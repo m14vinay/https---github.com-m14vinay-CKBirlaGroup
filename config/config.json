@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "ck-birla-group-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/ckBirlaGroup/CkBirlaGroupWebPart.js",
+          "manifest": "./src/webparts/ckBirlaGroup/CkBirlaGroupWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "CkBirlaGroupWebPartStrings": "lib/webparts/ckBirlaGroup/loc/{locale}.js"
+  }
+}

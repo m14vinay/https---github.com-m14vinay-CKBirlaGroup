@@ -1,0 +1,19 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "useGulp": false,
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "20.16.0",
+    "sdksVersions": {},
+    "version": "1.22.2",
+    "libraryName": "ck-birla-group",
+    "libraryId": "1d088ee4-46ba-4c4a-9bf8-05eaccbc01f0",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "ck-birla-group",
+    "solutionShortDescription": "ck-birla-group description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
