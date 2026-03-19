@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "ck-birla-group-digi-flow-client-side-solution",
+    "id": "837c3770-1824-4a26-a710-0decf5482f1b",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.22.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "CKBirlaGroupDigiFlow description"
+      },
+      "longDescription": {
+        "default": "CKBirlaGroupDigiFlow description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "ck-birla-group-digi-flow Feature",
+        "description": "The feature that activates elements of the ck-birla-group-digi-flow solution.",
+        "id": "c122795f-7cd8-49a9-a9ea-67c95fd5dcb2",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/ck-birla-group-digi-flow.sppkg"
+  }
+}
