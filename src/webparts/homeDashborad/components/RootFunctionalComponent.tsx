@@ -5,6 +5,7 @@ import { IHomeDashboradProps } from './IHomeDashboradProps';
 import WorkflowStatusChart from './WorkflowStatusChart';
 import MyRequests from './MyRequests';
 import { SharePointContext } from './SharePointContext';
+import DepartmentWiseChart from './DepartmentWiseChart';
 
 export default function RootFunctionalComponent(props: IHomeDashboradProps) {
 
@@ -12,6 +13,9 @@ export default function RootFunctionalComponent(props: IHomeDashboradProps) {
         <SharePointContext.Provider value={props.context}> 
             <div style={{width:"400px"}}>
             <WorkflowStatusChart context={props.context}/>
+            </div>
+            <div style={{width:"400px"}}>
+            <DepartmentWiseChart/>
             </div>
             <div>
             <MyRequests/>

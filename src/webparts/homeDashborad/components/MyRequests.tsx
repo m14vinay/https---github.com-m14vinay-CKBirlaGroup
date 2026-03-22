@@ -64,33 +64,27 @@ export default function MyRequests() {
     const webUrl = context.pageContext.web.absoluteUrl;
     const lists = ["QuotationApproval","PoApproval","ITApproval","ReimburseExpenseMaster","BillProcessing","VendorMapping"];
 
-    useEffect(() => {
-        if(user){
-            lists.forEach(l => {
-                getData(l);
-            })
-        }
-    },[user]);
-
-    useEffect(() => {
-        getUser();
-    },[]);
-
     const getUser = () => {
         console.log("context user : ", context);
-        var resturl = webUrl + "/_api/web/currentuser";
+        let resturl = webUrl + "/_api/web/currentuser";
         context.spHttpClient.get(
             `${resturl}`,
             SPHttpClient.configurations.v1
         ).then(res => res.json()).then(data => {
             console.log(data);
             setUser(data);
+        }).catch(e => {
+            console.log(e);
         })
     }
 
+    useEffect(() => {
+        getUser();
+    },[]);
+
     const getData = (listName:string) => {
         console.log("context user : ", context);
-        var resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AuthorId eq " + user.Id;
+        let resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AuthorId eq " + user.Id;
         context.spHttpClient.get(
             `${resturl}`,
             SPHttpClient.configurations.v1
@@ -99,8 +93,18 @@ export default function MyRequests() {
             if (data.value.length > 0) {
                 _setData((d) => [...d.concat(data.value)]);
             }
+        }).catch(e => {
+            console.log(e);
         })
     }
+
+    useEffect(() => {
+        if(user){
+            lists.forEach(l => {
+                getData(l);
+            })
+        }
+    },[user]);
 
     const table = useReactTable({
         data,

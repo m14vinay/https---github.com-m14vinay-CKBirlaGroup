@@ -6,14 +6,17 @@ import { Dropdown, IDropdownOption, Label } from '@fluentui/react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import styles from './HomeDashborad.module.scss'
+import { SharePointContext } from './SharePointContext';
+import { WebPartContext } from '@microsoft/sp-webpart-base';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function WorkflowStatusChart(props: IChartProps) {
+export default function DepartmentWiseChart() {
 
-    const [quotations, setQuotations] = useState<any[]>([]);
+    const context = React.useContext(SharePointContext) as WebPartContext;
+    const [items, setItems] = useState<any[]>([]);
     const [dataset, setDataset] = useState<number[]>([]);
-    const webUrl = props.context.pageContext.web.absoluteUrl;
+    const webUrl = context.pageContext.web.absoluteUrl;
 
     const listOptions:IDropdownOption[] = [
         {
@@ -45,29 +48,27 @@ export default function WorkflowStatusChart(props: IChartProps) {
     const [selectedList, setSelectedList] = useState(listOptions[0].key);
 
     const getChartDataSet = () => {
-        const approved = quotations.filter(q => q.CurrentStatus === "Approved");
-        const rejected = quotations.filter(q => q.CurrentStatus === "Rejected");
-        const pending = quotations.filter(q => q.CurrentStatus === "Pending");
-        const sendBack = quotations.filter(q => q.CurrentStatus === "SendBack");
-        const drafted = quotations.filter(q => q.CurrentStatus === "Drafted");
+        const Admin = items.filter(q => q.Department === "Admin");
+        const Finance = items.filter(q => q.Department === "Finance");
+        const IT = items.filter(q => q.Department === "IT");
+        const Branding = items.filter(q => q.Department === "Branding");
+        const Legal = items.filter(q => q.Department === "Legal");
 
-        setDataset([approved.length, rejected.length, pending.length, sendBack.length, drafted.length]);
+        setDataset([Admin.length, Finance.length, IT.length, Branding.length, Legal.length]);
     }
 
     useEffect(() => {
         getChartDataSet()
-    },[quotations]);
+    },[items]);
 
     const getQuotationData = () => {
-        let resturl = webUrl + "/_api/web/lists/getbytitle('" + selectedList + "')/items?$top=5000&$select=CurrentStatus,Id";
-        props.context.spHttpClient.get(
+        let resturl = webUrl + "/_api/web/lists/getbytitle('" + selectedList + "')/items?$top=5000&$select=Department,Id";
+        context.spHttpClient.get(
             `${resturl}`,
             SPHttpClient.configurations.v1
         ).then(res => res.json()).then(data => {
             console.log("quotations: ",data);
-            if (data.value.length > 0) {
-                setQuotations(data.value);
-            }
+                setItems(data.value);
         }).catch(e => {
             console.log(e);
         })
@@ -79,11 +80,11 @@ export default function WorkflowStatusChart(props: IChartProps) {
 
     const data = {
         labels: [
-            'Approved',
-            'Rejected',
-            'Pending',
-            'SendBack',
-            'Drafted'
+            'Admin',
+            'Finance',
+            'IT',
+            'Branding',
+            'Legal'
         ],
         datasets: [{
             data: dataset,
@@ -112,7 +113,7 @@ export default function WorkflowStatusChart(props: IChartProps) {
             ></Dropdown>
             </div>
         </div>
-        <Pie 
+        {items.length > 0 &&<Pie 
         data={data}
         options={{
             plugins: {
@@ -124,7 +125,7 @@ export default function WorkflowStatusChart(props: IChartProps) {
                     }
                 }
             }
-        }}/>
+        }}/>}
     </div>
     </div>)
 }
