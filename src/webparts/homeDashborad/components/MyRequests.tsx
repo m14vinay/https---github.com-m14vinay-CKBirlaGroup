@@ -15,13 +15,11 @@ import {
 import Table from 'react-bootstrap/Table';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Icon, Label } from '@fluentui/react';
+import { SharePointContext } from './SharePointContext';
 
-interface IMyRequestsProps {
-    context:WebPartContext;
-}
+export default function MyRequests() {
 
-export default function MyRequests(props: IMyRequestsProps) {
-
+    const context = React.useContext(SharePointContext) as WebPartContext;
 
     const columnHelper = createColumnHelper<any>()
 
@@ -58,22 +56,42 @@ export default function MyRequests(props: IMyRequestsProps) {
             cell: (info) => <span>TBD</span>
         })
     ]
-    const [data, _setData] = React.useState<any[]>(() => []);
+    const [data, _setData] = useState<any[]>(() => []);
+    const [user, setUser] = useState<any>(null);
 
     const [globalFilter, setGlobalFilter] = useState("");
     const [sorting, setSorting] = useState<any>([]);
-    const webUrl = props.context.pageContext.web.absoluteUrl;
+    const webUrl = context.pageContext.web.absoluteUrl;
     const lists = ["QuotationApproval","PoApproval","ITApproval","ReimburseExpenseMaster","BillProcessing","VendorMapping"];
 
     useEffect(() => {
-        lists.forEach(l => {
-            getData(l);
-        })
+        if(user){
+            lists.forEach(l => {
+                getData(l);
+            })
+        }
+    },[user]);
+
+    useEffect(() => {
+        getUser();
     },[]);
 
+    const getUser = () => {
+        console.log("context user : ", context);
+        var resturl = webUrl + "/_api/web/currentuser";
+        context.spHttpClient.get(
+            `${resturl}`,
+            SPHttpClient.configurations.v1
+        ).then(res => res.json()).then(data => {
+            console.log(data);
+            setUser(data);
+        })
+    }
+
     const getData = (listName:string) => {
-        var resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*";
-        props.context.spHttpClient.get(
+        console.log("context user : ", context);
+        var resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AuthorId eq " + user.Id;
+        context.spHttpClient.get(
             `${resturl}`,
             SPHttpClient.configurations.v1
         ).then(res => res.json()).then(data => {
