@@ -11,12 +11,11 @@ import { WebPartContext } from '@microsoft/sp-webpart-base';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function DepartmentWiseChart() {
+export default function MyWorkflowStatusChart(props: IChartProps) {
 
-    const context = React.useContext(SharePointContext) as WebPartContext;
-    const [items, setItems] = useState<any[]>([]);
+    const [quotations, setQuotations] = useState<any[]>([]);
     const [dataset, setDataset] = useState<number[]>([]);
-    const webUrl = context.pageContext.web.absoluteUrl;
+    const webUrl = props.context.pageContext.web.absoluteUrl;
 
     const listOptions:IDropdownOption[] = [
         {
@@ -45,46 +44,73 @@ export default function DepartmentWiseChart() {
         }
     ]
 
-    const [selectedList, setSelectedList] = useState(listOptions[0].key);
+    const context = React.useContext(SharePointContext) as WebPartContext;
+    const [user, setUser] = useState<any>(null);
 
-    const getChartDataSet = () => {
-        const Admin = items.filter(q => q.Department === "Admin");
-        const Finance = items.filter(q => q.Department === "Finance");
-        const IT = items.filter(q => q.Department === "IT");
-        const Branding = items.filter(q => q.Department === "Branding");
-        const Legal = items.filter(q => q.Department === "Legal");
-
-        setDataset([Admin.length, Finance.length, IT.length, Branding.length, Legal.length]);
-    }
-
-    useEffect(() => {
-        getChartDataSet()
-    },[items]);
-
-    const getQuotationData = () => {
-        let resturl = webUrl + "/_api/web/lists/getbytitle('" + selectedList + "')/items?$top=5000&$select=Department,Id";
+    const getUser = () => {
+        console.log("context user : ", context);
+        let resturl = webUrl + "/_api/web/currentuser";
         context.spHttpClient.get(
             `${resturl}`,
             SPHttpClient.configurations.v1
         ).then(res => res.json()).then(data => {
-            console.log("quotations: ",data);
-                setItems(data.value);
+            console.log(data);
+            setUser(data);
         }).catch(e => {
             console.log(e);
         })
     }
     
     useEffect(() => {
-        getQuotationData();
-    },[selectedList]);
+        getUser();
+    },[]);
+
+    const [selectedList, setSelectedList] = useState(listOptions[0].key);
+
+    const getChartDataSet = () => {
+        const approved = quotations.filter(q => q.CurrentStatus === "Approved");
+        const rejected = quotations.filter(q => q.CurrentStatus === "Rejected");
+        const pending = quotations.filter(q => q.CurrentStatus === "Pending");
+        const sendBack = quotations.filter(q => q.CurrentStatus === "SendBack");
+        const drafted = quotations.filter(q => q.CurrentStatus === "Drafted");
+
+        setDataset([approved.length, rejected.length, pending.length, sendBack.length, drafted.length]);
+    }
+
+    useEffect(() => {
+        getChartDataSet()
+    },[quotations]);
+
+    const getQuotationData = () => {
+        let resturl = webUrl + "/_api/web/lists/getbytitle('" + selectedList + "')/items?$top=5000&$select=CurrentStatus,Id,AuthorId&$filter=AuthorId eq " + user.Id;
+        props.context.spHttpClient.get(
+            `${resturl}`,
+            SPHttpClient.configurations.v1
+        ).then(res => res.json()).then(data => {
+            console.log("quotations: ",data);
+            if (data && data.value) {
+                setQuotations(data.value);
+            }
+            else{
+                setQuotations([]);
+            }
+        }).catch(e => {
+            console.log(e);
+        })
+    }
+    
+    useEffect(() => {
+        if(user)
+            getQuotationData();
+    },[selectedList, user]);
 
     const data = {
         labels: [
-            'Admin',
-            'Finance',
-            'IT',
-            'Branding',
-            'Legal'
+            'Approved',
+            'Rejected',
+            'Pending',
+            'SendBack',
+            'Drafted'
         ],
         datasets: [{
             data: dataset,
@@ -100,7 +126,7 @@ export default function DepartmentWiseChart() {
     };
 
     return (<div>
-    <Label>Department Wise</Label>
+    <Label>Workflow Status</Label>
     <div className={styles.chartDiv}>
         <div style={{display:"flex"}}>
             <div style={{display:"inline-block", width:"100px"}}><span>Flow</span></div>
@@ -113,7 +139,7 @@ export default function DepartmentWiseChart() {
             ></Dropdown>
             </div>
         </div>
-        {items.length > 0 &&<Pie 
+        <Pie 
         data={data}
         options={{
             plugins: {
@@ -125,7 +151,7 @@ export default function DepartmentWiseChart() {
                     }
                 }
             }
-        }}/>}
+        }}/>
     </div>
     </div>)
 }

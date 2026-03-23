@@ -11,7 +11,7 @@ import { WebPartContext } from '@microsoft/sp-webpart-base';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function DepartmentWiseChart() {
+export default function MyDepartmentWiseChart() {
 
     const context = React.useContext(SharePointContext) as WebPartContext;
     const [items, setItems] = useState<any[]>([]);
@@ -44,6 +44,25 @@ export default function DepartmentWiseChart() {
             "text":"Vendor Mapping / New Vendor Registration"
         }
     ]
+        
+    const [user, setUser] = useState<any>(null);
+    const getUser = () => {
+        console.log("context user : ", context);
+        let resturl = webUrl + "/_api/web/currentuser";
+        context.spHttpClient.get(
+            `${resturl}`,
+            SPHttpClient.configurations.v1
+        ).then(res => res.json()).then(data => {
+            console.log(data);
+            setUser(data);
+        }).catch(e => {
+            console.log(e);
+        })
+    }
+        
+    useEffect(() => {
+        getUser();
+    },[]);
 
     const [selectedList, setSelectedList] = useState(listOptions[0].key);
 
@@ -62,21 +81,25 @@ export default function DepartmentWiseChart() {
     },[items]);
 
     const getQuotationData = () => {
-        let resturl = webUrl + "/_api/web/lists/getbytitle('" + selectedList + "')/items?$top=5000&$select=Department,Id";
+        let resturl = webUrl + "/_api/web/lists/getbytitle('" + selectedList + "')/items?$top=5000&$select=Department,Id,AuthorId&$filter=AuthorId eq " + user.Id;
         context.spHttpClient.get(
             `${resturl}`,
             SPHttpClient.configurations.v1
         ).then(res => res.json()).then(data => {
             console.log("quotations: ",data);
-                setItems(data.value);
+                if(data && data.value)
+                    setItems(data.value);
+                else
+                    setItems([]);
         }).catch(e => {
             console.log(e);
         })
     }
     
     useEffect(() => {
-        getQuotationData();
-    },[selectedList]);
+        if(user)
+            getQuotationData();
+    },[selectedList, user]);
 
     const data = {
         labels: [

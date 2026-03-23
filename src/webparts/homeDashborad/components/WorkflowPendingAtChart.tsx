@@ -11,7 +11,7 @@ import { WebPartContext } from '@microsoft/sp-webpart-base';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function DepartmentWiseChart() {
+export default function WorkflowPendingAtChart() {
 
     const context = React.useContext(SharePointContext) as WebPartContext;
     const [items, setItems] = useState<any[]>([]);
@@ -68,7 +68,10 @@ export default function DepartmentWiseChart() {
             SPHttpClient.configurations.v1
         ).then(res => res.json()).then(data => {
             console.log("quotations: ",data);
+            if(data && data.value)
                 setItems(data.value);
+            else
+                setItems([]);
         }).catch(e => {
             console.log(e);
         })
@@ -100,7 +103,7 @@ export default function DepartmentWiseChart() {
     };
 
     return (<div>
-    <Label>Department Wise</Label>
+    <Label>Workflow Status</Label>
     <div className={styles.chartDiv}>
         <div style={{display:"flex"}}>
             <div style={{display:"inline-block", width:"100px"}}><span>Flow</span></div>

@@ -6,19 +6,29 @@ import WorkflowStatusChart from './WorkflowStatusChart';
 import MyRequests from './MyRequests';
 import { SharePointContext } from './SharePointContext';
 import DepartmentWiseChart from './DepartmentWiseChart';
+import MyWorkflowStatusChart from './MyWorkflowStatusChart';
+import MyDepartmentWiseChart from './MyDepartmentWiseChart';
 
 export default function RootFunctionalComponent(props: IHomeDashboradProps) {
 
     return(<div>
-        <SharePointContext.Provider value={props.context}> 
-            <div style={{width:"400px"}}>
-            <WorkflowStatusChart context={props.context}/>
+        <SharePointContext.Provider value={props.context}>
+            <div><label style={{fontSize:"20px"}}>Digital Overview Status</label></div>
+            <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
+                <WorkflowStatusChart context={props.context}/>
             </div>
-            <div style={{width:"400px"}}>
-            <DepartmentWiseChart/>
+            <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
+                <DepartmentWiseChart/>
+            </div>
+            <div><label style={{fontSize:"20px"}}>My Workflow Status</label></div>
+            <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
+                <MyWorkflowStatusChart context={props.context}/>
+            </div>
+            <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
+                <MyDepartmentWiseChart/>
             </div>
             <div>
-            <MyRequests/>
+                <MyRequests/>
             </div>
         </SharePointContext.Provider>
     </div>)
