@@ -9,10 +9,19 @@
           "manifest": "./src/webparts/homeDashborad/HomeDashboradWebPart.manifest.json"
         }
       ]
+    },
+    "ouotation-approval-form-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.js",
+          "manifest": "./src/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "HomeDashboradWebPartStrings": "lib/webparts/homeDashborad/loc/{locale}.js"
+    "HomeDashboradWebPartStrings": "lib/webparts/homeDashborad/loc/{locale}.js",
+    "OuotationApprovalFormWebPartStrings": "lib/webparts/ouotationApprovalForm/loc/{locale}.js"
   }
 }
