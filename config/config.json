@@ -41,6 +41,22 @@
           "manifest": "./src/webparts/purchaseOrderView/PurchaseOrderViewWebPart.manifest.json"
         }
       ]
+    },
+    "vendor-mapping-approval-form-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorMappingApprovalForm/VendorMappingApprovalFormWebPart.js",
+          "manifest": "./src/webparts/vendorMappingApprovalForm/VendorMappingApprovalFormWebPart.manifest.json"
+        }
+      ]
+    },
+    "vendor-mapping-details-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorMappingDetails/VendorMappingDetailsWebPart.js",
+          "manifest": "./src/webparts/vendorMappingDetails/VendorMappingDetailsWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -49,6 +65,8 @@
     "VendorMappingFormWebPartStrings": "lib/webparts/vendorMappingForm/loc/{locale}.js",
     "PurchaseOrderRequestWebPartStrings": "lib/webparts/purchaseOrderRequest/loc/{locale}.js",
     "PurchaseOrderApprovalWebPartStrings": "lib/webparts/purchaseOrderApproval/loc/{locale}.js",
-    "PurchaseOrderViewWebPartStrings": "lib/webparts/purchaseOrderView/loc/{locale}.js"
+    "PurchaseOrderViewWebPartStrings": "lib/webparts/purchaseOrderView/loc/{locale}.js",
+    "VendorMappingApprovalFormWebPartStrings": "lib/webparts/vendorMappingApprovalForm/loc/{locale}.js",
+    "VendorMappingDetailsWebPartStrings": "lib/webparts/vendorMappingDetails/loc/{locale}.js"
   }
 }
