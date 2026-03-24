@@ -17,11 +17,38 @@
           "manifest": "./src/webparts/vendorMappingForm/VendorMappingFormWebPart.manifest.json"
         }
       ]
+    },
+    "purchase-order-request-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/purchaseOrderRequest/PurchaseOrderRequestWebPart.js",
+          "manifest": "./src/webparts/purchaseOrderRequest/PurchaseOrderRequestWebPart.manifest.json"
+        }
+      ]
+    },
+    "purchase-order-approval-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/purchaseOrderApproval/PurchaseOrderApprovalWebPart.js",
+          "manifest": "./src/webparts/purchaseOrderApproval/PurchaseOrderApprovalWebPart.manifest.json"
+        }
+      ]
+    },
+    "purchase-order-view-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/purchaseOrderView/PurchaseOrderViewWebPart.js",
+          "manifest": "./src/webparts/purchaseOrderView/PurchaseOrderViewWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
     "HomeDashboradWebPartStrings": "lib/webparts/homeDashborad/loc/{locale}.js",
-    "VendorMappingFormWebPartStrings": "lib/webparts/vendorMappingForm/loc/{locale}.js"
+    "VendorMappingFormWebPartStrings": "lib/webparts/vendorMappingForm/loc/{locale}.js",
+    "PurchaseOrderRequestWebPartStrings": "lib/webparts/purchaseOrderRequest/loc/{locale}.js",
+    "PurchaseOrderApprovalWebPartStrings": "lib/webparts/purchaseOrderApproval/loc/{locale}.js",
+    "PurchaseOrderViewWebPartStrings": "lib/webparts/purchaseOrderView/loc/{locale}.js"
   }
 }
