@@ -11,6 +11,8 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'VendorMappingFormWebPartStrings';
 import VendorMappingForm from './components/VendorMappingForm';
 import { IVendorMappingFormProps } from './components/IVendorMappingFormProps';
+import { Environment, EnvironmentType } from '@microsoft/sp-core-library';
+import * as microsoftTeams from "@microsoft/teams-js";
 
 export interface IVendorMappingFormWebPartProps {
   description: string;
@@ -43,35 +45,57 @@ export default class VendorMappingFormWebPart extends BaseClientSideWebPart<IVen
     });
   }
 
+private _getEnvironmentMessage(): Promise<string> {
 
+  const isLocal: boolean = Environment.type === EnvironmentType.Local;
 
-  private _getEnvironmentMessage(): Promise<string> {
-    if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
-        .then(context => {
-          let environmentMessage: string = '';
-          switch (context.app.host.name) {
-            case 'Office': // running in Office
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
-              break;
-            case 'Outlook': // running in Outlook
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
-              break;
-            case 'Teams': // running in Teams
-            case 'TeamsModern':
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
-              break;
-            default:
-              environmentMessage = strings.UnknownEnvironment;
-          }
+  if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
+    return microsoftTeams.app.getContext()
+      .then((context: any) => {
+        let environmentMessage: string = '';
 
-          return environmentMessage;
-        });
-    }
+        switch (context.app.host.name) {
+          case 'Office': // running in Office
+            environmentMessage = isLocal
+              ? strings.AppLocalEnvironmentOffice
+              : strings.AppOfficeEnvironment;
+            break;
 
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
+          case 'Outlook': // running in Outlook
+            environmentMessage = isLocal
+              ? strings.AppLocalEnvironmentOutlook
+              : strings.AppOutlookEnvironment;
+            break;
+
+          case 'Teams': // running in Teams
+          case 'TeamsModern':
+            environmentMessage = isLocal
+              ? strings.AppLocalEnvironmentTeams
+              : strings.AppTeamsTabEnvironment;
+            break;
+
+          default:
+            environmentMessage = strings.UnknownEnvironment;
+        }
+
+        return environmentMessage;
+      });
   }
 
+  return Promise.resolve(
+    isLocal
+      ? strings.AppLocalEnvironmentSharePoint
+      : strings.AppSharePointEnvironment
+  );
+}
+
+
+
+
+
+
+
+  
   protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
     if (!currentTheme) {
       return;
@@ -94,9 +118,10 @@ export default class VendorMappingFormWebPart extends BaseClientSideWebPart<IVen
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
-  protected get dataVersion(): Version {
-    return Version.parse('1.0');
-  }
+  protected dataVersion: Version = Version.parse('1.0');
+  // protected get dataVersion(): Version {
+  //   return Version.parse('1.0');
+  // }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
