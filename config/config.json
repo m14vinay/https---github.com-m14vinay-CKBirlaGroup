@@ -129,6 +129,30 @@
           "manifest": "./src/webparts/quotationRequestDetailViewNeiBt/QuotationRequestDetailViewNeiBtWebPart.manifest.json"
         }
       ]
+    },
+    "reimbursement-request-form-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/reimbursementRequestForm/ReimbursementRequestFormWebPart.js",
+          "manifest": "./src/webparts/reimbursementRequestForm/ReimbursementRequestFormWebPart.manifest.json"
+        }
+      ]
+    },
+    "reimbursement-request-approval-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/reimbursementRequestApproval/ReimbursementRequestApprovalWebPart.js",
+          "manifest": "./src/webparts/reimbursementRequestApproval/ReimbursementRequestApprovalWebPart.manifest.json"
+        }
+      ]
+    },
+    "reimbursement-request-detail-view-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/reimbursementRequestDetailView/ReimbursementRequestDetailViewWebPart.js",
+          "manifest": "./src/webparts/reimbursementRequestDetailView/ReimbursementRequestDetailViewWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -148,6 +172,9 @@
     "QuotationRequestDetailViewBeibtWebPartStrings": "lib/webparts/quotationRequestDetailViewBeibt/loc/{locale}.js",
     "QuotationRequestNeiBtWebPartStrings": "lib/webparts/quotationRequestNeiBt/loc/{locale}.js",
     "QuotationRequestApprovalNeiBtWebPartStrings": "lib/webparts/quotationRequestApprovalNeiBt/loc/{locale}.js",
-    "QuotationRequestDetailViewNeiBtWebPartStrings": "lib/webparts/quotationRequestDetailViewNeiBt/loc/{locale}.js"
+    "QuotationRequestDetailViewNeiBtWebPartStrings": "lib/webparts/quotationRequestDetailViewNeiBt/loc/{locale}.js",
+    "ReimbursementRequestFormWebPartStrings": "lib/webparts/reimbursementRequestForm/loc/{locale}.js",
+    "ReimbursementRequestApprovalWebPartStrings": "lib/webparts/reimbursementRequestApproval/loc/{locale}.js",
+    "ReimbursementRequestDetailViewWebPartStrings": "lib/webparts/reimbursementRequestDetailView/loc/{locale}.js"
   }
 }
