@@ -16,6 +16,17 @@ export default function WorkflowPendingAtChart() {
     const context = React.useContext(SharePointContext) as WebPartContext;
     const [items, setItems] = useState<any[]>([]);
     const [dataset, setDataset] = useState<number[]>([]);
+
+    const chartLabels = {
+        "QuotationApproval":["Department Head", "Management 1", "Management 2"],
+        "PoApproval":["Finance Controller", "Management 1", "Management 2"],
+        "ITApproval":[],
+        "ReimburseExpenseMaster":[],
+        "BillProcessing":[],
+        "VendorMapping":[]
+    };
+
+    const [labels, setLabels] = useState<string[]>(chartLabels.QuotationApproval);
     const webUrl = context.pageContext.web.absoluteUrl;
 
     const listOptions:IDropdownOption[] = [
@@ -48,13 +59,64 @@ export default function WorkflowPendingAtChart() {
     const [selectedList, setSelectedList] = useState(listOptions[0].key);
 
     const getChartDataSet = () => {
-        const Admin = items.filter(q => q.Department === "Admin");
-        const Finance = items.filter(q => q.Department === "Finance");
-        const IT = items.filter(q => q.Department === "IT");
-        const Branding = items.filter(q => q.Department === "Branding");
-        const Legal = items.filter(q => q.Department === "Legal");
+        switch (selectedList) {
+            case "QuotationApproval":
+                setLabels(chartLabels.QuotationApproval);
+                getChartDataSetQuotation();
+                break;
+            case "PoApproval":
+                setLabels(chartLabels.PoApproval);
+                getChartDataSetPo();
+                break;
+            default:
+                break;
+        }
+    }
 
-        setDataset([Admin.length, Finance.length, IT.length, Branding.length, Legal.length]);
+    const getChartDataSetQuotation = () => {
+        let departmentHead = 0, management1 = 0, management2 = 0;
+        items.forEach(item => {
+            if(item.ApprovalPath){
+                const pathLength = item.ApprovalPath.split(">");
+                switch(pathLength.length){
+                    case 1:
+                        departmentHead++;
+                        break;
+                    case 2:
+                        management1++;
+                        break;
+                    case 3:
+                        management2++;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+        setDataset([departmentHead, management1, management2]);
+    }
+    
+    const getChartDataSetPo = () => {
+        let financeController = 0, management1 = 0, management2 = 0;
+        items.forEach(item => {
+            if(item.ApprovalPath){
+                const pathLength = item.ApprovalPath.split(">");
+                switch(pathLength.length){
+                    case 1:
+                        financeController++;
+                        break;
+                    case 2:
+                        management1++;
+                        break;
+                    case 3:
+                        management2++;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+        setDataset([financeController, management1, management2]);
     }
 
     useEffect(() => {
@@ -62,7 +124,7 @@ export default function WorkflowPendingAtChart() {
     },[items]);
 
     const getQuotationData = () => {
-        let resturl = webUrl + "/_api/web/lists/getbytitle('" + selectedList + "')/items?$top=5000&$select=Department,Id";
+        let resturl = webUrl + "/_api/web/lists/getbytitle('" + selectedList + "')/items?$top=5000&$select=Department,Id,ApprovalPath";
         context.spHttpClient.get(
             `${resturl}`,
             SPHttpClient.configurations.v1
@@ -82,13 +144,7 @@ export default function WorkflowPendingAtChart() {
     },[selectedList]);
 
     const data = {
-        labels: [
-            'Admin',
-            'Finance',
-            'IT',
-            'Branding',
-            'Legal'
-        ],
+        labels: labels,
         datasets: [{
             data: dataset,
             backgroundColor: [

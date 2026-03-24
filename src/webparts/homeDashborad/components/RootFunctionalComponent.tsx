@@ -8,6 +8,8 @@ import { SharePointContext } from './SharePointContext';
 import DepartmentWiseChart from './DepartmentWiseChart';
 import MyWorkflowStatusChart from './MyWorkflowStatusChart';
 import MyDepartmentWiseChart from './MyDepartmentWiseChart';
+import MyPendingRequests from './MyPendingRequests';
+import WorkflowPendingAtChart from './WorkflowPendingAtChart';
 
 export default function RootFunctionalComponent(props: IHomeDashboradProps) {
 
@@ -20,12 +22,18 @@ export default function RootFunctionalComponent(props: IHomeDashboradProps) {
             <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
                 <DepartmentWiseChart/>
             </div>
+            <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
+                <WorkflowPendingAtChart/>
+            </div>
             <div><label style={{fontSize:"20px"}}>My Workflow Status</label></div>
             <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
                 <MyWorkflowStatusChart context={props.context}/>
             </div>
             <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
                 <MyDepartmentWiseChart/>
+            </div>
+            <div>
+                <MyPendingRequests/>
             </div>
             <div>
                 <MyRequests/>
