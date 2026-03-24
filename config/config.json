@@ -9,10 +9,19 @@
           "manifest": "./src/webparts/homeDashborad/HomeDashboradWebPart.manifest.json"
         }
       ]
+    },
+    "vendor-mapping-form-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorMappingForm/VendorMappingFormWebPart.js",
+          "manifest": "./src/webparts/vendorMappingForm/VendorMappingFormWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "HomeDashboradWebPartStrings": "lib/webparts/homeDashborad/loc/{locale}.js"
+    "HomeDashboradWebPartStrings": "lib/webparts/homeDashborad/loc/{locale}.js",
+    "VendorMappingFormWebPartStrings": "lib/webparts/vendorMappingForm/loc/{locale}.js"
   }
 }
