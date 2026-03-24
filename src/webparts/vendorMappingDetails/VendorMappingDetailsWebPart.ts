@@ -1,10 +1,7 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
-import {
-  type IPropertyPaneConfiguration,
-  PropertyPaneTextField
-} from '@microsoft/sp-property-pane';
+import {type IPropertyPaneConfiguration,PropertyPaneTextField} from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
@@ -17,7 +14,8 @@ export interface IVendorMappingDetailsWebPartProps {
   description: string;
 }
 
-export default class VendorMappingDetailsWebPart extends BaseClientSideWebPart<IVendorMappingDetailsWebPartProps> {
+export default class VendorMappingDetailsWebPart 
+  extends BaseClientSideWebPart<IVendorMappingDetailsWebPartProps> {
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
@@ -26,11 +24,12 @@ export default class VendorMappingDetailsWebPart extends BaseClientSideWebPart<I
     const element: React.ReactElement<IVendorMappingDetailsProps> = React.createElement(
       VendorMappingDetails,
       {
-        description: this.properties.description,
+       description: this.properties.description,
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+        userDisplayName: this.context.pageContext.user.displayName,
+        context: this.context
       }
     );
 
@@ -111,10 +110,10 @@ export default class VendorMappingDetailsWebPart extends BaseClientSideWebPart<I
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
-  protected dataVersion: Version = Version.parse('1.0');
-  // protected get dataVersion(): Version {
-  //   return Version.parse('1.0');
-  // }
+  //protected dataVersion: Version = Version.parse('1.0');
+  protected get dataVersion(): Version {
+    return Version.parse('1.0');
+  }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {

@@ -83,8 +83,8 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     ProjectTitle: this.state.projectTitle,
     ProjectDescription: this.state.projectDescription,
     VendorName : this.state.vendorName,
-    VendorDescription: this.state.vendorDescription
-    //Attachments: this.state.files
+    VendorDescription: this.state.vendorDescription,
+    Attachments: this.state.files
   };
   
   const response = await this.props.context.spHttpClient.post(

@@ -1,4 +1,5 @@
 import { WebPartContext } from '@microsoft/sp-webpart-base';
+
 export interface IVendorMappingDetailsProps {
   description: string;
   isDarkTheme: boolean;

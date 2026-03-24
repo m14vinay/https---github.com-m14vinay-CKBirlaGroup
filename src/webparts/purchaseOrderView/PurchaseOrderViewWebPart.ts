@@ -30,7 +30,8 @@ export default class PurchaseOrderViewWebPart extends BaseClientSideWebPart<IPur
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+        userDisplayName: this.context.pageContext.user.displayName,
+         context: this.context
       }
     );
 
@@ -111,10 +112,10 @@ export default class PurchaseOrderViewWebPart extends BaseClientSideWebPart<IPur
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
-  protected dataVersion: Version = Version.parse('1.0');
-  // protected get dataVersion(): Version {
-  //   return Version.parse('1.0');
-  // }
+  //protected dataVersion: Version = Version.parse('1.0');
+  protected get dataVersion(): Version {
+    return Version.parse('1.0');
+  }
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [
