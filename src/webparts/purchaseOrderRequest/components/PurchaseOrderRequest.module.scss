@@ -1,34 +1,59 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
-.purchaseOrderRequest {
-  overflow: hidden;
-  padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
-  &.teams {
-    font-family: $ms-font-family-fallbacks;
-  }
+.container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
 }
 
-.welcome {
-  text-align: center;
+.leftPanel {
+  flex: 2;
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
 }
 
-.welcomeImage {
+.rightPanel {
+  flex: 1;
+}
+
+.card {
+  background: #fff;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+}
+
+input, textarea, select {
   width: 100%;
-  max-width: 420px;
+  padding: 8px;
+  margin: 8px 0 16px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+}
 
-    &:hover {
-      text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
-    }
-  }
+.submitBtn {
+  background: green;
+  color: white;
+}
+
+.saveBtn {
+  background: orange;
+  color: white;
+}
+
+.cancelBtn {
+  background: gray;
+  color: white;
+}
+
+button {
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
 }
