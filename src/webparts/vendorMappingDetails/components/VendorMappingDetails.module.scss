@@ -1,0 +1,59 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+.leftPanel {
+  flex: 2;
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
+}
+
+.rightPanel {
+  flex: 1;
+}
+
+.card {
+  background: #fff;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0 16px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+}
+
+.ApproveBtn {
+  background: green;
+  color: white;
+}
+
+.RejectBtn {
+  background: red;
+  color: white;
+}
+
+.cancelBtn {
+  background: gray;
+  color: white;
+}
+
+button {
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+}

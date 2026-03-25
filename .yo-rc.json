@@ -2,8 +2,8 @@
   "@microsoft/generator-sharepoint": {
     "useGulp": false,
     "plusBeta": false,
-    "isCreatingSolution": true,
-    "nodeVersion": "22.20.0",
+    "isCreatingSolution": false,
+    "nodeVersion": "20.16.0",
     "sdksVersions": {},
     "version": "1.22.2",
     "libraryName": "ck-birla-group-digi-flow",
