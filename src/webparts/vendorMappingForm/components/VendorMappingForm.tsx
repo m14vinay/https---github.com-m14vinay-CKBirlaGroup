@@ -148,8 +148,8 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <label>Additional Information & Remarks</label>
           <textarea name="VendorDescription" onChange={this.handleChange}></textarea>
 
-          {/* <label>Attach Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} /> */}
+          <label>Attach Documents</label>
+          <input type="file" multiple onChange={this.handleFileChange} />
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>

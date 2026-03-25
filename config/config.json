@@ -57,6 +57,79 @@
           "manifest": "./src/webparts/vendorMappingDetails/VendorMappingDetailsWebPart.manifest.json"
         }
       ]
+    },
+    "bill-processing-form-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/billProcessingForm/BillProcessingFormWebPart.js",
+          "manifest": "./src/webparts/billProcessingForm/BillProcessingFormWebPart.manifest.json"
+        }
+      ]
+    },
+    "bill-processing-approval-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/billProcessingApproval/BillProcessingApprovalWebPart.js",
+          "manifest": "./src/webparts/billProcessingApproval/BillProcessingApprovalWebPart.manifest.json"
+        }
+      ]
+    },
+    "bill-processing-detail-view-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/billProcessingDetailView/BillProcessingDetailViewWebPart.js",
+          "manifest": "./src/webparts/billProcessingDetailView/BillProcessingDetailViewWebPart.manifest.json"
+        }
+      ]
+    }, 
+    "quotation-request-detail-view-nei-bt-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/quotationRequestDetailViewNeiBt/QuotationRequestDetailViewNeiBtWebPart.js",
+          "manifest": "./src/webparts/quotationRequestDetailViewNeiBt/QuotationRequestDetailViewNeiBtWebPart.manifest.json"
+        }
+      ]
+    },
+    "quotation-request-nei-bt-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/quotationRequestNeiBt/QuotationRequestNeiBtWebPart.js",
+          "manifest": "./src/webparts/quotationRequestNeiBt/QuotationRequestNeiBtWebPart.manifest.json"
+        }
+      ]
+    },
+    "quotation-request-approval-nei-bt-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/quotationRequestApprovalNeiBt/QuotationRequestApprovalNeiBtWebPart.js",
+          "manifest": "./src/webparts/quotationRequestApprovalNeiBt/QuotationRequestApprovalNeiBtWebPart.manifest.json"
+        }
+      ]
+    },
+    
+    "reimbursement-request-form-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/reimbursementRequestForm/ReimbursementRequestFormWebPart.js",
+          "manifest": "./src/webparts/reimbursementRequestForm/ReimbursementRequestFormWebPart.manifest.json"
+        }
+      ]
+    },
+    "reimbursement-request-approval-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/reimbursementRequestApproval/ReimbursementRequestApprovalWebPart.js",
+          "manifest": "./src/webparts/reimbursementRequestApproval/ReimbursementRequestApprovalWebPart.manifest.json"
+        }
+      ]
+    },
+    "reimbursement-request-detail-view-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/reimbursementRequestDetailView/ReimbursementRequestDetailViewWebPart.js",
+          "manifest": "./src/webparts/reimbursementRequestDetailView/ReimbursementRequestDetailViewWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -67,6 +140,15 @@
     "PurchaseOrderApprovalWebPartStrings": "lib/webparts/purchaseOrderApproval/loc/{locale}.js",
     "PurchaseOrderViewWebPartStrings": "lib/webparts/purchaseOrderView/loc/{locale}.js",
     "VendorMappingApprovalFormWebPartStrings": "lib/webparts/vendorMappingApprovalForm/loc/{locale}.js",
-    "VendorMappingDetailsWebPartStrings": "lib/webparts/vendorMappingDetails/loc/{locale}.js"
+    "VendorMappingDetailsWebPartStrings": "lib/webparts/vendorMappingDetails/loc/{locale}.js",
+    "BillProcessingFormWebPartStrings": "lib/webparts/billProcessingForm/loc/{locale}.js",
+    "BillProcessingApprovalWebPartStrings": "lib/webparts/billProcessingApproval/loc/{locale}.js",
+    "BillProcessingDetailViewWebPartStrings": "lib/webparts/billProcessingDetailView/loc/{locale}.js",
+    "QuotationRequestNeiBtWebPartStrings": "lib/webparts/quotationRequestNeiBt/loc/{locale}.js",
+    "QuotationRequestApprovalNeiBtWebPartStrings": "lib/webparts/quotationRequestApprovalNeiBt/loc/{locale}.js",
+    "QuotationRequestDetailViewNeiBtWebPartStrings": "lib/webparts/quotationRequestDetailViewNeiBt/loc/{locale}.js",
+    "ReimbursementRequestFormWebPartStrings": "lib/webparts/reimbursementRequestForm/loc/{locale}.js",
+    "ReimbursementRequestApprovalWebPartStrings": "lib/webparts/reimbursementRequestApproval/loc/{locale}.js",
+    "ReimbursementRequestDetailViewWebPartStrings": "lib/webparts/reimbursementRequestDetailView/loc/{locale}.js"
   }
 }
