@@ -1,15 +1,9 @@
 import * as React from 'react';
 import styles from './DocumentSearch.module.scss';
-import { IDocumentSearchProps } from './IDocumentSearchProps';
+import { IDocumentSearchProps,IState,IData,IColumn } from './IDocumentSearchProps';
 import { SPHttpClient } from '@microsoft/sp-http';
-
-interface IState {
-  vendorName: string;
-  GST: string;
-  PAN: string;
-  vendorCode: string;
-  TANNo:string;
-}
+import { DetailsList } from '@fluentui/react';
+import { SelectionMode } from '@fluentui/react/lib/DetailsList';
 export default class DocumentSearch extends React.Component<IDocumentSearchProps, IState> {
 
   constructor(props: IDocumentSearchProps) {
@@ -23,7 +17,6 @@ export default class DocumentSearch extends React.Component<IDocumentSearchProps
       TANNo:''  
     };
   }
-
   private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     this.setState({ ...this.state, [name]: value });
@@ -41,6 +34,17 @@ export default class DocumentSearch extends React.Component<IDocumentSearchProps
   
  const data = await response.json();
 
+ const [items, setItems] = React.useState([
+    { id: 1, name: 'Vendor A', amount: 1000 },
+    { id: 2, name: 'Vendor B', amount: 2000 },
+    { id: 3, name: 'Vendor C', amount: 3000 }
+  ]);
+
+  const columns: IColumn[] = [
+    { key: 'col1', name: 'ID', fieldName: 'id', minWidth: 50 },
+    { key: 'col2', name: 'Name', fieldName: 'name', minWidth: 150 },
+    { key: 'col3', name: 'Amount', fieldName: 'amount', minWidth: 100 }
+  ];
   if (data.value.length > 0) {
     this.setState({
       vendorName: data.value[0].VendorName,
@@ -155,7 +159,11 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           </input>
           </div>     
           <div className={styles.container}>   
-            
+            {/* <DetailsList
+        items=null
+        columns={columns}
+        selectionMode={SelectionMode.none}
+      /> */}
           </div>          
         </div>
     );

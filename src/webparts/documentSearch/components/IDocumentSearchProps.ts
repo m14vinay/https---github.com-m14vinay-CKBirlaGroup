@@ -7,3 +7,21 @@ export interface IDocumentSearchProps {
   userDisplayName: string;
   context: WebPartContext;
 }
+export interface IState {
+  vendorName: string;
+  GST: string;
+  PAN: string;
+  vendorCode: string;
+  TANNo:string;
+}
+ export interface IData {
+  id: number;
+  name: string;
+  amount: number;
+}
+export interface IColumn {
+  key: string;
+  name: string;
+  fieldName: string;
+  minWidth: number;
+}
