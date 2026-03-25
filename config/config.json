@@ -130,6 +130,30 @@
           "manifest": "./src/webparts/reimbursementRequestDetailView/ReimbursementRequestDetailViewWebPart.manifest.json"
         }
       ]
+    },
+    "document-search-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/documentSearch/DocumentSearchWebPart.js",
+          "manifest": "./src/webparts/documentSearch/DocumentSearchWebPart.manifest.json"
+        }
+      ]
+    },
+    "document-upload-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/documentUpload/DocumentUploadWebPart.js",
+          "manifest": "./src/webparts/documentUpload/DocumentUploadWebPart.manifest.json"
+        }
+      ]
+    },
+    "document-view-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/documentView/DocumentViewWebPart.js",
+          "manifest": "./src/webparts/documentView/DocumentViewWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -149,6 +173,9 @@
     "QuotationRequestDetailViewNeiBtWebPartStrings": "lib/webparts/quotationRequestDetailViewNeiBt/loc/{locale}.js",
     "ReimbursementRequestFormWebPartStrings": "lib/webparts/reimbursementRequestForm/loc/{locale}.js",
     "ReimbursementRequestApprovalWebPartStrings": "lib/webparts/reimbursementRequestApproval/loc/{locale}.js",
-    "ReimbursementRequestDetailViewWebPartStrings": "lib/webparts/reimbursementRequestDetailView/loc/{locale}.js"
+    "ReimbursementRequestDetailViewWebPartStrings": "lib/webparts/reimbursementRequestDetailView/loc/{locale}.js",
+    "DocumentSearchWebPartStrings": "lib/webparts/documentSearch/loc/{locale}.js",
+    "DocumentUploadWebPartStrings": "lib/webparts/documentUpload/loc/{locale}.js",
+    "DocumentViewWebPartStrings": "lib/webparts/documentView/loc/{locale}.js"
   }
 }

@@ -8,29 +8,28 @@ import {
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
-import * as strings from 'ReimbursementRequestDetailViewWebPartStrings';
-import ReimbursementRequestDetailView from './components/ReimbursementRequestDetailView';
-import { IReimbursementRequestDetailViewProps } from './components/IReimbursementRequestDetailViewProps';
+import * as strings from 'DocumentSearchWebPartStrings';
+import DocumentSearch from './components/DocumentSearch';
+import { IDocumentSearchProps } from './components/IDocumentSearchProps';
 
-export interface IReimbursementRequestDetailViewWebPartProps {
+export interface IDocumentSearchWebPartProps {
   description: string;
 }
 
-export default class ReimbursementRequestDetailViewWebPart extends BaseClientSideWebPart<IReimbursementRequestDetailViewWebPartProps> {
+export default class DocumentSearchWebPart extends BaseClientSideWebPart<IDocumentSearchWebPartProps> {
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
 
   public render(): void {
-    const element: React.ReactElement<IReimbursementRequestDetailViewProps> = React.createElement(
-      ReimbursementRequestDetailView,
+    const element: React.ReactElement<IDocumentSearchProps> = React.createElement(
+      DocumentSearch,
       {
         description: this.properties.description,
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName,
-        context: this.context
+        userDisplayName: this.context.pageContext.user.displayName
       }
     );
 

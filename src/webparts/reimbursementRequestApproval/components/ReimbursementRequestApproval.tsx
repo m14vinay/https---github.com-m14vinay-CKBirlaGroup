@@ -2,42 +2,209 @@ import * as React from 'react';
 import styles from './ReimbursementRequestApproval.module.scss';
 import type { IReimbursementRequestApprovalProps } from './IReimbursementRequestApprovalProps';
 import { escape } from '@microsoft/sp-lodash-subset';
+import { SPHttpClient } from '@microsoft/sp-http';
+import { Checkbox, Modal, PrimaryButton } from '@fluentui/react'
+interface IState {
+  RRequestNo:string;  
+  ProjectTitle:string;
+  Department:string;
+  Remarks: string;
+  TotalAmount:number;
+  ExpenseType:string;
+  SelectedDocument:string;
+  BillNo:string
+  BillAmount:number;
+  BillDate:string;
+  ClaimAmount:number;
+  Description:string;
+  SupportingAvailable:boolean;
+}
+export default class ReimbursementRequestApproval extends React.Component<IReimbursementRequestApprovalProps, IState> {
 
-export default class ReimbursementRequestApproval extends React.Component<IReimbursementRequestApprovalProps> {
+  constructor(props: IReimbursementRequestApprovalProps) {
+    super(props);
+
+    this.state = {
+      RRequestNo:'',
+      ProjectTitle:'',
+      Department:'',
+      Remarks: '',
+      TotalAmount:0,
+      ExpenseType:'',
+      SelectedDocument:'',
+      BillNo:'',
+      BillAmount:0,
+      BillDate:'',
+      ClaimAmount:0,
+      Description:'',
+      SupportingAvailable:false
+    };
+  }
+
+  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    this.setState({ ...this.state, [name]: value });
+  };
+
+ private getRequestDetails = async (requestNo: string) => {
+ 
+  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
+
+    console.log("URL:",url)  
+  const response = await this.props.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+
+ const data = await response.json();
+
+  if (data.value.length > 0) {
+    this.setState({
+      RRequestNo: data.value[0].RRequestNo,
+      ProjectTitle: data.value[0].ProjectTitle,
+      Department: data.value[0].Department,
+      Remarks: data.value[0].Remarks,
+      TotalAmount: data.value[0].TotalAmount,
+      ExpenseType: data.value[0].ExpenseType,
+      SelectedDocument: data.value[0].SelectedDocument,
+      BillNo: data.value[0].BillNo,
+      BillAmount: data.value[0].BillAmount,
+      BillDate: data.value[0].BillDate,
+      ClaimAmount: data.value[0].ClaimAmount,
+      Description: data.value[0].Description,
+      SupportingAvailable: data.value[0].SupportingAvailable          
+    });
+  } else {
+   
+    this.setState({
+       RRequestNo:'',
+      ProjectTitle:'',
+      Department:'',
+      Remarks: '',
+      TotalAmount:0,
+      ExpenseType:'',
+      SelectedDocument:'',
+      BillNo:'',
+      BillAmount:0,
+      BillDate:'',
+      ClaimAmount:0,
+      Description:'',
+      SupportingAvailable:false
+    });
+  }
+};
+ 
+private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+
+  this.setState({ RRequestNo: value });
+
+ // optional
+    this.getRequestDetails(value);
+  
+};
+
+  private saveData = async () => {
+
+  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
+
+  const body = {
+    RRequestNo: this.state.  RRequestNo,      
+     };
+  
+  const response = await this.props.context.spHttpClient.post(
+    url,SPHttpClient.configurations.v1,
+   {
+      headers: {
+        "Accept": "application/json;odata=nometadata",
+        "Content-Type": "application/json;odata=nometadata"
+      },
+      body: JSON.stringify(body)
+    }
+  );
+   const result = await response.json();
+  console.log("Response:", result);
+
+   if (response.ok) {
+    alert("Data Saved Successfully ✅");
+  } else {
+    alert("Error saving data ❌");
+  }
+};
+  
+  
+  private handleReject = () => {
+    console.log("Form Data:", this.state);
+    alert("Form Submitted");
+  };
+  private handleApprove = () => {
+    console.log("Saved Data:", this.state);
+    alert("Saved");
+  };
+
   public render(): React.ReactElement<IReimbursementRequestApprovalProps> {
-    const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      hasTeamsContext,
-      userDisplayName
-    } = this.props;
+    function setIsOpen(arg0: boolean): void {
+      throw new Error('Function not implemented.');
+    }
 
     return (
-      <section className={`${styles.reimbursementRequestApproval} ${hasTeamsContext ? styles.teams : ''}`}>
-        <div className={styles.welcome}>
-          <img alt="" src={isDarkTheme ? require('../assets/welcome-dark.png') : require('../assets/welcome-light.png')} className={styles.welcomeImage} />
-          <h2>Well done, {escape(userDisplayName)}!</h2>
-          <div>{environmentMessage}</div>
-          <div>Web part property value: <strong>{escape(description)}</strong></div>
+      <div className={styles.container}>
+
+        {/* LEFT FORM */}
+        
+        <div className={styles.leftPanel}>
+          <h2>Reimbursement Request Approval</h2>
+          <h4>Reimbursement Request Approval</h4>
+
+          <label>Select Department</label>
+          <input value={this.state.Department}  onChange={this.handleRequestNoChange}  />
+
+          <div className={styles.gridContainer}>
+
+          </div>
+
+          <label>Total Amount</label>
+          <input name="totalAmount" value={this.state.TotalAmount}   >
+          </input>
+          
+         
+
+          <label>Remarks</label>
+          <input name="remarks" value={this.state.Remarks}   >
+          </input>          
+
+          {/* Buttons */}
+          <div className={styles.buttonGroup}>
+            <button className={styles.ApproveBtn} onClick={this.handleApprove}>Approve</button>
+            <button className={styles.RejectBtn} onClick={this.handleReject}>Reject</button>
+            <button className={styles.cancelBtn}>Cancel</button>
+          </div>
         </div>
-        <div>
-          <h3>Welcome to SharePoint Framework!</h3>
-          <p>
-            The SharePoint Framework (SPFx) is a extensibility model for Microsoft Viva, Microsoft Teams and SharePoint. It&#39;s the easiest way to extend Microsoft 365 with automatic Single Sign On, automatic hosting and industry standard tooling.
-          </p>
-          <h4>Learn more about SPFx development:</h4>
-          <ul className={styles.links}>
-            <li><a href="https://aka.ms/spfx" target="_blank" rel="noreferrer">SharePoint Framework Overview</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-graph" target="_blank" rel="noreferrer">Use Microsoft Graph in your solution</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-teams" target="_blank" rel="noreferrer">Build for Microsoft Teams using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-viva" target="_blank" rel="noreferrer">Build for Microsoft Viva Connections using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-store" target="_blank" rel="noreferrer">Publish SharePoint Framework applications to the marketplace</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-api" target="_blank" rel="noreferrer">SharePoint Framework API reference</a></li>
-            <li><a href="https://aka.ms/m365pnp" target="_blank" rel="noreferrer">Microsoft 365 Developer Community</a></li>
-          </ul>
+        {/* RIGHT PANEL */}
+        <div className={styles.rightPanel}>
+          {/* Templates */}
+          <div className={styles.card}>
+            <h4>Templates</h4>
+            <ul>
+              <li>Quotation_Approval_Form_v1.0.xlsx</li>
+              <li>SOP_Procurement_of_Goods_Services-CKBCS.pdf</li>
+              <li>DigiFlow_Training_Manual.pdf</li>
+            </ul>
+          </div>
+
+          {/* Guidelines */}
+          <div className={styles.card}>
+            <h4>Important Guidelines</h4>
+            <ol>
+              <li>Select approval path carefully.</li>
+              <li>Use project reference if needed.</li>
+              <li>Attach all documents (Max 25 MB).</li>
+              <li>Avoid special characters in file names.</li>
+            </ol>
+          </div>
         </div>
-      </section>
+      </div>
     );
   }
 }
+
