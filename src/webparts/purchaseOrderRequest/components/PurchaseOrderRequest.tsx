@@ -12,14 +12,15 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const [form, setForm] = React.useState({
     POrequestNo: '',
     projectCode: '',
+    department:'',
     projectTitle: '',
     vendorName: '',
-    RemainingAmount: 0,
-    TotalAmount:0,
-    OccupiedAmount:0,
+    RemainingAmount: '',
+    TotalAmount:'',
+    OccupiedAmount:'',
     Department: '',
-    POAmount: 0,
-    ApplicableTaxes: 0,
+    POAmount: '',
+    ApplicableTaxes: '',
     POCategory: '',
     Comments: '',
     files: null as FileList | null
@@ -29,6 +30,10 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const [vendorOptions, setvendorOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
+   const [POrequestNo, setPORequestNo] = React.useState('');
+  const [POrequestNoError, setPORequestNoError] = React.useState('');
+  const [department, setDepartment] = React.useState('');
+    const [projectTitle, setProjectTitle] = React.useState('');
 const handleCancel = () => {
   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
   window.location.assign(url);
@@ -39,6 +44,33 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     files: e.target.files
   });
 };
+
+
+
+
+const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+
+  setPORequestNo(value);
+
+  if (!value) return;
+
+  try {
+    const result = await service.getRequestDetails(value);
+
+    if (result.length > 0) {
+      setDepartment(result[0].Department || '');
+      setProjectTitle(result[0].ProjectTitle || '');
+    } else {
+      setDepartment('');
+      setProjectTitle('');
+    }
+
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
+ 
   // 🔹 PO Category Options
   const poOptions: IChoiceGroupOption[] = [
     { key: '1', text: 'Issue To Vendor' },
@@ -73,18 +105,17 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
   // 🔹 Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const { name, value } = e.target;
 
-    setForm({
-      ...form,
-      [name]: isNaN(Number(value)) ? value : Number(value)
-    });
-  };
+  setForm({
+    ...form,
+    [name]: value === '' ? 0 : isNaN(Number(value)) ? value : Number(value)
+  });
+};
 
   // Save Data
   const handleSave = async () => {
   const payload = {
-    POrequestNo: form.POrequestNo,
     projectCode: form.projectCode,
     projectTitle: form.projectTitle,
     vendorName: form.vendorName,
@@ -142,6 +173,32 @@ const handleUpdate = async () => {
   }
 };
 
+
+
+
+const validatePO = (value: string) => {
+    if (!value) return "Project Code is required";
+    if (!/^[a-zA-Z0-9-]+$/.test(value)) return "Only alphanumeric allowed";
+    return "";
+  };
+
+   // 🔹 Handle change
+  // const handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+
+  //   setPORequestNo(value);
+
+  //   const error = validatePO(value);
+  //   setPORequestNoError(error);
+
+  //   // Example: auto fill department
+  //   if (!error) {
+  //     setDepartment("IT Department"); // dummy
+  //   } else {
+  //     setDepartment("");
+  //   }
+  // };
+
   // 🔹 UI
   return (
     <div className={styles.container}>
@@ -149,22 +206,24 @@ const handleUpdate = async () => {
         {/* LEFT FORM */}
         <div className={styles.leftPanel}>
           <h2>PO Approval Mapping Form</h2>
-         
           <label>Project Code <span className={styles.required}>*</span></label>
-          <input
-            name="PorequestNo"
-            value={POrequestNo}
-            onChange={this.handleRequestNoChange}
-            className={POrequestNoError ? styles.buttonGroup : ''}
-          />
-          {POrequestNoError && <span className={styles.error}>{POrequestNoError}</span>}
+           <input
+          name="PorequestNo"
+          value={POrequestNo}
+          onChange={handleRequestNoChange}
+          className={POrequestNoError ? styles.inputError : ""}
+        />
+
+        {POrequestNoError && (
+          <span className={styles.error}>{POrequestNoError}</span>
+        )}
          
         
           <label>Department</label>
-          <input name="Department" value={this.state.Department} readOnly  />
+          <input name="Department" value={department} readOnly  />
 
         <label>Project Title</label>
-        <input name="projectTitle" value={form.projectTitle} onChange={handleChange} />
+        <input name="projectTitle" value={projectTitle} readOnly />
 
         <label>Select Vendor Name</label>
         <Dropdown
@@ -175,20 +234,21 @@ const handleUpdate = async () => {
           }
         />
 
-        <label>Total Amount</label>
-        <input name="TotalAmount" value={form.RemainingAmount} onChange={handleChange} />
+        <label>Total Amount</label>       
+        <input
+  name="TotalAmount"/>
 
         <label>Occupied Amount</label>
-        <input name="OccupiedAmount" value={form.RemainingAmount} onChange={handleChange} />
+        <input name="OccupiedAmount"  />
 
         <label>Remaining Amount</label>
-        <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange} />
+        <input name="RemainingAmount"  />
 
         <label>PO Amount</label>
-        <input name="POAmount" value={form.POAmount} onChange={handleChange} />
+        <input name="POAmount"   />
 
         <label>Applicable Taxes</label>
-        <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} />
+        <input name="ApplicableTaxes" />
 
         <ChoiceGroup
           label="PO Category"
