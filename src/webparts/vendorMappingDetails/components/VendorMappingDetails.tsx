@@ -128,26 +128,26 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <h2>Vendor Mapping Details & Status  </h2>
           <h4>Vendor Mapping / Request Details</h4>
 
-          <label>Project Code</label>
-          <input value={this.state.requestNo}  onChange={this.handleRequestNoChange}  />
+          <label>Project Code </label>
+    <input name="requestNo" value={this.state.requestNo} readOnly/>
 
-          <label>Project Title</label>
-          <input name="projectTitle" value={this.state.projectTitle} readOnly />
+    {/* Project Title (Read Only) */}
+    <label>Project Title</label>
+    <input name="projectTitle" value={this.state.projectTitle} readOnly/>
 
-          <label>Project Description</label>
-          <input name="projectDescription" value={this.state.projectDescription} readOnly  >
-          </input>
+    {/* Project Description (Read Only) */}
+    <label>Project Description</label>
+    <input name="projectDescription" value={this.state.projectDescription} readOnly/>
 
-          <label>Select Vendor</label>
-          <select name="vendorName" onChange={this.handleChange}>
-            <option value="">Select Vendor</option>
-            <option value="Vendor1">Vendor </option>
-            <option value="Vendor2">Vendor 2</option>
-          </select>
+    {/* Vendor Name (Read Only) */}
+    <label>Select Vendor </label>
+    <input name="vendorName" value={this.state.vendorName}readOnly/>
 
-          <label>Additional Information & Remarks</label>
-          <textarea name="VendorDescription" onChange={this.handleChange}></textarea>
+    {/* Additional Information / Remarks (Read Only) */}
+    <label>Additional Information & Remarks</label>
+    <input  name="VendorDescription"  value={this.state.vendorDescription} readOnly />
 
+    <label>Attach Documents</label>
           {/* <label>Attach Documents</label>
           <input type="file" multiple onChange={this.handleFileChange} /> */}          
         </div>

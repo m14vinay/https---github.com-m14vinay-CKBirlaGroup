@@ -5,16 +5,19 @@ import { SPHttpClient } from '@microsoft/sp-http';
 
 interface IState {
   POrequestNo:string;
+  POrequestNoError: string;
   projectCode: string;
   projectTitle: string;
   RemainingAmount: number;
   vendorName: string;
   Department:string;
   POAmount: number;
+  //POAmountError:string,
   ApplicableTaxes:number;
   POCategory:string;
   Comments: string;
   files: FileList | null;
+  filesError: string;
 }
 export default class PurchaseOrderRequest extends React.Component<IPurchaseOrderRequestProps, IState> {
 
@@ -23,6 +26,7 @@ export default class PurchaseOrderRequest extends React.Component<IPurchaseOrder
 
     this.state = {
       POrequestNo:'',
+      POrequestNoError:'',
       projectCode: '',
       projectTitle: '',
       vendorName: '',
@@ -32,15 +36,27 @@ export default class PurchaseOrderRequest extends React.Component<IPurchaseOrder
      ApplicableTaxes:0,
      POCategory:'',
      Comments: '',
-     files:  null
+     files:  null,
+     filesError: ''
     };
   }
+
+  // --- VALIDATIONS ---
+  validateProjectCode = (value: string): string => {
+    if (!value) return 'Project Code is required';
+    if (!/^[a-zA-Z0-9-]+$/.test(value)) return 'Project Code must be alphanumeric';
+    if (value.length > 10) return 'Project Code must be at most 10 characters';
+    return '';
+  }
+
+  
 
   private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     this.setState({ ...this.state, [name]: value });
   };
 
+  
  private getRequestDetails = async (requestNo: string) => {
  
   const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
@@ -55,8 +71,7 @@ export default class PurchaseOrderRequest extends React.Component<IPurchaseOrder
 
   if (data.value.length > 0) {
     this.setState({
-      POrequestNo: data.value[0].ProjectTitle,
-      projectCode: data.value[0].ProjectDescription,
+    
       projectTitle: data.value[0].ProjectTitle,
       vendorName: data.value[0].VendorName,
       RemainingAmount: data.value[0].RemainingAmount,
@@ -70,13 +85,12 @@ export default class PurchaseOrderRequest extends React.Component<IPurchaseOrder
   } else {
    
     this.setState({
-       POrequestNo:'',
-      projectCode: '',
+      
       projectTitle: '',
       vendorName: '',
       RemainingAmount: 0,
       Department:'',
-      POAmount: 0,
+      POAmount: 0 ,
   ApplicableTaxes:0,
   POCategory:'',
   Comments: '',
@@ -84,15 +98,33 @@ export default class PurchaseOrderRequest extends React.Component<IPurchaseOrder
   }
 };
  
+ validateFiles = (files: FileList | null): string => {
+    if (!files || files.length === 0) return 'At least one file is required';
+    return '';
+ }
+
+// private handlePOAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//   const value = e.target.value;
+//   const error = this.validateNumber(value, 'PO Amount');
+
+//   this.setState({
+//     POAmount: Number(value),
+//     POAmountError: error
+//   });
+// };
+
 private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
+    const value = e.target.value;
+    const errorMsg = this.validateProjectCode(value);
 
-  this.setState({ POrequestNo: value });
+    this.setState({ POrequestNo: value, POrequestNoError: errorMsg });
 
- // optional
-    this.getRequestDetails(value);
-  
-};
+    if (!errorMsg) {
+      this.getRequestDetails(value);
+    } else {
+      this.setState({ projectTitle: '', Department: '' });
+    }
+  };;
 
   private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ files: e.target.files });
@@ -145,7 +177,11 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     alert("Saved");
   };
 
-  public render(): React.ReactElement<IPurchaseOrderRequestProps> {
+public render(): React.ReactElement<IPurchaseOrderRequestProps> {
+    const { POrequestNo, POrequestNoError, projectTitle,  vendorName,filesError } = this.state;
+
+    // Form is invalid if any required field has an error
+    const isFormInvalid = !!POrequestNoError || !!filesError   || !POrequestNo || !vendorName || !this.state.files;
 
     return (
       <div className={styles.container}>
@@ -153,29 +189,35 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         {/* LEFT FORM */}
         <div className={styles.leftPanel}>
           <h2>PO Approval Mapping Form</h2>
-          <h4>PO Approval / Request Form</h4>
-
-          <label>Project Code</label>
-          <input value={this.state.POrequestNo}  onChange={this.handleRequestNoChange}  />
-
+         
+          <label>Project Code <span className={styles.required}>*</span></label>
+          <input
+            name="PorequestNo"
+            value={POrequestNo}
+            onChange={this.handleRequestNoChange}
+            className={POrequestNoError ? styles.buttonGroup : ''}
+          />
+          {POrequestNoError && <span className={styles.error}>{POrequestNoError}</span>}
+         
+        
           <label>Department</label>
-          <input name="Department" value={this.state.Department}  />
+          <input name="Department" value={this.state.Department} readOnly  />
 
           <label>Project Title</label>
-          <input name="projectTitle" value={this.state.projectTitle}  />
+          <input name="projectTitle" value={this.state.projectTitle} readOnly />
 
           <label>Select Vendor Name</label>
-          <input name="vendorName" value={this.state.vendorName}   >
+          <input name="vendorName" value={this.state.vendorName} readOnly  >
           </input>
 
           <label>Remaining Amount</label>
-          <input name="RemainingAmount" value={this.state.RemainingAmount}  />
+          <input name="RemainingAmount" value={this.state.RemainingAmount} readOnly  />
 
-          <label>PO Amount</label>
-          <input name="POAmount" value={this.state.POAmount}  />
+          <label>PO Amount <span className={styles.required}>*</span></label>
+          <input name="POAmount" value={this.state.POAmount} type="number" />
 
-          <label>Apllicable Taxes</label>
-          <input name="ApplicableTaxes" value={this.state.ApplicableTaxes}   >
+          <label>Applicable Taxes <span className={styles.required}>*</span></label>
+          <input name="ApplicableTaxes" value={this.state.ApplicableTaxes} type="number"  >
           </input>
 
 
@@ -183,8 +225,10 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <input name="comments" value={this.state.Comments}   >
           </input>
 
-          {/* <label>Attach Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} /> */}
+         <label>Attach Documents <span className={styles.required}>*</span></label>
+                    <input type="file" multiple onChange={this.handleFileChange} />
+                   {filesError && <span className={styles.required}>{filesError}</span>}
+         
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>
