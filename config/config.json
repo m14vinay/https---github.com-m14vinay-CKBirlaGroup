@@ -162,12 +162,20 @@
           "manifest": "./src/webparts/documentView/DocumentViewWebPart.manifest.json"
         }
       ]
+    },
+    "qa-request-approval-form-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/qaRequestApprovalForm/QaRequestApprovalFormWebPart.js",
+          "manifest": "./src/webparts/qaRequestApprovalForm/QaRequestApprovalFormWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
     "HomeDashboradWebPartStrings": "lib/webparts/homeDashborad/loc/{locale}.js",
-    "OuotationApprovalFormWebPartStrings": "lib/webparts/ouotationApprovalForm/loc/{locale}.js"
+    "OuotationApprovalFormWebPartStrings": "lib/webparts/ouotationApprovalForm/loc/{locale}.js",
     "VendorMappingFormWebPartStrings": "lib/webparts/vendorMappingForm/loc/{locale}.js",
     "PurchaseOrderRequestWebPartStrings": "lib/webparts/purchaseOrderRequest/loc/{locale}.js",
     "PurchaseOrderApprovalWebPartStrings": "lib/webparts/purchaseOrderApproval/loc/{locale}.js",
@@ -185,6 +193,7 @@
     "ReimbursementRequestDetailViewWebPartStrings": "lib/webparts/reimbursementRequestDetailView/loc/{locale}.js",
     "DocumentSearchWebPartStrings": "lib/webparts/documentSearch/loc/{locale}.js",
     "DocumentUploadWebPartStrings": "lib/webparts/documentUpload/loc/{locale}.js",
-    "DocumentViewWebPartStrings": "lib/webparts/documentView/loc/{locale}.js"
+    "DocumentViewWebPartStrings": "lib/webparts/documentView/loc/{locale}.js",
+    "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js"
   }
 }
