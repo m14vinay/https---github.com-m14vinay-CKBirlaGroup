@@ -10,17 +10,16 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
   // State
   const [form, setForm] = React.useState({
-    POrequestNo: '',
     projectCode: '',
     department:'',
     projectTitle: '',
     vendorName: '',
-    RemainingAmount: '',
-    TotalAmount:'',
-    OccupiedAmount:'',
+    RemainingAmount: 0,
+    TotalAmount:0,
+    OccupiedAmount:0,
     Department: '',
-    POAmount: '',
-    ApplicableTaxes: '',
+    POAmount: 0,
+    ApplicableTaxes: 0,
     POCategory: '',
     Comments: '',
     files: null as FileList | null
@@ -87,7 +86,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     const data = await service.getDepartments();
     const options = data.map((item: any) => ({
       key: item.Id,
-      text: item.Title
+      text: item.DepartmentName
     }));
 
     setDepartmentOptions(options);
@@ -105,17 +104,18 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
   // 🔹 Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  setForm({
-    ...form,
-    [name]: value === '' ? 0 : isNaN(Number(value)) ? value : Number(value)
-  });
-};
+    setForm({
+      ...form,
+      [name]: isNaN(Number(value)) ? value : Number(value)
+    });
+  };
 
   // Save Data
   const handleSave = async () => {
   const payload = {
+    POrequestNo: form.POrequestNo,
     projectCode: form.projectCode,
     projectTitle: form.projectTitle,
     vendorName: form.vendorName,
@@ -123,19 +123,24 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     Department: form.Department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
-    POCategory: form.POCategory,
-    Comments: form.Comments
+    //POCategory: form.POCategory,
+    ProjectDescription: form.Comments
   };
   try {    
       // 🔥 CREATE
       const res = await service.createItem(payload);
+      if(res.ok){
       setItemId(res.Id); 
       if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id, form.files[i]);
       }
     }
-      alert("Data Saved Successfully ✅");    
+      alert("Data Saved Successfully ✅");  
+  }  
+  else{
+    alert("Data Not Saved.");
+  }
   } catch (error) {
     console.error(error);
     alert("Error occurred ❌");
@@ -145,7 +150,6 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 // Update
 const handleUpdate = async () => {
   const payload = {
-    POrequestNo: form.POrequestNo,
     projectCode: form.projectCode,
     projectTitle: form.projectTitle,
     vendorName: form.vendorName,
@@ -203,24 +207,21 @@ const validatePO = (value: string) => {
   return (
     <div className={styles.container}>
 
-        {/* LEFT FORM */}
-        <div className={styles.leftPanel}>
-          <h2>PO Approval Mapping Form</h2>
-          <label>Project Code <span className={styles.required}>*</span></label>
-           <input
-          name="PorequestNo"
-          value={POrequestNo}
-          onChange={handleRequestNoChange}
-          className={POrequestNoError ? styles.inputError : ""}
-        />
+      <div className={styles.leftPanel}>
+        <h2>PO Approval Request Form</h2>
+        <h4>PO Approval / Request Form</h4>
 
-        {POrequestNoError && (
-          <span className={styles.error}>{POrequestNoError}</span>
-        )}
-         
-        
-          <label>Department</label>
-          <input name="Department" value={department} readOnly  />
+        <label>Project Code</label>
+        <input name="ProjectCode" value={form.POrequestNo} onChange={handleChange} />
+
+        <label>Department</label>
+        <Dropdown
+          options={departmentOptions}
+          selectedKey={form.Department}
+          onChange={(e, option) =>
+            setForm({ ...form, Department: option?.text as string })
+          }
+        />
 
         <label>Project Title</label>
         <input name="projectTitle" value={projectTitle} readOnly />
@@ -228,27 +229,26 @@ const validatePO = (value: string) => {
         <label>Select Vendor Name</label>
         <Dropdown
           options={vendorOptions}
-          selectedKey={form.vendorName}
+          selectedKey={form.vendorNameID}     
           onChange={(e, option) =>
-            setForm({ ...form, vendorName: option?.text as string })
-          }
+            setForm({ ...form, vendorName: option?.text as string,vendorNameID: option?.key as string, })
+          }    
         />
 
-        <label>Total Amount</label>       
-        <input
-  name="TotalAmount"/>
+        <label>Total Amount</label>
+        <input name="TotalAmount" value={form.RemainingAmount} onChange={handleChange} />
 
         <label>Occupied Amount</label>
-        <input name="OccupiedAmount"  />
+        <input name="OccupiedAmount" value={form.RemainingAmount} onChange={handleChange} />
 
         <label>Remaining Amount</label>
-        <input name="RemainingAmount"  />
+        <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange} />
 
         <label>PO Amount</label>
-        <input name="POAmount"   />
+        <input name="POAmount" value={form.POAmount} onChange={handleChange} />
 
         <label>Applicable Taxes</label>
-        <input name="ApplicableTaxes" />
+        <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} />
 
         <ChoiceGroup
           label="PO Category"
