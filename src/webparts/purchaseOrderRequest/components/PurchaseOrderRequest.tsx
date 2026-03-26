@@ -3,7 +3,7 @@ import styles from './PurchaseOrderRequest.module.scss';
 import { IPurchaseOrderRequestProps } from './IPurchaseOrderRequestProps';
 import { SPHttpClient } from '@microsoft/sp-http';
 import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
-import SharePointService from '../service/PORequestService';
+import SharePointService from '../service/Service';
 import { PageContext } from '@microsoft/sp-page-context';
 
 const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {

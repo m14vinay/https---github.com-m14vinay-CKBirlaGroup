@@ -1,5 +1,5 @@
 import { SPHttpClient } from '@microsoft/sp-http';
-export default class PORequestService {
+export default class Service {
 
   private context: any;
   private listname="PoApproval";
