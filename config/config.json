@@ -15,7 +15,7 @@
         {
           "entrypoint": "./lib/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.js",
           "manifest": "./src/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.manifest.json"
-    }
+        }
       ]
     },
     "vendor-mapping-form-web-part": {
@@ -89,7 +89,7 @@
           "manifest": "./src/webparts/billProcessingDetailView/BillProcessingDetailViewWebPart.manifest.json"
         }
       ]
-    }, 
+    },
     "quotation-request-detail-view-nei-bt-web-part": {
       "components": [
         {
@@ -114,7 +114,6 @@
         }
       ]
     },
-    
     "reimbursement-request-form-web-part": {
       "components": [
         {
@@ -162,12 +161,20 @@
           "manifest": "./src/webparts/documentView/DocumentViewWebPart.manifest.json"
         }
       ]
+    },
+    "vendor-search-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorSearch/VendorSearchWebPart.js",
+          "manifest": "./src/webparts/vendorSearch/VendorSearchWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
     "HomeDashboradWebPartStrings": "lib/webparts/homeDashborad/loc/{locale}.js",
-    "OuotationApprovalFormWebPartStrings": "lib/webparts/ouotationApprovalForm/loc/{locale}.js"
+    "OuotationApprovalFormWebPartStrings": "lib/webparts/ouotationApprovalForm/loc/{locale}.js",
     "VendorMappingFormWebPartStrings": "lib/webparts/vendorMappingForm/loc/{locale}.js",
     "PurchaseOrderRequestWebPartStrings": "lib/webparts/purchaseOrderRequest/loc/{locale}.js",
     "PurchaseOrderApprovalWebPartStrings": "lib/webparts/purchaseOrderApproval/loc/{locale}.js",
@@ -185,6 +192,7 @@
     "ReimbursementRequestDetailViewWebPartStrings": "lib/webparts/reimbursementRequestDetailView/loc/{locale}.js",
     "DocumentSearchWebPartStrings": "lib/webparts/documentSearch/loc/{locale}.js",
     "DocumentUploadWebPartStrings": "lib/webparts/documentUpload/loc/{locale}.js",
-    "DocumentViewWebPartStrings": "lib/webparts/documentView/loc/{locale}.js"
+    "DocumentViewWebPartStrings": "lib/webparts/documentView/loc/{locale}.js",
+    "VendorSearchWebPartStrings": "lib/webparts/vendorSearch/loc/{locale}.js"
   }
 }
