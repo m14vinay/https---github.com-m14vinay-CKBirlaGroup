@@ -1,43 +1,171 @@
 import * as React from 'react';
 import styles from './DocumentSearch.module.scss';
-import type { IDocumentSearchProps } from './IDocumentSearchProps';
-import { escape } from '@microsoft/sp-lodash-subset';
+import { IDocumentSearchProps,IState,IData,IColumn } from './IDocumentSearchProps';
+import { SPHttpClient } from '@microsoft/sp-http';
+import { DetailsList } from '@fluentui/react';
+import { SelectionMode } from '@fluentui/react/lib/DetailsList';
+export default class DocumentSearch extends React.Component<IDocumentSearchProps, IState> {
 
-export default class DocumentSearch extends React.Component<IDocumentSearchProps> {
+  constructor(props: IDocumentSearchProps) {
+    super(props);
+
+    this.state = {
+      vendorName: '',
+      GST: '',
+      PAN: '',
+      vendorCode: '',
+      TANNo:''  
+    };
+  }
+  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    this.setState({ ...this.state, [name]: value });
+  };
+
+ private getRequestDetails = async (requestNo: string) => {
+ 
+  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
+
+    console.log("URL:",url)  
+  const response = await this.props.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+  
+ const data = await response.json();
+
+ const [items, setItems] = React.useState([
+    { id: 1, name: 'Vendor A', amount: 1000 },
+    { id: 2, name: 'Vendor B', amount: 2000 },
+    { id: 3, name: 'Vendor C', amount: 3000 }
+  ]);
+
+  const columns: IColumn[] = [
+    { key: 'col1', name: 'ID', fieldName: 'id', minWidth: 50 },
+    { key: 'col2', name: 'Name', fieldName: 'name', minWidth: 150 },
+    { key: 'col3', name: 'Amount', fieldName: 'amount', minWidth: 100 }
+  ];
+  if (data.value.length > 0) {
+    this.setState({
+      vendorName: data.value[0].VendorName,
+      GST: data.value[0].GST,
+      PAN: data.value[0].PAN,
+      vendorCode: data.value[0].VendorCode,
+      TANNo: data.value[0].TANNo  
+    });
+  } else {
+   
+    this.setState({
+      vendorName: '',
+      GST: '',
+      PAN: '',
+      vendorCode: '',
+      TANNo: ''
+    });
+  }
+};
+ 
+private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+
+  this.setState({ vendorName: value });
+
+ // optional
+    this.getRequestDetails(value);
+  
+};
+
+  private saveData = async () => {
+
+  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
+
+  const body = {
+    vendorName: this.state.vendorName,
+    GST: this.state.GST,
+    PAN: this.state.PAN,
+    VendorCode: this.state.vendorCode,
+    TANNo: this.state.TANNo
+     };
+  
+  const response = await this.props.context.spHttpClient.post(
+    url,SPHttpClient.configurations.v1,
+   {
+      headers: {
+        "Accept": "application/json;odata=nometadata",
+        "Content-Type": "application/json;odata=nometadata"
+      },
+      body: JSON.stringify(body)
+    }
+  );
+   const result = await response.json();
+  console.log("Response:", result);
+
+   if (response.ok) {
+    alert("Data Saved Successfully ✅");
+  } else {
+    alert("Error saving data ❌");
+  }
+};
+  
+  
+  private handleSubmit = () => {
+    console.log("Form Data:", this.state);
+    alert("Form Submitted");
+  };
+
+  private handleSave = () => {
+    console.log("Saved Data:", this.state);
+    alert("Saved");
+  };
+
   public render(): React.ReactElement<IDocumentSearchProps> {
-    const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      hasTeamsContext,
-      userDisplayName
-    } = this.props;
 
     return (
-      <section className={`${styles.documentSearch} ${hasTeamsContext ? styles.teams : ''}`}>
-        <div className={styles.welcome}>
-          <img alt="" src={isDarkTheme ? require('../assets/welcome-dark.png') : require('../assets/welcome-light.png')} className={styles.welcomeImage} />
-          <h2>Well done, {escape(userDisplayName)}!</h2>
-          <div>{environmentMessage}</div>
-          <div>Web part property value: <strong>{escape(description)}</strong></div>
+      <div className={styles.container}>
+          <h2>My Document List</h2>
+          <h4>My Document List</h4>
+
+<div className={styles.container}>  
+  <h2>Search My Document</h2>
+  <div className={styles.leftSection}>
+            <button className={styles.submitBtn} onClick={this.handleSubmit}>Add New Document</button>
+          </div>
+</div>
+<div className={styles.container}>  
+  <h2>Search My Document</h2>
+  <div className={styles.leftSection}>
+            <button className={styles.submitBtn} onClick={this.handleSubmit}>Add New Document</button>
+          </div>          
+</div>
+        <div className={styles.container}>    
+
+          <label>Vendor Name</label>
+          <input name="vendorName" value={this.state.vendorName}  />
+
+          <label>GST</label>
+          <input name="GST" value={this.state.GST}   >
+          </input>
+
+          <label>PAN</label>
+          <input name="PAN" value={this.state.PAN}   >
+          </input>
+
+          <label>Vendor Code</label>
+          <input name="vendorCode" value={this.state.vendorCode}   >
+          </input>
+
+          <label>TAN Number</label>
+          <input name="TANNo" value={this.state.TANNo}   >
+          </input>
+          </div>     
+          <div className={styles.container}>   
+            {/* <DetailsList
+        items=null
+        columns={columns}
+        selectionMode={SelectionMode.none}
+      /> */}
+          </div>          
         </div>
-        <div>
-          <h3>Welcome to SharePoint Framework!</h3>
-          <p>
-            The SharePoint Framework (SPFx) is a extensibility model for Microsoft Viva, Microsoft Teams and SharePoint. It&#39;s the easiest way to extend Microsoft 365 with automatic Single Sign On, automatic hosting and industry standard tooling.
-          </p>
-          <h4>Learn more about SPFx development:</h4>
-          <ul className={styles.links}>
-            <li><a href="https://aka.ms/spfx" target="_blank" rel="noreferrer">SharePoint Framework Overview</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-graph" target="_blank" rel="noreferrer">Use Microsoft Graph in your solution</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-teams" target="_blank" rel="noreferrer">Build for Microsoft Teams using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-viva" target="_blank" rel="noreferrer">Build for Microsoft Viva Connections using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-store" target="_blank" rel="noreferrer">Publish SharePoint Framework applications to the marketplace</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-api" target="_blank" rel="noreferrer">SharePoint Framework API reference</a></li>
-            <li><a href="https://aka.ms/m365pnp" target="_blank" rel="noreferrer">Microsoft 365 Developer Community</a></li>
-          </ul>
-        </div>
-      </section>
     );
   }
 }

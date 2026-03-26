@@ -1,72 +1,110 @@
 import * as React from 'react';
 import styles from './QuotationRequestApprovalNeiBt.module.scss';
-import type { IQuotationRequestApprovalNeiBtProps } from './IQuotationRequestApprovalNeiBtProps';
+import type { IQuotationRequestApprovalNeiBtProps,IState,IForm } from './IQuotationRequestApprovalNeiBtProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import { SPHttpClient } from '@microsoft/sp-http';
-interface IState {
-  QARequestNo:string;  
-  ProjectTitle:string;
-  ProjectReferenceNo:string;
-  projectDescription: string;
-  TotalProjectAmount:number;
-  ApplicableTaxes:number;
-  Vendor1: string;
-  Vendor2: string;
-  Vendor3: string;
-  Quote1:string;
-  Quote2:string;
-  Quote3:string;
-  Vendor:string;
-  Quote:string;
-  Department:string;
-  AdvancePayment:number;
-  ApprovalPath: string;
-  files: FileList | null;
-}
-export default class QuotationRequestApprovalNeiBt extends React.Component<IQuotationRequestApprovalNeiBtProps, IState> {
+import { useEffect, useState } from 'react';
+import { TextField, Dropdown, PrimaryButton, formProperties } from '@fluentui/react';
 
+export default class QuotationRequestApprovalNeiBt extends React.Component<IQuotationRequestApprovalNeiBtProps, IState,IForm> {
   constructor(props: IQuotationRequestApprovalNeiBtProps) {
     super(props);
 
-    this.state = {
-      QARequestNo:'',
-      ProjectTitle:'',
-      ProjectReferenceNo:'',
-      projectDescription: '',
-      TotalProjectAmount:0,
-      ApplicableTaxes:0,
-      Vendor1: '',
-      Vendor2: '',
-      Vendor3: '',
-      Quote1:'',
-      Quote2:'',
-      Quote3:'',
-      Vendor:'',
-      Quote:'',
-      Department:'',
-      AdvancePayment:0,
-      ApprovalPath: '',
-      files: null
-    };
-  }
+    const [form, setForm] = useState<IForm>({
+    projectTitle: '',
+    projectDescription: '',
+    department: '',
+    approvalPath: '',
+    vendor1: '',
+    vendor2: '',
+    vendor3: '',
+    selectedVendor: '',
+    quote1: 0,
+    quote2: 0,
+    quote3: 0,
+    selectedQuote: 0,
+    projectRef: '',
+    files: []
+  });
 
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [paths, setPaths] = useState<any[]>([]);
+  useEffect(() => {
+    loadDepartments();
+  }, []);
+
+  const loadDepartments = async () => {
+    const res = await fetch(
+      `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items`,
+      { headers: { Accept: 'application/json;odata=verbose' } }
+    );
+    const data = await res.json();
+    setDepartments(data.d.results);
   };
 
- private getRequestDetails = async (requestNo: string) => {
+// 🔹 Bind approval path
+  const bindPath = async (dept: string) => {
+    const res = await fetch(
+      `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items?$filter=DepartmentName eq '${dept}'`,
+      { headers: { Accept: 'application/json;odata=verbose' } }
+    );
+    const data = await res.json();
+    setPaths(data.d.results);
+  };
+
+  // 🔹 Handle change
+  const handleChange = (field: keyof IForm, value: any) => {
+    setForm({ ...form, [field]: value });
+  };
  
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
+ // 🔹 File upload
+  const handleFile = (e: any) => {
+    setForm({ ...form, files: Array.from(e.target.files) });
+  };
 
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-  
- const data = await response.json();
+  // 🔹 Validation + Save
+  const handleSubmit = async () => {
 
+    if (!form.projectTitle) return alert("Project Title required");
+    if (!form.projectDescription) return alert("Description required");
+    if (!form.department) return alert("Department required");
+    if (!form.approvalPath) return alert("Approval Path required");
+    if (!form.vendor1) return alert("Vendor1 required");
+    if (!form.quote1) return alert("Quote1 required");
+    if (!form.selectedVendor) return alert("Select Vendor");
+    if (!form.selectedQuote) return alert("Select Quote");
+    if (form.files.length === 0) return alert("Attach files");
+  const body = {
+      __metadata: { type: "SP.Data.QuotationApprovalNEIBTAdminListItem" },
+      ProjectTitle: form.projectTitle,
+      ProjectDescription: form.projectDescription,
+      Vendor1: form.vendor1,
+      Vendor2: form.vendor2,
+      Vendor3: form.vendor3,
+      Selectedvendor: form.selectedVendor,
+      Quote1: form.quote1,
+      Quote2: form.quote2,
+      Quote3: form.quote3,
+      SelectedQuote: form.selectedQuote,
+      ProjectReffNo: form.projectRef,
+      Department: form.department,
+      ApprovalPath: form.approvalPath
+    };
+
+    const res = await fetch(
+      `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApprovalNEIBTAdmin')/items`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json;odata=verbose",
+          "Content-Type": "application/json;odata=verbose",
+          "X-RequestDigest": (document.getElementById("__REQUESTDIGEST") as HTMLInputElement).value
+        },
+        body: JSON.stringify(body)
+      }
+    );
+    const data = await res.json();
+    const itemId = data.d.Id;
   if (data.value.length > 0) {
     this.setState({
       QARequestNo: data.value[0].QARequestNo,
@@ -109,131 +147,120 @@ export default class QuotationRequestApprovalNeiBt extends React.Component<IQuot
       ApprovalPath: ''
     });
   }
-};
- 
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-
-  this.setState({ QARequestNo: value });
-
- // optional
-    this.getRequestDetails(value);
-  
-};
-
-  private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ files: e.target.files });
-  };
-  private saveData = async () => {
-
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
-
-  const body = {
-  QARequestNo: this.state.  QARequestNo,      
-     };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
+   // 🔥 Upload files
+    for (let file of form.files) {
+      await uploadFile(itemId, file);
     }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
 
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
-  }
+    alert("Submitted Successfully");
+    clearForm();
+  };
+  // 🔹 Upload file
+  const uploadFile = async (itemId: number, file: File) => {
+    const buffer = await file.arrayBuffer();
+    await fetch(
+      `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApprovalNEIBTAdmin')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json;odata=verbose",
+          "X-RequestDigest": (document.getElementById("__REQUESTDIGEST") as HTMLInputElement).value
+        },
+        body: buffer
+      }
+    );
+  };
+// 🔹 Clear form
+  const clearForm = () => {
+    setForm({
+      projectTitle: '',
+      projectDescription: '',
+      department: '',
+      approvalPath: '',
+      vendor1: '',
+      vendor2: '',
+      vendor3: '',
+      selectedVendor: '',
+      quote1: 0,
+      quote2: 0,
+      quote3: 0,
+      selectedQuote: 0,
+      projectRef: '',
+      files: []
+    });
+  };
 };
-  
-  private handleApprove = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
-  };
-
-  private handleReject = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Rejected");
-  };
 
   public render(): React.ReactElement<IQuotationRequestApprovalNeiBtProps> {
-
     return (
       <div className={styles.container}>
-
         {/* LEFT FORM */}
         <div className={styles.leftPanel}>
           <h2>Quotation Approval Form-NEI BT Admin</h2>
           <h4>Quotation Approval Form-NEI BT Admin/Request Approval</h4>
 
           <label>Project Title</label>
-          <input value={this.state.ProjectTitle}  onChange={this.handleRequestNoChange}  />
+          <input value={formProperties.ProjectTitle}  />
 
           <label>Project Reference No</label>
-          <input name="projectReferenceNo" value={this.state.ProjectReferenceNo}   >
+          <input name="projectReferenceNo" value={formProperties.ProjectReferenceNo}   >
           </input>
 
           <label>Project Description & Advance Payment Details</label>
-          <input name="projectDescription" value={this.state.projectDescription}   >
+          <input name="projectDescription" value={formProperties.projectDescription}   >
           </input>
 
           <label>Total Project Amount</label>
-          <input name="totalProjectAmount" value={this.state.TotalProjectAmount }  />
+          <input name="totalProjectAmount" value={formProperties.TotalProjectAmount }  />
 
           <label>Applicable Taxes</label>
-          <input name="applicableTaxes" value={this.state.ApplicableTaxes}   >
+          <input name="applicableTaxes" value={formProperties.ApplicableTaxes}   >
           </input>
 
           <label>Vendor 1</label>
-          <input name="vendor1" value={this.state.Vendor1}  />
+          <input name="vendor1" value={formProperties.Vendor1}  />
 
           <label>Vendor 2</label>
-          <input name="vendor2" value={this.state.Vendor2}  />
+          <input name="vendor2" value={formProperties.Vendor2}  />
 
           <label>Vendor 3</label>
-          <input name="vendor3" value={this.state.Vendor3}  />
+          <input name="vendor3" value={formProperties.Vendor3}  />
 
           <label>Quote 1</label>
-          <input name="quote1" value={this.state.Quote1}  />
+          <input name="quote1" value={formProperties.Quote1}  />
 
           <label>Quote 2</label>
-          <input name="quote2" value={this.state.Quote2}  />
+          <input name="quote2" value={formProperties.Quote2}  />
 
           <label>Quote 3</label>
-          <input name="quote3" value={this.state.Quote3}  />
+          <input name="quote3" value={formProperties.Quote3}  />
 
           <label>Select Vendor</label>
-          <input name="vendor" value={this.state.Vendor}  />
+          <input name="vendor" value={formProperties.Vendor}  />
 
           <label>Select Quote</label>
-          <input name="quote" value={this.state.Quote}   >
+          <input name="quote" value={formProperties.Quote}   >
           </input>
 
           <label>Department</label>
-          <input name="Department" value={this.state.Department}   >
+          <input name="Department" value={formProperties.Department}   >
           </input>
 
           <label>Advance Amount</label>
-          <input name="AdvanceAmount" value={this.state.AdvancePayment}   >
+          <input name="AdvanceAmount" value={formProperties.AdvancePayment}   >
           </input>
 
           <label>Approval Path</label>
-          <input name="ApprovalPath" value={this.state.ApprovalPath}   >
+          <input name="ApprovalPath" value={formProperties.ApprovalPath}   >
           </input>          
 
           <label>Attach Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} /> 
+          <input type="file" multiple /> 
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>
-            <button className={styles.ApproveBtn} onClick={this.handleApprove}>Approve</button>
-            <button className={styles.RejectBtn} onClick={this.handleReject}>Reject</button>
+            <button className={styles.ApproveBtn} >Approve</button>
+            <button className={styles.RejectBtn} >Reject</button>
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
         </div>
