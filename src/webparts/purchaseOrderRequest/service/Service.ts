@@ -5,7 +5,6 @@ export default class Service {
   private listname="PoApproval";
   private Departmentmaster ="DepartmentMaster";
   private VendorList="";
-  private FetchList="QuotationApproval";
 
   constructor(context: any) {
     this.context = context;
@@ -36,24 +35,32 @@ export default class Service {
     const data = await res.json();
     return data.value;
   }
+  // GetList Item
+private async getListItemType(): Promise<string> {
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')?$select=ListItemEntityTypeFullName`;
 
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+
+  const data = await res.json();
+  return data.ListItemEntityTypeFullName;
+}
   // Save the Record
   public async createItem(data: any): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;
-    const body = {
-      __metadata: { type: "SP.Data.VendorMappingListItem" },
-      ...data
-    };
+    const itemType = await this.getListItemType();
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;   
     const response = await this.context.spHttpClient.post(
       url,
-      SPHttpClient.configurations.v1,
-      {
-        headers: {
-          "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/json;odata=nometadata"
-        },
-        body: JSON.stringify(body)
-      }
+     SPHttpClient.configurations.v1,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        }
     );
     return response.json();
   }
@@ -67,11 +74,11 @@ export default class Service {
       SPHttpClient.configurations.v1,
       {
         headers: {
-          "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/json;odata=nometadata",
-          "IF-MATCH": "*",
-          "X-HTTP-Method": "MERGE"
-        },
+            'IF-MATCH': '*',
+            'X-HTTP-Method': 'MERGE',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
         body: JSON.stringify(data)
       }
     );

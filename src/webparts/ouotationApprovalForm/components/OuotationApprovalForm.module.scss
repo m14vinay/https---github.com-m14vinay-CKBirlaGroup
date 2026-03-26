@@ -1,0 +1,170 @@
+/* ========================= */
+/* MAIN CONTAINER            */
+/* ========================= */
+
+.quotationApprovalForm {
+  padding: 20px;
+  background-color: #f9f9f9;
+  font-family: Arial, sans-serif;
+}
+
+/* Heading */
+.quotationApprovalForm h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* ========================= */
+/* FORM ROW                  */
+/* ========================= */
+
+.formRow {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+/* Label */
+.label {
+  width: 260px;
+  font-weight: 600;
+  color: #6b7c8f;
+  line-height: 1.4;
+}
+
+.label span {
+  color: red;
+  margin-left: 3px;
+}
+
+/* Field container */
+.field {
+  flex: 1;
+}
+
+/* ========================= */
+/* 🔥 PERFECT GRID ALIGNMENT */
+/* ========================= */
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 140px 1fr; /* perfect balance */
+  column-gap: 20px;
+  align-items: center;
+  width: 100%;
+}
+
+/* Center labels like Quote / Taxes */
+.inlineLabel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  color: #6b7c8f;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ========================= */
+/* INPUT STYLES              */
+/* ========================= */
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cfcfcf;
+  background-color: #f3f3f3;
+  border-radius: 2px;
+  font-size: 14px;
+  box-sizing: border-box; /* 🔥 critical fix */
+}
+
+/* Ensure equal width inside grid */
+.twoCol input {
+  width: 100%;
+}
+
+/* Placeholder */
+input::placeholder {
+  color: #b5b5b5;
+  font-style: italic;
+}
+
+/* Textarea */
+textarea {
+  width: 100%;
+  height: 80px;
+  resize: none;
+}
+
+/* Full width inputs */
+.fullWidth {
+  width: 100%;
+}
+
+/* ========================= */
+/* RADIO BUTTONS             */
+/* ========================= */
+
+.field input[type="radio"] {
+  margin-right: 6px;
+  margin-left: 12px;
+}
+
+/* ========================= */
+/* FILE INPUT                */
+/* ========================= */
+
+input[type="file"] {
+  border: 1px solid #ccc;
+  padding: 6px;
+  background: #fff;
+}
+
+/* ========================= */
+/* BUTTONS                   */
+/* ========================= */
+
+.buttonRow {
+  margin-top: 30px;
+  margin-left: 260px;
+}
+
+.submitBtn {
+  background-color: #107c10;
+  color: #fff;
+  padding: 8px 22px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.submitBtn:hover {
+  background-color: #0b6a0b;
+}
+
+.cancelBtn {
+  background-color: #d13438;
+  color: #fff;
+  padding: 8px 22px;
+  border: none;
+  border-radius: 5px;
+  margin-left: 12px;
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  background-color: #a4262c;
+}
+
+/* ========================= */
+/* STATUS MESSAGE            */
+/* ========================= */
+
+.statusMessage {
+  margin-top: 15px;
+  font-weight: 600;
+}

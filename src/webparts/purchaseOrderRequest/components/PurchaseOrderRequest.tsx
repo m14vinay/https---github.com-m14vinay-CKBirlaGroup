@@ -14,9 +14,10 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     department:'',
     projectTitle: '',
     vendorName: '',
-    RemainingAmount: 0,
-    TotalAmount:0,
-    OccupiedAmount:0,
+    vendorNameID:'',
+    RemainingAmount: '',
+    TotalAmount:'',
+    OccupiedAmount:'',
     Department: '',
     POAmount: 0,
     ApplicableTaxes: 0,
@@ -96,30 +97,29 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     const data = await service.getVendor();
     const options = data.map((item: any) => ({
       key: item.Id,
-      text: item.Title
+      text: item.VendorName
     }));
 
     setvendorOptions(options);
   };
 
   // 🔹 Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = e.target;
 
-    setForm({
-      ...form,
-      [name]: isNaN(Number(value)) ? value : Number(value)
-    });
-  };
+  setForm({
+    ...form,
+    [name]: value
+  });
+};
 
   // Save Data
   const handleSave = async () => {
   const payload = {
-    POrequestNo: form.POrequestNo,
-    projectCode: form.projectCode,
-    projectTitle: form.projectTitle,
-    vendorName: form.vendorName,
-    RemainingAmount: form.RemainingAmount,
+    ProjectCode: form.projectCode,
+    ProjectTitle: form.projectTitle,
+    VendorName: 'vinay',
+    //RemainingAmount: form.RemainingAmount,
     Department: form.Department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
@@ -127,38 +127,39 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     ProjectDescription: form.Comments
   };
   try {    
-      // 🔥 CREATE
+      // CREATE
       const res = await service.createItem(payload);
-      if(res.ok){
       setItemId(res.Id); 
+      if(res.Id>0){      
       if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id, form.files[i]);
       }
     }
-      alert("Data Saved Successfully ✅");  
+      alert("Data Saved Successfully✅");  
   }  
   else{
     alert("Data Not Saved.");
   }
   } catch (error) {
     console.error(error);
-    alert("Error occurred ❌");
+    alert("Error occurred");
   }
 };
 
 // Update
 const handleUpdate = async () => {
   const payload = {
-    projectCode: form.projectCode,
-    projectTitle: form.projectTitle,
-    vendorName: form.vendorName,
-    RemainingAmount: form.RemainingAmount,
+    Title:"Testing",
+    ProjectCode: form.projectCode,
+    ProjectTitle: form.projectTitle,
+    VendorName: form.VendorName,
+    //RemainingAmount: form.RemainingAmount,
     Department: form.Department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
-    POCategory: form.POCategory,
-    Comments: form.Comments
+    //POCategory: form.POCategory,
+    ProjectDescription: form.Comments
   };
   try {
     if (itemId) {
@@ -173,7 +174,7 @@ const handleUpdate = async () => {
     }
   } catch (error) {
     console.error(error);
-    alert("Error occurred ❌");
+    alert("Error occurred");
   }
 };
 
@@ -212,7 +213,7 @@ const validatePO = (value: string) => {
         <h4>PO Approval / Request Form</h4>
 
         <label>Project Code</label>
-        <input name="ProjectCode" value={form.POrequestNo} onChange={handleChange} />
+        <input name="projectCode" value={form.projectCode} onChange={handleChange} />
 
         <label>Department</label>
         <Dropdown
@@ -231,7 +232,7 @@ const validatePO = (value: string) => {
           options={vendorOptions}
           selectedKey={form.vendorNameID}     
           onChange={(e, option) =>
-            setForm({ ...form, vendorName: option?.text as string,vendorNameID: option?.key as string, })
+            setForm({ ...form, VendorName: option?.text as string,vendorNameID: option?.key as string, })
           }    
         />
 
@@ -266,7 +267,7 @@ const validatePO = (value: string) => {
        <input type="file" multiple onChange={handleFileChange} />
 
         <div className={styles.buttonGroup}>          
-          <button className={styles.submitBtn} onClick={handleSave}>Submit</button>
+          <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
           <button className={styles.saveBtn} onClick={handleSave}>Save</button>
           <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
         </div>
