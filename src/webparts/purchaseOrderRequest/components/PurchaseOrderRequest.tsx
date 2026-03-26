@@ -74,7 +74,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
   // 🔹 Handle input change
  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const { name, value } = e.target;
+ const { name, value } = e.target;
 
   setForm({
     ...form,
@@ -88,7 +88,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     Title:"Testing",
     ProjectCode: form.projectCode,
     ProjectTitle: form.projectTitle,
-    VendorName: 'vinay',
+    VendorName: form.VendorName,
     //RemainingAmount: form.RemainingAmount,
     Department: form.Department,
     POAmount: form.POAmount,
@@ -97,7 +97,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     ProjectDescription: form.Comments
   };
   try {    
-      // 🔥 CREATE
+      // CREATE
       const res = await service.createItem(payload);
       if(res.ok){
       setItemId(res.Id); 
