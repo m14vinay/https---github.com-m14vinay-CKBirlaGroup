@@ -72,10 +72,16 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setvendorOptions(options);
   };
 
-  // 🔹 Handle input change
+  // Handle input change
  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const { name, value } = e.target;
-
+ const { name, value } = e.target;
+  setForm({
+    ...form,
+    [name]: value
+  });
+};
+const handleDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+ const { name, value } = e.target;
   setForm({
     ...form,
     [name]: value
@@ -88,7 +94,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     Title:"Testing",
     ProjectCode: form.projectCode,
     ProjectTitle: form.projectTitle,
-    VendorName: 'vinay',
+    VendorName: form.VendorName,
     //RemainingAmount: form.RemainingAmount,
     Department: form.Department,
     POAmount: form.POAmount,
@@ -97,38 +103,39 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     ProjectDescription: form.Comments
   };
   try {    
-      // 🔥 CREATE
+      // CREATE
       const res = await service.createItem(payload);
-      if(res.ok){
       setItemId(res.Id); 
+      if(res.Id>0){      
       if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id, form.files[i]);
       }
     }
-      alert("Data Saved Successfully ✅");  
+      alert("Data Saved Successfully✅");  
   }  
   else{
     alert("Data Not Saved.");
   }
   } catch (error) {
     console.error(error);
-    alert("Error occurred ❌");
+    alert("Error occurred");
   }
 };
 
 // Update
 const handleUpdate = async () => {
   const payload = {
-    projectCode: form.projectCode,
-    projectTitle: form.projectTitle,
-    vendorName: form.VendorName,
-    RemainingAmount: form.RemainingAmount,
+    Title:"Testing",
+    ProjectCode: form.projectCode,
+    ProjectTitle: form.projectTitle,
+    VendorName: form.VendorName,
+    //RemainingAmount: form.RemainingAmount,
     Department: form.Department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
-    POCategory: form.POCategory,
-    Comments: form.Comments
+    //POCategory: form.POCategory,
+    ProjectDescription: form.Comments
   };
   try {
     if (itemId) {
@@ -143,7 +150,7 @@ const handleUpdate = async () => {
     }
   } catch (error) {
     console.error(error);
-    alert("Error occurred ❌");
+    alert("Error occurred");
   }
 };
 
@@ -156,7 +163,7 @@ const handleUpdate = async () => {
         <h4>PO Approval / Request Form</h4>
 
         <label>Project Code</label>
-        <input name="projectCode" value={form.projectCode} onChange={handleChange} />
+        <input name="projectCode" value={form.projectCode} onChange={handleDataChange} />
 
         <label>Department</label>
         <Dropdown
@@ -210,7 +217,7 @@ const handleUpdate = async () => {
        <input type="file" multiple onChange={handleFileChange} />
 
         <div className={styles.buttonGroup}>          
-          <button className={styles.submitBtn} onClick={handleSave}>Submit</button>
+          <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
           <button className={styles.saveBtn} onClick={handleSave}>Save</button>
           <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
         </div>
