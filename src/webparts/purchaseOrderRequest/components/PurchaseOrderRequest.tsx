@@ -10,16 +10,17 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
   // State
   const [form, setForm] = React.useState({
-    POrequestNo: '',
     projectCode: '',
     projectTitle: '',
     vendorName: '',
-    RemainingAmount: 0,
-    TotalAmount:0,
-    OccupiedAmount:0,
+    vendorNameID:'',
+    RemainingAmount: '',
+    TotalAmount:'',
+    OccupiedAmount:'',
     Department: '',
-    POAmount: 0,
-    ApplicableTaxes: 0,
+    DepartmentID:'',
+    POAmount: '',
+    ApplicableTaxes: '',
     POCategory: '',
     Comments: '',
     files: null as FileList | null
@@ -55,7 +56,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const data = await service.getDepartments();
     const options = data.map((item: any) => ({
       key: item.Id,
-      text: item.Title
+      text: item.DepartmentName
     }));
 
     setDepartmentOptions(options);
@@ -72,39 +73,43 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   };
 
   // 🔹 Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = e.target;
 
-    setForm({
-      ...form,
-      [name]: isNaN(Number(value)) ? value : Number(value)
-    });
-  };
+  setForm({
+    ...form,
+    [name]: value
+  });
+};
 
   // Save Data
   const handleSave = async () => {
   const payload = {
-    POrequestNo: form.POrequestNo,
-    projectCode: form.projectCode,
-    projectTitle: form.projectTitle,
-    vendorName: form.vendorName,
-    RemainingAmount: form.RemainingAmount,
+    ProjectCode: form.projectCode,
+    ProjectTitle: form.projectTitle,
+    VendorName: 'vinay',
+    //RemainingAmount: form.RemainingAmount,
     Department: form.Department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
-    POCategory: form.POCategory,
-    Comments: form.Comments
+    //POCategory: form.POCategory,
+    ProjectDescription: form.Comments
   };
   try {    
       // 🔥 CREATE
       const res = await service.createItem(payload);
+      if(res.ok){
       setItemId(res.Id); 
       if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id, form.files[i]);
       }
     }
-      alert("Data Saved Successfully ✅");    
+      alert("Data Saved Successfully ✅");  
+  }  
+  else{
+    alert("Data Not Saved.");
+  }
   } catch (error) {
     console.error(error);
     alert("Error occurred ❌");
@@ -114,7 +119,6 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 // Update
 const handleUpdate = async () => {
   const payload = {
-    POrequestNo: form.POrequestNo,
     projectCode: form.projectCode,
     projectTitle: form.projectTitle,
     vendorName: form.vendorName,
@@ -151,14 +155,14 @@ const handleUpdate = async () => {
         <h4>PO Approval / Request Form</h4>
 
         <label>Project Code</label>
-        <input name="ProjectCode" value={form.POrequestNo} onChange={handleChange} />
+        <input name="projectCode" value={form.projectCode} onChange={handleChange} />
 
         <label>Department</label>
         <Dropdown
           options={departmentOptions}
-          selectedKey={form.Department}
+          selectedKey={form.DepartmentID}
           onChange={(e, option) =>
-            setForm({ ...form, Department: option?.text as string })
+            setForm({ ...form, Department: option?.text as string,DepartmentID: option?.key as string, })
           }
         />
 
@@ -168,26 +172,26 @@ const handleUpdate = async () => {
         <label>Select Vendor Name</label>
         <Dropdown
           options={vendorOptions}
-          selectedKey={form.vendorName}
+          selectedKey={form.vendorNameID}     
           onChange={(e, option) =>
-            setForm({ ...form, vendorName: option?.text as string })
-          }
+            setForm({ ...form, vendorName: option?.text as string,vendorNameID: option?.key as string, })
+          }    
         />
 
         <label>Total Amount</label>
-        <input name="TotalAmount" value={form.RemainingAmount} onChange={handleChange} />
+        <input name="TotalAmount" type='number' value={form.TotalAmount} onChange={handleChange} />
 
         <label>Occupied Amount</label>
-        <input name="OccupiedAmount" value={form.RemainingAmount} onChange={handleChange} />
+        <input name="OccupiedAmount" type='number' value={form.OccupiedAmount} onChange={handleChange} />
 
         <label>Remaining Amount</label>
-        <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange} />
+        <input name="RemainingAmount" type='number' value={form.RemainingAmount} onChange={handleChange} />
 
         <label>PO Amount</label>
-        <input name="POAmount" value={form.POAmount} onChange={handleChange} />
+        <input name="POAmount" type='number' value={form.POAmount} onChange={handleChange} />
 
         <label>Applicable Taxes</label>
-        <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} />
+        <input name="ApplicableTaxes"  type='number' value={form.ApplicableTaxes} onChange={handleChange} />
 
         <ChoiceGroup
           label="PO Category"
