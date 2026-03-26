@@ -55,7 +55,7 @@ export default class PurchaseOrderView extends React.Component<IPurchaseOrderVie
 
   if (data.value.length > 0) {
     this.setState({
-      POrequestNo: data.value[0].ProjectTitle,
+      POrequestNo: data.value[0].projectCode,
       projectCode: data.value[0].ProjectDescription,
       projectTitle: data.value[0].ProjectTitle,
       vendorName: data.value[0].VendorName,
@@ -70,7 +70,6 @@ export default class PurchaseOrderView extends React.Component<IPurchaseOrderVie
   } else {
    
     this.setState({
-       POrequestNo:'',
       projectCode: '',
       projectTitle: '',
       vendorName: '',
@@ -156,35 +155,38 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <h4>PO Approval / Request Details</h4>
 
           <label>Project Code</label>
-          <input value={this.state.POrequestNo}  onChange={this.handleRequestNoChange}  />
+          <input value={this.state.POrequestNo}  onChange={this.handleRequestNoChange} readOnly />
 
           <label>Department</label>
-          <input name="Department" value={this.state.Department}  />
+          <input name="Department" value={this.state.Department} readOnly  />
 
           <label>Project Title</label>
-          <input name="projectTitle" value={this.state.projectTitle}  />
+          <input name="projectTitle" value={this.state.projectTitle} readOnly />
 
           <label>Select Vendor Name</label>
-          <input name="vendorName" value={this.state.vendorName}   >
+          <input name="vendorName" value={this.state.vendorName} readOnly  >
           </input>
 
           <label>Remaining Amount</label>
-          <input name="RemainingAmount" value={this.state.RemainingAmount}  />
+          <input name="RemainingAmount" value={this.state.RemainingAmount} readOnly  />
 
           <label>PO Amount</label>
-          <input name="POAmount" value={this.state.POAmount}  />
+          <input name="POAmount" value={this.state.POAmount} readOnly />
 
-          <label>Apllicable Taxes</label>
-          <input name="ApplicableTaxes" value={this.state.ApplicableTaxes}   >
+          <label>Applicable Taxes</label>
+          <input name="ApplicableTaxes" value={this.state.ApplicableTaxes} readOnly  >
           </input>
-
+           
+            <label>PO Category</label>
+          <input name="POCategory" value={this.state.POCategory} readOnly   >
+          </input>
 
           <label>Additional Information & Remarks</label>
           <input name="comments" value={this.state.Comments}   >
           </input>
 
           <label>Attached Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} />
+          
         </div>
 
         {/* RIGHT PANEL */}

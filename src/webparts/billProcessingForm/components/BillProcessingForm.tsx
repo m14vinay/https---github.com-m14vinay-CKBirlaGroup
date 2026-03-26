@@ -5,6 +5,7 @@ import { escape } from '@microsoft/sp-lodash-subset';
 import { SPHttpClient } from '@microsoft/sp-http';
 interface IState {
   BPRequestNo:string;
+  BPRequestErrorNo:string;
   POsigned:boolean
   ProjcetCode:string
   vendorCode: string;
@@ -27,6 +28,7 @@ export default class BillProcessingForm extends React.Component<IBillProcessingF
 
     this.state = {
       BPRequestNo:'',
+      BPRequestErrorNo:'',
       POsigned: true,
       ProjcetCode:'',
       vendorCode: '',
@@ -81,9 +83,8 @@ export default class BillProcessingForm extends React.Component<IBillProcessingF
   } else {
    
     this.setState({
-       BPRequestNo:'',
+
       POsigned: true,
-      ProjcetCode:'',
       vendorCode: '',
       vendorName: '',
       projectTitle: '',
@@ -100,15 +101,26 @@ export default class BillProcessingForm extends React.Component<IBillProcessingF
   }
 };
  
+ validateProjectCode = (value: string): string => {
+    if (!value) return 'Project Code is required';
+    if (!/^[a-zA-Z0-9-]+$/.test(value)) return 'Project Code must be alphanumeric';
+    if (value.length > 10) return 'Project Code must be at most 10 characters';
+    return '';
+  }
+
 private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
+    const value = e.target.value;
+    const errorMsg = this.validateProjectCode(value);
 
-  this.setState({ BPRequestNo: value });
+    this.setState({ BPRequestNo: value, BPRequestErrorNo: errorMsg });
 
- // optional
-    this.getRequestDetails(value);
-  
-};
+    if (!errorMsg) {
+      this.getRequestDetails(value);
+    } else {
+      this.setState({ projectTitle:'',vendorCode:'',vendorName:'' });
+    }
+  };;
+
 
   private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ files: e.target.files });
@@ -162,12 +174,19 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <h2>Bill Processing Form</h2>
           <h4>Bill Processing / Request Form</h4>
 
-          <label>PO Signed</label>
+          <label>Bill Signed</label>
           <input type="checkbox" checked={this.state.POsigned}  onChange={this.handleRequestNoChange}  />
 
-          <label>Project Code</label>
-          <input value={this.state.ProjcetCode}  onChange={this.handleRequestNoChange}  />
-
+          <label>Project Code <span className={styles.required}>*</span></label>
+          <input
+            name="PorequestNo"
+            value={this.state.BPRequestNo}
+            onChange={this.handleRequestNoChange}
+            className={this.state.BPRequestErrorNo ? styles.buttonGroup : ''}
+          />
+          {this.state.BPRequestErrorNo && <span className={styles.error}>{this.state.BPRequestErrorNo}</span>}
+         
+        
           <label>Select Vendor Code</label>
           <input name="vendorCode" value={this.state.vendorCode}   >
           </input>

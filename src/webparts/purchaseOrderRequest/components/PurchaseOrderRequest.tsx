@@ -193,9 +193,9 @@ public render(): React.ReactElement<IPurchaseOrderRequestProps> {
           <label>Project Code <span className={styles.required}>*</span></label>
           <input
             name="PorequestNo"
-            value={POrequestNo}
+            value={this.state.POrequestNo}
             onChange={this.handleRequestNoChange}
-            className={POrequestNoError ? styles.buttonGroup : ''}
+            className={this.state.POrequestNoError ? styles.buttonGroup : ''}
           />
           {POrequestNoError && <span className={styles.error}>{POrequestNoError}</span>}
          

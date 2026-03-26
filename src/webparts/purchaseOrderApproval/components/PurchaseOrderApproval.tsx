@@ -15,6 +15,7 @@ interface IState {
   POCategory:string;
   Comments: string;
   ApproverComments:string;
+   ApproverCommentsError:string;
   files: FileList | null;
 }
 export default class PurchaseOrderRequest extends React.Component<IPurchaseOrderApprovalProps, IState> {
@@ -33,9 +34,15 @@ export default class PurchaseOrderRequest extends React.Component<IPurchaseOrder
      ApplicableTaxes:0,
      POCategory:'',
      Comments: '',
-     ApproverComments: '',
+     ApproverComments:'',
+     ApproverCommentsError:'',
      files:  null
     };
+  }
+
+  validateApproverComments = (value: string): string => {
+    if (!value) return 'Approver Comments is required';
+    return '';
   }
 
   private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -57,7 +64,7 @@ export default class PurchaseOrderRequest extends React.Component<IPurchaseOrder
 
   if (data.value.length > 0) {
     this.setState({
-      POrequestNo: data.value[0].ProjectTitle,
+      POrequestNo: data.value[0].projectCode,
       projectCode: data.value[0].ProjectDescription,
       projectTitle: data.value[0].ProjectTitle,
       vendorName: data.value[0].VendorName,
@@ -72,7 +79,6 @@ export default class PurchaseOrderRequest extends React.Component<IPurchaseOrder
   } else {
    
     this.setState({
-       POrequestNo:'',
       projectCode: '',
       projectTitle: '',
       vendorName: '',
@@ -94,6 +100,13 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
  // optional
     this.getRequestDetails(value);
   
+};
+
+
+private handleApproverCommentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;                    // get text input value
+  const errorMsg = this.validateApproverComments(value);  // validate required field
+  this.setState({ ApproverComments: value, ApproverCommentsError: errorMsg });
 };
 
   private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,38 +171,45 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <h4>PO Approval / Request Approval</h4>
 
           <label>Project Code</label>
-          <input value={this.state.POrequestNo}  onChange={this.handleRequestNoChange}  />
+          <input value={this.state.POrequestNo}  onChange={this.handleRequestNoChange} readOnly />
 
           <label>Department</label>
-          <input name="Department" value={this.state.Department}  />
+          <input name="Department" value={this.state.Department} readOnly />
 
           <label>Project Title</label>
-          <input name="projectTitle" value={this.state.projectTitle}  />
+          <input name="projectTitle" value={this.state.projectTitle} readOnly />
 
           <label>Select Vendor Name</label>
-          <input name="vendorName" value={this.state.vendorName}   >
+          <input name="vendorName" value={this.state.vendorName} readOnly   >
           </input>
 
           <label>Remaining Amount</label>
-          <input name="RemainingAmount" value={this.state.RemainingAmount}  />
+          <input name="RemainingAmount" value={this.state.RemainingAmount} readOnly  />
 
           <label>PO Amount</label>
-          <input name="POAmount" value={this.state.POAmount}  />
+          <input name="POAmount" value={this.state.POAmount} readOnly  />
 
-          <label>Apllicable Taxes</label>
-          <input name="ApplicableTaxes" value={this.state.ApplicableTaxes}   >
+          <label>Applicable Taxes</label>
+          <input name="ApplicableTaxes" value={this.state.ApplicableTaxes} readOnly   >
+          </input>
+
+           <label>PO Category</label>
+          <input name="POCategory" value={this.state.POCategory} readOnly   >
           </input>
 
           <label>Additional Information & Remarks</label>
-          <input name="comments" value={this.state.Comments}   >
+          <input name="comments" value={this.state.Comments}  readOnly >
           </input>
 
-          <label>Approver Comments</label>
-          <input name="ApproverComments" value={this.state.ApproverComments}   >
-          </input>
+        <label>Approver Comments <span className={styles.required}>*</span></label>
+<input name="ApproverComments" value={this.state.ApproverComments} onChange={this.handleApproverCommentsChange}
+  className={this.state.ApproverCommentsError ? styles.inputError : ''}/>
+{this.state.ApproverCommentsError && (
+  <span className={styles.error}>{this.state.ApproverCommentsError}</span>
+)}
 
-          {/* <label>Attach Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} /> */}
+          <label>Attach Documents</label>
+          {/* <input type="file" multiple onChange={this.handleFileChange} /> */}
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>

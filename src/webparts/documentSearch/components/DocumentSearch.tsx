@@ -127,13 +127,13 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
 <div className={styles.container}>  
   <h2>Search My Document</h2>
-  <div className={styles.leftSection}>
+  <div >
             <button className={styles.submitBtn} onClick={this.handleSubmit}>Add New Document</button>
           </div>
 </div>
 <div className={styles.container}>  
   <h2>Search My Document</h2>
-  <div className={styles.leftSection}>
+  <div >
             <button className={styles.submitBtn} onClick={this.handleSubmit}>Add New Document</button>
           </div>          
 </div>

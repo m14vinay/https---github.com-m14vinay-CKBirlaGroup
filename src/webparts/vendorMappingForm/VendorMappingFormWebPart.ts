@@ -23,22 +23,21 @@ export default class VendorMappingFormWebPart extends BaseClientSideWebPart<IVen
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
 
-  public render(): void {
-    const element: React.ReactElement<IVendorMappingFormProps> = React.createElement(
-      VendorMappingForm,
-      {
-        description: this.properties.description,
-        isDarkTheme: this._isDarkTheme,
-        environmentMessage: this._environmentMessage,
-        hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName,
-        context: this.context
-      }
-    );
+ public render(): void {
+  const element: React.ReactElement<IVendorMappingFormProps> = React.createElement(
+    VendorMappingForm, // function component
+    {
+        context: this.context,  
+      description: this.properties.description,
+      isDarkTheme: this._isDarkTheme,
+      environmentMessage: this._environmentMessage,
+      hasTeamsContext: !!this.context.sdks.microsoftTeams?.teamsJs,
+       
+    }
+  );
 
-    ReactDom.render(element, this.domElement);
-  }
-
+  ReactDom.render(element, this.domElement);
+}
   protected onInit(): Promise<void> {
     return this._getEnvironmentMessage().then(message => {
       this._environmentMessage = message;
