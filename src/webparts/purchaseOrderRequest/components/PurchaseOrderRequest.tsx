@@ -2,189 +2,149 @@ import * as React from 'react';
 import styles from './PurchaseOrderRequest.module.scss';
 import { IPurchaseOrderRequestProps } from './IPurchaseOrderRequestProps';
 import { SPHttpClient } from '@microsoft/sp-http';
+import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
+import SharePointService from '../service/Service';
+import { PageContext } from '@microsoft/sp-page-context';
 
-interface IState {
-  POrequestNo:string;
-  POrequestNoError: string;
-  projectCode: string;
-  projectTitle: string;
-  RemainingAmount: number;
-  vendorName: string;
-  Department:string;
-  POAmount: number;
-  //POAmountError:string,
-  ApplicableTaxes:number;
-  POCategory:string;
-  Comments: string;
-  files: FileList | null;
-  filesError: string;
-}
-export default class PurchaseOrderRequest extends React.Component<IPurchaseOrderRequestProps, IState> {
+const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
-  constructor(props: IPurchaseOrderRequestProps) {
-    super(props);
+  // State
+  const [form, setForm] = React.useState({
+    POrequestNo: '',
+    projectCode: '',
+    projectTitle: '',
+    vendorName: '',
+    RemainingAmount: 0,
+    TotalAmount:0,
+    OccupiedAmount:0,
+    Department: '',
+    POAmount: 0,
+    ApplicableTaxes: 0,
+    POCategory: '',
+    Comments: '',
+    files: null as FileList | null
+  });
 
-    this.state = {
-      POrequestNo:'',
-      POrequestNoError:'',
-      projectCode: '',
-      projectTitle: '',
-      vendorName: '',
-      RemainingAmount: 0,
-      Department:'',
-      POAmount: 0,
-     ApplicableTaxes:0,
-     POCategory:'',
-     Comments: '',
-     files:  null,
-     filesError: ''
-    };
-  }
+  const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
+  const [vendorOptions, setvendorOptions] = React.useState<IDropdownOption[]>([]);
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+const handleCancel = () => {
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+  window.location.assign(url);
+};
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setForm({
+    ...form,
+    files: e.target.files
+  });
+};
+  // 🔹 PO Category Options
+  const poOptions: IChoiceGroupOption[] = [
+    { key: '1', text: 'Issue To Vendor' },
+    { key: '2', text: 'Internal Compliance' }
+  ];
 
-  // --- VALIDATIONS ---
-  validateProjectCode = (value: string): string => {
-    if (!value) return 'Project Code is required';
-    if (!/^[a-zA-Z0-9-]+$/.test(value)) return 'Project Code must be alphanumeric';
-    if (value.length > 10) return 'Project Code must be at most 10 characters';
-    return '';
-  }
+  // 🔹 Load data
+  React.useEffect(() => {
+    loadDepartments();
+    loadVendor();
+  }, []);
 
-  
+  const loadDepartments = async () => {
+    const data = await service.getDepartments();
+    const options = data.map((item: any) => ({
+      key: item.Id,
+      text: item.Title
+    }));
 
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setDepartmentOptions(options);
+  };
+
+  const loadVendor = async () => {    
+    const data = await service.getVendor();
+    const options = data.map((item: any) => ({
+      key: item.Id,
+      text: item.Title
+    }));
+
+    setvendorOptions(options);
+  };
+
+  // 🔹 Handle input change
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
+
+    setForm({
+      ...form,
+      [name]: isNaN(Number(value)) ? value : Number(value)
+    });
   };
 
-  
- private getRequestDetails = async (requestNo: string) => {
- 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
-
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-  
- const data = await response.json();
-
-  if (data.value.length > 0) {
-    this.setState({
-    
-      projectTitle: data.value[0].ProjectTitle,
-      vendorName: data.value[0].VendorName,
-      RemainingAmount: data.value[0].RemainingAmount,
-      Department:data.value[0].Department,
-      POAmount: data.value[0].POAmount,
-     ApplicableTaxes:data.value[0].ApplicableTaxes,
-     POCategory:data.value[0].POCategory,
-     Comments: data.value[0].Comments
-      
-    });
-  } else {
-   
-    this.setState({
-      
-      projectTitle: '',
-      vendorName: '',
-      RemainingAmount: 0,
-      Department:'',
-      POAmount: 0 ,
-  ApplicableTaxes:0,
-  POCategory:'',
-  Comments: '',
-    });
+  // Save Data
+  const handleSave = async () => {
+  const payload = {
+    POrequestNo: form.POrequestNo,
+    projectCode: form.projectCode,
+    projectTitle: form.projectTitle,
+    vendorName: form.vendorName,
+    RemainingAmount: form.RemainingAmount,
+    Department: form.Department,
+    POAmount: form.POAmount,
+    ApplicableTaxes: form.ApplicableTaxes,
+    POCategory: form.POCategory,
+    Comments: form.Comments
+  };
+  try {    
+      // 🔥 CREATE
+      const res = await service.createItem(payload);
+      setItemId(res.Id); 
+      if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(res.Id, form.files[i]);
+      }
+    }
+      alert("Data Saved Successfully ✅");    
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred ❌");
   }
 };
- 
- validateFiles = (files: FileList | null): string => {
-    if (!files || files.length === 0) return 'At least one file is required';
-    return '';
- }
 
-// private handlePOAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//   const value = e.target.value;
-//   const error = this.validateNumber(value, 'PO Amount');
-
-//   this.setState({
-//     POAmount: Number(value),
-//     POAmountError: error
-//   });
-// };
-
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const errorMsg = this.validateProjectCode(value);
-
-    this.setState({ POrequestNo: value, POrequestNoError: errorMsg });
-
-    if (!errorMsg) {
-      this.getRequestDetails(value);
-    } else {
-      this.setState({ projectTitle: '', Department: '' });
-    }
-  };;
-
-  private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ files: e.target.files });
+// Update
+const handleUpdate = async () => {
+  const payload = {
+    POrequestNo: form.POrequestNo,
+    projectCode: form.projectCode,
+    projectTitle: form.projectTitle,
+    vendorName: form.vendorName,
+    RemainingAmount: form.RemainingAmount,
+    Department: form.Department,
+    POAmount: form.POAmount,
+    ApplicableTaxes: form.ApplicableTaxes,
+    POCategory: form.POCategory,
+    Comments: form.Comments
   };
-  private saveData = async () => {
-
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
-
-  const body = {
-  POrequestNo: this.state.POrequestNo,
-      projectCode: this.state.projectCode,
-      projectTitle: this.state.projectTitle,
-      vendorName: this.state.vendorName,
-      RemainingAmount: this.state.RemainingAmount,
-      Department:this.state.Department,
-      POAmount: this.state.POAmount,
-     ApplicableTaxes:this.state.ApplicableTaxes,
-     POCategory:this.state.POCategory,
-     Comments: this.state.Comments
-     };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
+  try {
+    if (itemId) {
+      // 🔥 UPDATE
+    const result=  await service.updateItem(itemId, payload);
+    if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(itemId, form.files[i]);
+      }
     }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
-
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
+      alert("Data Updated Successfully ✅");      
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred ❌");
   }
 };
-  
-  
-  private handleSubmit = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
-  };
 
-  private handleSave = () => {
-    console.log("Saved Data:", this.state);
-    alert("Saved");
-  };
-
-public render(): React.ReactElement<IPurchaseOrderRequestProps> {
-    const { POrequestNo, POrequestNoError, projectTitle,  vendorName,filesError } = this.state;
-
-    // Form is invalid if any required field has an error
-    const isFormInvalid = !!POrequestNoError || !!filesError   || !POrequestNo || !vendorName || !this.state.files;
-
-    return (
-      <div className={styles.container}>
+  // 🔹 UI
+  return (
+    <div className={styles.container}>
 
         {/* LEFT FORM */}
         <div className={styles.leftPanel}>
@@ -193,9 +153,9 @@ public render(): React.ReactElement<IPurchaseOrderRequestProps> {
           <label>Project Code <span className={styles.required}>*</span></label>
           <input
             name="PorequestNo"
-            value={this.state.POrequestNo}
+            value={POrequestNo}
             onChange={this.handleRequestNoChange}
-            className={this.state.POrequestNoError ? styles.buttonGroup : ''}
+            className={POrequestNoError ? styles.buttonGroup : ''}
           />
           {POrequestNoError && <span className={styles.error}>{POrequestNoError}</span>}
          
@@ -203,43 +163,55 @@ public render(): React.ReactElement<IPurchaseOrderRequestProps> {
           <label>Department</label>
           <input name="Department" value={this.state.Department} readOnly  />
 
-          <label>Project Title</label>
-          <input name="projectTitle" value={this.state.projectTitle} readOnly />
+        <label>Project Title</label>
+        <input name="projectTitle" value={form.projectTitle} onChange={handleChange} />
 
-          <label>Select Vendor Name</label>
-          <input name="vendorName" value={this.state.vendorName} readOnly  >
-          </input>
+        <label>Select Vendor Name</label>
+        <Dropdown
+          options={vendorOptions}
+          selectedKey={form.vendorName}
+          onChange={(e, option) =>
+            setForm({ ...form, vendorName: option?.text as string })
+          }
+        />
 
-          <label>Remaining Amount</label>
-          <input name="RemainingAmount" value={this.state.RemainingAmount} readOnly  />
+        <label>Total Amount</label>
+        <input name="TotalAmount" value={form.RemainingAmount} onChange={handleChange} />
 
-          <label>PO Amount <span className={styles.required}>*</span></label>
-          <input name="POAmount" value={this.state.POAmount} type="number" />
+        <label>Occupied Amount</label>
+        <input name="OccupiedAmount" value={form.RemainingAmount} onChange={handleChange} />
 
-          <label>Applicable Taxes <span className={styles.required}>*</span></label>
-          <input name="ApplicableTaxes" value={this.state.ApplicableTaxes} type="number"  >
-          </input>
+        <label>Remaining Amount</label>
+        <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange} />
 
+        <label>PO Amount</label>
+        <input name="POAmount" value={form.POAmount} onChange={handleChange} />
 
-          <label>Additional Information & Remarks</label>
-          <input name="comments" value={this.state.Comments}   >
-          </input>
+        <label>Applicable Taxes</label>
+        <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} />
 
-         <label>Attach Documents <span className={styles.required}>*</span></label>
-                    <input type="file" multiple onChange={this.handleFileChange} />
-                   {filesError && <span className={styles.required}>{filesError}</span>}
-         
+        <ChoiceGroup
+          label="PO Category"
+          options={poOptions}
+          selectedKey={form.POCategory}
+          onChange={(e, option) =>
+            setForm({ ...form, POCategory: option?.key as string })
+          }
+        />
 
-          {/* Buttons */}
-          <div className={styles.buttonGroup}>
-            <button className={styles.submitBtn} onClick={this.handleSubmit}>Submit</button>
-            <button className={styles.saveBtn} onClick={this.saveData}>Save</button>
-            <button className={styles.cancelBtn}>Cancel</button>
-          </div>
+        <label>Additional Information & Remarks</label>
+        <input name="Comments" value={form.Comments} onChange={handleChange} />
+
+        <label>Attachments</label>
+       <input type="file" multiple onChange={handleFileChange} />
+
+        <div className={styles.buttonGroup}>          
+          <button className={styles.submitBtn} onClick={handleSave}>Submit</button>
+          <button className={styles.saveBtn} onClick={handleSave}>Save</button>
+          <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
         </div>
-
-        {/* RIGHT PANEL */}
-        <div className={styles.rightPanel}>
+      </div>
+       <div className={styles.rightPanel}>
           {/* Templates */}
           <div className={styles.card}>
             <h4>Templates</h4>
@@ -249,7 +221,6 @@ public render(): React.ReactElement<IPurchaseOrderRequestProps> {
               <li>DigiFlow_Training_Manual.pdf</li>
             </ul>
           </div>
-
           {/* Guidelines */}
           <div className={styles.card}>
             <h4>Important Guidelines</h4>
@@ -261,7 +232,9 @@ public render(): React.ReactElement<IPurchaseOrderRequestProps> {
             </ol>
           </div>
         </div>
-      </div>
-    );
-  }
-}
+
+    </div>
+  );
+};
+
+export default PurchaseOrderRequest;
