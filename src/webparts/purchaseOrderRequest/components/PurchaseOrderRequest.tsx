@@ -12,7 +12,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const [form, setForm] = React.useState({
     projectCode: '',
     projectTitle: '',
-    vendorName: '',
+    VendorName: '',
     vendorNameID:'',
     RemainingAmount: '',
     TotalAmount:'',
@@ -66,7 +66,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const data = await service.getVendor();
     const options = data.map((item: any) => ({
       key: item.Id,
-      text: item.Title
+      text: item.VendorName
     }));
 
     setvendorOptions(options);
@@ -85,6 +85,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   // Save Data
   const handleSave = async () => {
   const payload = {
+    Title:"Testing",
     ProjectCode: form.projectCode,
     ProjectTitle: form.projectTitle,
     VendorName: 'vinay',
@@ -121,7 +122,7 @@ const handleUpdate = async () => {
   const payload = {
     projectCode: form.projectCode,
     projectTitle: form.projectTitle,
-    vendorName: form.vendorName,
+    vendorName: form.VendorName,
     RemainingAmount: form.RemainingAmount,
     Department: form.Department,
     POAmount: form.POAmount,
@@ -174,7 +175,7 @@ const handleUpdate = async () => {
           options={vendorOptions}
           selectedKey={form.vendorNameID}     
           onChange={(e, option) =>
-            setForm({ ...form, vendorName: option?.text as string,vendorNameID: option?.key as string, })
+            setForm({ ...form, VendorName: option?.text as string,vendorNameID: option?.key as string, })
           }    
         />
 
