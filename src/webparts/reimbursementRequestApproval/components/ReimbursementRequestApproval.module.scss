@@ -6,6 +6,12 @@
   padding: 20px;
 }
 
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
 .leftPanel {
   flex: 2;
   background: #fff;
