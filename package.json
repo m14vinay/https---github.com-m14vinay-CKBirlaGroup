@@ -21,7 +21,6 @@
     "@microsoft/sp-property-pane": "1.22.2",
     "@microsoft/sp-webpart-base": "1.22.2",
     "@microsoft/teams-js": "^2.50.0",
-    "react": "17.0.1",
     "@tanstack/react-table": "^8.21.3",
     "bootstrap": "^5.3.8",
     "chart.js": "^4.5.1",

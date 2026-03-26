@@ -3,14 +3,17 @@ import styles from './VendorMappingForm.module.scss';
 import { IVendorMappingFormProps } from './IVendorMappingFormProps';
 import { SPHttpClient } from '@microsoft/sp-http';
 
+
 interface IState {
   requestNo:string;
+   requestNoError: string;
   projectCode: string;
   projectTitle: string;
   projectDescription: string;
   vendorName: string;
   vendorDescription: string;
   files: FileList | null;
+  filesError: string;
 }
 
 export default class VendorMappingForm extends React.Component<IVendorMappingFormProps, IState> {
@@ -20,14 +23,36 @@ export default class VendorMappingForm extends React.Component<IVendorMappingFor
 
     this.state = {
       requestNo:'',
+       requestNoError: '',
       projectCode: '',
       projectTitle: '',
       projectDescription: '',
       vendorName: '',
       vendorDescription: '',
-      files: null
+      files: null,
+      filesError: ''
+      
     };
   }
+
+   // --- VALIDATIONS ---
+  validateProjectCode = (value: string): string => {
+    if (!value) return 'Project Code is required';
+    if (!/^[a-zA-Z0-9-]+$/.test(value)) return 'Project Code must be alphanumeric';
+    if (value.length > 10) return 'Project Code must be at most 10 characters';
+    return '';
+  }
+
+  validateVendorName = (value: string): string => {
+    if (!value) return 'Vendor selection is required';
+    return '';
+  }
+
+  validateFiles = (files: FileList | null): string => {
+    if (!files || files.length === 0) return 'At least one file is required';
+    return '';
+  }
+
 
   private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -60,19 +85,29 @@ export default class VendorMappingForm extends React.Component<IVendorMappingFor
   }
 };
  
+
+
 private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
+    const value = e.target.value;
+    const errorMsg = this.validateProjectCode(value);
 
-  this.setState({ requestNo: value });
+    this.setState({ requestNo: value, requestNoError: errorMsg });
 
- // optional
-    this.getRequestDetails(value);
-  
-};
+    if (!errorMsg) {
+      this.getRequestDetails(value);
+    } else {
+      this.setState({ projectTitle: '', projectDescription: '' });
+    }
+  };
 
   private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ files: e.target.files });
+    const files = e.target.files;
+    const errorMsg = this.validateFiles(files);
+    this.setState({ files: files, filesError: errorMsg });
   };
+  // private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   this.setState({ files: e.target.files });
+  // };
   private saveData = async () => {
 
   const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
@@ -119,6 +154,10 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   };
 
   public render(): React.ReactElement<IVendorMappingFormProps> {
+    const { requestNo, requestNoError, projectTitle, vendorName, filesError } = this.state;
+
+    // Form is invalid if any required field has an error
+    const isFormInvalid = !!requestNoError  || !!filesError || !requestNo || !vendorName || !this.state.files;
 
     return (
       <div className={styles.container}>
@@ -128,8 +167,14 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <h2>Vendor Mapping Form</h2>
           <h4>Vendor Mapping / New Vendor Registration Form</h4>
 
-          <label>Project Code</label>
-          <input value={this.state.requestNo}  onChange={this.handleRequestNoChange}  />
+          <label>Project Code <span className={styles.required}>*</span></label>
+          <input
+            name="requestNo"
+            value={requestNo}
+            onChange={this.handleRequestNoChange}
+            className={requestNoError ? styles.buttonGroup : ''}
+          />
+          {requestNoError && <span className={styles.error}>{requestNoError}</span>}
 
           <label>Project Title</label>
           <input name="projectTitle" value={this.state.projectTitle} readOnly />
@@ -138,7 +183,7 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <input name="projectDescription" value={this.state.projectDescription} readOnly  >
           </input>
 
-          <label>Select Vendor</label>
+          <label>Select Vendor <span className={styles.required}>*</span></label>
           <select name="vendorName" onChange={this.handleChange}>
             <option value="">Select Vendor</option>
             <option value="Vendor1">Vendor </option>
@@ -148,8 +193,9 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <label>Additional Information & Remarks</label>
           <textarea name="VendorDescription" onChange={this.handleChange}></textarea>
 
-          <label>Attach Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} />
+          <label>Attach Documents <span className={styles.required}>*</span></label>
+           <input type="file" multiple onChange={this.handleFileChange} />
+          {filesError && <span className={styles.required}>{filesError}</span>}
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>
@@ -174,7 +220,7 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
           {/* Guidelines */}
           <div className={styles.card}>
-            <h4>Important Guidelines</h4>
+            <h4>Important Guidelines</h4> 
             <ol>
               <li>Select approval path carefully.</li>
               <li>Use project reference if needed.</li>

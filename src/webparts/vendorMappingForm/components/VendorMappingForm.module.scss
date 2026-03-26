@@ -6,6 +6,7 @@
   padding: 20px;
 }
 
+
 .leftPanel {
   flex: 2;
   background: #fff;
@@ -56,4 +57,19 @@ button {
   padding: 8px 16px;
   border: none;
   cursor: pointer;
+}
+.required {
+  color: red;
+  margin-left: 2px;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.inputError {
+  border: 1px solid red;
 }
