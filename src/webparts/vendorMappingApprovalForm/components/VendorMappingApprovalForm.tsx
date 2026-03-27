@@ -1,244 +1,306 @@
 import * as React from 'react';
+import { useState } from 'react';
+import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import styles from './VendorMappingApprovalForm.module.scss';
 import { IVendorMappingApprovalFormProps } from './IVendorMappingApprovalFormProps';
-import { SPHttpClient } from '@microsoft/sp-http';
-
-interface IState {
-   requestNo:string;
-   requestNoError: string;
-  projectCode: string;
-  projectTitle: string;
-  projectDescription: string;
-  vendorName: string;
-  vendorDescription: string;
-  files: FileList | null;
-  filesError: string;
-  approverComments:string;
-  approverCommentsError:string;
-}
-
-export default class VendorMappingForm extends React.Component<IVendorMappingApprovalFormProps, IState> {
-
-  constructor(props: IVendorMappingApprovalFormProps) {
-    super(props);
-
-    this.state = {
-      requestNo:'',
-       requestNoError: '',
-      projectCode: '',
-      projectTitle: '',
-      projectDescription: '',
-      vendorName: '',
-      vendorDescription: '',
-      files: null,
-      filesError: '',
-      approverComments:'',
-      approverCommentsError:''
+import SharePointService from '../service/Service';
+import Service from '../service/Service';
 
 
-    };
-  }
+const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => {
 
-   // --- VALIDATIONS ---
-  validateProjectCode = (value: string): string => {
+  const [form, setForm]=React.useState({
+    projectCode: '',
+    projectTitle: '',
+    projectDescription: '',
+    vendorName: '',
+    vendorDescription: '',
+    files: null as FileList | null
+  });
+
+  const [requestNo, setRequestNo] = React.useState('');
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+  const [projectTitle, setProjectTitle] = React.useState('');
+  const [projectDescription, setProjectDescription] = React.useState('');
+  const [requestNoError, setRequestNoError] = React.useState('');
+  const [isSubmitted, setIsSubmitted] = React.useState(false);
+  const MAX_TOTAL_SIZE_MB = 25;
+  const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.-]/; 
+
+
+
+
+  
+  // --- VALIDATIONS ---
+  const validateProjectCode = (value: string): string => {
     if (!value) return 'Project Code is required';
-    if (!/^[a-zA-Z0-9]+$/.test(value)) return 'Project Code must be alphanumeric';
+    if (!/^[a-zA-Z0-9-]+$/.test(value)) return 'Project Code must be alphanumeric';
     if (value.length > 10) return 'Project Code must be at most 10 characters';
     return '';
   }
 
-  validateVendorName = (value: string): string => {
+  const validateVendorName = (value: string): string => {
     if (!value) return 'Vendor selection is required';
     return '';
   }
 
-  validateFiles = (files: FileList | null): string => {
+  const validateFiles = (files: FileList | null): string => {
     if (!files || files.length === 0) return 'At least one file is required';
     return '';
   }
+
+  // --- HANDLE FIELD CHANGES ---
   
-  validateApproverComments = (value: string): string => {
-    if (!value) return 'Vendor approver is required';
-    return '';
+  const handleCancel = () => {
+     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url);
+   };
+   const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event?.target?.files;
+  if (!files) return;
+
+  
+  const filesArray = Array.from(files);
+
+  const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
+  if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
+    alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+    return;
+  }
+   // Invalid filename check
+  const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
+  if (invalidFiles.length > 0) {
+    alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+    return;
   }
 
+     setForm({
+       ...form,
+       files: event.target.files
+     });
+   };
 
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = Number(e.target.value);
+
+  if (!value) return;
+
+  handleFetchById(value);
+};
+
+  // 🔹 Handle input change
+   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
+    setForm({
+      ...form,
+      [name]: value
+    });
   };
 
- private getRequestDetails = async (requestNo: string) => {
- 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
 
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-  
- const data = await response.json();
+  //SAVE DRAFT
 
-  if (data.value.length > 0) {
-    this.setState({
-      projectTitle: data.value[0].ProjectTitle,
-      projectDescription: data.value[0].ProjectDescription
-    });
-  } else {
-   
-    this.setState({
-      projectTitle: '',
-      projectDescription: ''
-    });
-  }
-};
- 
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const errorMsg = this.validateProjectCode(value);
+  const handleSaveOrUpdate = async () => {
+  // 🔹 Validations
+  if (!requestNo) return alert("Project Code required");
+  if (!form.vendorName) return alert("Select Vendor");
+  if (!form.files || form.files.length === 0) return alert("Attach files");
 
-    this.setState({ requestNo: value, requestNoError: errorMsg });
+  // 🔹 Payload (common)
+  const payload = {
+    ProjectCode: requestNo,
+    ProjectTitle: projectTitle,
+    ProjectDescription: projectDescription,
+    VendorName: form.vendorName,
+    VendorDescription: form.vendorDescription
+  };
 
-    if (!errorMsg) {
-      this.getRequestDetails(value);
+  try {
+    if (!itemId) {
+      // 🔹 CREATE
+      const res = await service.createItem(payload);
+      setItemId(res.Id); // store ID for future updates
+
+      if (res.Id > 0 && form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(res.Id, form.files[i]);
+        }
+      }
+      alert("Data Saved Successfully ✅");
     } else {
-      this.setState({ projectTitle: '', projectDescription: '' });
+      // 🔹 UPDATE
+      await service.updateItem(itemId, payload);
+
+      if (form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(itemId, form.files[i]);
+        }
+      }
+      alert("Data Updated Successfully ✅");
     }
-  };
-   private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      const errorMsg = this.validateFiles(files);
-      this.setState({ files: files, filesError: errorMsg });
-    };
-
-   private handleApproverCommentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;                    // get text input value
-  const errorMsg = this.validateApproverComments(value);  // validate required field
-  this.setState({ approverComments: value, approverCommentsError: errorMsg });
-};
-  private saveData = async () => {
-
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
-
-  const body = {
-  
-    ProjectCode: this.state.requestNo,
-    ProjectTitle: this.state.projectTitle,
-    ProjectDescription: this.state.projectDescription,
-    VendorName : this.state.vendorName,
-    VendorDescription: this.state.vendorDescription,
-    Attachments: this.state.files
-  };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
-    }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
-
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred ❌");
   }
 };
   
+    // Save Data
+    const handleSave = async () => {
+    if (!requestNo) return alert("Project Code required");
+    if (!form.vendorName) return alert("Select Vendor");
+    if (!form.files || form.files.length === 0) return alert("Attach files");
+    const payload = {
+      ProjectCode: requestNo,
+      ProjectTitle: projectTitle,
+      ProjectDescription: projectDescription,
+      VendorName: form.vendorName,
+      VendorDescription:form.vendorDescription
+    };
+    try {    
+        // CREATE
+        const res = await service.createItem(payload);
+        setItemId(res.Id); 
+        if(res.Id>0){      
+        if (form.files && form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(res.Id, form.files[i]);
+        }
+      }
+        alert("Data Saved Successfully✅");  
+    }  
+    else{
+      alert("Data Not Saved.");
+    }
+    } catch (error) {
+      console.error(error);
+      alert("Error occurred");
+    }
+  };
   
-  private handleApprove = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
+  
+
+// Update
+const handleUpdate = async () => {
+   if (!requestNo) return alert("Project Code required");
+    if (!form.vendorName) return alert("Select Vendor");
+    if (!form.files || form.files.length === 0) return alert("Attach files");
+  const payload = {
+    Title:"Testing",
+    ProjectCode: requestNo,
+     ProjectDescription: projectDescription,
+    ProjectTitle: projectTitle,
+    VendorName:  form.vendorName, 
+    VendorDescription: form.vendorDescription
   };
+  try {
+    if (itemId) {
+      // 🔥 UPDATE
+     await service.updateItem(itemId, payload);
+    if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(itemId, form.files[i]);
+      }
+    }
+    setIsSubmitted(true); 
+      alert("Data Submitted Successfully ✅");      
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred");
+  }
+};
 
-  private handleReject = () => {
-    console.log("Saved Data:", this.state);
-    alert("Saved");
-  };
+//FETCH
+const handleFetchById = async (id: number) => {
+  try {
+    const result = await service.getItemByRequestNo(id);
 
-  public render(): React.ReactElement<IVendorMappingApprovalFormProps> {
-    const { requestNo, requestNoError, projectTitle, projectDescription, vendorName, filesError } = this.state;
+    if (result) {
+      setRequestNo(result.ProjectCode);
+      setProjectTitle(result.ProjectTitle);
+      setProjectDescription(result.ProjectDescription);
 
-    // Form is invalid if any required field has an error
-    const isFormInvalid = !!requestNoError  || !!filesError || !requestNo || !vendorName || !this.state.files;
+      setForm(prev => ({
+        ...prev,
+        vendorName: result.VendorName || '',
+        vendorDescription: result.VendorDescription || ''
+      }));
 
-    return (
-      <div className={styles.container}>
+      console.log("Attachments:", result.Attachments);
+    }
 
-        {/* LEFT FORM */}
-        <div className={styles.leftPanel}>
-          <h2>Vendor Mapping Approval Form</h2>
+  } catch (error) {
+    console.error("Error fetching by ID:", error);
+  }
+};
+
+    // console.log("Attachments:", result.Attachments);
+    // console.log("Comments:", result.ApproverComments);
+  
+
+
+
+  // --- RENDER ---
+  return (
+    <div className={styles.container}>
+
+      <div className={styles.leftPanel}>
+        <h2>Vendor Mapping Approval Form</h2>
        
-           <label>Project Code </label>
-    <input name="requestNo" value={this.state.requestNo} readOnly/>
+        <label>Project Code <span className={styles.required}>*</span></label>
+        <input name="projectCode" value={requestNo} onChange={handleIdChange}  readOnly />
+       {requestNoError && <span className={styles.error}>{requestNoError}</span>}
+       
+        <label>Project Title</label>
+        <input name="projectTitle" value={projectTitle} onChange={handleIdChange}   readOnly />
 
-    {/* Project Title (Read Only) */}
-    <label>Project Title</label>
-    <input name="projectTitle" value={this.state.projectTitle} readOnly/>
+        <label>Project Description</label>
+        <input name="projectDescription" value={projectDescription} onChange={handleIdChange}  readOnly />
+        
+        <label>Select Vendor <span className={styles.required}>*</span></label>
+      <input name="vendorName" value={form.vendorName} onChange={handleIdChange} readOnly />
 
-    {/* Project Description (Read Only) */}
-    <label>Project Description</label>
-    <input name="projectDescription" value={this.state.projectDescription} readOnly/>
+        <label>Additional Information & Remarks</label>
+        <input name="vendorDescription" value={form.vendorDescription} onChange={handleChange}  readOnly />
+        
 
-    {/* Vendor Name (Read Only) */}
-    <label>Select Vendor </label>
-    <input name="vendorName" value={this.state.vendorName}readOnly/>
-
-    {/* Additional Information / Remarks (Read Only) */}
-    <label>Additional Information & Remarks</label>
-    <input  name="VendorDescription"  value={this.state.vendorDescription} readOnly />
-
-    <label>Attach Documents</label>
-           
-          
-  <label>Approver Comments <span className={styles.required}>*</span></label>
-<input name="ApproverComments" value={this.state.approverComments} onChange={this.handleApproverCommentsChange}
-  className={this.state.approverCommentsError ? styles.inputError : ''}
-/>
-{this.state.approverCommentsError && (
-  <span className={styles.error}>{this.state.approverCommentsError}</span>
-)}
-
-          {/* Buttons */}
+        <label>Attachments <span className={styles.required}>*</span></label>
+       <input type="file" multiple onChange={handleFileChange}   />
+        
+       {/* Buttons */}
           <div className={styles.buttonGroup}>
-            <button className={styles.ApproveBtn} onClick={this.handleApprove}>Approve</button>
-            <button className={styles.RejectBtn} onClick={this.handleReject}>Reject</button>
+            <button className={styles.ApproveBtn} >Approve</button>
+            <button className={styles.RejectBtn} >Reject</button>
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
+        
+      
         </div>
 
-        {/* RIGHT PANEL */}
-        <div className={styles.rightPanel}>
+      <div className={styles.rightPanel}>
+        <div className={styles.card}>
+          <h4>Templates</h4>
+          <ul>
+            <li>Vendor_Registration_Form_v1.0.xlsx</li>
+            <li>SOP_Procurement_of_Goods_Services.pdf</li>
+            <li>DigiFlow_Training_Manual.pdf</li>
+          </ul>
+        </div>
 
-          {/* Templates */}
-          <div className={styles.card}>
-            <h4>Templates</h4>
-            <ul>
-              <li>Vendor_Registration_Form_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
-            </ul>
-          </div>
-
-          {/* Guidelines */}
-          <div className={styles.card}>
-            <h4>Important Guidelines</h4>
-            <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
-            </ol>
-          </div>
-
+        <div className={styles.card}>
+          <h4>Important Guidelines</h4>
+          <ol>
+            <li>Select approval path carefully.</li>
+            <li>Use project reference if needed.</li>
+            <li>Attach all documents (Max 25 MB).</li>
+            <li>Avoid special characters in file names.</li>
+          </ol>
         </div>
       </div>
-    );
-  }
-}
+
+    </div>
+   );
+};
+
+export default VendorMappingForm;

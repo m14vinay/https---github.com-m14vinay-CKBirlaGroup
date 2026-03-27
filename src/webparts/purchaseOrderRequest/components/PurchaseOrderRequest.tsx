@@ -11,25 +11,31 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   // State
   const [form, setForm] = React.useState({
     projectCode: '',
+    department:'',
     projectTitle: '',
-    VendorName: '',
+    vendorName: '',
     vendorNameID:'',
     RemainingAmount: '',
     TotalAmount:'',
     OccupiedAmount:'',
     Department: '',
-    DepartmentID:'',
-    POAmount: '',
-    ApplicableTaxes: '',
+    POAmount: 0,
+    ApplicableTaxes: 0,
     POCategory: '',
     Comments: '',
-    files: null as FileList | null
+    files: null as FileList | null,
+    POrequestNo:''
   });
 
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   const [vendorOptions, setvendorOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
+   const [POrequestNo, setPORequestNo] = React.useState('');
+  const [POrequestNoError, setPORequestNoError] = React.useState('');
+  const [department, setDepartment] = React.useState('');
+    const [projectTitle, setProjectTitle] = React.useState('');
+    
 const handleCancel = () => {
   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
   window.location.assign(url);
@@ -40,6 +46,33 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     files: e.target.files
   });
 };
+
+
+
+
+const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+
+  setPORequestNo(value);
+
+  if (!value) return;
+
+  try {
+    const result = await service.getRequestDetails(value);
+
+    if (result.length > 0) {
+      setDepartment(result[0].Department || '');
+      setProjectTitle(result[0].ProjectTitle || '');
+    } else { 
+      setDepartment('');
+      setProjectTitle('');
+    }
+
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
+ 
   // 🔹 PO Category Options
   const poOptions: IChoiceGroupOption[] = [
     { key: '1', text: 'Issue To Vendor' },
@@ -72,16 +105,10 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setvendorOptions(options);
   };
 
-  // Handle input change
+  // 🔹 Handle input change
  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
- const { name, value } = e.target;
-  setForm({
-    ...form,
-    [name]: value
-  });
-};
-const handleDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
- const { name, value } = e.target;
+  const { name, value } = e.target;
+
   setForm({
     ...form,
     [name]: value
@@ -91,12 +118,13 @@ const handleDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   // Save Data
   const handleSave = async () => {
   const payload = {
-    Title:"Testing",
-    ProjectCode: form.projectCode,
-    ProjectTitle: form.projectTitle,
-    VendorName: form.VendorName,
+    ProjectCode: POrequestNo,
+    Department: department,
+    ProjectTitle: projectTitle,
+    VendorName: 'vinay',
+    //TotalAmount:form.TotalAmount,
+    //OccupiedAmount: form.OccupiedAmount,
     //RemainingAmount: form.RemainingAmount,
-    Department: form.Department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
     //POCategory: form.POCategory,
@@ -127,11 +155,11 @@ const handleDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 const handleUpdate = async () => {
   const payload = {
     Title:"Testing",
-    ProjectCode: form.projectCode,
-    ProjectTitle: form.projectTitle,
-    VendorName: form.VendorName,
+    ProjectCode: POrequestNo,
+    ProjectTitle: projectTitle,
+    VendorName: 'Vinay',
     //RemainingAmount: form.RemainingAmount,
-    Department: form.Department,
+    Department: department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
     //POCategory: form.POCategory,
@@ -154,6 +182,32 @@ const handleUpdate = async () => {
   }
 };
 
+
+
+
+const validatePO = (value: string) => {
+    if (!value) return "Project Code is required";
+    if (!/^[a-zA-Z0-9-]+$/.test(value)) return "Only alphanumeric allowed";
+    return "";
+  };
+
+   // 🔹 Handle change
+  // const handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+
+  //   setPORequestNo(value);
+
+  //   const error = validatePO(value);
+  //   setPORequestNoError(error);
+
+  //   // Example: auto fill department
+  //   if (!error) {
+  //     setDepartment("IT Department"); // dummy
+  //   } else {
+  //     setDepartment("");
+  //   }
+  // };
+
   // 🔹 UI
   return (
     <div className={styles.container}>
@@ -163,52 +217,62 @@ const handleUpdate = async () => {
         <h4>PO Approval / Request Form</h4>
 
         <label>Project Code</label>
-        <input name="projectCode" value={form.projectCode} onChange={handleDataChange} />
+        <input name="projectCode" value={POrequestNo} onChange={handleRequestNoChange} />
 
-        <label>Department</label>
+        {/* <label>Department</label>
         <Dropdown
           options={departmentOptions}
-          selectedKey={form.DepartmentID}
+          selectedKey={form.Department}
           onChange={(e, option) =>
-            setForm({ ...form, Department: option?.text as string,DepartmentID: option?.key as string, })
+            setForm({ ...form, Department: option?.text as string })
           }
-        />
+        /> */}
+         
+
+         <label>Department</label>
+          <input name="Department" value={department} readOnly />
+        
 
         <label>Project Title</label>
-        <input name="projectTitle" value={form.projectTitle} onChange={handleChange} />
+        <input name="projectTitle" value={projectTitle} readOnly />
 
         <label>Select Vendor Name</label>
         <Dropdown
           options={vendorOptions}
           selectedKey={form.vendorNameID}     
           onChange={(e, option) =>
-            setForm({ ...form, VendorName: option?.text as string,vendorNameID: option?.key as string, })
+            setForm({ ...form, vendorName: option?.text as string,vendorNameID: option?.key as string, })
           }    
         />
 
         <label>Total Amount</label>
-        <input name="TotalAmount" type='number' value={form.TotalAmount} onChange={handleChange} />
+        <input name="TotalAmount" value={form.TotalAmount} onChange={handleChange} />
 
         <label>Occupied Amount</label>
-        <input name="OccupiedAmount" type='number' value={form.OccupiedAmount} onChange={handleChange} />
+        <input name="OccupiedAmount" value={form.OccupiedAmount} onChange={handleChange} />
 
         <label>Remaining Amount</label>
-        <input name="RemainingAmount" type='number' value={form.RemainingAmount} onChange={handleChange} />
+        <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange} />
 
         <label>PO Amount</label>
-        <input name="POAmount" type='number' value={form.POAmount} onChange={handleChange} />
+        <input name="POAmount" value={form.POAmount} onChange={handleChange} />
 
         <label>Applicable Taxes</label>
-        <input name="ApplicableTaxes"  type='number' value={form.ApplicableTaxes} onChange={handleChange} />
+        <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} />
 
         <ChoiceGroup
-          label="PO Category"
-          options={poOptions}
-          selectedKey={form.POCategory}
-          onChange={(e, option) =>
-            setForm({ ...form, POCategory: option?.key as string })
-          }
-        />
+  label="PO Category"
+  options={poOptions}
+  selectedKey={form.POCategory}   // ✅ form se bind karo
+  onChange={(e, option) =>{
+    if (!option) return;
+
+    setForm(prev => ({
+      ...prev,
+      POCategory: option.key as string  // '1' or '2'
+    }));
+  }}
+/>
 
         <label>Additional Information & Remarks</label>
         <input name="Comments" value={form.Comments} onChange={handleChange} />

@@ -77,9 +77,10 @@ export default class Service {
   }
 
   // Fetch the Record
-  public async getItemByRequestNo(requestNo: string): Promise<any> {
+  public async getItemByRequestNo(itemId: Number): Promise<any> {
 
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=POrequestNo eq '${requestNo}'`;
+     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})?$expand=AttachmentFiles`;
+
 
     const res = await this.context.spHttpClient.get(
       url,
@@ -87,8 +88,25 @@ export default class Service {
     );
 
     const data = await res.json();
-    return data.value.length > 0 ? data.value[0] : null;
+   
+  if (data.value.length > 0) {
+    const item = data.value[0];
+
+    return {
+      Id: item.Id,
+      ProjectCode: item.ProjectCode,
+      ProjectTitle: item.ProjectTitle,
+      ProjectDescription: item.ProjectDescription,
+      VendorName: item.VendorName,
+      VendorDescription: item.VendorDescription,
+      ApproverComments: item.ApproverComments, // 👈 check column name
+      Attachments: item.AttachmentFiles || [] // 👈 important
+    };
   }
+
+  return null;
+}
+  
   // Upload Files
 
   public async uploadFile(itemId: number, file: File): Promise<void> {
