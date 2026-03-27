@@ -2,6 +2,7 @@ import * as React from 'react';
 import styles from './PurchaseOrderApproval.module.scss';
 import { IPurchaseOrderApprovalProps } from './IPurchaseOrderApprovalProps';
 import { SPHttpClient } from '@microsoft/sp-http';
+import SharePointService from '../service/Service';
 
 interface IState {
   POrequestNo:string;
@@ -15,13 +16,19 @@ interface IState {
   POCategory:string;
   Comments: string;
   ApproverComments:string;
-  files: FileList | null;
-}
+  attachments: any [];
+  approver1: string;
+  approver2: string;
+  approver3: string;
+  approver4: string;
+  approver5: string;
+  DepartmentHead: string;
+};
 export default class PurchaseOrderRequest extends React.Component<IPurchaseOrderApprovalProps, IState> {
-
+  private service: SharePointService;
   constructor(props: IPurchaseOrderApprovalProps) {
     super(props);
-
+  this.service = new SharePointService(props.context);
     this.state = {
       POrequestNo:'',
       projectCode: '',
@@ -34,108 +41,45 @@ export default class PurchaseOrderRequest extends React.Component<IPurchaseOrder
      POCategory:'',
      Comments: '',
      ApproverComments: '',
-     files:  null
+     attachments: [],
+    approver1: '',
+   approver2: '',
+   approver3: '',
+   approver4: '',
+   approver5: '',
+   DepartmentHead: ''
     };
   }
+private loadAttachments = async () => {
+  const files = await this.service.getAttachments(10);
+  console.log("Attachments:", files);
+  this.setState({
+    attachments: files
+  });
+};
 
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
-  };
-
- private getRequestDetails = async (requestNo: string) => {
- 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
-
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-  
- const data = await response.json();
-
-  if (data.value.length > 0) {
-    this.setState({
-      POrequestNo: data.value[0].ProjectTitle,
-      projectCode: data.value[0].ProjectDescription,
-      projectTitle: data.value[0].ProjectTitle,
-      vendorName: data.value[0].VendorName,
-      RemainingAmount: data.value[0].RemainingAmount,
-      Department:data.value[0].Department,
-      POAmount: data.value[0].POAmount,
-     ApplicableTaxes:data.value[0].ApplicableTaxes,
-     POCategory:data.value[0].POCategory,
-     Comments: data.value[0].Comments
-      
-    });
-  } else {
-   
-    this.setState({
-       POrequestNo:'',
-      projectCode: '',
-      projectTitle: '',
-      vendorName: '',
-      RemainingAmount: 0,
-      Department:'',
-      POAmount: 0,
-  ApplicableTaxes:0,
-  POCategory:'',
-  Comments: '',
-    });
+private GetApprover = async () => {
+  const data = await this.service.getApprover('');
+  if(data.ok)
+  {
+    this.setState({approver1:data[0].approver1});
+    this.setState({approver2:data[0].approver2});
+    this.setState({approver3:data[0].approver3});
+    this.setState({approver4:data[0].approver4});
+    this.setState({approver5:data[0].approver5});
+    this.setState({DepartmentHead:data[0].DepartmentHead});
   }
 };
+
+componentDidMount(): void {
+  this.loadAttachments();
+  this.GetApprover();
+}
  
 private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value;
-
-  this.setState({ POrequestNo: value });
-
- // optional
-    this.getRequestDetails(value);
-  
+  this.setState({ POrequestNo: value });  
 };
-
-  private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ files: e.target.files });
-  };
-  private saveData = async () => {
-
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
-
-  const body = {
-  POrequestNo: this.state.POrequestNo,
-      projectCode: this.state.projectCode,
-      projectTitle: this.state.projectTitle,
-      vendorName: this.state.vendorName,
-      RemainingAmount: this.state.RemainingAmount,
-      Department:this.state.Department,
-      POAmount: this.state.POAmount,
-     ApplicableTaxes:this.state.ApplicableTaxes,
-     POCategory:this.state.POCategory,
-     Comments: this.state.Comments
-     };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
-    }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
-
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
-  }
-};
-  
   
   private handleApprove = () => {
     console.log("Form Data:", this.state);
@@ -188,8 +132,16 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <input name="ApproverComments" value={this.state.ApproverComments}   >
           </input>
 
-          {/* <label>Attach Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} /> */}
+          <label>Attach Documents</label>
+          <ul>
+  {this.state.attachments.map((file, index) => (
+    <li key={index}>
+      <a href={file.ServerRelativeUrl} target="_blank">
+        {file.FileName}
+      </a>
+    </li>
+  ))}
+</ul>
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>
