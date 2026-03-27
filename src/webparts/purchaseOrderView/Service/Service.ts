@@ -107,4 +107,30 @@ export default class Service {
       }
     );
   }
+  // get CurrentUserId
+  public async getCurrentUser():Promise<void>{
+  const res = await this.context.spHttpClient.get(
+    `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`,
+    SPHttpClient.configurations.v1
+  );
+  const user = await res.json();
+  return user.Id;
+};
+ // Get Files Uploaded by Me
+public async getMyFiles(): Promise<any[]> {
+  const userId = await this.getCurrentUser();
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('Documents')/items?$select=Id,Title,File/Name,File/ServerRelativeUrl,Author/Id,Author/Title&$expand=File,Author&$filter=Author/Id eq ${userId}`;
+
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1,
+    {
+      headers: {
+        "Accept": "application/json;odata=nometadata"
+      }
+    }
+  );
+  const data = await res.json();
+  return data.value;
+}
 }
