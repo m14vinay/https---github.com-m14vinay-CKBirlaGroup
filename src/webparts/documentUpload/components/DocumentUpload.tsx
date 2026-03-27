@@ -1,24 +1,11 @@
 import * as React from 'react';
 import styles from './DocumentUpload.module.scss';
-import { IDocumentUploadProps } from './IDocumentUploadProps';
-import { SPHttpClient } from '@microsoft/sp-http';
+import { IDocumentUploadProps, IState } from './IDocumentUploadProps';
 import SharePointService from '../service/Service';
-import { PageContext } from '@microsoft/sp-page-context';
 import { Dropdown, IDropdownOption } from '@fluentui/react';
 
-interface IState {
-  TypeofDocument:any;
-  TypeofDocumentID:any;
-  NameofDocument: any;
-  BillNumber: any;
-  BillDate: Date;
-  vendorName: any;
-  BillAmount: number;
-  Remarks: any;
-  files: FileList | null;
-}
+
 const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
-const [itemId, setItemId] = React.useState<number | null>(null);
 export default class DocumentUpload extends React.Component<IDocumentUploadProps, IState> {
   private service: SharePointService;
   constructor(props: IDocumentUploadProps) {
@@ -46,10 +33,10 @@ private loadDepartments = async () => {
 
     setDepartmentOptions(options);
   };
-
+/*
 componentDidMount(): void {
   this.loadDepartments();
-}
+}*/
 private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   this.setState({
     ...this.state,
@@ -69,7 +56,6 @@ private handleSave = async () => {
   try {    
       // CREATE
       const res = await this.service.createItem(payload);
-      setItemId(res.Id); 
       if(res.Id>0){      
       if (this.state.files && this.state.files.length > 0) {
       for (let i = 0; i < this.state.files.length; i++) {
