@@ -2,24 +2,31 @@ import * as React from 'react';
 import styles from './DocumentUpload.module.scss';
 import { IDocumentUploadProps } from './IDocumentUploadProps';
 import { SPHttpClient } from '@microsoft/sp-http';
+import SharePointService from '../service/Service';
+import { PageContext } from '@microsoft/sp-page-context';
+import { Dropdown, IDropdownOption } from '@fluentui/react';
 
 interface IState {
-  TypeofDocument:string;
-  NameofDocument: string;
-  BillNumber: string;
+  TypeofDocument:any;
+  TypeofDocumentID:any;
+  NameofDocument: any;
+  BillNumber: any;
   BillDate: Date;
-  vendorName: string;
+  vendorName: any;
   BillAmount: number;
-  Remarks: string;
+  Remarks: any;
   files: FileList | null;
 }
+const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
+const [itemId, setItemId] = React.useState<number | null>(null);
 export default class DocumentUpload extends React.Component<IDocumentUploadProps, IState> {
-
+  private service: SharePointService;
   constructor(props: IDocumentUploadProps) {
     super(props);
-
+    this.service = new SharePointService(props.context);
     this.state = {
       TypeofDocument:'',
+      TypeofDocumentID:'',
       NameofDocument: '',
       BillNumber: '',
       BillDate: new Date(),
@@ -29,108 +36,71 @@ export default class DocumentUpload extends React.Component<IDocumentUploadProps
       files:  null
     };
   }
+  
+private loadDepartments = async () => {
+    const data = await this.service.getMasterDocument();
+    const options = data.map((item: any) => ({
+      key: item.Id,
+      text: item.Title
+    }));
 
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
+    setDepartmentOptions(options);
   };
 
- private getRequestDetails = async (requestNo: string) => {
- 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
-
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-  
- const data = await response.json();
-
-  if (data.value.length > 0) {
-    this.setState({
-      TypeofDocument: data.value[0].ProjectTitle,
-      NameofDocument: data.value[0].ProjectDescription,
-      BillNumber: data.value[0].ProjectTitle,
-      BillDate: new Date(data.value[0].Created),
-      vendorName: data.value[0].VendorName,
-      BillAmount: data.value[0].RemainingAmount,
-      Remarks: data.value[0].Department      
-    });
-  } else {
-   
-    this.setState({
-      TypeofDocument: '',
+componentDidMount(): void {
+  this.loadDepartments();
+}
+private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  this.setState({
+    ...this.state,
+    files: e.target.files
+  });
+};
+private handleSave = async () => {
+  const payload = {
+      TypeofDocument:this.state.TypeofDocument,
+      NameofDocument:this.state.NameofDocument,
+      BillNumber: this.state.BillNumber,
+      BillDate: this.state.BillDate,
+      vendorName: this.state.vendorName,
+      BillAmount : this.state.BillAmount,
+      Remarks: this.state.Remarks,
+  };
+  try {    
+      // CREATE
+      const res = await this.service.createItem(payload);
+      setItemId(res.Id); 
+      if(res.Id>0){      
+      if (this.state.files && this.state.files.length > 0) {
+      for (let i = 0; i < this.state.files.length; i++) {
+        await this.service.uploadFile(res.Id, this.state.files[i]);
+      }
+    }
+      alert("Data Saved Successfully✅");  
+      this.resetForm();
+  }  
+  else{
+    alert("Data Not Saved.");
+  }
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred");
+  }
+};
+private resetForm = () => {
+  this.setState({
+    TypeofDocument:'',
+      TypeofDocumentID:'',
       NameofDocument: '',
       BillNumber: '',
       BillDate: new Date(),
       vendorName: '',
-      BillAmount: 0,
-      Remarks:''
-    });
-  }
+      BillAmount : 0,
+      Remarks: '',
+      files:  null
+  });
 };
- 
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-
-  this.setState({ NameofDocument: value });
-
- // optional
-    this.getRequestDetails(value);
-  
-};
-
-  private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ files: e.target.files });
-  };
-  private saveData = async () => {
-
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
-
-  const body = {
-    NameofDocument: this.state.NameofDocument,
-    TypeofDocument: this.state.TypeofDocument,
-    BillNumber: this.state.BillNumber,
-    BillDate: this.state.BillDate.toISOString(),
-    vendorName: this.state.vendorName,
-    BillAmount: this.state.BillAmount,
-    Remarks: this.state.Remarks
-     };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
-    }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
-
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
-  }
-};
-  
-  
-  private handleSubmit = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
-  };
-
-  private handleSave = () => {
-    console.log("Saved Data:", this.state);
-    alert("Saved");
-  };
-
   public render(): React.ReactElement<IDocumentUploadProps> {
-
     return (
       <div className={styles.container}>
 
@@ -140,7 +110,16 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <h4>My Document List/ Upload New Document</h4>
 
           <label>Type of Document</label>
-          <input value={this.state.TypeofDocument}  onChange={this.handleChange}  />
+          <Dropdown
+                    options={departmentOptions}
+                    selectedKey={this.state.TypeofDocumentID}
+                    onChange={(e, option) =>
+                      this.setState({
+      TypeofDocumentID: option?.key as string,
+      TypeofDocument: option?.text as string
+    })
+                    }
+                  />
 
           <label>Name of Document</label>
           <input name="NameofDocument" value={this.state.NameofDocument}  />
@@ -167,7 +146,7 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>
-            <button className={styles.submitBtn} onClick={this.handleSubmit}>Submit</button>
+            <button className={styles.submitBtn} onClick={this.handleSave}>Submit</button>
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
         </div>
