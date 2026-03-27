@@ -3,36 +3,32 @@ import { useState } from 'react';
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import styles from './VendorMappingForm.module.scss';
 import { IVendorMappingFormProps } from './IVendorMappingFormProps';
+import SharePointService from '../service/Service';
+import Service from '../service/Service';
 
 
-// interface IVendorMappingFormProps {
-//   context: any; 
-//   // SPFx context
-// }
+const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
 
-interface IFormState {
-  requestNo: string;
-  requestNoError: string;
-  projectTitle: string;
-  projectDescription: string;
-  vendorName: string;
-  vendorDescription: string;
-  
-
-}
-
-const VendorMappingForm: React.FC<IVendorMappingFormProps> = ({ context }) => {
-
-  const [state, setState] = useState<IFormState>({
-    requestNo: '',
-    requestNoError: '',
+  const [form, setForm]=React.useState({
+    projectCode: '',
     projectTitle: '',
     projectDescription: '',
     vendorName: '',
     vendorDescription: '',
-    
-    //isSubmitted: false
+    files: null as FileList | null
   });
+
+  const [requestNo, setRequestNo] = React.useState('');
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+  const [projectTitle, setProjectTitle] = React.useState('');
+  const [projectDescription, setProjectDescription] = React.useState('');
+  const [requestNoError, setRequestNoError] = React.useState('');
+  const [isSubmitted, setIsSubmitted] = React.useState('');
+  const MAX_TOTAL_SIZE_MB = 25;
+  const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.-]/; 
+
+
 
   // --- VALIDATIONS ---
   const validateProjectCode = (value: string): string => {
@@ -53,142 +49,167 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = ({ context }) => {
   }
 
   // --- HANDLE FIELD CHANGES ---
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setState(prev => ({ ...prev, [name]: value }));
+  
+  const handleCancel = () => {
+     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url);
+   };
+   const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event?.target?.files;
+  if (!files) return;
+
+  
+  const filesArray = Array.from(files);
+
+  const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
+  if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
+    alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+    return;
   }
+   // Invalid filename check
+  const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
+  if (invalidFiles.length > 0) {
+    alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+    return;
+  }
+     setForm({
+       ...form,
+       files: event.target.files
+     });
+   };
 
   const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    setRequestNo(value);
     const errorMsg = validateProjectCode(value);
-    setState(prev => ({ ...prev, requestNo: value, requestNoError: errorMsg }));
+  setRequestNoError(errorMsg);
 
-    if (!errorMsg) {
-      await getRequestDetails(value);
-    } else {
-      setState(prev => ({ ...prev, projectTitle: '', projectDescription: '' }));
-    }
+  if (errorMsg) {
+    // validation failed → reset dependent fields
+    setProjectTitle('');
+    setProjectDescription('');
+    return; // API call skip karo
   }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    const errorMsg = validateFiles(files);
-    setState(prev => ({ ...prev, files: files, filesError: errorMsg }));
+    if (!value) {
+    setProjectTitle('');
+     setProjectDescription('');
+    return;
   }
-  
-  const handleSubmit = () => {
-    console.log("Form Data:", state);
-    alert("Form Submitted");
-};
-
-const handleSave = () => {
-    console.log("Saved Data:", state);
-    alert("Saved");
-};
-  // --- GET REQUEST DETAILS ---
-  const getRequestDetails = async (requestNo: string) => {
-    const url = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
-    const response: SPHttpClientResponse = await context.spHttpClient.get(url, SPHttpClient.configurations.v1);
-    const data = await response.json();
-
-    if (data.value.length > 0) {
-      setState(prev => ({
-        ...prev,
-        projectTitle: data.value[0].ProjectTitle,
-        projectDescription: data.value[0].ProjectDescription
-      }));
-    } else {
-      setState(prev => ({ ...prev, projectTitle: '', projectDescription: '' }));
-    }
-  }
-
-  // --- UPLOAD SINGLE FILE ---
-  const uploadFile = async (itemId: number, file: File) => {
     try {
-      const url = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
+      const result =  await service.getRequestDetails(value);
 
-      const response = await context.spHttpClient.post(
-        url,
-        SPHttpClient.configurations.v1,
-        { headers: { "Accept": "application/json;odata=nometadata" }, body: file }
-      );
-
-      if (!response.ok) {
-        const error = await response.text();
-        console.error(`Failed to upload ${file.name}:`, error);
-      } else {
-        console.log(`File uploaded successfully: ${file.name}`);
+      if (result.length > 0) {
+        setProjectTitle(result[0].ProjectTitle || '');
+        setProjectDescription(result[0].ProjectDescription || '');
+      } else { 
+        setProjectTitle('');
+        setProjectDescription('');
       }
-
-    } catch (err) {
-      console.error(`Error uploading ${file.name}:`, err);
-    }
-  }
-
-  // --- UPLOAD ALL FILES ---
-  // const uploadAllFiles = async (itemId: number) => {
-  //   if (!state.files || state.files.length === 0) return;
-
-  //   const filesArray = Array.from(state.files);
-  //   for (const file of filesArray) {
-  //     await uploadFile(itemId, file);
-  //   }
-
-  //   alert("All attachments uploaded ✅");
-  // }
-
   
- 
-
-
-
-  // --- SAVE DATA ---
-  const saveData = async () => {
-    // Validations
-    if (!state.requestNo) return alert("Project Code required");
-    if (!state.vendorName) return alert("Select Vendor");
-    //if (!state.files || state.files.length === 0) return alert("Attach files");
-
-    const url = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items`;
-    const body = {
-      ProjectCode: state.requestNo,
-      ProjectTitle: state.projectTitle,
-      ProjectDescription: state.projectDescription,
-      VendorName: state.vendorName,
-      VendorDescription: state.vendorDescription
-    
-    };
-    const response = await context.spHttpClient.post(url, SPHttpClient.configurations.v1, {
-  headers: {
-    "Accept": "application/json;odata=nometadata",
-    "Content-Type": "application/json;odata=nometadata",
-    "odata-version": ""
-  },
-  body: JSON.stringify(body)
-});
-if (response.ok) {
-    let result = null;
-    try {
-      result = await response.json();
-    } catch {
-      console.warn("No JSON returned. Possibly empty body from SharePoint.");
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
+  };
 
-    // const itemId = result?.Id; // optional chaining
-    // if (!itemId) {
-    //   alert("Item created, but cannot retrieve Id for attachments.");
-    //   return;
-    // }
+  // 🔹 Handle input change
+   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: value
+    });
+  };
 
-    // await uploadAllFiles(itemId);
 
-    //setState(prev => ({ ...prev, isSubmitted: true }));
-    alert("Data Submitted & Files Uploaded ✅");
-  } 
-  else {
-    const error = await response.text();
+  //SAVE DRAFT DATA
+
+  const handleSaveOrUpdate = async () => {
+  // 🔹 Validations
+  if (!requestNo) return alert("Project Code required");
+  if (!form.vendorName) return alert("Select Vendor");
+  if (!form.files || form.files.length === 0) return alert("Attach files");
+
+  // 🔹 Payload (common)
+  const payload = {
+    ProjectCode: requestNo,
+    ProjectTitle: projectTitle,
+    ProjectDescription: projectDescription,
+    VendorName: form.vendorName,
+    VendorDescription: form.vendorDescription
+  };
+
+  try {
+    if (!itemId) {
+      // 🔹 CREATE
+      const res = await service.createItem(payload);
+      setItemId(res.Id); // store ID for future updates
+
+      if (res.Id > 0 && form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(res.Id, form.files[i]);
+        }
+      }
+      alert("Data Saved Successfully ✅");
+    } else {
+      // 🔹 UPDATE
+      await service.updateItem(itemId, payload);
+
+      if (form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(itemId, form.files[i]);
+        }
+      }
+      alert("Data Updated Successfully ✅");
+    }
+  } catch (error) {
     console.error(error);
-    alert("Error saving data ❌");
+    alert("Error occurred ❌");
+  }
+};
+  
+  
+// SUBMIT DATA
+const handleUpdate = async () => {
+   if (!requestNo) return alert("Project Code required");
+    if (!form.vendorName) return alert("Select Vendor");
+    if (!form.files || form.files.length === 0) return alert("Attach files");
+  const payload = {
+    ProjectCode: requestNo,
+     ProjectDescription: projectDescription,
+    ProjectTitle: projectTitle,
+    VendorName:  form.vendorName, 
+    VendorDescription: form.vendorDescription
+  };
+  try {
+    if (itemId) {
+      //  UPDATE
+     await service.updateItem(itemId, payload);
+    if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(itemId, form.files[i]);
+      }
+    }
+   
+      alert("Data Submitted Successfully ✅");     
+       // Reset form
+  setForm({
+    projectCode: '',
+    projectTitle: '',
+    projectDescription: '',
+    vendorName: '',
+    vendorDescription: '',
+    files: null
+  });
+  setRequestNo('');
+  setProjectTitle('');
+  setProjectDescription('');
+  setItemId(null);
+  //setIsSubmitted(true); // freeze inputs
+};
+    
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred");
   }
 };
 
@@ -198,7 +219,7 @@ if (response.ok) {
 
 
 
-  const isFormInvalid = !!state.requestNoError  || !state.requestNo || !state.vendorName ;
+
 
   // --- RENDER ---
   return (
@@ -209,34 +230,35 @@ if (response.ok) {
         <h4>Vendor Mapping / New Vendor Registration Form</h4>
 
         <label>Project Code <span className={styles.required}>*</span></label>
-        <input name="requestNo" value={state.requestNo} onChange={handleRequestNoChange} />
-        {state.requestNoError && <span className={styles.error}>{state.requestNoError}</span>}
-
+        <input name="projectCode" value={requestNo} onChange={handleRequestNoChange}   />
+       {requestNoError && <span className={styles.error}>{requestNoError}</span>}
+       
         <label>Project Title</label>
-        <input name="projectTitle" value={state.projectTitle} readOnly />
+        <input name="projectTitle" value={projectTitle} readOnly   />
 
         <label>Project Description</label>
-        <input name="projectDescription" value={state.projectDescription} readOnly />
-
+        <input name="projectDescription" value={projectDescription} readOnly  />
         <label>Select Vendor <span className={styles.required}>*</span></label>
-        <select name="vendorName" value={state.vendorName} onChange={handleChange}>
-          <option value="">Select Vendor</option>
-          <option value="Vendor1">Vendor 1</option>
-          <option value="Vendor2">Vendor 2</option>
-        </select>
-
+      <select name="vendorName" value={form.vendorName} onChange={(e) =>setForm(prev => ({
+      ...prev,vendorName: e.target.value}))} >
+       <option value="">Select Vendor</option>
+  <option value="Vendor1">Vendor 1</option>
+  <option value="Vendor2">Vendor 2</option>
+</select>
         <label>Additional Information & Remarks</label>
-        <textarea name="vendorDescription" value={state.vendorDescription} onChange={handleChange} />
+        <input name="vendorDescription" value={form.vendorDescription} onChange={handleChange}  />
+        
 
-        {/* <label>Attach Documents <span className={styles.required}>*</span></label>
-        <input type="file" multiple onChange={handleFileChange} />
-        {state.filesError && <span className={styles.error}>{state.filesError}</span>} */}
+        <label>Attachments <span className={styles.required}>*</span></label>
+       <input type="file" multiple onChange={handleFileChange}  
+       key={form.files ? form.files.length : 0}  />
+        
 
        {/* Buttons */}
           <div className={styles.buttonGroup}>
-            <button className={styles.submitBtn} onClick={handleSubmit}>Submit</button>
-            <button className={styles.saveBtn} onClick={saveData}>Save</button>
-            <button className={styles.cancelBtn}>Cancel</button>
+            <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
+            <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
+            <button className={styles.cancelBtn} onClick={handleCancel} >Cancel</button>
           </div>
         </div>
 
@@ -262,7 +284,7 @@ if (response.ok) {
       </div>
 
     </div>
-  );
-}
+   );
+};
 
 export default VendorMappingForm;

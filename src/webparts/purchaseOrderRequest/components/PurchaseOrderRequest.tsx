@@ -23,7 +23,8 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     ApplicableTaxes: 0,
     POCategory: '',
     Comments: '',
-    files: null as FileList | null
+    files: null as FileList | null,
+    POrequestNo:''
   });
 
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
@@ -34,6 +35,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const [POrequestNoError, setPORequestNoError] = React.useState('');
   const [department, setDepartment] = React.useState('');
     const [projectTitle, setProjectTitle] = React.useState('');
+    
 const handleCancel = () => {
   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
   window.location.assign(url);
@@ -61,7 +63,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     if (result.length > 0) {
       setDepartment(result[0].Department || '');
       setProjectTitle(result[0].ProjectTitle || '');
-    } else {
+    } else { 
       setDepartment('');
       setProjectTitle('');
     }
@@ -116,11 +118,13 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
   // Save Data
   const handleSave = async () => {
   const payload = {
-    ProjectCode: form.projectCode,
-    ProjectTitle: form.projectTitle,
+    ProjectCode: POrequestNo,
+    Department: department,
+    ProjectTitle: projectTitle,
     VendorName: 'vinay',
+    //TotalAmount:form.TotalAmount,
+    //OccupiedAmount: form.OccupiedAmount,
     //RemainingAmount: form.RemainingAmount,
-    Department: form.Department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
     //POCategory: form.POCategory,
@@ -151,11 +155,11 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 const handleUpdate = async () => {
   const payload = {
     Title:"Testing",
-    ProjectCode: form.projectCode,
-    ProjectTitle: form.projectTitle,
-    VendorName: form.VendorName,
+    ProjectCode: POrequestNo,
+    ProjectTitle: projectTitle,
+    VendorName: 'Vinay',
     //RemainingAmount: form.RemainingAmount,
-    Department: form.Department,
+    Department: department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
     //POCategory: form.POCategory,
@@ -213,16 +217,21 @@ const validatePO = (value: string) => {
         <h4>PO Approval / Request Form</h4>
 
         <label>Project Code</label>
-        <input name="projectCode" value={form.projectCode} onChange={handleChange} />
+        <input name="projectCode" value={POrequestNo} onChange={handleRequestNoChange} />
 
-        <label>Department</label>
+        {/* <label>Department</label>
         <Dropdown
           options={departmentOptions}
           selectedKey={form.Department}
           onChange={(e, option) =>
             setForm({ ...form, Department: option?.text as string })
           }
-        />
+        /> */}
+         
+
+         <label>Department</label>
+          <input name="Department" value={department} readOnly />
+        
 
         <label>Project Title</label>
         <input name="projectTitle" value={projectTitle} readOnly />
@@ -232,15 +241,15 @@ const validatePO = (value: string) => {
           options={vendorOptions}
           selectedKey={form.vendorNameID}     
           onChange={(e, option) =>
-            setForm({ ...form, VendorName: option?.text as string,vendorNameID: option?.key as string, })
+            setForm({ ...form, vendorName: option?.text as string,vendorNameID: option?.key as string, })
           }    
         />
 
         <label>Total Amount</label>
-        <input name="TotalAmount" value={form.RemainingAmount} onChange={handleChange} />
+        <input name="TotalAmount" value={form.TotalAmount} onChange={handleChange} />
 
         <label>Occupied Amount</label>
-        <input name="OccupiedAmount" value={form.RemainingAmount} onChange={handleChange} />
+        <input name="OccupiedAmount" value={form.OccupiedAmount} onChange={handleChange} />
 
         <label>Remaining Amount</label>
         <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange} />
@@ -252,13 +261,18 @@ const validatePO = (value: string) => {
         <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} />
 
         <ChoiceGroup
-          label="PO Category"
-          options={poOptions}
-          selectedKey={form.POCategory}
-          onChange={(e, option) =>
-            setForm({ ...form, POCategory: option?.key as string })
-          }
-        />
+  label="PO Category"
+  options={poOptions}
+  selectedKey={form.POCategory}   // ✅ form se bind karo
+  onChange={(e, option) =>{
+    if (!option) return;
+
+    setForm(prev => ({
+      ...prev,
+      POCategory: option.key as string  // '1' or '2'
+    }));
+  }}
+/>
 
         <label>Additional Information & Remarks</label>
         <input name="Comments" value={form.Comments} onChange={handleChange} />

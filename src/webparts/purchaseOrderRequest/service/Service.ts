@@ -4,6 +4,7 @@ export default class Service {
   private context: any;
   private listname="PoApproval";
   private Departmentmaster ="DepartmentMaster";
+  private FetchList ="QuotationApproval";
   private VendorList="";
 
   constructor(context: any) {
