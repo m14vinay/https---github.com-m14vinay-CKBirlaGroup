@@ -1,189 +1,154 @@
 import * as React from 'react';
 import styles from './DocumentUpload.module.scss';
 import { IDocumentUploadProps } from './IDocumentUploadProps';
-import { SPHttpClient } from '@microsoft/sp-http';
+import { Dropdown, IDropdownOption } from '@fluentui/react';
+import SharePointService from '../service/Service';
 
-interface IState {
-  TypeofDocument:string;
-  NameofDocument: string;
-  BillNumber: string;
-  BillDate: Date;
-  vendorName: string;
-  BillAmount: number;
-  Remarks: string;
-  files: FileList | null;
-}
-export default class DocumentUpload extends React.Component<IDocumentUploadProps, IState> {
+const DocumentUpload: React.FC<IDocumentUploadProps> = (props) => {
 
-  constructor(props: IDocumentUploadProps) {
-    super(props);
+  // State
+  const [form, setForm] = React.useState({
+    TypeOfDocument:'',
+      TypeOfDocumentID:'',
+      Title: '',
+      BillNumber: '',
+      BillDate: new Date(),
+      VendorName: '',
+      BillAmount : 0,
+      Remarks: '',
+    files: null as FileList | null
+  });
 
-    this.state = {
+  const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+const handleCancel = () => {
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+  window.location.assign(url);
+};
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setForm({
+    ...form,
+    files: e.target.files
+  });
+};
+  // 🔹 Load data
+  React.useEffect(() => {
+    loadMaster();
+  }, []);
+
+  const loadMaster = async () => {
+    const data = await service.getMasterDocument();
+    const options = data.map((item: any) => ({
+      key: item.Id,
+      text: item.Title
+    }));
+    setDepartmentOptions(options);
+  };
+
+
+  // Handle input change
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+ const { name, value } = e.target;
+  setForm({
+    ...form,
+    [name]: value
+  });
+};
+
+  // Save Data
+  const handleSave = async () => {
+  const payload = {
+    TypeOfDocument:form.TypeOfDocument,
+      Title:form.Title,
+      BillNumber: form.BillNumber,
+      BillDate: form.BillDate,
+      VendorName:form.VendorName,
+      BillAmount : form.BillAmount,
+      Remarks: form.Remarks
+  };
+  try {    
+      // CREATE
+      const res = await service.createItem(payload);
+      setItemId(res.Id); 
+      if(res.Id>0){      
+      if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(res.Id, form.files[i]);
+      }
+    }
+      alert("Data Saved Successfully✅");  
+      resetForm();
+  }  
+  else{
+    alert("Data Not Saved.");
+  }
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred");
+  }
+};
+const resetForm = () => {
+  ({
       TypeofDocument:'',
+      TypeofDocumentID:'',
       NameofDocument: '',
       BillNumber: '',
       BillDate: new Date(),
-      vendorName: '',
+      VendorName: '',
       BillAmount : 0,
       Remarks: '',
       files:  null
-    };
-  }
-
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
-  };
-
- private getRequestDetails = async (requestNo: string) => {
- 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
-
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-  
- const data = await response.json();
-
-  if (data.value.length > 0) {
-    this.setState({
-      TypeofDocument: data.value[0].ProjectTitle,
-      NameofDocument: data.value[0].ProjectDescription,
-      BillNumber: data.value[0].ProjectTitle,
-      BillDate: new Date(data.value[0].Created),
-      vendorName: data.value[0].VendorName,
-      BillAmount: data.value[0].RemainingAmount,
-      Remarks: data.value[0].Department      
-    });
-  } else {
-   
-    this.setState({
-      TypeofDocument: '',
-      NameofDocument: '',
-      BillNumber: '',
-      BillDate: new Date(),
-      vendorName: '',
-      BillAmount: 0,
-      Remarks:''
-    });
-  }
-};
- 
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-
-  this.setState({ NameofDocument: value });
-
- // optional
-    this.getRequestDetails(value);
-  
+  });
 };
 
-  private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ files: e.target.files });
-  };
-  private saveData = async () => {
-
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
-
-  const body = {
-    NameofDocument: this.state.NameofDocument,
-    TypeofDocument: this.state.TypeofDocument,
-    BillNumber: this.state.BillNumber,
-    BillDate: this.state.BillDate.toISOString(),
-    vendorName: this.state.vendorName,
-    BillAmount: this.state.BillAmount,
-    Remarks: this.state.Remarks
-     };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
-    }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
-
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
-  }
-};
-  
-  
-  private handleSubmit = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
-  };
-
-  private handleSave = () => {
-    console.log("Saved Data:", this.state);
-    alert("Saved");
-  };
-
-  public render(): React.ReactElement<IDocumentUploadProps> {
-
-    return (
-      <div className={styles.container}>
-
-        {/* LEFT FORM */}
-        <div className={styles.leftPanel}>
-          <h2>Upload New Document</h2>
+  // 🔹 UI
+  return (
+    <div className={styles.container}>
+      <div className={styles.leftPanel}>
+        <h2>Upload New Document</h2>
           <h4>My Document List/ Upload New Document</h4>
-
           <label>Type of Document</label>
-          <input value={this.state.TypeofDocument}  onChange={this.handleChange}  />
-
-          <label>Name of Document</label>
-          <input name="NameofDocument" value={this.state.NameofDocument}  />
-
+        <Dropdown
+          options={departmentOptions}
+          selectedKey={form.TypeOfDocumentID}
+          onChange={(e, option) =>
+            setForm({ ...form, TypeOfDocument: option?.text as string,TypeOfDocumentID: option?.key as string, })
+          }
+        />
+        <label>Name of Document</label>
+        <input name="Title" value={form.Title}  onChange={handleChange} />
           <label>Vendor Name</label>
-          <input name="vendorName" value={this.state.vendorName}  />
-
+          <input name="VendorName" value={form.VendorName}  onChange={handleChange} />
           <label>Bill Number</label>
-          <input name="BillNumber" value={this.state.BillNumber}   >
+          <input name="BillNumber" value={form.BillNumber} onChange={handleChange}  >
           </input>
-
           <label>Bill Date</label>
-          <input name="BillDate" type="date" value={this.state.BillDate.toISOString().split('T')[0]}  />
-
+          <input name="BillDate" type="date" value={form.BillDate.toISOString().split('T')[0]}  />
           <label>Bill Amount</label>
-          <input name="BillAmount" value={this.state.BillAmount}  />
-
+          <input name="BillAmount" value={form.BillAmount} onChange={handleChange} />
           <label>Remarks</label>
-          <input name="Remarks" value={this.state.Remarks}   >
+          <input name="Remarks" value={form.Remarks} onChange={handleChange}  >
           </input>
 
-          <label>Attach Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} />
+        <label>Attachments</label>
+       <input type="file" multiple onChange={handleFileChange} />
 
-          {/* Buttons */}
-          <div className={styles.buttonGroup}>
-            <button className={styles.submitBtn} onClick={this.handleSubmit}>Submit</button>
+        <div className={styles.buttonGroup}>
+            <button className={styles.submitBtn} onClick={handleSave}>Submit</button>
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
-        </div>
-
-        {/* RIGHT PANEL */}
-        <div className={styles.rightPanel}>
+      </div>
+       <div className={styles.rightPanel}>
           {/* Templates */}
           <div className={styles.card}>
             <h4>Templates</h4>
             <ul>
-              <li></li>
-              <li></li>
-              <li></li>
+              <li>PO_v1.0.xlsx</li>
+              <li>SOP_Procurement_of_Goods_Services.pdf</li>
+              <li>DigiFlow_Training_Manual.pdf</li>
             </ul>
           </div>
-
           {/* Guidelines */}
           <div className={styles.card}>
             <h4>Important Guidelines</h4>
@@ -195,7 +160,9 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             </ol>
           </div>
         </div>
-      </div>
-    );
-  }
-}
+
+    </div>
+  );
+};
+
+export default DocumentUpload;

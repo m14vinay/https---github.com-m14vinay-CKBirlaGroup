@@ -2,6 +2,7 @@ import * as React from 'react';
 import styles from './PurchaseOrderApproval.module.scss';
 import { IPurchaseOrderApprovalProps } from './IPurchaseOrderApprovalProps';
 import { SPHttpClient } from '@microsoft/sp-http';
+import SharePointService from '../service/Service';
 
 interface IState {
   POrequestNo:string;
@@ -17,12 +18,20 @@ interface IState {
   ApproverComments:string;
    ApproverCommentsError:string;
   files: FileList | null;
-}
-export default class PurchaseOrderRequest extends React.Component<IPurchaseOrderApprovalProps, IState> {
 
+  attachments: any [];
+  approver1: string;
+  approver2: string;
+  approver3: string;
+  approver4: string;
+  approver5: string;
+  DepartmentHead: string;
+};
+export default class PurchaseOrderRequest extends React.Component<IPurchaseOrderApprovalProps, IState> {
+  private service: SharePointService;
   constructor(props: IPurchaseOrderApprovalProps) {
     super(props);
-
+  this.service = new SharePointService(props.context);
     this.state = {
       POrequestNo:'',
       projectCode: '',
@@ -36,9 +45,23 @@ export default class PurchaseOrderRequest extends React.Component<IPurchaseOrder
      Comments: '',
      ApproverComments:'',
      ApproverCommentsError:'',
-     files:  null
+     files:  null,
+     attachments: [],
+    approver1: '',
+   approver2: '',
+   approver3: '',
+   approver4: '',
+   approver5: '',
+   DepartmentHead: ''
     };
   }
+private loadAttachments = async () => {
+  const files = await this.service.getAttachments(10);
+  console.log("Attachments:", files);
+  this.setState({
+    attachments: files
+  });
+};
 
   validateApproverComments = (value: string): string => {
     if (!value) return 'Approver Comments is required';
@@ -90,16 +113,28 @@ export default class PurchaseOrderRequest extends React.Component<IPurchaseOrder
   Comments: '',
     });
   }
+}
+private GetApprover = async () => {
+  const data = await this.service.getApprover('');
+  if(data.ok)
+  {
+    this.setState({approver1:data[0].approver1});
+    this.setState({approver2:data[0].approver2});
+    this.setState({approver3:data[0].approver3});
+    this.setState({approver4:data[0].approver4});
+    this.setState({approver5:data[0].approver5});
+    this.setState({DepartmentHead:data[0].DepartmentHead});
+  }
 };
+
+componentDidMount(): void {
+  this.loadAttachments();
+  this.GetApprover();
+}
  
 private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value;
-
-  this.setState({ POrequestNo: value });
-
- // optional
-    this.getRequestDetails(value);
-  
+  this.setState({ POrequestNo: value });  
 };
 
 
@@ -210,6 +245,15 @@ private handleApproverCommentsChange = (e: React.ChangeEvent<HTMLInputElement>) 
 
           <label>Attach Documents</label>
           {/* <input type="file" multiple onChange={this.handleFileChange} /> */}
+          <ul>
+  {this.state.attachments.map((file, index) => (
+    <li key={index}>
+      <a href={file.ServerRelativeUrl} target="_blank">
+        {file.FileName}
+      </a>
+    </li>
+  ))}
+</ul>
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>

@@ -167,7 +167,7 @@
   "externals": {},
   "localizedResources": {
     "HomeDashboradWebPartStrings": "lib/webparts/homeDashborad/loc/{locale}.js",
-    "OuotationApprovalFormWebPartStrings": "lib/webparts/ouotationApprovalForm/loc/{locale}.js"
+    "OuotationApprovalFormWebPartStrings": "lib/webparts/ouotationApprovalForm/loc/{locale}.js",
     "VendorMappingFormWebPartStrings": "lib/webparts/vendorMappingForm/loc/{locale}.js",
     "PurchaseOrderRequestWebPartStrings": "lib/webparts/purchaseOrderRequest/loc/{locale}.js",
     "PurchaseOrderApprovalWebPartStrings": "lib/webparts/purchaseOrderApproval/loc/{locale}.js",
