@@ -3,7 +3,7 @@ import styles from './DocumentUpload.module.scss';
 import { IDocumentUploadProps } from './IDocumentUploadProps';
 import { Dropdown, IDropdownOption } from '@fluentui/react';
 import SharePointService from '../service/Service';
-
+import { Spinner, SpinnerSize } from '@fluentui/react';
 const DocumentUpload: React.FC<IDocumentUploadProps> = (props) => {
 
   // State
@@ -18,10 +18,26 @@ const DocumentUpload: React.FC<IDocumentUploadProps> = (props) => {
       Remarks: '',
     files: null as FileList | null
   });
-
+const [loading, setLoading] = React.useState(false);
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
+  const [errors, setErrors] = React.useState<any>({});
   const service = new SharePointService(props.context);
+  const validateForm = () => {
+  let newErrors: any = {};
+
+  if (!form.TypeOfDocument) {
+    newErrors.TypeOfDocument = "*";
+  }
+  if (!form.files) {
+    newErrors.files = "*";
+  }
+  if (!form.Title) {
+    newErrors.Title = "*";
+  }
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
 const handleCancel = () => {
   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
   window.location.assign(url);
@@ -55,12 +71,25 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     [name]: value
   });
 };
-
+const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = e.target;
+  setForm({
+    ...form,
+    [name]: name === "BillDate" ? new Date(value) : value
+  });
+};
   // Save Data
   const handleSave = async () => {
+    const dateOnly =
+  String(form.BillDate.getDate()) +
+  String(form.BillDate.getMonth() + 1) +
+  form.BillDate.getFullYear();
+  if (!validateForm()) {
+    return;
+  }
   const payload = {
     TypeOfDocument:form.TypeOfDocument,
-      Title:form.Title,
+      Title:form.Title+'_'+dateOnly,
       BillNumber: form.BillNumber,
       BillDate: form.BillDate,
       VendorName:form.VendorName,
@@ -68,7 +97,11 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       Remarks: form.Remarks
   };
   try {    
+    setLoading(true);
       // CREATE
+      const resutldata=await service.getItemByTitle(form.Title+'_'+dateOnly);
+      if(resutldata==0)
+      {
       const res = await service.createItem(payload);
       setItemId(res.Id); 
       if(res.Id>0){      
@@ -78,36 +111,44 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       }
     }
       alert("Data Saved Successfully✅");  
-      resetForm();
-  }  
-  else{
-    alert("Data Not Saved.");
-  }
-  } catch (error) {
-    console.error(error);
-    alert("Error occurred");
-  }
-};
-const resetForm = () => {
-  ({
-      TypeofDocument:'',
-      TypeofDocumentID:'',
-      NameofDocument: '',
+      setForm({
+    ...form,TypeOfDocument:'',
+      TypeOfDocumentID:'',
+      Title: '',
       BillNumber: '',
       BillDate: new Date(),
       VendorName: '',
       BillAmount : 0,
       Remarks: '',
-      files:  null
+    files: null
   });
+  }  
+  else{
+    alert("Data Not Saved.");
+  }
+      }
+      else{
+        alert("Record already exists with the Document ID : "+form.Title+'_'+dateOnly);
+      }
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred");
+  }
+  finally{
+    setLoading(false);
+  }
 };
-
   // 🔹 UI
   return (
     <div className={styles.container}>
       <div className={styles.leftPanel}>
         <h2>Upload New Document</h2>
           <h4>My Document List/ Upload New Document</h4>
+          {errors.TypeOfDocument && (
+  <span style={{ color: "red" }}>
+    {errors.TypeOfDocument}
+  </span>
+)}
           <label>Type of Document</label>
         <Dropdown
           options={departmentOptions}
@@ -116,27 +157,45 @@ const resetForm = () => {
             setForm({ ...form, TypeOfDocument: option?.text as string,TypeOfDocumentID: option?.key as string, })
           }
         />
-        <label>Name of Document</label>
-        <input name="Title" value={form.Title}  onChange={handleChange} />
+        {errors.Title && (
+  <span style={{ color: "red" }}>
+    {errors.Title}
+  </span>
+)}
+           <label>Name of Document</label>
+          <input name="Title" value={form.Title}  onChange={handleChange} required/>
           <label>Vendor Name</label>
-          <input name="VendorName" value={form.VendorName}  onChange={handleChange} />
+          <input name="VendorName" value={form.VendorName}  onChange={handleChange} required />
           <label>Bill Number</label>
-          <input name="BillNumber" value={form.BillNumber} onChange={handleChange}  >
+          <input name="BillNumber" value={form.BillNumber} onChange={handleChange} required >
           </input>
           <label>Bill Date</label>
-          <input name="BillDate" type="date" value={form.BillDate.toISOString().split('T')[0]}  />
+                    <input
+            name="BillDate"
+            type="date"
+            value={
+              form.BillDate
+                ? new Date(form.BillDate).toISOString().split('T')[0]
+                : ''
+            }
+            onChange={handleDateChange}
+            required
+          />
           <label>Bill Amount</label>
-          <input name="BillAmount" value={form.BillAmount} onChange={handleChange} />
+          <input name="BillAmount" type='number' value={form.BillAmount} onChange={handleChange} required/>
           <label>Remarks</label>
-          <input name="Remarks" value={form.Remarks} onChange={handleChange}  >
+          <input name="Remarks" value={form.Remarks} onChange={handleChange}  required>
           </input>
-
-        <label>Attachments</label>
-       <input type="file" multiple onChange={handleFileChange} />
-
+          {errors.files && (
+  <span style={{ color: "red" }}>
+    {errors.files}
+  </span>
+)}
+          <label>Attachments</label>
+          <input name="files" type="file" multiple onChange={handleFileChange} required />
         <div className={styles.buttonGroup}>
             <button className={styles.submitBtn} onClick={handleSave}>Submit</button>
-            <button className={styles.cancelBtn}>Cancel</button>
+            <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
           </div>
       </div>
        <div className={styles.rightPanel}>

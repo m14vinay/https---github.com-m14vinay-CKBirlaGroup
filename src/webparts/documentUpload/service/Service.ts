@@ -38,7 +38,16 @@ export default class Service {
     );
     return response.json();
   }
-
+  // Fetch the Record
+  public async getItemByTitle(Title: string): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=Title eq '${Title}'`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data.value.length > 0 ? 1 : 0;
+  }
   
   // Upload Files
 
