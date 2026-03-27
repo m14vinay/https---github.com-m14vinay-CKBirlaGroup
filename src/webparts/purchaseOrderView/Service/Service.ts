@@ -133,4 +133,14 @@ public async getMyFiles(): Promise<any[]> {
   const data = await res.json();
   return data.value;
 }
+// get Login ID by passing loginName
+private async getUserId(loginName: string): Promise<number> {
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/siteusers/getbyloginname('${encodeURIComponent(loginName)}')`;
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+  const data = await res.json();
+  return data.Id;
+}
 }
