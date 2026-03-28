@@ -2,7 +2,7 @@ import { SPHttpClient } from '@microsoft/sp-http';
 export default class Service {
 
   private context: any;
-  private listname="PoApproval";
+   private listname="VendorMapping";
   private Departmentmaster ="DepartmentMaster";
   private VendorList="";
 
@@ -58,8 +58,9 @@ export default class Service {
   }
 
   // Update the Record (Submit)
-  public async updateItem(id: number, data: any): Promise<void> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
+  public async updateItem(ID: number, comments: any): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})`;
+
 
     await this.context.spHttpClient.post(
       url,
@@ -71,27 +72,48 @@ export default class Service {
           "IF-MATCH": "*",
           "X-HTTP-Method": "MERGE"
         },
-        body: JSON.stringify(data)
+        
+        body: JSON.stringify({
+        ApproverComment: comments  // 👈 column name same hona chahiye
+      })
+      }
+    );
+  }
+
+  // Update the Record (Submit)
+  public async updateItemdata(id: number,status:string, comments: string): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;",
+          "Content-Type": "application/json;",
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "MERGE"
+        },
+        body: JSON.stringify({
+        CurrentStatus: status,
+         ApproverComment: comments
+     })
       }
     );
   }
 
   // Fetch the Record
-  public async getItemByRequestNo(itemId: Number): Promise<any> {
+  public async getItemByRequestNo(ID: Number): Promise<any> {
 
-     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})?$expand=AttachmentFiles`;
-
-
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})?$expand=AttachmentFiles`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
     );
 
-    const data = await res.json();
+    const item = await res.json();
    
-  if (data.value.length > 0) {
-    const item = data.value[0];
-
+   if (item && item.Id) {
     return {
       Id: item.Id,
       ProjectCode: item.ProjectCode,

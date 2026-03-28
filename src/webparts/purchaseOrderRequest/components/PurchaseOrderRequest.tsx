@@ -115,8 +115,19 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
   });
 };
 
-  // Save Data
-  const handleSave = async () => {
+
+
+//SAVE DRAFT DATA
+
+  const handleSaveOrUpdate = async () => {
+  // 🔹 Validations
+  if(!POrequestNo) return alert("Project Code required");
+    if(!form.POAmount) return alert("Enter POAmount");
+    if(!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
+    if(!form.POCategory) return alert("Choose POCategory");
+     if (!form.files || form.files.length === 0) return alert("Attach files");
+
+  // 🔹 Payload (common)
   const payload = {
     ProjectCode: POrequestNo,
     Department: department,
@@ -130,29 +141,45 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     //POCategory: form.POCategory,
     ProjectDescription: form.Comments
   };
-  try {    
-      // CREATE
+
+  try {
+    if (!itemId) {
+      // 🔹 CREATE
       const res = await service.createItem(payload);
-      setItemId(res.Id); 
-      if(res.Id>0){      
-      if (form.files && form.files.length > 0) {
-      for (let i = 0; i < form.files.length; i++) {
-        await service.uploadFile(res.Id, form.files[i]);
+      setItemId(res.Id); // store ID for future updates
+
+      if (res.Id > 0 && form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(res.Id, form.files[i]);
+        }
       }
+      alert("Data Saved Successfully ✅");
+    } else {
+      // 🔹 UPDATE
+      await service.updateItem(itemId, payload);
+
+      if (form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(itemId, form.files[i]);
+        }
+      }
+      alert("Data Updated Successfully ✅");
     }
-      alert("Data Saved Successfully✅");  
-  }  
-  else{
-    alert("Data Not Saved.");
-  }
   } catch (error) {
     console.error(error);
-    alert("Error occurred");
+    alert("Error occurred ❌");
   }
 };
 
+  
+
 // Update
 const handleUpdate = async () => {
+   if(!POrequestNo) return alert("Project Code required");
+  if(!form.POAmount) return alert("Enter POAmount");
+    if(!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
+    if(!form.POCategory) return alert("Choose POCategory");
+     if (!form.files || form.files.length === 0) return alert("Attach files");
   const payload = {
     Title:"Testing",
     ProjectCode: POrequestNo,
@@ -168,13 +195,15 @@ const handleUpdate = async () => {
   try {
     if (itemId) {
       // 🔥 UPDATE
-    const result=  await service.updateItem(itemId, payload);
+     await service.updateItem(itemId, payload);
     if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(itemId, form.files[i]);
       }
     }
-      alert("Data Updated Successfully ✅");      
+      alert("Data Submitted Successfully ✅");    
+      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url);  
     }
   } catch (error) {
     console.error(error);
@@ -216,7 +245,7 @@ const validatePO = (value: string) => {
         <h2>PO Approval Request Form</h2>
         <h4>PO Approval / Request Form</h4>
 
-        <label>Project Code</label>
+        <label>Project Code <span className={styles.required}>*</span> </label>
         <input name="projectCode" value={POrequestNo} onChange={handleRequestNoChange} />
 
         {/* <label>Department</label>
@@ -254,10 +283,10 @@ const validatePO = (value: string) => {
         <label>Remaining Amount</label>
         <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange} />
 
-        <label>PO Amount</label>
+        <label>PO Amount <span className={styles.required}>*</span></label>
         <input name="POAmount" value={form.POAmount} onChange={handleChange} />
 
-        <label>Applicable Taxes</label>
+        <label>Applicable Taxes <span className={styles.required}>*</span></label>
         <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} />
 
         <ChoiceGroup
@@ -277,12 +306,12 @@ const validatePO = (value: string) => {
         <label>Additional Information & Remarks</label>
         <input name="Comments" value={form.Comments} onChange={handleChange} />
 
-        <label>Attachments</label>
+        <label>Attachments <span className={styles.required}>*</span></label>
        <input type="file" multiple onChange={handleFileChange} />
 
         <div className={styles.buttonGroup}>          
           <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
-          <button className={styles.saveBtn} onClick={handleSave}>Save</button>
+          <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
           <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
         </div>
       </div>

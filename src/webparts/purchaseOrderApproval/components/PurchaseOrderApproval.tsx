@@ -114,6 +114,7 @@ private loadAttachments = async () => {
     });
   }
 }
+  
 private GetApprover = async () => {
   const data = await this.service.getApprover('');
   if(data.ok)
