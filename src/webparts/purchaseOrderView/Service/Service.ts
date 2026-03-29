@@ -154,7 +154,7 @@ public async getApprover(DepartmentName: string): Promise<any> {
   // Upload Files
 
   public async uploadFile(itemId: number, file: File): Promise<void> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})?$expand=Attachments`;
 
     const buffer = await file.arrayBuffer();
 
@@ -173,14 +173,14 @@ public async getApprover(DepartmentName: string): Promise<any> {
   // Fetch the Files from List
   public async getAttachments(itemId: number): Promise<any[]> {
 
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items(${itemId})/AttachmentFiles`;
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
 
   const res = await this.context.spHttpClient.get(
     url,
     SPHttpClient.configurations.v1,
     {
       headers: {
-        "Accept": "application/json;odata=nometadata"
+        "Accept": "application/json;"
       }
     }
   );

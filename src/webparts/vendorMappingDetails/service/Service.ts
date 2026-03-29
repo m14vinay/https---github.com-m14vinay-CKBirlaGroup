@@ -121,4 +121,25 @@ export default class Service {
       }
     );
   }
+    // Fetch the Files from List
+  public async getAttachments(itemId: number): Promise<any[]> {
+
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
+
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1,
+    {
+      headers: {
+        "Accept": "application/json;"
+      }
+    }
+  );
+
+  const data = await res.json();
+
+  return data.value; // array of attachments
 }
+  }
+
+  

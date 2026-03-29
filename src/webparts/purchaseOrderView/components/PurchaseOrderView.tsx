@@ -219,9 +219,18 @@ const handleReject = async () => {
           <label>Additional Information & Remarks</label>
           <input name="comments" value={form.ProjectDescription}  readOnly >
           </input>
-
-          <label>Attachments <span className={styles.required}>*</span></label>
-       <input type="file" multiple />
+        
+           <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
+      {attachments.map((file: any, index: number) => (
+        <a
+          key={index}
+            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+          {file.FileName}
+        </a>
+       ))}
+    </div>
+ 
+ 
         </div>
     </div>
    );

@@ -15,7 +15,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     projectDescription: '',
     vendorName: '',
     vendorDescription: '',
-    files: null as FileList | null
+    files: [] as File[]
   });
 
   const [requestNo, setRequestNo] = React.useState('');
@@ -26,7 +26,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   const [requestNoError, setRequestNoError] = React.useState('');
   const [isSubmitted, setIsSubmitted] = React.useState('');
   const MAX_TOTAL_SIZE_MB = 25;
-  const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.-]/; 
+  const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
 
 
 
@@ -72,11 +72,22 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
     return;
   }
-     setForm({
-       ...form,
-       files: event.target.files
-     });
-   };
+   if (event.target.files) {
+    const selectedFiles = Array.from(event.target.files);
+
+    setForm((prev: any) => ({
+      ...prev,
+      files: [...prev.files, ...selectedFiles]
+    }));
+  }
+};
+
+const removeFile = (index: number) => {
+  setForm((prev: any) => ({
+    ...prev,
+    files: prev.files.filter((_: File, i: number) => i !== index)
+  }));
+};
 
   const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -190,20 +201,22 @@ const handleUpdate = async () => {
       }
     }
    
-      alert("Data Submitted Successfully ✅");     
+      alert("Data Submitted Successfully ✅");  
+      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url);     
        // Reset form
-  setForm({
-    projectCode: '',
-    projectTitle: '',
-    projectDescription: '',
-    vendorName: '',
-    vendorDescription: '',
-    files: null
-  });
-  setRequestNo('');
-  setProjectTitle('');
-  setProjectDescription('');
-  setItemId(null);
+  // setForm({
+  //   projectCode: '',
+  //   projectTitle: '',
+  //   projectDescription: '',
+  //   vendorName: '',
+  //   vendorDescription: '',
+  //   files: [] as File[]
+  // });
+  // setRequestNo('');
+  // setProjectTitle('');
+  // setProjectDescription('');
+  // setItemId(null);
   //setIsSubmitted(true); // freeze inputs
 };
     
@@ -250,9 +263,28 @@ const handleUpdate = async () => {
         
 
         <label>Attachments <span className={styles.required}>*</span></label>
-       <input type="file" multiple onChange={handleFileChange}  
-       key={form.files ? form.files.length : 0}  />
-        
+       <input type="file" multiple onChange={handleFileChange}  />
+        {/* Selected Files */}
+       {form.files.length > 0 && (
+    <ul style={{ listStyle: "none", padding: 0 }}>
+      {form.files.map((file: File, index: number) => (
+        <li key={index} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          
+          {/* ❌ Remove */}
+          <span
+            style={{ cursor: "pointer", color: "red", fontWeight: "bold" }}
+            onClick={() => removeFile(index)}
+          >
+            ✕
+          </span>
+
+          {/* File Name */}
+          <span>{file.name}</span>
+
+        </li>
+      ))}
+    </ul>
+       )}
 
        {/* Buttons */}
           <div className={styles.buttonGroup}>

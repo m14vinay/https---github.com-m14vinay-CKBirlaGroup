@@ -218,15 +218,23 @@ const handleReject = async () => {
 
           <label>Additional Information & Remarks</label>
           <input name="comments" value={form.ProjectDescription}  readOnly >
-          </input>
-
-          <label>Attachments <span className={styles.required}>*</span></label>
-       <input type="file" multiple />
-       
-
+          </input>  
+           <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
+      {attachments.map((file: any, index: number) => (
+        <a
+          key={index}
+            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+          {file.FileName}
+        </a>
+       ))}
+    </div>
+ 
+ 
+      <label></label>
+        <label></label>
         <label>Approver Comments <span className={styles.required}>*</span></label>
        <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}/>
-        
+   
        {/* Buttons */}
           <div className={styles.buttonGroup}>
             <button className={styles.ApproveBtn} onClick={handleApprove}>Approve</button>
@@ -234,8 +242,8 @@ const handleReject = async () => {
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
         
-      
-        </div>
+      </div>
+     
 
       <div className={styles.rightPanel}>
         <div className={styles.card}>

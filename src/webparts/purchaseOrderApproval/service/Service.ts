@@ -171,21 +171,21 @@ public async getApprover(DepartmentName: string): Promise<any> {
   }
 
   // Fetch the Files from List
+   // Fetch the Files from List
   public async getAttachments(itemId: number): Promise<any[]> {
 
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items(${itemId})/AttachmentFiles`;
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
 
   const res = await this.context.spHttpClient.get(
     url,
     SPHttpClient.configurations.v1,
     {
       headers: {
-        "Accept": "application/json;odata=nometadata"
+        "Accept": "application/json;"
       }
     }
   );
-
-  const data = await res.json();
+   const data = await res.json();
 
   return data.value; // array of attachments
 }

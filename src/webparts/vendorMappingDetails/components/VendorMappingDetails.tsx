@@ -16,12 +16,14 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
     projectDescription: '',
     vendorName: '',
     vendorDescription: '',
-    files: null as FileList | null
+    files: null as FileList | null,
+     attachments: []
   });
 
   ;
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
+   const [attachments, setAttachments] = React.useState<any[]>([]);
   
  
   
@@ -41,7 +43,22 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
   }, []);
 
 
-  
+  const loadAttachments = async (id:number) => {
+    try{
+  const files = await service.getAttachments(id);
+  console.log("Attachments:", files);
+  setAttachments(files);
+    }catch(error)
+    {
+      console.error(error);
+    }
+   };
+   React.useEffect(() => {
+     if (itemId) {
+       loadAttachments(itemId);
+        // 👈 dynamic ID use karo
+     }
+   }, [itemId]);
   
 //FETCH DATA-----
 const handleFetchById = async (id: number) => {
@@ -55,14 +72,16 @@ const handleFetchById = async (id: number) => {
       if (result) {
         setItemId(result.Id);
 
-        setForm({
+        setForm(prev => ({
+        ...prev,
           projectCode: result.ProjectCode || '',
           projectTitle: result.ProjectTitle || '',
           projectDescription: result.ProjectDescription || '',
           vendorName: result.VendorName || '',
           vendorDescription: result.VendorDescription || '',
           files: null
-        });
+        }));
+      
 
       } else {
         alert("No data found");
@@ -101,12 +120,22 @@ const handleFetchById = async (id: number) => {
         <label>Additional Information & Remarks</label>
         <input name="vendorDescription" value={form.vendorDescription}  readOnly />
         
-
-        <label>Attachments <span className={styles.required}>*</span></label>
-       <input type="file" multiple />
-        
-       
-        
+       <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px" }}>
+           <label>
+            Attachments <span className={styles.required}>*</span>
+            </label>
+     
+    <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
+      {attachments.map((file: any, index: number) => (
+        <a
+          key={index}
+            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+          {file.FileName}
+        </a>
+       ))}
+    </div>
+ 
+</div>        
       
         </div>
 

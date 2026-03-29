@@ -15,7 +15,8 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
     projectDescription: '',
     vendorName: '',
     vendorDescription: '',
-    files: null as FileList | null
+    files: null as FileList | null,
+     attachments: []
     
   });
 
@@ -23,6 +24,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
   const [approverComment, setApproverComment] = React.useState('');
+   const [attachments, setAttachments] = React.useState<any[]>([]);
  
   
   // --- 1️⃣ Get ID from query string ---
@@ -41,7 +43,22 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
   }, []);
 
 
-  
+   const loadAttachments = async (id:number) => {
+    try{
+  const files = await service.getAttachments(id);
+  console.log("Attachments:", files);
+  setAttachments(files);
+    }catch(error)
+    {
+      console.error(error);
+    }
+   };
+   React.useEffect(() => {
+     if (itemId) {
+       loadAttachments(itemId);
+      
+     }
+   }, [itemId]);
   
 //FETCH DATA-----
 const handleFetchById = async (id: number) => {
@@ -55,14 +72,15 @@ const handleFetchById = async (id: number) => {
       if (result) {
         setItemId(result.Id);
 
-        setForm({
+        setForm(prev => ({
+        ...prev,
           projectCode: result.ProjectCode || '',
           projectTitle: result.ProjectTitle || '',
           projectDescription: result.ProjectDescription || '',
           vendorName: result.VendorName || '',
           vendorDescription: result.VendorDescription || '',
           files: null
-        });
+        }));
          setApproverComment(result.ApproverComment || ''); // 
       } else {
         alert("No data found");
@@ -135,9 +153,22 @@ const handleReject = async () => {
         <input name="vendorDescription" value={form.vendorDescription}  readOnly />
         
 
-        <label>Attachments <span className={styles.required}>*</span></label>
-       <input type="file" multiple />
-       
+        <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px", marginBottom:"10px" }}>
+           <label>
+            Attachments <span className={styles.required}>*</span>
+            </label>
+     
+    <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
+      {attachments.map((file: any, index: number) => (
+        <a
+          key={index}
+            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+          {file.FileName}
+        </a>
+       ))}
+    </div>
+ 
+</div>    
        <label>Approver Comments <span className={styles.required}>*</span></label>
        <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}/>
         
