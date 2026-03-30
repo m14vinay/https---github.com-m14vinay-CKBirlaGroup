@@ -11,7 +11,8 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'SummaryReportWebPartStrings';
 import SummaryReport from './components/SummaryReport';
 import { ISummaryReportProps } from './components/ISummaryReportProps';
-
+import { Environment, EnvironmentType } from '@microsoft/sp-core-library';
+import * as microsoftTeams from "@microsoft/teams-js";
 export interface ISummaryReportWebPartProps {
   description: string;
 }
@@ -29,7 +30,8 @@ export default class SummaryReportWebPart extends BaseClientSideWebPart<ISummary
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+        userDisplayName: this.context.pageContext.user.displayName,
+        context: this.context
       }
     );
 
@@ -45,31 +47,48 @@ export default class SummaryReportWebPart extends BaseClientSideWebPart<ISummary
 
 
   private _getEnvironmentMessage(): Promise<string> {
-    if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
-        .then(context => {
-          let environmentMessage: string = '';
-          switch (context.app.host.name) {
-            case 'Office': // running in Office
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
-              break;
-            case 'Outlook': // running in Outlook
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
-              break;
-            case 'Teams': // running in Teams
-            case 'TeamsModern':
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
-              break;
-            default:
-              environmentMessage = strings.UnknownEnvironment;
-          }
 
-          return environmentMessage;
-        });
-    }
+  const isLocal: boolean = Environment.type === EnvironmentType.Local;
 
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
+  if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
+    return microsoftTeams.app.getContext()
+      .then((context: any) => {
+        let environmentMessage: string = '';
+
+        switch (context.app.host.name) {
+          case 'Office': // running in Office
+            environmentMessage = isLocal
+              ? strings.AppLocalEnvironmentOffice
+              : strings.AppOfficeEnvironment;
+            break;
+
+          case 'Outlook': // running in Outlook
+            environmentMessage = isLocal
+              ? strings.AppLocalEnvironmentOutlook
+              : strings.AppOutlookEnvironment;
+            break;
+
+          case 'Teams': // running in Teams
+          case 'TeamsModern':
+            environmentMessage = isLocal
+              ? strings.AppLocalEnvironmentTeams
+              : strings.AppTeamsTabEnvironment;
+            break;
+
+          default:
+            environmentMessage = strings.UnknownEnvironment;
+        }
+
+        return environmentMessage;
+      });
   }
+
+  return Promise.resolve(
+    isLocal
+      ? strings.AppLocalEnvironmentSharePoint
+      : strings.AppSharePointEnvironment
+  );
+}
 
   protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
     if (!currentTheme) {
@@ -93,9 +112,7 @@ export default class SummaryReportWebPart extends BaseClientSideWebPart<ISummary
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
-  protected get dataVersion(): Version {
-    return Version.parse('1.0');
-  }
+  protected dataVersion: Version = Version.parse('1.0');
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
