@@ -16,6 +16,8 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { Table } from 'react-bootstrap';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
 const [form, setForm] = React.useState({
       VendorName: '',
@@ -25,13 +27,12 @@ const [form, setForm] = React.useState({
 
   const [loading, setLoading] = React.useState(false);
   const [vendorOptions, setVendorOptions] = React.useState<IDropdownOption[]>([]);
-  const params = new URLSearchParams(window.location.search);
   const service = new SharePointService(props.context);
   const [search, setSearch] = useState("");
-    const [data, _setData] = useState<any[]>(() => []);
-    const [user, setUser] = useState<any>(null);
-    const [globalFilter, setGlobalFilter] = useState("");
-    const [sorting, setSorting] = useState<any>([]);
+  const [data, _setData] = useState<any[]>(() => []);
+  const [user, setUser] = useState<any>(null);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [sorting, setSorting] = useState<any>([]);
     
 const filteredData = data.filter(item =>
   item.DocumentName?.toLowerCase().includes(search.toLowerCase()) ||
@@ -119,6 +120,56 @@ const columnHelper = createColumnHelper<any>()
       setVendorOptions(options);
     }
     };
+
+const exportToCSV = (data: any[]) => {
+  if (!data || data.length === 0) return;
+
+  const headers = [
+    "DocumentID",
+    "DocumentName",
+    "VendorName",
+    "BillNumber",
+    "BillDate",
+    "BillAmount",
+    "Uploader"
+  ];
+  const rows = data.map(item => [
+    item.ID,
+    item.Title,
+    item.VendorName,
+    item.BillNumber,
+    item.BillDate,
+    item.BillAmount,
+    item.Author?.Title
+  ]);
+
+  let csvContent =
+    headers.join(",") +
+    "\n" +
+    rows.map(e => e.join(",")).join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  saveAs(blob, "Documents.csv");
+};
+
+const exportToExcel = () => {
+  if (!data.length) return;
+
+  const formatted = data.map(item => ({
+    ID: item.ID,
+    Name: item.Title,
+    Vendor: item.VendorName,
+    Amount: item.BillAmount,
+    Date: item.BillDate
+      ? new Date(item.BillDate).toLocaleDateString()
+      : "",
+    Uploader: item.Author?.Title
+  }));
+  const ws = XLSX.utils.json_to_sheet(formatted);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Documents");
+  XLSX.writeFile(wb, "Documents.xlsx");
+};
   const handleAddNewDocument = () => {
   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
   window.location.assign(url);
@@ -165,6 +216,10 @@ const getDatafromListByTitle = async (parm_vendorname:string) => {
   <div className={styles.searchbox}>
     <span><h3>Search My Document</h3>    
       <button className={styles.btnadd} onClick={handleAddNewDocument}>Add New Document</button></span>    
+      <div>
+        <button className={styles.btnsearch} onClick={exportToExcel }>Export to Excel</button> &nbsp; 
+        <button className={styles.btnsearch} onClick={() => exportToCSV(data)}>Export to CSV</button> 
+      </div>
     <div className={styles.searchrow}>
       <div className={styles.field}>
         <label className={styles.field}>Vendor Name</label>
