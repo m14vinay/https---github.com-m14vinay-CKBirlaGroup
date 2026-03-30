@@ -1,183 +1,167 @@
 import * as React from 'react';
-import styles from './VendorMappingDetails.module.scss';
+import { useState } from 'react';
+import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
+import styles from './VendorMappingDetails.module.scss'
 import { IVendorMappingDetailsProps } from './IVendorMappingDetailsProps';
-import { SPHttpClient } from '@microsoft/sp-http';
+import SharePointService from '../service/Service';
 
-interface IState {
-  requestNo:string;
-  projectCode: string;
-  projectTitle: string;
-  projectDescription: string;
-  vendorName: string;
-  vendorDescription: string;
-  files: FileList | null;
-}
 
-export default class VendorMappingForm extends React.Component<IVendorMappingDetailsProps, IState> {
 
-  constructor(props: IVendorMappingDetailsProps) {
-    super(props);
 
-    this.state = {
-      requestNo:'',
-      projectCode: '',
-      projectTitle: '',
-      projectDescription: '',
-      vendorName: '',
-      vendorDescription: '',
-      files: null
-    };
-  }
+const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
 
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
-  };
+  const [form, setForm]=React.useState({
+    projectCode: '',
+    projectTitle: '',
+    projectDescription: '',
+    vendorName: '',
+    vendorDescription: '',
+    files: null as FileList | null,
+     attachments: []
+  });
 
- private getRequestDetails = async (requestNo: string) => {
+  ;
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+   const [attachments, setAttachments] = React.useState<any[]>([]);
+  
  
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
-
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
   
- const data = await response.json();
-
-  if (data.value.length > 0) {
-    this.setState({
-      projectTitle: data.value[0].ProjectTitle,
-      projectDescription: data.value[0].ProjectDescription
-    });
-  } else {
-   
-    this.setState({
-      projectTitle: '',
-      projectDescription: ''
-    });
-  }
-};
- 
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-
-  this.setState({ requestNo: value });
-
- // optional
-    this.getRequestDetails(value);
-  
-};
-
-  private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ files: e.target.files });
+  // --- 1️⃣ Get ID from query string ---
+  const getIdFromQueryString = (): number | null => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('ID');
+    return id ? parseInt(id, 10) : null;
   };
-  private saveData = async () => {
 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
-
-  const body = {
-  
-    ProjectCode: this.state.requestNo,
-    ProjectTitle: this.state.projectTitle,
-    ProjectDescription: this.state.projectDescription,
-    VendorName : this.state.vendorName,
-    VendorDescription: this.state.vendorDescription
-    //Attachments: this.state.files
-  };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
+  // --- 3️⃣ Load data on mount ---
+  React.useEffect(() => {
+    const id = getIdFromQueryString();
+    if (id) {
+      handleFetchById(id);
     }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
+  }, []);
 
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
-  }
-};
+
+  const loadAttachments = async (id:number) => {
+    try{
+  const files = await service.getAttachments(id);
+  console.log("Attachments:", files);
+  setAttachments(files);
+    }catch(error)
+    {
+      console.error(error);
+    }
+   };
+   React.useEffect(() => {
+     if (itemId) {
+       loadAttachments(itemId);
+        // 👈 dynamic ID use karo
+     }
+   }, [itemId]);
   
-  
-  private handleApprove = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
+//FETCH DATA-----
+const handleFetchById = async (id: number) => {
+    try {
+      console.log("Calling API with ID:", id);
+
+      const result = await service.getItemByRequestNo(id);
+
+      console.log("Result:", result);
+
+      if (result) {
+        setItemId(result.Id);
+
+        setForm(prev => ({
+        ...prev,
+          projectCode: result.ProjectCode || '',
+          projectTitle: result.ProjectTitle || '',
+          projectDescription: result.ProjectDescription || '',
+          vendorName: result.VendorName || '',
+          vendorDescription: result.VendorDescription || '',
+          files: null
+        }));
+      
+
+      } else {
+        alert("No data found");
+      }
+
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
-  private handleReject = () => {
-    console.log("Saved Data:", this.state);
-    alert("Saved");
-  };
 
-  public render(): React.ReactElement<IVendorMappingDetailsProps> {
+    
 
-    return (
-      <div className={styles.container}>
 
-        {/* LEFT FORM */}
-        <div className={styles.leftPanel}>
-          <h2>Vendor Mapping Details & Status  </h2>
-          <h4>Vendor Mapping / Request Details</h4>
 
-          <label>Project Code </label>
-    <input name="requestNo" value={this.state.requestNo} readOnly/>
+  // --- RENDER ---
+  return (
+    <div className={styles.container}>
 
-    {/* Project Title (Read Only) */}
-    <label>Project Title</label>
-    <input name="projectTitle" value={this.state.projectTitle} readOnly/>
+      <div className={styles.leftPanel}>
+        <h2>Vendor Mapping Approval Form</h2>
+       
+        <label>Project Code <span className={styles.required}>*</span></label>
+        <input name="projectCode" value={form.projectCode}   readOnly />
+       
+       
+        <label>Project Title</label>
+        <input name="projectTitle" value={form.projectTitle}   readOnly />
 
-    {/* Project Description (Read Only) */}
-    <label>Project Description</label>
-    <input name="projectDescription" value={this.state.projectDescription} readOnly/>
+        <label>Project Description</label>
+        <input name="projectDescription" value={form.projectDescription}  readOnly />
+        
+        <label>Select Vendor <span className={styles.required}>*</span></label>
+      <input name="vendorName" value={form.vendorName}  readOnly />
 
-    {/* Vendor Name (Read Only) */}
-    <label>Select Vendor </label>
-    <input name="vendorName" value={this.state.vendorName}readOnly/>
-
-    {/* Additional Information / Remarks (Read Only) */}
-    <label>Additional Information & Remarks</label>
-    <input  name="VendorDescription"  value={this.state.vendorDescription} readOnly />
-
-    <label>Attach Documents</label>
-          {/* <label>Attach Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} /> */}          
+        <label>Additional Information & Remarks</label>
+        <input name="vendorDescription" value={form.vendorDescription}  readOnly />
+        
+       <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px" }}>
+           <label>
+            Attachments <span className={styles.required}>*</span>
+            </label>
+     
+    <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
+      {attachments.map((file: any, index: number) => (
+        <a
+          key={index}
+            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+          {file.FileName}
+        </a>
+       ))}
+    </div>
+ 
+</div>        
+      
         </div>
 
-        {/* RIGHT PANEL */}
-        <div className={styles.rightPanel}>
+      <div className={styles.rightPanel}>
+        <div className={styles.card}>
+          <h4>Templates</h4>
+          <ul>
+            <li>Vendor_Registration_Form_v1.0.xlsx</li>
+            <li>SOP_Procurement_of_Goods_Services.pdf</li>
+            <li>DigiFlow_Training_Manual.pdf</li>
+          </ul>
+        </div>
 
-          {/* Templates */}
-          <div className={styles.card}>
-            <h4>Templates</h4>
-            <ul>
-              <li>Vendor_Registration_Form_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
-            </ul>
-          </div>
-
-          {/* Guidelines */}
-          <div className={styles.card}>
-            <h4>Important Guidelines</h4>
-            <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
-            </ol>
-          </div>
-
+        <div className={styles.card}>
+          <h4>Important Guidelines</h4>
+          <ol>
+            <li>Select approval path carefully.</li>
+            <li>Use project reference if needed.</li>
+            <li>Attach all documents (Max 25 MB).</li>
+            <li>Avoid special characters in file names.</li>
+          </ol>
         </div>
       </div>
-    );
-  }
-}
+
+    </div>
+   );
+};
+
+export default VendorMappingForm;

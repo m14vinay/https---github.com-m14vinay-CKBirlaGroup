@@ -83,6 +83,31 @@ private async getListItemType(): Promise<string> {
       }
     );
   }
+
+ // Update the Record (Submit)
+  public async updateItemdata(id: number,status:string, comments: string): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;",
+          "Content-Type": "application/json;",
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "MERGE"
+        },
+        body: JSON.stringify({
+        CurrentStatus: status,
+         ApproverComment1: comments
+     })
+      }
+    );
+  }
+
+
+
   // Get Approver from Department List
 public async getApprover(DepartmentName: string): Promise<any> {
 
@@ -98,18 +123,34 @@ public async getApprover(DepartmentName: string): Promise<any> {
   }
 
   // Fetch the Record
-  public async getItemByRequestNo(requestNo: string): Promise<any> {
+  public async getItemByRequestNo(ID: Number): Promise<any> {
 
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=POrequestNo eq '${requestNo}'`;
-
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})?$expand=AttachmentFiles`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
     );
 
-    const data = await res.json();
-    return data.value.length > 0 ? data.value[0] : null;
+    const item = await res.json();
+   
+   if (item && item.Id) {
+    return {
+      Id: item.Id,
+      ProjectCode: item.ProjectCode,
+      ProjectTitle: item.ProjectTitle,
+      VendorName: item.VendorName,
+      Department: item.Department,
+       POAmount: item.POAmount,
+     ApplicableTaxes: item.ApplicableTaxes,
+    //POCategory: form.POCategory,
+    ProjectDescription: item.ProjectDescription, 
+      Attachments: item.AttachmentFiles || [] // 👈 important
+    };
   }
+
+  return null;
+};
+  
   // Upload Files
 
   public async uploadFile(itemId: number, file: File): Promise<void> {
@@ -130,21 +171,21 @@ public async getApprover(DepartmentName: string): Promise<any> {
   }
 
   // Fetch the Files from List
+   // Fetch the Files from List
   public async getAttachments(itemId: number): Promise<any[]> {
 
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items(${itemId})/AttachmentFiles`;
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
 
   const res = await this.context.spHttpClient.get(
     url,
     SPHttpClient.configurations.v1,
     {
       headers: {
-        "Accept": "application/json;odata=nometadata"
+        "Accept": "application/json;"
       }
     }
   );
-
-  const data = await res.json();
+   const data = await res.json();
 
   return data.value; // array of attachments
 }

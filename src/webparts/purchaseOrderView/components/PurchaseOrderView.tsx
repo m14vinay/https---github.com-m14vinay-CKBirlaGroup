@@ -1,28 +1,16 @@
 import * as React from 'react';
+import { useState } from 'react';
+import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import styles from './PurchaseOrderView.module.scss';
 import { IPurchaseOrderViewProps } from './IPurchaseOrderViewProps';
-import { SPHttpClient } from '@microsoft/sp-http';
+import SharePointService from '../Service/Service';
 
-interface IState {
-  POrequestNo:string;
-  projectCode: string;
-  projectTitle: string;
-  RemainingAmount: number;
-  vendorName: string;
-  Department:string;
-  POAmount: number;
-  ApplicableTaxes:number;
-  POCategory:string;
-  Comments: string;
-  files: FileList | null;
-}
-export default class PurchaseOrderView extends React.Component<IPurchaseOrderViewProps, IState> {
 
-  constructor(props: IPurchaseOrderViewProps) {
-    super(props);
 
-    this.state = {
-      POrequestNo:'',
+const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
+
+  const [form, setForm]=React.useState({
+    POrequestNo:'',
       projectCode: '',
       projectTitle: '',
       vendorName: '',
@@ -31,188 +19,221 @@ export default class PurchaseOrderView extends React.Component<IPurchaseOrderVie
       POAmount: 0,
      ApplicableTaxes:0,
      POCategory:'',
-     Comments: '',
-     files:  null
-    };
-  }
+     ProjectDescription: '',
+     ApproverComment1:'',
+     ApproverCommentsError:'',
+     files:  null,
+     attachments: [],
+    approver1: '',
+   approver2: '',
+   approver3: '',
+   approver4: '',
+   approver5: '',
+   DepartmentHead: ''
+    
+  });
 
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
+  
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+  const [approverComment, setApproverComment] = React.useState('');
+  const [attachments, setAttachments] = React.useState<any[]>([]);
+ const [approver1, setApprover1] = React.useState('');
+const [approver2, setApprover2] = React.useState('');
+const [approver3, setApprover3] = React.useState('');
+const [approver4, setApprover4] = React.useState('');
+const [approver5, setApprover5] = React.useState('');
+const [departmentHead, setDepartmentHead] = React.useState('');
+  
+  // --- 1️⃣ Get ID from query string ---
+  const getIdFromQueryString = (): number | null => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('ID');
+    return id ? parseInt(id, 10) : null;
   };
 
- private getRequestDetails = async (requestNo: string) => {
- 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
-
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-  
- const data = await response.json();
-
-  if (data.value.length > 0) {
-    this.setState({
-      POrequestNo: data.value[0].projectCode,
-      projectCode: data.value[0].ProjectDescription,
-      projectTitle: data.value[0].ProjectTitle,
-      vendorName: data.value[0].VendorName,
-      RemainingAmount: data.value[0].RemainingAmount,
-      Department:data.value[0].Department,
-      POAmount: data.value[0].POAmount,
-     ApplicableTaxes:data.value[0].ApplicableTaxes,
-     POCategory:data.value[0].POCategory,
-     Comments: data.value[0].Comments
-      
-    });
-  } else {
-   
-    this.setState({
-      projectCode: '',
-      projectTitle: '',
-      vendorName: '',
-      RemainingAmount: 0,
-      Department:'',
-      POAmount: 0,
-  ApplicableTaxes:0,
-  POCategory:'',
-  Comments: '',
-    });
-  }
-};
- 
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-
-  this.setState({ POrequestNo: value });
-
- // optional
-    this.getRequestDetails(value);
-  
-};
-
-  private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ files: e.target.files });
-  };
-  private saveData = async () => {
-
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
-
-  const body = {
-  POrequestNo: this.state.POrequestNo,
-      projectCode: this.state.projectCode,
-      projectTitle: this.state.projectTitle,
-      vendorName: this.state.vendorName,
-      RemainingAmount: this.state.RemainingAmount,
-      Department:this.state.Department,
-      POAmount: this.state.POAmount,
-     ApplicableTaxes:this.state.ApplicableTaxes,
-     POCategory:this.state.POCategory,
-     Comments: this.state.Comments
-     };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
+  // --- 3️⃣ Load data on mount ---
+  React.useEffect(() => {
+    const id = getIdFromQueryString();
+    if (id) {
+      handleFetchById(id);
     }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
+  }, []);
 
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
+
+  const loadAttachments = async (id:number) => {
+    try{
+  const files = await service.getAttachments(id);
+  console.log("Attachments:", files);
+  setAttachments(files);
+    }catch(error)
+    {
+      console.error(error);
+    }
+   };
+
+
+const getApprover = async () => {
+  try {
+    const data = await service.getApprover('');
+
+    console.log("Approver Data:", data);
+
+    if (data && data.length > 0) {
+      setApprover1(data[0].approver1 || '');
+      setApprover2(data[0].approver2 || '');
+      setApprover3(data[0].approver3 || '');
+      setApprover4(data[0].approver4 || '');
+      setApprover5(data[0].approver5 || '');
+      setDepartmentHead(data[0].DepartmentHead || '');
+    }
+
+  } catch (error) {
+    console.error(error);
   }
 };
+
+
+React.useEffect(() => {
+  if (itemId) {
+    loadAttachments(itemId);
+    getApprover(); // 👈 dynamic ID use karo
+  }
+}, [itemId]);
+
+// componentDidMount(): void {
+//   this.loadAttachments();
+//   this.GetApprover();
+// }
   
-  
-  private handleSubmit = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
-  };
+//FETCH DATA-----
+const handleFetchById = async (id: number) => {
+    try {
+      console.log("Calling API with ID:", id);
 
-  private handleSave = () => {
-    console.log("Saved Data:", this.state);
-    alert("Saved");
-  };
+      const result = await service.getItemByRequestNo(id);
 
-  public render(): React.ReactElement<IPurchaseOrderViewProps> {
+      console.log("Result:", result);
 
-    return (
-      <div className={styles.container}>
+      if (result) {
+      setItemId(result.Id);
+
+      setForm(prev => ({
+        ...prev,
+        POrequestNo: result.POrequestNo || '',
+        projectCode: result.ProjectCode || '',
+        Department: result.Department || '',
+        projectTitle: result.ProjectTitle || '',
+        vendorName: result.VendorName || '',
+        POAmount: result.POAmount || 0,
+        ApplicableTaxes: result.ApplicableTaxes || 0,
+        ProjectDescription: result.ProjectDescription || '',
+        files: null
+      }));
+
+      setApproverComment(result.ApproverComment1 || '');
+
+    } else {
+      alert("No data found");
+    }
+
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+
+  const handleApprove = async () => {
+  try {
+       if (!approverComment) return alert("Approver Comment required");
+    if (!itemId) return;
+
+    await service.updateItemdata(itemId, "Approved", approverComment);
+
+    alert("✅ Approved successfully");
+    setApproverComment('');
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const handleReject = async () => {
+  try {
+    if (!approverComment) return alert("Approver Comment required");
+    if (!itemId) return;
+
+    if (!approverComment) {
+      alert("Comment is required for rejection ❗");
+      return;
+    }
+
+    await service.updateItemdata(itemId, "Rejected", approverComment);
+
+    alert("❌ Rejected successfully");
+    setApproverComment('');
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+    
+ 
+
+
+  // --- RENDER ---
+  return (
+     <div className={styles.container}>
 
         {/* LEFT FORM */}
         <div className={styles.leftPanel}>
-          <h2>PO Approval Details & Status</h2>
-          <h4>PO Approval / Request Details</h4>
+          <h2>PO Approval Form</h2>
+          <h4>PO Approval / Request Approval</h4>
 
           <label>Project Code</label>
-          <input value={this.state.POrequestNo}  onChange={this.handleRequestNoChange} readOnly />
+          <input value={form.projectCode}   readOnly />
 
           <label>Department</label>
-          <input name="Department" value={this.state.Department} readOnly  />
+          <input name="department" value={form.Department} readOnly />
 
           <label>Project Title</label>
-          <input name="projectTitle" value={this.state.projectTitle} readOnly />
+          <input name="projectTitle" value={form.projectTitle} readOnly />
 
           <label>Select Vendor Name</label>
-          <input name="vendorName" value={this.state.vendorName} readOnly  >
+          <input name="vendorName" value={form.vendorName} readOnly   >
           </input>
 
           <label>Remaining Amount</label>
-          <input name="RemainingAmount" value={this.state.RemainingAmount} readOnly  />
+          <input name="RemainingAmount" value={form.RemainingAmount} readOnly  />
 
           <label>PO Amount</label>
-          <input name="POAmount" value={this.state.POAmount} readOnly />
+          <input name="POAmount" value={form.POAmount} readOnly  />
 
           <label>Applicable Taxes</label>
-          <input name="ApplicableTaxes" value={this.state.ApplicableTaxes} readOnly  >
+          <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly   >
           </input>
-           
-            <label>PO Category</label>
-          <input name="POCategory" value={this.state.POCategory} readOnly   >
+
+           <label>PO Category</label>
+          <input name="POCategory" value={form.POCategory} readOnly   >
           </input>
 
           <label>Additional Information & Remarks</label>
-          <input name="comments" value={this.state.Comments}   >
+          <input name="comments" value={form.ProjectDescription}  readOnly >
           </input>
-
-          <label>Attached Documents</label>
-          
+        
+           <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
+      {attachments.map((file: any, index: number) => (
+        <a
+          key={index}
+            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+          {file.FileName}
+        </a>
+       ))}
+    </div>
+ 
+ 
         </div>
+    </div>
+   );
+};
 
-        {/* RIGHT PANEL */}
-        <div className={styles.rightPanel}>
-          {/* Templates */}
-          <div className={styles.card}>
-            <h4>Templates</h4>
-            <ul>
-              <li>PO_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
-            </ul>
-          </div>
-
-          {/* Guidelines */}
-          <div className={styles.card}>
-            <h4>Important Guidelines</h4>
-            <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
-            </ol>
-          </div>
-        </div>
-      </div>
-    );
-  }
-}
+export default PurchaseOrderView;

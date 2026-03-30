@@ -23,7 +23,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     ApplicableTaxes: 0,
     POCategory: '',
     Comments: '',
-    files: null as FileList | null,
+   files: [] as File[],
     POrequestNo:''
   });
 
@@ -35,18 +35,47 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const [POrequestNoError, setPORequestNoError] = React.useState('');
   const [department, setDepartment] = React.useState('');
     const [projectTitle, setProjectTitle] = React.useState('');
+    const MAX_TOTAL_SIZE_MB = 25;
+  const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
     
 const handleCancel = () => {
   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
   window.location.assign(url);
 };
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  setForm({
-    ...form,
-    files: e.target.files
-  });
+const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event?.target?.files;
+  if (!files) return;
+
+  
+  const filesArray = Array.from(files);
+
+  const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
+  if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
+    alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+    return;
+  }
+   // Invalid filename check
+  const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
+  if (invalidFiles.length > 0) {
+    alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+    return;
+  }
+   if (event.target.files) {
+    const selectedFiles = Array.from(event.target.files);
+
+    setForm((prev: any) => ({
+      ...prev,
+      files: [...prev.files, ...selectedFiles]
+    }));
+  }
 };
 
+const removeFile = (index: number) => {
+  setForm((prev: any) => ({
+    ...prev,
+    files: prev.files.filter((_: File, i: number) => i !== index)
+  }));
+};
 
 
 
@@ -115,8 +144,19 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
   });
 };
 
-  // Save Data
-  const handleSave = async () => {
+
+
+//SAVE DRAFT DATA
+
+  const handleSaveOrUpdate = async () => {
+  // 🔹 Validations
+  if(!POrequestNo) return alert("Project Code required");
+    if(!form.POAmount) return alert("Enter POAmount");
+    if(!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
+    if(!form.POCategory) return alert("Choose POCategory");
+     if (!form.files || form.files.length === 0) return alert("Attach files");
+
+  // 🔹 Payload (common)
   const payload = {
     ProjectCode: POrequestNo,
     Department: department,
@@ -130,29 +170,45 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     //POCategory: form.POCategory,
     ProjectDescription: form.Comments
   };
-  try {    
-      // CREATE
+
+  try {
+    if (!itemId) {
+      // 🔹 CREATE
       const res = await service.createItem(payload);
-      setItemId(res.Id); 
-      if(res.Id>0){      
-      if (form.files && form.files.length > 0) {
-      for (let i = 0; i < form.files.length; i++) {
-        await service.uploadFile(res.Id, form.files[i]);
+      setItemId(res.Id); // store ID for future updates
+
+      if (res.Id > 0 && form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(res.Id, form.files[i]);
+        }
       }
+      alert("Data Saved Successfully ✅");
+    } else {
+      // 🔹 UPDATE
+      await service.updateItem(itemId, payload);
+
+      if (form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(itemId, form.files[i]);
+        }
+      }
+      alert("Data Updated Successfully ✅");
     }
-      alert("Data Saved Successfully✅");  
-  }  
-  else{
-    alert("Data Not Saved.");
-  }
   } catch (error) {
     console.error(error);
-    alert("Error occurred");
+    alert("Error occurred ❌");
   }
 };
 
+  
+
 // Update
 const handleUpdate = async () => {
+   if(!POrequestNo) return alert("Project Code required");
+  if(!form.POAmount) return alert("Enter POAmount");
+    if(!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
+    if(!form.POCategory) return alert("Choose POCategory");
+     if (!form.files || form.files.length === 0) return alert("Attach files");
   const payload = {
     Title:"Testing",
     ProjectCode: POrequestNo,
@@ -168,13 +224,15 @@ const handleUpdate = async () => {
   try {
     if (itemId) {
       // 🔥 UPDATE
-    const result=  await service.updateItem(itemId, payload);
+     await service.updateItem(itemId, payload);
     if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(itemId, form.files[i]);
       }
     }
-      alert("Data Updated Successfully ✅");      
+      alert("Data Submitted Successfully ✅");    
+      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url);  
     }
   } catch (error) {
     console.error(error);
@@ -216,7 +274,7 @@ const validatePO = (value: string) => {
         <h2>PO Approval Request Form</h2>
         <h4>PO Approval / Request Form</h4>
 
-        <label>Project Code</label>
+        <label>Project Code <span className={styles.required}>*</span> </label>
         <input name="projectCode" value={POrequestNo} onChange={handleRequestNoChange} />
 
         {/* <label>Department</label>
@@ -254,10 +312,10 @@ const validatePO = (value: string) => {
         <label>Remaining Amount</label>
         <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange} />
 
-        <label>PO Amount</label>
+        <label>PO Amount <span className={styles.required}>*</span></label>
         <input name="POAmount" value={form.POAmount} onChange={handleChange} />
 
-        <label>Applicable Taxes</label>
+        <label>Applicable Taxes <span className={styles.required}>*</span></label>
         <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} />
 
         <ChoiceGroup
@@ -277,12 +335,32 @@ const validatePO = (value: string) => {
         <label>Additional Information & Remarks</label>
         <input name="Comments" value={form.Comments} onChange={handleChange} />
 
-        <label>Attachments</label>
-       <input type="file" multiple onChange={handleFileChange} />
+       <label>Attachments <span className={styles.required}>*</span></label>
+       <input type="file" multiple onChange={handleFileChange}  />
+        {/* Selected Files */}
+       {form.files.length > 0 && (
+    <ul style={{ listStyle: "none", padding: 0 }}>
+      {form.files.map((file: File, index: number) => (
+        <li key={index} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          
+          {/* ❌ Remove */}
+          <span
+            style={{ cursor: "pointer", color: "red", fontWeight: "bold" }}
+            onClick={() => removeFile(index)}
+          >
+            ✕
+          </span>
 
+          {/* File Name */}
+          <span>{file.name}</span>
+
+        </li>
+      ))}
+    </ul>
+       )}
         <div className={styles.buttonGroup}>          
           <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
-          <button className={styles.saveBtn} onClick={handleSave}>Save</button>
+          <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
           <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
         </div>
       </div>
