@@ -49,26 +49,36 @@ const columnHelper = createColumnHelper<any>()
         columnHelper.accessor('VendorName', {
             header: () => <span>Vendor Name</span>
         }),
-        columnHelper.accessor('Bill Number', {
+        columnHelper.accessor('BillNumber', {
             header: 'Bill Number'
         }),
         columnHelper.accessor('BillDate', {
-            header: 'Bill Date'
-        }),
+  header: 'Bill Date',
+  cell: info =>
+    info.getValue()
+      ? new Date(info.getValue()).toLocaleDateString()
+      : ""
+}),
         columnHelper.accessor('BillAmount', {
             header: 'Bill Amount'            
         }),
         columnHelper.accessor('Created', {
-            header: 'Uploaded Date',
-            cell: (info) => <span>TBD</span>
-        }),
-        columnHelper.accessor('Author', {
-            header: 'Uploader'
-        }),
-        columnHelper.accessor('Created', {
-            header: 'View',
-            cell: (info) => <span>TBD</span>
-        })
+  header: 'Uploaded Date',
+  cell: info => new Date(info.getValue()).toLocaleDateString()
+}),
+        columnHelper.accessor(row => row.Author?.Title, {
+  id: 'Author',
+  header: 'Uploader'
+}),
+        columnHelper.display({
+  id: 'view',
+  header: 'View',
+  cell: info => (
+    <button onClick={() => handleView(info.row.original)}>
+      View
+    </button>
+  )
+})
     ]
     const table = useReactTable({
             data,
@@ -118,20 +128,21 @@ const columnHelper = createColumnHelper<any>()
   window.location.assign(url);
 };
 const handlesearch = async () => {
+  _setData([]);
   if (!form.VendorName) {
     alert("Please select a Vendor Name");
     return;
   }
-  await getDatafromListByTitle(form.VendorName, user?.Id);
+  await getDatafromListByTitle(form.VendorName);
 };    
-const getDatafromListByTitle = async (parm_vendorname:string,UserID:number) => {
+const getDatafromListByTitle = async (parm_vendorname:string) => {
   try
   {
     setLoading(true);
-  const data = await service.getItemByTitle(parm_vendorname,UserID);
+  const data = await service.getItemByTitle(parm_vendorname);
     if(data.Id>0)
     {
-      _setData((d) => [...d.concat(data.value)]);
+      _setData((d) => [...d.concat(data)]);
     }
   }catch (error) {
     console.error(error);
@@ -212,14 +223,13 @@ const getDatafromListByTitle = async (parm_vendorname:string,UserID:number) => {
                     </tr>
                 ))}
                 </tbody>
-            </Table>
-            {/* 📄 Pagination */}
-            <div className="flex items-center gap-2">
+                
+                 <div className="pagination" style={{padding:"10px",textAlign:"right"}}>
                 <span>
                     Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
                     {table.getRowCount().toLocaleString()} Rows
                 </span>
-                <div style={{float:"right"}} className="flex items-center gap-2">
+                <div style={{float:"right", textAlign:"right"}}>
                     <label>
                     Go to page:
                     </label>
@@ -278,7 +288,9 @@ const getDatafromListByTitle = async (parm_vendorname:string,UserID:number) => {
                     ))}
                     </select>
                 </div>
-            </div>
+                </div>
+                
+            </Table>
       </div>
   </div>
   );

@@ -21,8 +21,8 @@ export default class Service {
     return data.value;
   }
   // Fetch the Record
-  public async getItemByTitle(VendorName: string, UserID: number): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=VendorName eq '${VendorName}' or UserID eq ${UserID}`;
+  public async getItemByTitle(VendorName: string): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=VendorName eq '${VendorName}'`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
