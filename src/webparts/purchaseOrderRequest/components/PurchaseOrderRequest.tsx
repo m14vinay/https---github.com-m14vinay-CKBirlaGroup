@@ -249,23 +249,7 @@ const validatePO = (value: string) => {
     return "";
   };
 
-   // 🔹 Handle change
-  // const handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = e.target.value;
-
-  //   setPORequestNo(value);
-
-  //   const error = validatePO(value);
-  //   setPORequestNoError(error);
-
-  //   // Example: auto fill department
-  //   if (!error) {
-  //     setDepartment("IT Department"); // dummy
-  //   } else {
-  //     setDepartment("");
-  //   }
-  // };
-
+   
   // 🔹 UI
   return (
     <div className={styles.container}>

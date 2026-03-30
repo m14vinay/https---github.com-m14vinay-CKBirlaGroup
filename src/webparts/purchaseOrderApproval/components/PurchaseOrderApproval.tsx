@@ -219,6 +219,10 @@ const handleReject = async () => {
           <label>Additional Information & Remarks</label>
           <input name="comments" value={form.ProjectDescription}  readOnly >
           </input>  
+           <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px",  marginBottom:"10px"}}>
+           <label>
+            Attachments <span className={styles.required}>*</span>
+            </label>
            <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
       {attachments.map((file: any, index: number) => (
         <a
@@ -228,7 +232,7 @@ const handleReject = async () => {
         </a>
        ))}
     </div>
- 
+ </div>
  
       <label></label>
         <label></label>

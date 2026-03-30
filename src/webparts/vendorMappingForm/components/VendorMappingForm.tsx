@@ -15,7 +15,8 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     projectDescription: '',
     vendorName: '',
     vendorDescription: '',
-    files: [] as File[]
+    files: [] as File[],
+    CurrentStatus:''
   });
 
   const [requestNo, setRequestNo] = React.useState('');
@@ -146,7 +147,8 @@ const removeFile = (index: number) => {
     ProjectTitle: projectTitle,
     ProjectDescription: projectDescription,
     VendorName: form.vendorName,
-    VendorDescription: form.vendorDescription
+    VendorDescription: form.vendorDescription,
+    CurrentStatus: 'Draft'
   };
 
   try {
@@ -189,7 +191,8 @@ const handleUpdate = async () => {
      ProjectDescription: projectDescription,
     ProjectTitle: projectTitle,
     VendorName:  form.vendorName, 
-    VendorDescription: form.vendorDescription
+    VendorDescription: form.vendorDescription,
+    CurrentStatus: 'Pending'
   };
   try {
     if (itemId) {
