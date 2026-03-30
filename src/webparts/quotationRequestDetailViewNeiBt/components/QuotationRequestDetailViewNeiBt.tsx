@@ -3,36 +3,16 @@ import styles from './QuotationRequestDetailViewNeiBt.module.scss';
 import type { IQuotationRequestDetailViewNeiBtProps } from './IQuotationRequestDetailViewNeiBtProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import { SPHttpClient } from '@microsoft/sp-http';
-interface IState {
-  QARequestNo:string;  
-  ProjectTitle:string;
-  ProjectReferenceNo:string;
-  projectDescription: string;
-  TotalProjectAmount:number;
-  ApplicableTaxes:number;
-  Vendor1: string;
-  Vendor2: string;
-  Vendor3: string;
-  Quote1:string;
-  Quote2:string;
-  Quote3:string;
-  Vendor:string;
-  Quote:string;
-  Department:string;
-  AdvancePayment:number;
-  ApprovalPath: string;
-  files: FileList | null;
-}
-export default class QuotationRequestDetailViewNeiBt extends React.Component<IQuotationRequestDetailViewNeiBtProps, IState> {
+import { useEffect, useState } from 'react';
+import { TextField, Dropdown, PrimaryButton, formProperties } from '@fluentui/react';
+import SharePointService from '../service/Service';
 
-  constructor(props: IQuotationRequestDetailViewNeiBtProps) {
-    super(props);
+const QuotationRequestDetailViewNeiBt: React.FC<IQuotationRequestDetailViewNeiBtProps> = (props) => {
 
-    this.state = {
-      QARequestNo:'',
-      ProjectTitle:'',
-      ProjectReferenceNo:'',
-      projectDescription: '',
+     const [form, setForm] = React.useState({
+   ProjectTitle:'',
+      ProjectReffNo:'',
+      ProjectDescription: '',
       TotalProjectAmount:0,
       ApplicableTaxes:0,
       Vendor1: '',
@@ -41,194 +21,211 @@ export default class QuotationRequestDetailViewNeiBt extends React.Component<IQu
       Quote1:'',
       Quote2:'',
       Quote3:'',
-      Vendor:'',
-      Quote:'',
+      Selectedvendor:'',
+      SelectedQuote:'',
       Department:'',
-      AdvancePayment:0,
+      Advancepayment:0,
       ApprovalPath: '',
-      files: null
-    };
-  }
+      files: null,
+      attachments: [],
+       ApproverComment1:'',
+  });
 
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
-  };
+   const [itemId, setItemId] = React.useState<number | null>(null);
+    const service = new SharePointService(props.context);
+    const [approverComment, setApproverComment] = React.useState('');
+    const [attachments, setAttachments] = React.useState<any[]>([]);
+  // useEffect(() => {
+  //   loadDepartments();
+  // }, []);
 
- private getRequestDetails = async (requestNo: string) => {
- 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
+  // const loadDepartments = async () => {
+  //   const res = await fetch(
+  //     `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items`,
+  //     { headers: { Accept: 'application/json;odata=verbose' } }
+  //   );
+  //   const data = await res.json();
+  //   setDepartments(data.d.results);
+  // };
 
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-  
- const data = await response.json();
-
-  if (data.value.length > 0) {
-    this.setState({
-      QARequestNo: data.value[0].QARequestNo,
-      ProjectTitle: data.value[0].ProjectTitle,
-      ProjectReferenceNo: data.value[0].ProjectReferenceNo,
-      projectDescription: data.value[0].projectDescription,
-      TotalProjectAmount: data.value[0].TotalProjectAmount,
-      ApplicableTaxes: data.value[0].ApplicableTaxes,
-      Vendor1: data.value[0].Vendor1,
-      Vendor2: data.value[0].Vendor2,
-      Vendor3: data.value[0].Vendor3,
-      Quote1: data.value[0].Quote1,
-      Quote2: data.value[0].Quote2,
-      Quote3: data.value[0].Quote3,
-      Vendor: data.value[0].Vendor,
-      Quote: data.value[0].Quote,
-      Department: data.value[0].Department,
-      AdvancePayment: data.value[0].AdvancePayment,
-      ApprovalPath: data.value[0].ApprovalPath
-    });
-  } else {
-   
-    this.setState({
-       QARequestNo:'',
-      ProjectTitle:'',
-      ProjectReferenceNo:'',
-      projectDescription: '',
-      TotalProjectAmount:0,
-      ApplicableTaxes:0,
-      Vendor1: '',
-      Vendor2: '',
-      Vendor3: '',
-      Quote1:'',
-      Quote2:'',
-      Quote3:'',
-      Vendor:'',
-      Quote:'',
-      Department:'',
-      AdvancePayment:0,
-      ApprovalPath: ''
-    });
-  }
-};
- 
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-
-  this.setState({ QARequestNo: value });
-
- // optional
-    this.getRequestDetails(value);
-  
-};
-
-  private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ files: e.target.files });
-  };
-  private saveData = async () => {
-
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
-
-  const body = {
-  QARequestNo: this.state.  QARequestNo,      
+    // --- 1️⃣ Get ID from query string ---
+     const getIdFromQueryString = (): number | null => {
+       const params = new URLSearchParams(window.location.search);
+       const id = params.get('ID');
+       return id ? parseInt(id, 10) : null;
      };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
-    }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
+   
+     // --- 3️⃣ Load data on mount ---
+     React.useEffect(() => {
+       const id = getIdFromQueryString();
+       if (id) {
+         handleFetchById(id);
+       }
+     }, []);
 
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
+const loadAttachments = async (id:number) => {
+    try{
+  const files = await service.getAttachments(id);
+  console.log("Attachments:", files);
+  setAttachments(files);
+    }catch(error)
+    {
+      console.error(error);
+    }
+   };
+
+React.useEffect(() => {
+  if (itemId) {
+    loadAttachments(itemId);
+     // 👈 dynamic ID use karo
+  }
+}, [itemId]);
+
+
+const handleFetchById = async (id: number) => {
+    try {
+      console.log("Calling API with ID:", id);
+
+      const result = await service.getItemByRequestNo(id);
+
+      console.log("Result:", result);
+
+      if (result) {
+      setItemId(result.Id);
+
+      setForm(prev => ({
+        ...prev,
+        ProjectTitle: result.ProjectTitle || '',
+        ProjectReffNo: result. ProjectReffNo || '',
+        ProjectDescription: result.ProjectDescription || '',
+        TotalProjectAmount: result.TotalProjectAmount || 0,
+         ApplicableTaxes: result.ApplicableTaxes || 0,
+          Vendor1: result.Vendor1 || '',
+      Vendor2: result.Vendor2 || '',
+      Vendor3: result.Vendor3 || '',
+      Quote1: result.Quote1 || '',
+      Quote2:result.Quote2 || '',
+      Quote3: result.Quote3 || '',
+      Selectedvendor: result.Selectedvendor || '',
+      SelectedQuote: result.SelectedQuote || '',
+      Department: result.Department || '',
+      Advancepayment: result.Advancepayment || 0,
+      ApprovalPath: result.ApprovalPath || '',
+      files: null
+      }));
+  setApproverComment(result.ApproverComment1 || '');
+    } else {
+      alert("No data found");
+    }
+
+  } catch (error) {
+    console.error("Error:", error);
   }
 };
+
+
   
-  private handleApprove = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
-  };
 
-  private handleReject = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Rejected");
-  };
+// // 🔹 Bind approval path
+//   const bindPath = async (dept: string) => {
+//     const res = await fetch(
+//       `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items?$filter=DepartmentName eq '${dept}'`,
+//       { headers: { Accept: 'application/json;odata=verbose' } }
+//     );
+//     const data = await res.json();
+//     setPaths(data.d.results);
+//   };
 
-  public render(): React.ReactElement<IQuotationRequestDetailViewNeiBtProps> {
+  // 🔹 Handle change
+  
+ 
+//  // 🔹 File upload
+//   const handleFile = (e: any) => {
+//     setForm({ ...form, files: Array.from(e.target.files) });
+//   };
 
+  
+    
+  
     return (
       <div className={styles.container}>
-
         {/* LEFT FORM */}
         <div className={styles.leftPanel}>
           <h2>Quotation Approval Form-NEI BT Admin</h2>
-          <h4>Quotation Approval Form-NEI BT Admin/Request Details</h4>
+          <h4>Quotation Approval Form-NEI BT Admin/Request Approval</h4>
 
           <label>Project Title</label>
-          <input value={this.state.ProjectTitle}  onChange={this.handleRequestNoChange}  />
+          <input name="ProjectTitle" value={form.ProjectTitle}  />
 
           <label>Project Reference No</label>
-          <input name="projectReferenceNo" value={this.state.ProjectReferenceNo}   >
+          <input name="ProjectReffNo" value={form.ProjectReffNo}   >
           </input>
 
           <label>Project Description & Advance Payment Details</label>
-          <input name="projectDescription" value={this.state.projectDescription}   >
+          <input name="projectDescription" value={form.ProjectDescription}   >
           </input>
 
           <label>Total Project Amount</label>
-          <input name="totalProjectAmount" value={this.state.TotalProjectAmount }  />
+          <input name="TotalProjectAmount" value={form.TotalProjectAmount }  />
 
           <label>Applicable Taxes</label>
-          <input name="applicableTaxes" value={this.state.ApplicableTaxes}   >
+          <input name="ApplicableTaxes" value={form.ApplicableTaxes}   >
           </input>
 
           <label>Vendor 1</label>
-          <input name="vendor1" value={this.state.Vendor1}  />
+          <input name="Vendor1" value={form.Vendor1}  />
 
           <label>Vendor 2</label>
-          <input name="vendor2" value={this.state.Vendor2}  />
+          <input name="Vendor2" value={form.Vendor2}  />
 
           <label>Vendor 3</label>
-          <input name="vendor3" value={this.state.Vendor3}  />
+          <input name="Vendor3" value={form.Vendor3}  />
 
           <label>Quote 1</label>
-          <input name="quote1" value={this.state.Quote1}  />
+          <input name="Quote1" value={form.Quote1}  />
 
           <label>Quote 2</label>
-          <input name="quote2" value={this.state.Quote2}  />
+          <input name="Quote2" value={form.Quote2}  />
 
           <label>Quote 3</label>
-          <input name="quote3" value={this.state.Quote3}  />
+          <input name="Quote3" value={form.Quote3}  />
 
           <label>Select Vendor</label>
-          <input name="vendor" value={this.state.Vendor}  />
+          <input name="Selectedvendor" value={form.Selectedvendor}  />
 
           <label>Select Quote</label>
-          <input name="quote" value={this.state.Quote}   >
+          <input name="SelectedQuote" value={form.SelectedQuote}   >
           </input>
 
           <label>Department</label>
-          <input name="Department" value={this.state.Department}   >
+          <input name="Department" value={form.Department}   >
           </input>
 
           <label>Advance Amount</label>
-          <input name="AdvanceAmount" value={this.state.AdvancePayment}   >
+          <input name="AdvancePayment" value={form.Advancepayment}   >
           </input>
 
           <label>Approval Path</label>
-          <input name="ApprovalPath" value={this.state.ApprovalPath}   >
+          <input name="ApprovalPath" value={form.ApprovalPath}   >
           </input>          
+ <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px" , marginBottom:"10px"}}>
+           <label>
+            Attachments <span className={styles.required}></span>
+            </label>
+           <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
+      {attachments.map((file: any, index: number) => (
+        <a
+          key={index}
+            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+          {file.FileName}
+        </a>
+       ))}
+    </div>
+</div>
 
-          <label>Attach Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} /> 
+<label></label>
+        <label></label>
+        
         </div>
 
         {/* RIGHT PANEL */}
@@ -257,5 +254,6 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       </div>
     );
   }
-}
 
+
+export default QuotationRequestDetailViewNeiBt;

@@ -122,7 +122,8 @@ export default class Service {
       VendorName: item.VendorName,
       VendorDescription: item.VendorDescription,
       ApproverComments: item.ApproverComments, // 👈 check column name
-      Attachments: item.AttachmentFiles || [] // 👈 important
+      Attachments: item.AttachmentFiles || [],
+      CurrentStatus:item.CurrentStatus // 👈 important
     };
   }
 

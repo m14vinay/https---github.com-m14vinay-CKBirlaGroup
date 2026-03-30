@@ -16,7 +16,8 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
     vendorName: '',
     vendorDescription: '',
     files: null as FileList | null,
-     attachments: []
+     attachments: [],
+     CurrentStatus:''
     
   });
 
@@ -63,6 +64,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
 //FETCH DATA-----
 const handleFetchById = async (id: number) => {
     try {
+     
       console.log("Calling API with ID:", id);
 
       const result = await service.getItemByRequestNo(id);
@@ -85,7 +87,7 @@ const handleFetchById = async (id: number) => {
       } else {
         alert("No data found");
       }
-
+      
     } catch (error) {
       console.error("Error:", error);
     }
