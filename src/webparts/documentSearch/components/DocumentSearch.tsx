@@ -1,171 +1,298 @@
 import * as React from 'react';
 import styles from './DocumentSearch.module.scss';
-import { IDocumentSearchProps,IState,IData,IColumn } from './IDocumentSearchProps';
-import { SPHttpClient } from '@microsoft/sp-http';
-import { DetailsList } from '@fluentui/react';
-import { SelectionMode } from '@fluentui/react/lib/DetailsList';
-export default class DocumentSearch extends React.Component<IDocumentSearchProps, IState> {
-
-  constructor(props: IDocumentSearchProps) {
-    super(props);
-
-    this.state = {
-      vendorName: '',
-      GST: '',
-      PAN: '',
-      vendorCode: '',
-      TANNo:''  
-    };
-  }
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
-  };
-
- private getRequestDetails = async (requestNo: string) => {
- 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
-
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
+import { IDocumentSearchProps } from './IDocumentSearchProps';
+import { Dropdown, Icon, IDropdownOption, Label } from '@fluentui/react';
+import SharePointService from '../service/Service';
+import { Spinner, SpinnerSize } from '@fluentui/react';
+import DataTable, { TableColumn } from "react-data-table-component";
+import { useEffect, useState } from 'react';
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  flexRender,
+  useReactTable,
+} from '@tanstack/react-table';
+import { Table } from 'react-bootstrap';
+const DocumentSearch: React.FC<IDocumentSearchProps> = (props) => {
+const [form, setForm] = React.useState({
+      VendorName: '',
+      VendorID: ''
+  });
   
- const data = await response.json();
 
- const [items, setItems] = React.useState([
-    { id: 1, name: 'Vendor A', amount: 1000 },
-    { id: 2, name: 'Vendor B', amount: 2000 },
-    { id: 3, name: 'Vendor C', amount: 3000 }
-  ]);
+  const [loading, setLoading] = React.useState(false);
+  const [vendorOptions, setVendorOptions] = React.useState<IDropdownOption[]>([]);
+  const params = new URLSearchParams(window.location.search);
+  const service = new SharePointService(props.context);
+  const [search, setSearch] = useState("");
+    const [data, _setData] = useState<any[]>(() => []);
+    const [user, setUser] = useState<any>(null);
+    const [globalFilter, setGlobalFilter] = useState("");
+    const [sorting, setSorting] = useState<any>([]);
+    
+const filteredData = data.filter(item =>
+  item.DocumentName?.toLowerCase().includes(search.toLowerCase()) ||
+  item.VendorName?.toLowerCase().includes(search.toLowerCase())
+);
 
-  const columns: IColumn[] = [
-    { key: 'col1', name: 'ID', fieldName: 'id', minWidth: 50 },
-    { key: 'col2', name: 'Name', fieldName: 'name', minWidth: 150 },
-    { key: 'col3', name: 'Amount', fieldName: 'amount', minWidth: 100 }
-  ];
-  if (data.value.length > 0) {
-    this.setState({
-      vendorName: data.value[0].VendorName,
-      GST: data.value[0].GST,
-      PAN: data.value[0].PAN,
-      vendorCode: data.value[0].VendorCode,
-      TANNo: data.value[0].TANNo  
-    });
-  } else {
-   
-    this.setState({
-      vendorName: '',
-      GST: '',
-      PAN: '',
-      vendorCode: '',
-      TANNo: ''
-    });
-  }
-};
- 
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-
-  this.setState({ vendorName: value });
-
- // optional
-    this.getRequestDetails(value);
-  
-};
-
-  private saveData = async () => {
-
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
-
-  const body = {
-    vendorName: this.state.vendorName,
-    GST: this.state.GST,
-    PAN: this.state.PAN,
-    VendorCode: this.state.vendorCode,
-    TANNo: this.state.TANNo
-     };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
+const columnHelper = createColumnHelper<any>()
+    const columns = [
+        columnHelper.accessor('ID', {
+            header: () => <span>Document ID</span>
+        }),
+        columnHelper.accessor('Title', {
+            header: () => 'Document Name'
+        }),
+        columnHelper.accessor('VendorName', {
+            header: () => <span>Vendor Name</span>
+        }),
+        columnHelper.accessor('BillNumber', {
+            header: 'Bill Number'
+        }),
+        columnHelper.accessor('BillDate', {
+  header: 'Bill Date',
+  cell: info =>
+    info.getValue()
+      ? new Date(info.getValue()).toLocaleDateString()
+      : ""
+}),
+        columnHelper.accessor('BillAmount', {
+            header: 'Bill Amount'            
+        }),
+        columnHelper.accessor('Created', {
+  header: 'Uploaded Date',
+  cell: info => new Date(info.getValue()).toLocaleDateString()
+}),
+        columnHelper.accessor(row => row.Author?.Title, {
+  id: 'Author',
+  header: 'Uploader'
+}),
+        columnHelper.display({
+  id: 'view',
+  header: 'View',
+  cell: info => (
+    <button onClick={() => handleView(info.row.original)}>
+      View
+    </button>
+  )
+})
+    ]
+    const table = useReactTable({
+            data,
+            columns,
+            getCoreRowModel: getCoreRowModel(),
+            state: {
+                globalFilter,
+                sorting,
+            },
+            onGlobalFilterChange: setGlobalFilter,
+            onSortingChange: setSorting,
+            getPaginationRowModel: getPaginationRowModel(),
+            getSortedRowModel: getSortedRowModel(),
+            getFilteredRowModel: getFilteredRowModel(),
+        });
+  // 🔹 Load data
+    React.useEffect(() => {
+      loadMaster();
+      getUser();
+    }, []);
+  // Load the User Details
+  const getUser = async () => {
+      const data = await service.getUser();
+      if(data && Array.isArray(data))
+      {
+      setUser(data);
     }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
-
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
+    };
+    //Load the Master Data for Dropdown
+    const loadMaster = async () => {
+      const data = await service.getMasterDocument();
+      if(data && Array.isArray(data))
+      {
+      const options = data.map((item: any) => ({
+        key: item.Id,
+        text: item.VendorName
+      }));
+      setVendorOptions(options);
+    }
+    };
+  const handleAddNewDocument = () => {
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+  window.location.assign(url);
+};
+ const handleView = (documentId: string) => {
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx?documentId=${documentId}`;
+  window.location.assign(url);
+};
+const handlesearch = async () => {
+  _setData([]);
+  if (!form.VendorName) {
+    alert("Please select a Vendor Name");
+    return;
+  }
+  await getDatafromListByTitle(form.VendorName);
+};    
+const getDatafromListByTitle = async (parm_vendorname:string) => {
+  try
+  {
+    setLoading(true);
+  const data = await service.getItemByTitle(parm_vendorname);
+    if(data.Id>0)
+    {
+      _setData((d) => [...d.concat(data)]);
+    }
+  }catch (error) {
+    console.error(error);
+    alert("Error occurred");
+  }
+  finally
+  {
+    setLoading(false);
   }
 };
-  
-  
-  private handleSubmit = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
-  };
-
-  private handleSave = () => {
-    console.log("Saved Data:", this.state);
-    alert("Saved");
-  };
-
-  public render(): React.ReactElement<IDocumentSearchProps> {
-
-    return (
-      <div className={styles.container}>
-          <h2>My Document List</h2>
-          <h4>My Document List</h4>
-
-<div className={styles.container}>  
-  <h2>Search My Document</h2>
-  <div className={styles.leftPanel}>
-            <button className={styles.submitBtn} onClick={this.handleSubmit}>Add New Document</button>
-          </div>
-</div>
-<div className={styles.container}>  
-  <h2>Search My Document</h2>
-  <div className={styles.leftPanel}>
-            <button className={styles.submitBtn} onClick={this.handleSubmit}>Add New Document</button>
-          </div>          
-</div>
-        <div className={styles.container}>    
-
-          <label>Vendor Name</label>
-          <input name="vendorName" value={this.state.vendorName}  />
-
-          <label>GST</label>
-          <input name="GST" value={this.state.GST}   >
-          </input>
-
-          <label>PAN</label>
-          <input name="PAN" value={this.state.PAN}   >
-          </input>
-
-          <label>Vendor Code</label>
-          <input name="vendorCode" value={this.state.vendorCode}   >
-          </input>
-
-          <label>TAN Number</label>
-          <input name="TANNo" value={this.state.TANNo}   >
-          </input>
-          </div>     
-          <div className={styles.container}>   
-            {/* <DetailsList
-        items=null
-        columns={columns}
-        selectionMode={SelectionMode.none}
-      /> */}
-          </div>          
-        </div>
-    );
-  }
-}
+  return (
+<div className={styles.pagecontainer}>
+  <div className={styles.headerbar}>
+      <h2 className={styles.leftPanel}>My Documents List</h2>      
+    <div className={styles.rightPanel}> 
+      <span className={styles.rightPanel}>Digiflow / My Documents List</span>
+      <br></br>      
+    </div>
+  </div>
+  <div className={styles.searchbox}>
+    <span><h3>Search My Document</h3>    
+      <button className={styles.btnadd} onClick={handleAddNewDocument}>Add New Document</button></span>    
+    <div className={styles.searchrow}>
+      <div className={styles.field}>
+        <label className={styles.field}>Vendor Name</label>
+        <Dropdown
+                  options={vendorOptions}
+                  selectedKey={form.VendorID}
+                  onChange={(e, option) =>
+                    setForm({ ...form, VendorName: option?.text as string,VendorID: option?.key as string, })
+                  }
+                />
+      </div>
+      <div className={styles.btnarea}>
+        <button className={styles.btnsearch} onClick={handlesearch}>Search</button>
+      </div>
+    </div>
+  </div>
+      <div className={styles.pagecontainer}>
+        <Label style={{display:"inline-block"}}>My Documents List</Label>
+         <input
+                    value={globalFilter ?? ""}
+                    onChange={(e) => setGlobalFilter(e.target.value)}
+                    placeholder="Search..."
+                    style={{ marginBottom: "10px", padding: "5px", float:"right" }}
+                />
+                          <Table striped bordered hover>
+                <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                    <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                        <th 
+                        key={header.id} 
+                        onClick={header.column.getToggleSortingHandler()}>
+                        {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                            )}
+                            {{
+                                asc: <Icon iconName='ChevronUpMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
+                                desc: <Icon iconName='ChevronDownMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
+                            }[header.column.getIsSorted() as string] ?? null}
+                        </th>
+                    ))}
+                    </tr>
+                ))}
+                </thead>
+                <tbody>
+                {table.getRowModel().rows.map((row) => (
+                    <tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                    ))}
+                    </tr>
+                ))}
+                </tbody>
+                
+                 <div className="pagination" style={{padding:"10px",textAlign:"right"}}>
+                <span>
+                    Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
+                    {table.getRowCount().toLocaleString()} Rows
+                </span>
+                <div style={{float:"right", textAlign:"right"}}>
+                    <label>
+                    Go to page:
+                    </label>
+                    <label>
+                        <input
+                            type="number"
+                            min="1"
+                            max={table.getPageCount()}
+                            defaultValue={table.getState().pagination.pageIndex + 1}
+                            onChange={(e) => {
+                            const page = e.target.value ? Number(e.target.value) - 1 : 0
+                            table.setPageIndex(page)
+                            }}
+                            className="border p-1 rounded w-16"
+                        />
+                    </label>
+                    <button
+                    className="border rounded p-1"
+                    onClick={() => table.firstPage()}
+                    disabled={!table.getCanPreviousPage()}
+                    >
+                    {'<<'}
+                    </button>
+                    <button
+                    className="border rounded p-1"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                    >
+                    {'<'}
+                    </button>
+                    <button
+                    className="border rounded p-1"
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                    >
+                    {'>'}
+                    </button>
+                    <button
+                    className="border rounded p-1"
+                    onClick={() => table.lastPage()}
+                    disabled={!table.getCanNextPage()}
+                    >
+                    {'>>'}
+                    </button>
+                    <span>Page size</span>
+                    <select
+                    value={table.getState().pagination.pageSize}
+                    onChange={(e) => {
+                        table.setPageSize(Number(e.target.value))
+                    }}
+                    >
+                    {[10, 20, 30, 40, 50].map((pageSize) => (
+                        <option key={pageSize} value={pageSize}>
+                        {pageSize}
+                        </option>
+                    ))}
+                    </select>
+                </div>
+                </div>
+                
+            </Table>
+      </div>
+  </div>
+  );
+};
+export default DocumentSearch;

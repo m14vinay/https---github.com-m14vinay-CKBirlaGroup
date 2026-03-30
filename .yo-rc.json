@@ -3,7 +3,7 @@
     "useGulp": false,
     "plusBeta": false,
     "isCreatingSolution": false,
-    "nodeVersion": "22.20.0",
+    "nodeVersion": "20.16.0",
     "sdksVersions": {},
     "version": "1.22.2",
     "libraryName": "ck-birla-group-digi-flow",

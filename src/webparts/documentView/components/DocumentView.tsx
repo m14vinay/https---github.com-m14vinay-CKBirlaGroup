@@ -4,6 +4,7 @@ import { IDocumentViewProps } from './IDocumentViewProps';
 import { Dropdown, IDropdownOption } from '@fluentui/react';
 import SharePointService from '../service/Service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
+
 const DocumentView: React.FC<IDocumentViewProps> = (props) => {
   // State
   const [form, setForm] = React.useState({
