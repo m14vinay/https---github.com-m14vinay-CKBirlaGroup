@@ -21,8 +21,8 @@ export default class Service {
     return data.value;
   }
   // Fetch the Record
-  public async getItemByTitle(VendorName: string): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=VendorName eq '${VendorName}'`;
+  public async getItemByTitle(VendorName: string, UserID: number): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=VendorName eq '${VendorName}' or UserID eq ${UserID}`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
@@ -44,4 +44,14 @@ export default class Service {
 
   return data.value; // array of attachments
 }
+ public async getUser(): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0]: null;
+  }
+
 }

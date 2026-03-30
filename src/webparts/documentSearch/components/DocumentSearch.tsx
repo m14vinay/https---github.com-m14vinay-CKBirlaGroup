@@ -1,87 +1,103 @@
 import * as React from 'react';
 import styles from './DocumentSearch.module.scss';
 import { IDocumentSearchProps } from './IDocumentSearchProps';
-import { Dropdown, IDropdownOption } from '@fluentui/react';
+import { Dropdown, Icon, IDropdownOption, Label } from '@fluentui/react';
 import SharePointService from '../service/Service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import DataTable, { TableColumn } from "react-data-table-component";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  flexRender,
+  useReactTable,
+} from '@tanstack/react-table';
+import { Table } from 'react-bootstrap';
 const DocumentSearch: React.FC<IDocumentSearchProps> = (props) => {
 const [form, setForm] = React.useState({
       VendorName: '',
       VendorID: ''
   });
-  interface IDocument {
-  ID: string;
-  Title: string;
-  VendorName: string;
-  BillNumber: string;
-  BillDate: string;
-  BillAmount: number;
-  Author: string;
-}
+  
 
   const [loading, setLoading] = React.useState(false);
   const [vendorOptions, setVendorOptions] = React.useState<IDropdownOption[]>([]);
-  const [documents, setDocuments] = React.useState<any[]>([]);
   const params = new URLSearchParams(window.location.search);
   const service = new SharePointService(props.context);
   const [search, setSearch] = useState("");
-
-const filteredData = documents.filter(item =>
+    const [data, _setData] = useState<any[]>(() => []);
+    const [user, setUser] = useState<any>(null);
+    const [globalFilter, setGlobalFilter] = useState("");
+    const [sorting, setSorting] = useState<any>([]);
+    
+const filteredData = data.filter(item =>
   item.DocumentName?.toLowerCase().includes(search.toLowerCase()) ||
   item.VendorName?.toLowerCase().includes(search.toLowerCase())
 );
 
-const columns: TableColumn<IDocument>[] = [
-  {
-    name: "Document ID",
-    selector: (row: IDocument) => row.ID || "",
-    sortable: true
-  },
-  {
-    name: "Document Name",
-    selector: (row: IDocument) => row.Title || "",
-    sortable: true
-  },
-  {
-    name: "Vendor Name",
-    selector: (row: IDocument) => row.VendorName || "",
-    sortable: true
-  },
-  {
-    name: "Bill Number",
-    selector: (row: IDocument) => row.BillNumber || ""    
-  },
-  {
-    name: "Bill Date",
-    selector: (row: IDocument) =>
-      row.BillDate ? new Date(row.BillDate).toLocaleDateString() : ""
-  },
-  {
-    name: "Bill Amount",
-    selector: (row: IDocument) => row.BillAmount || 0,
-    sortable: true,
-    right: true
-  },
-  {
-    name: "Uploader",
-    selector: (row: IDocument) => row.Author || "",
-  },
-  {
-    name: "View",
-    cell: (row: IDocument) => (
-      <button onClick={() => handleView(row.ID)}>
-        View
-      </button>
-    )
-  }
-];
+const columnHelper = createColumnHelper<any>()
+    const columns = [
+        columnHelper.accessor('ID', {
+            header: () => <span>Document ID</span>
+        }),
+        columnHelper.accessor('Title', {
+            header: () => 'Document Name'
+        }),
+        columnHelper.accessor('VendorName', {
+            header: () => <span>Vendor Name</span>
+        }),
+        columnHelper.accessor('Bill Number', {
+            header: 'Bill Number'
+        }),
+        columnHelper.accessor('BillDate', {
+            header: 'Bill Date'
+        }),
+        columnHelper.accessor('BillAmount', {
+            header: 'Bill Amount'            
+        }),
+        columnHelper.accessor('Created', {
+            header: 'Uploaded Date',
+            cell: (info) => <span>TBD</span>
+        }),
+        columnHelper.accessor('Author', {
+            header: 'Uploader'
+        }),
+        columnHelper.accessor('Created', {
+            header: 'View',
+            cell: (info) => <span>TBD</span>
+        })
+    ]
+    const table = useReactTable({
+            data,
+            columns,
+            getCoreRowModel: getCoreRowModel(),
+            state: {
+                globalFilter,
+                sorting,
+            },
+            onGlobalFilterChange: setGlobalFilter,
+            onSortingChange: setSorting,
+            getPaginationRowModel: getPaginationRowModel(),
+            getSortedRowModel: getSortedRowModel(),
+            getFilteredRowModel: getFilteredRowModel(),
+        });
   // 🔹 Load data
     React.useEffect(() => {
       loadMaster();
+      getUser();
     }, []);
-  
+  // Load the User Details
+  const getUser = async () => {
+      const data = await service.getUser();
+      if(data && Array.isArray(data))
+      {
+      setUser(data);
+    }
+    };
+    //Load the Master Data for Dropdown
     const loadMaster = async () => {
       const data = await service.getMasterDocument();
       if(data && Array.isArray(data))
@@ -106,16 +122,16 @@ const handlesearch = async () => {
     alert("Please select a Vendor Name");
     return;
   }
-  await getDatafromListByTitle(form.VendorName);
+  await getDatafromListByTitle(form.VendorName, user?.Id);
 };    
-const getDatafromListByTitle = async (parm_vendorname:string) => {
+const getDatafromListByTitle = async (parm_vendorname:string,UserID:number) => {
   try
   {
     setLoading(true);
-  const data = await service.getItemByTitle(parm_vendorname);
+  const data = await service.getItemByTitle(parm_vendorname,UserID);
     if(data.Id>0)
     {
-      setDocuments(data.value || []);
+      _setData((d) => [...d.concat(data.value)]);
     }
   }catch (error) {
     console.error(error);
@@ -155,21 +171,114 @@ const getDatafromListByTitle = async (parm_vendorname:string) => {
     </div>
   </div>
       <div className={styles.pagecontainer}>
-         <span className={styles.leftPanel}>My Document List</span>
+        <Label style={{display:"inline-block"}}>My Documents List</Label>
          <input
-  type="text"
-  placeholder="Search..."
-  onChange={(e) => setSearch(e.target.value)} className={styles.searchboxh3}
-/>                  <DataTable
-          columns={columns}
-          data={filteredData}
-          pagination
-          striped
-          highlightOnHover
-          responsive
-          fixedHeader
-          fixedHeaderScrollHeight="400px"
-        />
+                    value={globalFilter ?? ""}
+                    onChange={(e) => setGlobalFilter(e.target.value)}
+                    placeholder="Search..."
+                    style={{ marginBottom: "10px", padding: "5px", float:"right" }}
+                />
+                          <Table striped bordered hover>
+                <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                    <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                        <th 
+                        key={header.id} 
+                        onClick={header.column.getToggleSortingHandler()}>
+                        {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                            )}
+                            {{
+                                asc: <Icon iconName='ChevronUpMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
+                                desc: <Icon iconName='ChevronDownMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
+                            }[header.column.getIsSorted() as string] ?? null}
+                        </th>
+                    ))}
+                    </tr>
+                ))}
+                </thead>
+                <tbody>
+                {table.getRowModel().rows.map((row) => (
+                    <tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                    ))}
+                    </tr>
+                ))}
+                </tbody>
+            </Table>
+            {/* 📄 Pagination */}
+            <div className="flex items-center gap-2">
+                <span>
+                    Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
+                    {table.getRowCount().toLocaleString()} Rows
+                </span>
+                <div style={{float:"right"}} className="flex items-center gap-2">
+                    <label>
+                    Go to page:
+                    </label>
+                    <label>
+                        <input
+                            type="number"
+                            min="1"
+                            max={table.getPageCount()}
+                            defaultValue={table.getState().pagination.pageIndex + 1}
+                            onChange={(e) => {
+                            const page = e.target.value ? Number(e.target.value) - 1 : 0
+                            table.setPageIndex(page)
+                            }}
+                            className="border p-1 rounded w-16"
+                        />
+                    </label>
+                    <button
+                    className="border rounded p-1"
+                    onClick={() => table.firstPage()}
+                    disabled={!table.getCanPreviousPage()}
+                    >
+                    {'<<'}
+                    </button>
+                    <button
+                    className="border rounded p-1"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                    >
+                    {'<'}
+                    </button>
+                    <button
+                    className="border rounded p-1"
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                    >
+                    {'>'}
+                    </button>
+                    <button
+                    className="border rounded p-1"
+                    onClick={() => table.lastPage()}
+                    disabled={!table.getCanNextPage()}
+                    >
+                    {'>>'}
+                    </button>
+                    <span>Page size</span>
+                    <select
+                    value={table.getState().pagination.pageSize}
+                    onChange={(e) => {
+                        table.setPageSize(Number(e.target.value))
+                    }}
+                    >
+                    {[10, 20, 30, 40, 50].map((pageSize) => (
+                        <option key={pageSize} value={pageSize}>
+                        {pageSize}
+                        </option>
+                    ))}
+                    </select>
+                </div>
+            </div>
       </div>
   </div>
   );
