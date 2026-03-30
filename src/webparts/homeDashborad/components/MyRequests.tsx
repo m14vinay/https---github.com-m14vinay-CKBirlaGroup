@@ -14,7 +14,7 @@ import {
 } from '@tanstack/react-table';
 import Table from 'react-bootstrap/Table';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Icon, Label } from '@fluentui/react';
+import { Icon, Label, Modal } from '@fluentui/react';
 import { SharePointContext } from './SharePointContext';
 
 export default function MyRequests() {
@@ -22,6 +22,12 @@ export default function MyRequests() {
     const context = React.useContext(SharePointContext) as WebPartContext;
 
     const columnHelper = createColumnHelper<any>()
+
+    const [showForm, setShowForm] = useState<boolean>(false);
+
+    const openForm = () => {
+        setShowForm(true);
+    }
 
     const columns = [
         columnHelper.accessor('RequestNo', {
@@ -53,7 +59,7 @@ export default function MyRequests() {
         }),
         columnHelper.accessor('Created', {
             header: 'View',
-            cell: (info) => <span>TBD</span>
+            cell: (info) => <span><Icon iconName="RedEye" onClick={openForm}></Icon></span>
         })
     ]
     const [data, _setData] = useState<any[]>(() => []);
@@ -234,6 +240,7 @@ export default function MyRequests() {
                     </select>
                 </div>
             </div>
+            {showForm && <Modal isOpen={true}><iframe src='https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/QuotationForm.aspx?isDlg=1' width={1080} height={720}></iframe></Modal>}
         </div>
     )
 }
