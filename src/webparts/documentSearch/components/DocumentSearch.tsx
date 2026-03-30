@@ -12,13 +12,13 @@ const [form, setForm] = React.useState({
       VendorID: ''
   });
   interface IDocument {
-  DocumentID: string;
-  DocumentName: string;
+  ID: string;
+  Title: string;
   VendorName: string;
   BillNumber: string;
   BillDate: string;
   BillAmount: number;
-  Uploader: string;
+  Author: string;
 }
 
   const [loading, setLoading] = React.useState(false);
@@ -36,22 +36,22 @@ const filteredData = documents.filter(item =>
 const columns: TableColumn<IDocument>[] = [
   {
     name: "Document ID",
-    selector: (row: IDocument) => row.DocumentID,
+    selector: (row: IDocument) => row.ID || "",
     sortable: true
   },
   {
     name: "Document Name",
-    selector: (row: IDocument) => row.DocumentName,
+    selector: (row: IDocument) => row.Title || "",
     sortable: true
   },
   {
     name: "Vendor Name",
-    selector: (row: IDocument) => row.VendorName,
+    selector: (row: IDocument) => row.VendorName || "",
     sortable: true
   },
   {
     name: "Bill Number",
-    selector: (row: IDocument) => row.BillNumber
+    selector: (row: IDocument) => row.BillNumber || ""    
   },
   {
     name: "Bill Date",
@@ -60,18 +60,18 @@ const columns: TableColumn<IDocument>[] = [
   },
   {
     name: "Bill Amount",
-    selector: (row: IDocument) => row.BillAmount,
+    selector: (row: IDocument) => row.BillAmount || 0,
     sortable: true,
     right: true
   },
   {
     name: "Uploader",
-    selector: (row: IDocument) => row.Uploader
+    selector: (row: IDocument) => row.Author || "",
   },
   {
     name: "View",
     cell: (row: IDocument) => (
-      <button onClick={() => handleView(row.DocumentID)}>
+      <button onClick={() => handleView(row.ID)}>
         View
       </button>
     )
@@ -102,7 +102,7 @@ const columns: TableColumn<IDocument>[] = [
   window.location.assign(url);
 };
 const handlesearch = async () => {
-  if (!form.VendorID) {
+  if (!form.VendorName) {
     alert("Please select a Vendor Name");
     return;
   }
@@ -127,34 +127,40 @@ const getDatafromListByTitle = async (parm_vendorname:string) => {
   }
 };
   return (
-    <div className={styles.container}>
-      <div className={styles.header}> 
-        <span className={styles.leftPanel}>My Document List</span>
-        <span>className={styles.rightPanel}Search / My Document List</span>
+<div className={styles.pagecontainer}>
+  <div className={styles.headerbar}>
+      <h2 className={styles.leftPanel}>My Documents List</h2>      
+    <div className={styles.rightPanel}> 
+      <span className={styles.rightPanel}>Digiflow / My Documents List</span>
+      <br></br>      
+    </div>
+  </div>
+  <div className={styles.searchbox}>
+    <span><h3>Search My Document</h3>    
+      <button className={styles.btnadd} onClick={handleAddNewDocument}>Add New Document</button></span>    
+    <div className={styles.searchrow}>
+      <div className={styles.field}>
+        <label className={styles.field}>Vendor Name</label>
+        <Dropdown
+                  options={vendorOptions}
+                  selectedKey={form.VendorID}
+                  onChange={(e, option) =>
+                    setForm({ ...form, VendorName: option?.text as string,VendorID: option?.key as string, })
+                  }
+                />
       </div>
-      <div className={styles.container}>
-        <h2>Search My Document</h2>
-        <span><button onClick={handleAddNewDocument} className={styles.btnadd}>Add New Document</button></span>
-        <div>
-          <label>Vendor Name</label>          
-                  <Dropdown
-                    options={vendorOptions}
-                    selectedKey={form.VendorID}
-                    onChange={(e, option) =>
-                      setForm({ ...form, VendorName: option?.text as string, VendorID: option?.key as string, })
-                    }
-                  />
-          <button onClick={handlesearch} className={styles.btnsearch}>Search</button>
-        </div>   
+      <div className={styles.btnarea}>
+        <button className={styles.btnsearch} onClick={handlesearch}>Search</button>
       </div>
-      <div className={styles.container}>
+    </div>
+  </div>
+      <div className={styles.pagecontainer}>
          <span className={styles.leftPanel}>My Document List</span>
          <input
   type="text"
   placeholder="Search..."
-  onChange={(e) => setSearch(e.target.value)}
-/>
-                  <DataTable
+  onChange={(e) => setSearch(e.target.value)} className={styles.searchboxh3}
+/>                  <DataTable
           columns={columns}
           data={filteredData}
           pagination
