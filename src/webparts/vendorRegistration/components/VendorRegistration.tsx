@@ -20,16 +20,41 @@ const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/;
     attachments: []
   });
 const handleFileUpload = async (event: any) => {
-  const file = event.target.files[0];
+  try
+  {
+  const file = form.files[0];
   const data = await file.arrayBuffer();
   const workbook = XLSX.read(data);
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
   const jsonData = XLSX.utils.sheet_to_json(worksheet);
   console.log(jsonData);
-  const result=await service.InsertRecord(jsonData);
-  
-  
+  const payload = jsonData.map((item: any) => ({
+  Title: item.Title
+}));  
+  const result=await service.InsertRecord(payload);  
+  console.log(result);   
+  if(result!=null)
+  {
+    alert("Data uploaded successfully");
+  }
+  else{
+    alert("Failed to upload data");
+  }
+}
+catch(error)
+{
+  console.error("Error uploading file:", error);
+  alert("An error occurred while uploading the file. Please try again.");
+}
+finally
+{
+  setForm({
+    Title: '',
+    files: [],
+    attachments: []
+  });
+}
 };
 const handleManual = () => {
      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -65,6 +90,8 @@ const handleManual = () => {
   // 🔹 UI
   return (
       <section>
+        <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
+        <button onClick={handleFileUpload}>View Manual</button>        
       </section>
     );
 };

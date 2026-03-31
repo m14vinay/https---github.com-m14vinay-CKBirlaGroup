@@ -202,6 +202,13 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
                 <h4>Approved</h4>
                 </div>
               </div>
+              <div className={styles.statusBox}>
+                <div className={styles.content}>
+                <h5>Vinay Kumar</h5>
+                <h6>Department Head</h6>
+                <h4>Approved</h4>
+                </div>
+              </div>
               <div className={`${styles.statusBox} ${styles.pendingBox}`}>
                 <div className={styles.content}>
                 <h5>Vinay Kumar</h5>
@@ -299,16 +306,6 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
                 <li>SOP_Procurement_of_Goods_Services.pdf</li>
                 <li>DigiFlow_Training_Manual.pdf</li>
               </ul>
-            </div>
-
-            <div className={styles.card}>
-              <h4>Important Guidelines</h4>
-              <ol>
-                <li>Select approval path carefully.</li>
-                <li>Use project reference if needed.</li>
-                <li>Attach all documents (Max 25 MB).</li>
-                <li>Avoid special characters in file names.</li>
-              </ol>
             </div>
           </div>
         </div>
