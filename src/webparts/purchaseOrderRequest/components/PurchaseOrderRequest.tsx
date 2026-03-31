@@ -32,6 +32,10 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const [itemId, setItemId] = React.useState<number | null>(null);
   const [Approver1ID, setApprover1ID] = React.useState<number | null>(null);
   const [Approver2ID, setApprover2ID] = React.useState<number | null>(null);
+  const [Approver3ID, setApprover3ID] = React.useState<number | null>(null);
+  const [Approver4ID, setApprover4ID] = React.useState<number | null>(null);
+  const [Approver5ID, setApprover5ID] = React.useState<number | null>(null);
+  const [Departmenthead, setDepartmenthead] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
    const [POrequestNo, setPORequestNo] = React.useState('');
   const [POrequestNoError, setPORequestNoError] = React.useState('');
@@ -94,12 +98,23 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
       setDepartment(result[0].Department || '');
       setProjectTitle(result[0].ProjectTitle || '');
       const data=await service.GetApprover(result[0].Department);
-      if(data.length>0){
-      
+      if(data.Id>0){
+      setApprover1ID(data.Approval1 ? data.Approval1.Id : null);
+      setApprover2ID(data.Approval2 ? data.Approval2.Id : null);  
+      setApprover3ID(data.Approval3 ? data.Approval3.Id : null);
+      setApprover4ID(data.Approval4 ? data.Approval4.Id : null);
+      setApprover5ID(data.Approval5 ? data.Approval5.Id : null);
+      setDepartmenthead(data.Departmenthead ? data.Departmenthead.Id : null);        
       }
     } else { 
       setDepartment('');
       setProjectTitle('');
+      setApprover1ID(null);
+      setApprover2ID(null);
+      setApprover3ID(null);
+      setApprover4ID(null);
+      setApprover5ID(null);
+      setDepartmenthead(null);
     }
 
   } catch (error) {
