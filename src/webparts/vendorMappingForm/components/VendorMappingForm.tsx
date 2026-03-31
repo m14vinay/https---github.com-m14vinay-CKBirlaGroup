@@ -16,7 +16,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     vendorName: '',
     vendorDescription: '',
     files: [] as File[],
-    attachments: [],
+    Attachments: [],
     CurrentStatus:''
   });
 
@@ -161,9 +161,15 @@ const removeFile = (index: number) => {
     files: prev.files.filter((_: File, i: number) => i !== index)
   }));
 };
+// const removeExistingFile = (index: number) => {
+//   setAttachments((prev: any[]) =>
+//     prev.filter((_, i) => i !== index)
+//   );
+// };
 
-
-
+const removeExistingFile = (index: number) => {
+  setAttachments(prev => prev.filter((_, i) => i !== index));
+};
 
 
 
@@ -171,6 +177,7 @@ const removeFile = (index: number) => {
   // const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   //   const value = e.target.value;
   //   setRequestNo(value);
+   
   //   const errorMsg = validateProjectCode(value);
   // setRequestNoError(errorMsg);
 
@@ -202,28 +209,30 @@ const removeFile = (index: number) => {
   // };
 
 
-  const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value;
 
-  // Update form.projectCode
-  setForm(prev => ({ ...prev, projectCode: value }));
+  // ✅ form me update karo (IMPORTANT)
+  setForm(prev => ({
+    ...prev,
+    projectCode: value
+  }));
 
-  // Validate
+  // validation
   const errorMsg = validateProjectCode(value);
   setRequestNoError(errorMsg);
 
   if (errorMsg || !value) {
-    // reset dependent fields
     setForm(prev => ({
       ...prev,
       projectTitle: '',
       projectDescription: ''
     }));
-    return; // skip API
+    return;
   }
 
   try {
-    const result = await service.getRequestDetails(value); // GET API
+    const result = await service.getRequestDetails(value);
 
     if (result.length > 0) {
       setForm(prev => ({
@@ -244,7 +253,6 @@ const removeFile = (index: number) => {
   }
 };
 
-
   // 🔹 Handle input change
    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -261,13 +269,18 @@ const removeFile = (index: number) => {
   // 🔹 Validations
   if (!form.projectCode) return alert("Project Code required");
   if (!form.vendorName) return alert("Select Vendor");
-  if (!form.files || form.files.length === 0) return alert("Attach files");
+ if (
+  (!form.files || form.files.length === 0) &&
+  (!attachments || attachments.length === 0)
+) {
+  return alert("Attach files");
+}
 
   // 🔹 Payload (common)
   const payload = {
-    ProjectCode: requestNo,
-    ProjectTitle: projectTitle,
-    ProjectDescription: projectDescription,
+    ProjectCode: form.projectCode,
+    ProjectTitle: form.projectTitle,
+    ProjectDescription: form.projectDescription,
     VendorName: form.vendorName,
     VendorDescription: form.vendorDescription,
     CurrentStatus: 'Draft'
@@ -305,13 +318,18 @@ const removeFile = (index: number) => {
   
 // SUBMIT DATA
 const handleUpdate = async () => {
-   if (!requestNo) return alert("Project Code required");
+   if (!form.projectCode) return alert("Project Code required");
     if (!form.vendorName) return alert("Select Vendor");
-    if (!form.files || form.files.length === 0) return alert("Attach files");
+    if (
+  (!form.files || form.files.length === 0) &&
+  (!attachments || attachments.length === 0)
+) {
+  return alert("Attach files");
+}
   const payload = {
-    ProjectCode: requestNo,
-     ProjectDescription: projectDescription,
-    ProjectTitle: projectTitle,
+    ProjectCode: form.projectCode,
+     ProjectDescription: form.projectDescription,
+    ProjectTitle: form.projectTitle,
     VendorName:  form.vendorName, 
     VendorDescription: form.vendorDescription,
     CurrentStatus: 'Pending'
@@ -393,14 +411,14 @@ const handleUpdate = async () => {
 
 
         <label>Project Code <span className={styles.required}>*</span></label>
-        <input name="projectCode" value={requestNo} onChange={handleRequestNoChange}   />
+        <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange}   />
        {requestNoError && <span className={styles.error}>{requestNoError}</span>}
        
         <label>Project Title</label>
-        <input name="projectTitle" value={projectTitle} readOnly   />
+        <input name="projectTitle" value={form.projectTitle} readOnly   />
 
         <label>Project Description</label>
-        <input name="projectDescription" value={projectDescription} readOnly  />
+        <input name="projectDescription" value={form.projectDescription} readOnly  />
 
 
         <label>Select Vendor <span className={styles.required}>*</span></label>
@@ -420,13 +438,36 @@ const handleUpdate = async () => {
        {/*  Existing Files (API se) */}
 {attachments?.length > 0 && (
   <ul style={{ listStyle: "none", padding: 0 }}>
-    {attachments.map((file: any, index: number) => (
-      <li key={index}>
-        📄 {file.FileName}
+    {attachments.map((file, index) => (
+      <li
+        key={index}
+        style={{ display: "flex", alignItems: "center", gap: "10px" }}
+      >
+        {/* ❌ Remove Button */}
+        <span
+          style={{
+            color: "red",
+            cursor: "pointer",
+            fontWeight: "bold"
+          }}
+          onClick={() => removeExistingFile(index)}
+        >
+          ✕
+        </span>
+
+        {/* 📄 File Link */}
+        <a
+          href={file.ServerRelativeUrl}
+         
+          rel="noopener noreferrer"
+        >
+          {file.FileName}
+        </a>
       </li>
     ))}
   </ul>
 )}
+      
         {/* Selected Files */}
        {form.files.length > 0 && (
     <ul style={{ listStyle: "none", padding: 0 }}>

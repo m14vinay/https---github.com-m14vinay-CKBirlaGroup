@@ -25,6 +25,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
   const [approverComment, setApproverComment] = React.useState('');
+   const [Actiondate1, setactiondate1] = React.useState('');
    const [attachments, setAttachments] = React.useState<any[]>([]);
  
   
@@ -84,6 +85,7 @@ const handleFetchById = async (id: number) => {
           files: null
         }));
          setApproverComment(result.ApproverComment || ''); // 
+         
       } else {
         alert("No data found");
       }
@@ -100,7 +102,7 @@ const handleFetchById = async (id: number) => {
     if (!itemId) return;
 
     await service.updateItemdata(itemId, "Approved", approverComment);
-
+    
     alert("✅ Approved successfully");
     setApproverComment('');
   } catch (error) {

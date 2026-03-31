@@ -42,9 +42,82 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const [POrequestNoError, setPORequestNoError] = React.useState('');
   const [department, setDepartment] = React.useState('');
     const [projectTitle, setProjectTitle] = React.useState('');
+     const [attachments, setAttachments] = React.useState<any[]>([]);
     const MAX_TOTAL_SIZE_MB = 25;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
     
+
+
+  // --- 1️⃣ Get ID from query string ---
+    const getIdFromQueryString = (): number | null => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('ID');
+      return id ? parseInt(id, 10) : null;
+    };
+  
+    // --- 3️⃣ Load data on mount ---
+    // React.useEffect(() => {
+    //   const id = getIdFromQueryString();
+    //   if (id) {
+    //     handleFetchById(id);
+    //   }
+    // }, []);
+  
+  
+//      const loadAttachments = async (id:number) => {
+//       try{
+//     const files = await service.getAttachments(id);
+//     console.log("Attachments:", files);
+//     setAttachments(files);
+//       }catch(error)
+//       {
+//         console.error(error);
+//       }
+//      };
+//      React.useEffect(() => {
+//        if (itemId) {
+//          loadAttachments(itemId);
+        
+//        }
+//      }, [itemId]);
+
+// //FETCH DATA-----
+//   const handleFetchById = async (id: number) => {
+//     try {
+//       console.log("Calling API with ID:", id);
+
+//       const result = await service.getItemByRequestNo(id);
+
+//       console.log("Result:", result);
+
+//       if (result.CurrentStatus==='Draft') {
+//       setItemId(result.Id);
+
+//         setForm(prev => ({
+//           ...prev,
+//           POrequestNo: result.POrequestNo || '',
+//           projectCode: result.ProjectCode || '',
+//           Department: result.Department || '',
+//           projectTitle: result.ProjectTitle || '',
+//           vendorName: result.VendorName || '',
+//           POAmount: result.POAmount || 0,
+//           ApplicableTaxes: result.ApplicableTaxes || 0,
+//           ProjectDescription: result.ProjectDescription || '',
+         
+//         }));
+
+       
+
+//       } else {
+//         alert("No data found");
+//       }
+
+//     } catch (error) {
+//       console.error("Error:", error);
+//     }
+//   };
+
+
 const handleCancel = () => {
   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
   window.location.assign(url);
