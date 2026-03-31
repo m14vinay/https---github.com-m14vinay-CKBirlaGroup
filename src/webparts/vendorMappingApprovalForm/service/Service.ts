@@ -81,7 +81,7 @@ export default class Service {
   }
 
   // Update the Record (Submit)
-  public async updateItemdata(id: number,status:string, comments: string): Promise<void> {
+  public async updateItemdata(id: number,status:string, comments: string ): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
     await this.context.spHttpClient.post(
@@ -96,7 +96,8 @@ export default class Service {
         },
         body: JSON.stringify({
         CurrentStatus: status,
-         ApproverComment: comments
+         ApproverComment: comments,
+         Actiondate1: new Date().toISOString()
      })
       }
     );
@@ -123,7 +124,8 @@ export default class Service {
       VendorDescription: item.VendorDescription,
       ApproverComments: item.ApproverComments, // 👈 check column name
       Attachments: item.AttachmentFiles || [],
-      CurrentStatus:item.CurrentStatus // 👈 important
+      CurrentStatus:item.CurrentStatus ,// 👈 important
+      Actiondate1 : item.Actiondate1
     };
   }
 
