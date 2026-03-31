@@ -19,24 +19,26 @@ import { Table } from 'react-bootstrap';
 const DocumentSearch: React.FC<IDocumentSearchProps> = (props) => {
 const [form, setForm] = React.useState({
       VendorName: '',
-      VendorID: ''
+      ID: '',
+      BillNumber: '',
+      BillDate: '',
+      BillAmount: '',
+      Title: ''
   });
   
 
   const [loading, setLoading] = React.useState(false);
   const [vendorOptions, setVendorOptions] = React.useState<IDropdownOption[]>([]);
-  const params = new URLSearchParams(window.location.search);
+  const [BillNumberOptions, setBillNumberOptions] = React.useState<IDropdownOption[]>([]);
+  const [BillDateOptions, setBillDateOptions] = React.useState<IDropdownOption[]>([]);
+  const [BillAmountOptions, setBillAmountOptions] = React.useState<IDropdownOption[]>([]);
+  const [TitleOptions, setTitleOptions] = React.useState<IDropdownOption[]>([]);
   const service = new SharePointService(props.context);
   const [search, setSearch] = useState("");
     const [data, _setData] = useState<any[]>(() => []);
     const [user, setUser] = useState<any>(null);
     const [globalFilter, setGlobalFilter] = useState("");
     const [sorting, setSorting] = useState<any>([]);
-    
-const filteredData = data.filter(item =>
-  item.DocumentName?.toLowerCase().includes(search.toLowerCase()) ||
-  item.VendorName?.toLowerCase().includes(search.toLowerCase())
-);
 
 const columnHelper = createColumnHelper<any>()
     const columns = [
@@ -66,7 +68,7 @@ const columnHelper = createColumnHelper<any>()
   header: 'Uploaded Date',
   cell: info => new Date(info.getValue()).toLocaleDateString()
 }),
-        columnHelper.accessor(row => row.Author?.Title, {
+        columnHelper.accessor(row => user?.Title, {
   id: 'Author',
   header: 'Uploader'
 }),
@@ -74,7 +76,7 @@ const columnHelper = createColumnHelper<any>()
   id: 'view',
   header: 'View',
   cell: info => (
-    <button onClick={() => handleView(info.row.original)}>
+    <button onClick={() => handleView(info.row.original.ID)}>
       View
     </button>
   )
@@ -94,53 +96,73 @@ const columnHelper = createColumnHelper<any>()
             getSortedRowModel: getSortedRowModel(),
             getFilteredRowModel: getFilteredRowModel(),
         });
-  // 🔹 Load data
+  // Load data
     React.useEffect(() => {
-      loadMaster();
-      getUser();
+      getUser();          
     }, []);
   // Load the User Details
   const getUser = async () => {
       const data = await service.getUser();
-      if(data && Array.isArray(data))
+      if(data.Id>0)
       {
       setUser(data);
+      loadMaster(data.Id); // Load the Master Data for Dropdown based on User ID  
     }
     };
     //Load the Master Data for Dropdown
-    const loadMaster = async () => {
-      const data = await service.getMasterDocument();
+    const loadMaster = async (userId: number) => {
+      const data = await service.getMasterDocument(userId);
       if(data && Array.isArray(data))
       {
-      const options = data.map((item: any) => ({
-        key: item.Id,
+      const BillNumberOption = data.map((item: any) => ({
+        key: item.BillNumber,
+        text: item.BillNumber
+      }));
+      const BillDateOption = data.map((item: any) => ({
+        key: item.BillDate ? new Date(item.BillDate).toLocaleDateString() : "",
+        text: item.BillDate ? new Date(item.BillDate).toLocaleDateString() : ""
+      }));
+      const BillAmountOption = data.map((item: any) => ({
+        key: item.BillAmount,
+        text: item.BillAmount
+      }));
+      const VendorOption = data.map((item: any) => ({
+        key: item.VendorName,
         text: item.VendorName
       }));
-      setVendorOptions(options);
+      const TitleOption = data.map((item: any) => ({
+        key: item.Title,
+        text: item.Title
+      }));
+      setVendorOptions(VendorOption);
+      setBillNumberOptions(BillNumberOption);
+      setBillDateOptions(BillDateOption);
+      setBillAmountOptions(BillAmountOption);
+      setTitleOptions(TitleOption);
     }
     };
   const handleAddNewDocument = () => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/DocumentUpload.aspx`;
   window.location.assign(url);
 };
  const handleView = (documentId: string) => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx?documentId=${documentId}`;
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/DocumentView.aspx?ID=${documentId}`;
   window.location.assign(url);
 };
 const handlesearch = async () => {
   _setData([]);
-  if (!form.VendorName) {
-    alert("Please select a Vendor Name");
+  if (!form.VendorName && !form.BillAmount && !form.Title&& !form.BillDate&& !form.BillNumber) {
+    alert("Please select any one  fields to search");
     return;
   }
-  await getDatafromListByTitle(form.VendorName);
+  await getDatafromListByTitle(form.VendorName,form.BillAmount,form.Title,form.BillDate,form.BillNumber);
 };    
-const getDatafromListByTitle = async (parm_vendorname:string) => {
+const getDatafromListByTitle = async (parm_vendorname:string, parm_billamount:string, parm_title:string, parm_billdate:string, parm_billnumber:string) => {
   try
   {
     setLoading(true);
-  const data = await service.getItemByTitle(parm_vendorname);
-    if(data.Id>0)
+  const data = await service.getItemByTitle(parm_vendorname,parm_billamount, parm_title, parm_billdate, parm_billnumber);
+   if (data)
     {
       _setData((d) => [...d.concat(data)]);
     }
@@ -170,12 +192,59 @@ const getDatafromListByTitle = async (parm_vendorname:string) => {
         <label className={styles.field}>Vendor Name</label>
         <Dropdown
                   options={vendorOptions}
-                  selectedKey={form.VendorID}
+                  selectedKey={form.VendorName}
                   onChange={(e, option) =>
-                    setForm({ ...form, VendorName: option?.text as string,VendorID: option?.key as string, })
+                    setForm({ ...form, VendorName: option?.text as string,ID: option?.key as string, })
                   }
                 />
+                
       </div>
+      <div className={styles.field}>
+        <label className={styles.field}>Bill Number</label>
+        <Dropdown
+                  options={BillNumberOptions}
+                  selectedKey={form.BillNumber}
+                  onChange={(e, option) =>
+                    setForm({ ...form, BillNumber: option?.text as string,ID: option?.key as string, })
+                  }
+                />
+                
+      </div>
+      <div className={styles.field}>
+        <label className={styles.field}>Bill Amount</label>
+        <Dropdown
+                  options={BillAmountOptions}
+                  selectedKey={form.BillAmount}
+                  onChange={(e, option) =>
+                    setForm({ ...form, BillAmount: option?.text as string,ID: option?.key as string, })
+                  }
+                />
+                
+      </div> 
+    </div>
+    <div className={styles.searchrow}>
+      <div className={styles.field}>
+        <label className={styles.field}>Bill Date</label>
+        <Dropdown
+                  options={BillDateOptions}
+                  selectedKey={form.BillDate}
+                  onChange={(e, option) =>
+                    setForm({ ...form, BillDate: option?.text as string,ID: option?.key as string, })
+                  }
+                />
+                
+      </div>
+      <div className={styles.field}>
+        <label className={styles.field}>Document Name</label>
+        <Dropdown
+                  options={TitleOptions}
+                  selectedKey={form.Title}
+                  onChange={(e, option) =>
+                    setForm({ ...form, Title: option?.text as string,ID: option?.key as string, })
+                  }
+                />
+                
+      </div> 
       <div className={styles.btnarea}>
         <button className={styles.btnsearch} onClick={handlesearch}>Search</button>
       </div>
