@@ -2,7 +2,7 @@ import { SPHttpClient } from '@microsoft/sp-http';
 export default class Service {
 
   private context: any;
-  private listname="AllDocuments";
+  private listname="AllVendor";
   private DocumentMaster ="Master_TypeofDocument";
 
   constructor(context: any) {
@@ -67,4 +67,22 @@ export default class Service {
       }
     );
   }
+  //Insert Record in List
+  public async InsertRecord(items: any[]): Promise<void> {
+  for (const item of items) {
+    await fetch(
+      `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`,
+      {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          Title: item.Title
+        })
+      }
+    );
+  }
+};
 }

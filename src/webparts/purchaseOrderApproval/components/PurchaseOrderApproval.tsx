@@ -192,7 +192,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
           <div className={styles.leftPanel}>
             <div className={styles.leftPanelHeader}>
               <h4>CKBCSL/25-26/IV/Finance/12</h4>
-              <h4>Current Status: Pending</h4>
+              <h4>Current Status: <span className={styles.status}>Rejected</span></h4>
             </div>
             <div className={styles.leftPanelStatusHeader}>
               <div className={styles.statusBox}>
@@ -207,6 +207,20 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
                 <h5>Vinay Kumar</h5>
                 <h6>Department Head</h6>
                 <h4>Pending</h4>
+                </div>
+              </div>
+              <div className={`${styles.statusBox} ${styles.rejectedBox}`}>
+                <div className={styles.content}>
+                <h5>Vinay Kumar</h5>
+                <h6>Department Head</h6>
+                <h4>Rejected</h4>
+                </div>
+              </div>
+              <div className={`${styles.statusBox} ${styles.upcomingBox}`}>
+                <div className={styles.content}>
+                <h5>Vinay Kumar</h5>
+                <h6>Department Head</h6>
+                <h4>Upcoming Approver</h4>
                 </div>
               </div>
             </div>
