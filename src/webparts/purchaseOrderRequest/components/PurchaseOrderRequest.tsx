@@ -31,6 +31,8 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   const [vendorOptions, setvendorOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
+  const [Approver1ID, setApprover1ID] = React.useState<number | null>(null);
+  const [Approver2ID, setApprover2ID] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
    const [POrequestNo, setPORequestNo] = React.useState('');
   const [POrequestNoError, setPORequestNoError] = React.useState('');
@@ -89,10 +91,13 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
   try {
     const result = await service.getRequestDetails(value);
-
     if (result.length > 0) {
       setDepartment(result[0].Department || '');
       setProjectTitle(result[0].ProjectTitle || '');
+      const data=await service.GetApprover(result[0].Department);
+      if(data.length>0){
+      
+      }
     } else { 
       setDepartment('');
       setProjectTitle('');

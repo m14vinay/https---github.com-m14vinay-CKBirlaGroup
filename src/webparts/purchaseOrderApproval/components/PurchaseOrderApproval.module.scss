@@ -1,20 +1,105 @@
 @import '~@fluentui/react/dist/sass/References.scss';
+@import "~bootstrap/scss/bootstrap";
 
 .container {
-  display: flex;
-  gap: 20px;
-  padding: 20px;
+  // display: flex;
+  // gap: 20px;
+  padding: 10px;
+}
+
+.header {
+  margin-bottom: 15px;
 }
 
 .leftPanel {
-  flex: 2;
   background: #fff;
-  padding: 20px;
   border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex: 2;
+  padding: 10px;
+}
+
+.leftPanelHeader {
+  border-bottom: 1px solid #848484;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+}
+
+.leftPanelHeader h4 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.leftPanelStatusHeader {
+  display: flex;
+  padding: 20px 0;
+}
+
+.statusBox {
+  background-color: #225a22;
+  color: #fff;
+  padding: 16px;
+  position: relative;
+  width: 200px;
+}
+.statusBox::after {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #225a22;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  position: absolute;
+  right: -46%;
+  top: 0;
+}
+.pendingBox {
+  background-color: #8b7e32;
+}
+.pendingBox::after {
+  border-left-color: #8b7e32;
+}
+.pendingBox::before {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #225a22;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.statusBox h5 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.statusBox h6 {
+  margin: 0;
+  font-size: 12px;
+}
+
+.statusBox h4 {
+  margin: 10px 0 0;
+  font-size: 16px;
+}
+
+.pendingBox .content {
+  padding-left: 40px;
+}
+
+.formGroup {
+  margin-bottom: 10px;
 }
 
 .rightPanel {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   flex: 1;
+  padding: 10px;
 }
 
 .card {
@@ -24,10 +109,17 @@
   border-radius: 6px;
 }
 
-input, textarea, select {
+label {
+  display: block;
+  margin-bottom: 5px;
+
+}
+
+input,
+textarea,
+select {
   width: 100%;
-  padding: 8px;
-  margin: 8px 0 16px 0;
+  padding: 6px 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
@@ -57,6 +149,7 @@ button {
   border: none;
   cursor: pointer;
 }
+
 .required {
   color: red;
   margin-left: 2px;
