@@ -29,6 +29,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
       files: null,
       attachments: [],
        ApproverComment1:'',
+       CurrentStatus:''
   });
 
    const [itemId, setItemId] = React.useState<number | null>(null);
@@ -90,7 +91,7 @@ const handleFetchById = async (id: number) => {
 
       console.log("Result:", result);
 
-      if (result) {
+      if (result.CurrentStatus==='Pending' || result.CurrentStatus==='Approved' ) {
       setItemId(result.Id);
 
       setForm(prev => ({
@@ -189,58 +190,58 @@ const handleReject = async () => {
           <h4>Quotation Approval Form-NEI BT Admin/Request Approval</h4>
 
           <label>Project Title</label>
-          <input name="ProjectTitle" value={form.ProjectTitle}  />
+          <input name="ProjectTitle" value={form.ProjectTitle} readOnly />
 
           <label>Project Reference No</label>
-          <input name="ProjectReffNo" value={form.ProjectReffNo}   >
+          <input name="ProjectReffNo" value={form.ProjectReffNo}  readOnly >
           </input>
 
           <label>Project Description & Advance Payment Details</label>
-          <input name="projectDescription" value={form.ProjectDescription}   >
+          <input name="projectDescription" value={form.ProjectDescription}  readOnly >
           </input>
 
           <label>Total Project Amount</label>
-          <input name="TotalProjectAmount" value={form.TotalProjectAmount }  />
+          <input name="TotalProjectAmount" value={form.TotalProjectAmount } readOnly />
 
           <label>Applicable Taxes</label>
-          <input name="ApplicableTaxes" value={form.ApplicableTaxes}   >
+          <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly  >
           </input>
 
           <label>Vendor 1</label>
-          <input name="Vendor1" value={form.Vendor1}  />
+          <input name="Vendor1" value={form.Vendor1} readOnly />
 
           <label>Vendor 2</label>
-          <input name="Vendor2" value={form.Vendor2}  />
+          <input name="Vendor2" value={form.Vendor2} readOnly />
 
           <label>Vendor 3</label>
-          <input name="Vendor3" value={form.Vendor3}  />
+          <input name="Vendor3" value={form.Vendor3} readOnly />
 
           <label>Quote 1</label>
-          <input name="Quote1" value={form.Quote1}  />
+          <input name="Quote1" value={form.Quote1} readOnly />
 
           <label>Quote 2</label>
-          <input name="Quote2" value={form.Quote2}  />
+          <input name="Quote2" value={form.Quote2} readOnly  />
 
           <label>Quote 3</label>
-          <input name="Quote3" value={form.Quote3}  />
+          <input name="Quote3" value={form.Quote3} readOnly  />
 
           <label>Select Vendor</label>
-          <input name="Selectedvendor" value={form.Selectedvendor}  />
+          <input name="Selectedvendor" value={form.Selectedvendor} readOnly  />
 
           <label>Select Quote</label>
-          <input name="SelectedQuote" value={form.SelectedQuote}   >
+          <input name="SelectedQuote" value={form.SelectedQuote} readOnly   >
           </input>
 
           <label>Department</label>
-          <input name="Department" value={form.Department}   >
+          <input name="Department" value={form.Department}  readOnly >
           </input>
 
           <label>Advance Amount</label>
-          <input name="AdvancePayment" value={form.Advancepayment}   >
+          <input name="AdvancePayment" value={form.Advancepayment} readOnly  >
           </input>
 
           <label>Approval Path</label>
-          <input name="ApprovalPath" value={form.ApprovalPath}   >
+          <input name="ApprovalPath" value={form.ApprovalPath}  readOnly >
           </input>          
  <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px" , marginBottom:"10px"}}>
            <label>

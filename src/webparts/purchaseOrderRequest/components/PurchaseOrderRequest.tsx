@@ -24,7 +24,8 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     POCategory: '',
     Comments: '',
    files: [] as File[],
-    POrequestNo:''
+    POrequestNo:'',
+    CurrentStatus:''
   });
 
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
@@ -168,7 +169,8 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
     //POCategory: form.POCategory,
-    ProjectDescription: form.Comments
+    ProjectDescription: form.Comments,
+    CurrentStatus:'Draft'
   };
 
   try {
@@ -219,7 +221,8 @@ const handleUpdate = async () => {
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
     //POCategory: form.POCategory,
-    ProjectDescription: form.Comments
+    ProjectDescription: form.Comments,
+    CurrentStatus:'Pending'
   };
   try {
     if (itemId) {

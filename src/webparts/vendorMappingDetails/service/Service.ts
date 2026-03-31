@@ -76,7 +76,7 @@ export default class Service {
     );
   }
 
-  // Fetch the Record
+
   // Fetch the Record
     public async getItemByRequestNo(ID: Number): Promise<any> {
   

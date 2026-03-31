@@ -29,7 +29,8 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
    approver3: '',
    approver4: '',
    approver5: '',
-   DepartmentHead: ''
+   DepartmentHead: '',
+   CurrentStatus:''
     
   });
 
@@ -115,7 +116,7 @@ const handleFetchById = async (id: number) => {
 
       console.log("Result:", result);
 
-      if (result) {
+      if (result.CurrentStatus==='Pending' || result.CurrentStatus==='Approved') {
       setItemId(result.Id);
 
       setForm(prev => ({

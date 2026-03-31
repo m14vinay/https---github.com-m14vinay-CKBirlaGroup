@@ -111,6 +111,7 @@ export default class Service {
       Department: item.Department ,
       Advancepayment: item.Advancepayment,
       ApprovalPath: item.ApprovalPath,
+      CurrentStatus: item.CurrentStatus,
       Attachments: item.AttachmentFiles || [] // 👈 important
     };
   }
