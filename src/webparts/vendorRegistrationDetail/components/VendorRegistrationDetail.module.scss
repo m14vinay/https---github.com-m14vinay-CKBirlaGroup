@@ -44,9 +44,9 @@
 .statusBox {
   background-color: #225a22;
   color: #fff;
-  padding: 18px 10px 8px;
+  padding: 16px;
   position: relative;
-  width: 170px;
+  width: 200px;
 }
 .statusBox::after {
   border-bottom: 46px solid transparent;
@@ -56,14 +56,14 @@
   content: "";
   display: block;
   position: absolute;
-  right: -61%;
+  right: -46%;
   top: 0;
 }
 .pendingBox {
-  background-color: #cdcd17;
+  background-color: #8b7e32;
 }
 .pendingBox::after {
-  border-left-color: #cdcd17;
+  border-left-color: #8b7e32;
 }
 .pendingBox::before {
   border-bottom: 46px solid transparent;
@@ -85,24 +85,6 @@
 }
 .rejectedBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #cdcd17;
-  border-right: 46px solid transparent;
-  border-top: 46px solid transparent;
-  content: "";
-  display: block;
-  left: 0;
-  position: absolute;
-  top: 0;
-}
-
-.upcomingBox {
-  background-color: #ee7606;
-}
-.upcomingBox::after {
-  border-left-color: #ee7606;
-}
-.upcomingBox::before {
-  border-bottom: 46px solid transparent;
   border-left: 46px solid #8b3222;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
@@ -115,20 +97,20 @@
 
 .statusBox h5 {
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .statusBox h6 {
   margin: 0;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .statusBox h4 {
-  margin: 5px 0 0;
-  font-size: 14px;
+  margin: 10px 0 0;
+  font-size: 16px;
 }
 
-.pendingBox .content, .rejectedBox .content, .upcomingBox .content {
+.pendingBox .content {
   padding-left: 40px;
 }
 

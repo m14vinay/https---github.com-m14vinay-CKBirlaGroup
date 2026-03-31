@@ -185,6 +185,38 @@
           "manifest": "./src/webparts/requestHistoryReport/RequestHistoryReportWebPart.manifest.json"
         }
       ]
+    },
+    "vendor-registration-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorRegistration/VendorRegistrationWebPart.js",
+          "manifest": "./src/webparts/vendorRegistration/VendorRegistrationWebPart.manifest.json"
+        }
+      ]
+    },
+    "vendor-registration-manually-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorRegistrationManually/VendorRegistrationManuallyWebPart.js",
+          "manifest": "./src/webparts/vendorRegistrationManually/VendorRegistrationManuallyWebPart.manifest.json"
+        }
+      ]
+    },
+    "vendor-registration-detail-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorRegistrationDetail/VendorRegistrationDetailWebPart.js",
+          "manifest": "./src/webparts/vendorRegistrationDetail/VendorRegistrationDetailWebPart.manifest.json"
+        }
+      ]
+    },
+    "vendor-registration-search-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorRegistrationSearch/VendorRegistrationSearchWebPart.js",
+          "manifest": "./src/webparts/vendorRegistrationSearch/VendorRegistrationSearchWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -211,6 +243,10 @@
     "DocumentViewWebPartStrings": "lib/webparts/documentView/loc/{locale}.js",
     "SummaryReportWebPartStrings": "lib/webparts/summaryReport/loc/{locale}.js",
     "FinanceReportWebPartStrings": "lib/webparts/financeReport/loc/{locale}.js",
-    "RequestHistoryReportWebPartStrings": "lib/webparts/requestHistoryReport/loc/{locale}.js"
+    "RequestHistoryReportWebPartStrings": "lib/webparts/requestHistoryReport/loc/{locale}.js",
+    "VendorRegistrationWebPartStrings": "lib/webparts/vendorRegistration/loc/{locale}.js",
+    "VendorRegistrationManuallyWebPartStrings": "lib/webparts/vendorRegistrationManually/loc/{locale}.js",
+    "VendorRegistrationDetailWebPartStrings": "lib/webparts/vendorRegistrationDetail/loc/{locale}.js",
+    "VendorRegistrationSearchWebPartStrings": "lib/webparts/vendorRegistrationSearch/loc/{locale}.js"
   }
 }
