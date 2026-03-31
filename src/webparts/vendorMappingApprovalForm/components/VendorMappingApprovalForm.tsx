@@ -71,7 +71,7 @@ const handleFetchById = async (id: number) => {
 
       console.log("Result:", result);
 
-      if (result) {
+      if (result.CurrentStatus==='Pending' || result.CurrentStatus==='Approved' ) {
         setItemId(result.Id);
 
         setForm(prev => ({

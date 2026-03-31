@@ -28,7 +28,8 @@ import SharePointService from '../service/Service';
       Department:'',
       Advancepayment:0,
       ApprovalPath: '',
-      files: [] as File[]
+      files: [] as File[],
+      CurrentStatus:''
   });
 
 
@@ -124,7 +125,8 @@ import SharePointService from '../service/Service';
       SelectedQuote: form.SelectedQuote,
       Department: form.Department,
       Advancepayment:form.Advancepayment,
-      ApprovalPath: form.ApprovalPath
+      ApprovalPath: form.ApprovalPath,
+      CurrentStatus:'Draft'
    
   };
 
@@ -185,7 +187,8 @@ const handleUpdate = async () => {
       SelectedQuote: form.SelectedQuote,
       Department: form.Department,
       Advancepayment:form.Advancepayment,
-      ApprovalPath: form.ApprovalPath
+      ApprovalPath: form.ApprovalPath,
+       CurrentStatus:'Pending'
   };
   try {
     if (itemId) {

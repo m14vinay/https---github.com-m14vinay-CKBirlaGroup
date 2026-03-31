@@ -144,6 +144,7 @@ public async getApprover(DepartmentName: string): Promise<any> {
      ApplicableTaxes: item.ApplicableTaxes,
     //POCategory: form.POCategory,
     ProjectDescription: item.ProjectDescription, 
+    CurrentStatus:item.CurrentStatus,
       Attachments: item.AttachmentFiles || [] // 👈 important
     };
   }

@@ -25,12 +25,13 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     files: null,
     attachments: [],
     approver1: '',
-    approver2: '',
-    approver3: '',
-    approver4: '',
-    approver5: '',
-    DepartmentHead: ''
-
+   approver2: '',
+   approver3: '',
+   approver4: '',
+   approver5: '',
+   DepartmentHead: '',
+   CurrentStatus:''
+    
   });
 
 
@@ -114,8 +115,8 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
 
       console.log("Result:", result);
 
-      if (result) {
-        setItemId(result.Id);
+      if (result.CurrentStatus==='Pending' || result.CurrentStatus==='Approved') {
+      setItemId(result.Id);
 
         setForm(prev => ({
           ...prev,
