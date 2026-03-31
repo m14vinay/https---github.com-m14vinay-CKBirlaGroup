@@ -111,14 +111,10 @@ export default class QuotationRequestDetailViewNeiBtWebPart extends BaseClientSi
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
   }
-
-  private _dataVersion: Version = Version.parse('1.0');
-  protected get dataVersion(): Version {
-    return this._dataVersion;
-  }
-  protected set dataVersion(value: Version) {
-    this._dataVersion = value;
-  }
+// protected get dataVersion(): Version {
+//   return Version.parse('1.0');
+// }
+protected  dataVersion: Version = Version.parse('1.0');
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {

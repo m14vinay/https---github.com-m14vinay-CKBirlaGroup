@@ -4,7 +4,7 @@ import { IRequestHistoryReportProps } from './IRequestHistoryReportProps';
 import { Dropdown, Icon, IDropdownOption, Label } from '@fluentui/react';
 import SharePointService from '../service/Service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
-import DataTable, { TableColumn } from "react-data-table-component";
+//import DataTable, { TableColumn } from "react-data-table-component";
 import { useEffect, useState } from 'react';
 import {
   createColumnHelper,

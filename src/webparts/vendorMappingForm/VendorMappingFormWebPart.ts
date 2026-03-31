@@ -125,6 +125,9 @@ private _getEnvironmentMessage(): Promise<string> {
     this._dataVersion = value;
   }
 
+// protected get dataVersion(): Version {
+//   return Version.parse('1.0');
+// }
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [
