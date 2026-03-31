@@ -113,10 +113,9 @@ export default class QuotationRequestApprovalNeiBtWebPart extends BaseClientSide
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
-  protected dataVersion: Version = Version.parse('1.0');
-  // protected get dataVersion(): Version {
-  // return Version.parse('1.0');
-//}
+  protected get dataVersion(): Version {
+   return Version.parse('1.0');
+ }
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [
