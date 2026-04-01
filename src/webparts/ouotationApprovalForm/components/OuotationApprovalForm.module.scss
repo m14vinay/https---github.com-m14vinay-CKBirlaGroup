@@ -35,7 +35,7 @@
 .formRow {
   display: flex;
   align-items: flex-start;
-  /* 🔥 important */
+  /* Ok important */
   margin-bottom: 20px;
 }
 
@@ -95,7 +95,7 @@ textarea {
 .twoCol {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  /* 🔥 perfect layout */
+  /* Ok perfect layout */
   gap: 15px;
   width: 100%;
   align-items: center;
@@ -114,7 +114,7 @@ textarea {
 /* ========================= */
 
 .field input[type="radio"] {
-  transform: scale(0.5);   /* 🔥 size chhota */
+  transform: scale(0.5);   /* Ok size chhota */
   margin-right: 5px;
   margin-left: 5px;
 }
@@ -203,7 +203,7 @@ button {
 }
 
 /* ========================= */
-/* 🔥 REMOVE SHAREPOINT SIDE LINES */
+/* Ok REMOVE SHAREPOINT SIDE LINES */
 /* ========================= */
 
 :global(.CanvasZone),
@@ -221,7 +221,7 @@ button {
 }
 
 /* ========================= */
-/* 🔥 REMOVE EXTRA LINES     */
+/* Ok REMOVE EXTRA LINES     */
 /* ========================= */
 
 .ms-Grid-col {
@@ -238,6 +238,130 @@ button {
 
 .innerLabel {
   font-weight: 600;
+  color: #5f6f81;
+  font-size: 14px;
+}
+
+.fieldRow input {
+  width: 100%;
+}
+
+.quotationApprovalForm {
+  width: 100%;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #fff;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin: 0;
+  /* Ok remove outer shift */
+  padding: 20px;
+  /* Ok balanced padding */
+  box-sizing: border-box;
+  /* Ok important */
+}
+
+.required {
+  color: #d8000c;
+}
+
+.poSection {
+  margin-top: 22px;
+}
+
+.poHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 20px;
+  margin-bottom: 16px;
+}
+
+.poHeader span {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d2d2d;
+}
+
+.addBtn {
+  background: #e55353;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 24px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(229, 83, 83, 0.22);
+}
+
+.deleteBtn {
+  background: #ff4d4d;
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Ok FORCE GRID */
+.poRowHeader,
+.poRow {
+  display: grid !important;
+  grid-template-columns: 2fr 1fr 1fr 1fr 60px !important;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.poRowHeader {
+  background: #f7f8fb;
+  border-bottom: 1px solid #e7eaf3;
+  color: #4b5660;
+  font-weight: 600;
+}
+
+.poRow {
+  border-bottom: 1px solid #eef1f6;
+}
+
+.poRow:last-child {
+  border-bottom: none;
+}
+
+/* Inputs full width */
+.poRow input {
+  width: 100% !important;
+  height: 40px;
+  padding: 10px 12px;
+  border: 1px solid #d7dce3;
+  background: #fff;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.poTable {
+  border: 1px solid #e7eaf3;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* Ok FULL WIDTH FIX */
+.fullWidth .field textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Ok Approval Path specific */
+.approvalPath {
+  width: 100% !important;
+  max-width: none !important;
+  height: 100px;
 }
 .textarea
 {
