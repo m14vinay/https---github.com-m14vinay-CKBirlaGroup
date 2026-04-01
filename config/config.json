@@ -15,7 +15,7 @@
         {
           "entrypoint": "./lib/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.js",
           "manifest": "./src/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.manifest.json"
-    }
+        }
       ]
     },
     "vendor-mapping-form-web-part": {
@@ -89,7 +89,7 @@
           "manifest": "./src/webparts/billProcessingDetailView/BillProcessingDetailViewWebPart.manifest.json"
         }
       ]
-    }, 
+    },
     "quotation-request-detail-view-nei-bt-web-part": {
       "components": [
         {
@@ -114,7 +114,6 @@
         }
       ]
     },
-    
     "reimbursement-request-form-web-part": {
       "components": [
         {
@@ -170,6 +169,14 @@
           "manifest": "./src/webparts/qaRequestApprovalForm/QaRequestApprovalFormWebPart.manifest.json"
         }
       ]
+    },
+    "qr-details-status-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/qrDetailsStatus/QrDetailsStatusWebPart.js",
+          "manifest": "./src/webparts/qrDetailsStatus/QrDetailsStatusWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -194,6 +201,7 @@
     "DocumentSearchWebPartStrings": "lib/webparts/documentSearch/loc/{locale}.js",
     "DocumentUploadWebPartStrings": "lib/webparts/documentUpload/loc/{locale}.js",
     "DocumentViewWebPartStrings": "lib/webparts/documentView/loc/{locale}.js",
-    "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js"
+    "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js",
+    "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js"
   }
 }

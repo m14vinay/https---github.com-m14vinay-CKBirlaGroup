@@ -6,81 +6,89 @@ import styles from './QaRequestApprovalForm.module.scss';
 
 export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (props) => {
 
+  const [poItems, setPoItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
   const [statusMsg, setStatusMsg] = useState("");
-  const [comment, setComment] = useState(""); // ✅ FIXED
+  const [comment, setComment] = useState("");
 
   const params = new URLSearchParams(window.location.search);
-  const rawId = params.get("id");
-  const itemId = rawId ? Number(rawId) : null;
+  const rawItemId = params.get("id");
+  const itemId = rawItemId ? Number(rawItemId) : null;
+  const isReadOnly = data?.Status === "Approved" || data?.Status === "Rejected";
 
-  // 🔹 Fetch Data
+  // ================= FETCH DATA =================
   const fetchData = async () => {
     try {
       if (!itemId) {
-        setLoading(false);
+        setStatusMsg('❌ Invalid item ID');
         return;
       }
 
       const res = await props.spHttpClient.get(
-        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles`,
         SPHttpClient.configurations.v1
       );
 
-      if (!res.ok) throw new Error("Item not found");
-
       const result = await res.json();
       setData(result);
+      setComment(result.ApproverComment1 || "");
 
-      // ✅ Prefill comment
-      setComment(result.ApproverComments || "");
+      const poRes = await props.spHttpClient.get(
+        `${props.siteUrl}/_api/web/lists/getbytitle('PurchaseOrderDetails')/items?$filter=QuotationIdId eq ${itemId}`,
+        SPHttpClient.configurations.v1
+      );
 
-    } catch (err) {
-      console.error("Error fetching data:", err);
+      const poData = await poRes.json();
+      setPoItems(poData.value || []);
+
+    } catch (err: any) {
+      console.error(err);
+      setStatusMsg("❌ Error loading data");
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔹 Update Status
+  // ================= UPDATE STATUS =================
   const updateStatus = async (status: string) => {
     try {
+      if (!itemId) {
+        setStatusMsg('❌ Invalid item ID');
+        return;
+      }
 
-      // ✅ Validation
       if (!comment.trim()) {
         setStatusMsg("❌ Please enter comment");
         return;
       }
-
-      setStatusMsg("⏳ Processing...");
 
       const res = await props.spHttpClient.post(
         `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
         SPHttpClient.configurations.v1,
         {
           headers: {
-            'Accept': 'application/json;odata.metadata=none',
-            'Content-Type': 'application/json;odata.metadata=none',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
             'IF-MATCH': '*',
             'X-HTTP-Method': 'MERGE'
           },
           body: JSON.stringify({
-            Status: status,
-            ApproverComments: comment // ✅ ADDED
+            Status: String(status),   // - force string
+            ApproverComment1: String(comment)
           })
         }
       );
 
-      if (!res.ok) throw new Error("Update failed");
+      if (!res.ok) {
+        const error = await res.text();
+        console.log("SP ERROR FULL:", error);
+        setStatusMsg(error); // temporarily show real error
+        return;
+      }
 
       setStatusMsg(`✅ ${status} successfully`);
-
-      // ✅ Update UI instantly
-      setData({ ...data, Status: status });
-
-      // Optional: clear comment after submit
-      // setComment("");
+      setData((prev: any) => prev ? { ...prev, Status: status, ApproverComment1: comment } : prev);
 
     } catch (err: any) {
       setStatusMsg("❌ " + err.message);
@@ -91,86 +99,182 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
     fetchData();
   }, []);
 
-  // 🔹 UI STATES
-  if (loading) return <div>⏳ Loading...</div>;
-  if (!itemId) return <div>❌ Invalid ID in URL</div>;
-  if (!data) return <div>❌ No data found</div>;
+  if (loading) return <div>Loading...</div>;
+  if (!data) return <div>No data</div>;
+
+  // ONLY UPDATED JSX PART (rest same rahega)
 
   return (
     <div className={styles.container}>
-      <div className={styles.heading}>Approval Form</div>
 
-      {/* 🔹 READ ONLY FIELDS */}
-      <label className={styles.label}>Project Title</label>
-      <input className={styles.input} value={data.ProjectTitle || ""} readOnly />
+      <div className={styles.heading}>
+        Quotation Request Approval Form
+      </div>
 
-      <label className={styles.label}>Reference No</label>
-      <input className={styles.input} value={data.ProjectReffNo || ""} readOnly />
+      {/* Project Title */}
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          Project Title <span className={styles.required}>*</span>
+        </label>
+        <input className={styles.input} value={data.ProjectTitle || ""} disabled />
+      </div>
 
-      <label className={styles.label}>Description</label>
-      <textarea className={styles.textarea} value={data.ProjectDescription || ""} readOnly />
+      {/* Project Reference Number */}
+      <div className={styles.formRow}>
+        <label className={styles.label}>Project Reference Number</label>
+        <input className={styles.input} value={data.ProjectReffNo || ""} disabled />
+      </div>
 
-      <label className={styles.label}>Total Amount</label>
-      <input className={styles.input} value={data.TotalProjectAmount || ""} readOnly />
+      {/* Description */}
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          Project Description & Advance Payment Details <span className={styles.required}>*</span>
+        </label>
+        <input className={styles.input} value={data.ProjectDescription || ""} disabled />
+      </div>
 
-      <label className={styles.label}>Taxes</label>
-      <input className={styles.input} value={data.ApplicableTaxes || ""} readOnly />
+      {/* Amount */}
+      <div className={styles.formRow}>
+        <label className={styles.label}>Total Project Amount</label>
+        <div className={styles.twoCol}>
+          <input className={styles.input} value={data.TotalProjectAmount || ""} disabled />
+          <span className={styles.inlineLabel}>Applicable Taxes</span>
+          <input className={styles.input} value={data.ApplicableTaxes || ""} disabled />
+        </div>
+      </div>
 
-      <label className={styles.label}>Vendor 1</label>
-      <input className={styles.input} value={`${data.Vendor1 || ""} - ${data.Quote1 || ""}`} readOnly />
+      {/* Vendors */}
+      {[1, 2, 3].map(i => (
+        <div key={i} className={styles.formRow}>
+          <label className={styles.label}>
+            Vendor {i} <span className={styles.required}>*</span>
+          </label>
+          <div className={styles.twoCol}>
+            <input className={styles.input} value={data[`Vendor${i}`] || ""} disabled />
+            <span className={styles.inlineLabel}>
+              Quote {i} <span className={styles.required}>*</span>
+            </span>
+            <input className={styles.input} value={data[`Quote${i}`] || ""} disabled />
+          </div>
+        </div>
+      ))}
 
-      <label className={styles.label}>Vendor 2</label>
-      <input className={styles.input} value={`${data.Vendor2 || ""} - ${data.Quote2 || ""}`} readOnly />
+      {/* Selected Vendor */}
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          Select Vendor <span className={styles.required}>*</span>
+        </label>
+        <input className={styles.input} value={data.Selectedvendor || ""} disabled />
+      </div>
 
-      <label className={styles.label}>Vendor 3</label>
-      <input className={styles.input} value={`${data.Vendor3 || ""} - ${data.Quote3 || ""}`} readOnly />
+      {/* Selected Quote */}
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          Selected Quote <span className={styles.required}>*</span>
+        </label>
+        <input className={styles.input} value={data.SelectedQuote || ""} disabled />
+      </div>
 
-      <label className={styles.label}>Selected Vendor</label>
-      <input className={styles.input} value={data.Selectedvendor || ""} readOnly />
+      {/* Department */}
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          Department <span className={styles.required}>*</span>
+        </label>
+        <input className={styles.input} value={data.Department || ""} disabled />
+      </div>
 
-      <label className={styles.label}>Selected Quote</label>
-      <input className={styles.input} value={data.SelectedQuote || ""} readOnly />
+      {/* Advance Payment */}
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          Advance Payment <span className={styles.required}>*</span>
+        </label>
+        <input className={styles.input} value={data.AdvancePayment || ""} disabled />
+      </div>
 
-      <label className={styles.label}>Department</label>
-      <input className={styles.input} value={data.Department || ""} readOnly />
+      {/* Approval Path */}
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          Approval Path <span className={styles.required}>*</span>
+        </label>
+        <input className={styles.input} value={data.ApprovalPath || ""} disabled />
+      </div>
 
-      <label className={styles.label}>Advance Payment</label>
-      <input className={styles.input} value={data.Advancepayment || ""} readOnly />
+      {/* Attach Documents */}
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          Attach Documents <span className={styles.required}>*</span>
+        </label>
+        <div className={styles.field}>
+          {data.AttachmentFiles?.length > 0 ? (
+            data.AttachmentFiles.map((f: any) => (
+              <div key={f.FileName}>
+                <a href={f.ServerRelativeUrl} target="_blank" rel="noreferrer">
+                  {f.FileName}
+                </a>
+              </div>
+            ))
+          ) : (
+            <span>No documents attached</span>
+          )}
+        </div>
+      </div>
 
-      <label className={styles.label}>Approval Path</label>
-      <input className={styles.input} value={data.ApprovalPath || ""} readOnly />
+      {/* PO Table */}
+      <div className={styles.poSection}>
+        <div className={styles.poHeader}>
+          Purchase Order Details: <span className={styles.required}>*</span>
+        </div>
 
-      <label className={styles.label}>Status</label>
-      <input className={styles.input} value={data.Status || ""} readOnly />
+        <div className={styles.poTable}>
+          <div className={styles.poRowHeader}>
+            <div>Description of Goods / Services</div>
+            <div>Quantity</div>
+            <div>Rate</div>
+            <div>Amount</div>
+          </div>
 
-      <hr />
+          {poItems.map((item, i) => (
+            <div key={i} className={styles.poRow}>
+              <input className={styles.input} value={item.Description || ""} disabled />
+              <input className={styles.input} value={item.Quantity || ""} disabled />
+              <input className={styles.input} value={item.Rate || ""} disabled />
+              <input className={styles.input} value={item.Amount || ""} disabled />
+            </div>
+          ))}
+        </div>
+      </div>
 
-      {/* ✅ COMMENT BOX */}
-      <label className={styles.label}>Approver Comments</label>
-      <textarea
-        className={styles.textarea}
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-        placeholder="Write your comment here..."
-      />
+      {/* COMMENT */}
+      <div className={styles.formRow}>
+        <label className={styles.label}>
+          Approver Comments <span className={styles.required}>*</span>
+        </label>
+        <textarea
+          className={`${styles.textarea} ${styles.commentBox}`}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          disabled={isReadOnly}
+        />
+      </div>
 
-      <hr />
 
-      {/* ✅ BUTTONS */}
-      {data.Status !== "Approved" && data.Status !== "Rejected" && (
-        <div className={styles.buttonContainer}>
-          <button className={styles.approveBtn} onClick={() => updateStatus("Approved")}>
-            Approve
-          </button>
+      {/* BUTTONS */}
+      <div className={styles.buttonContainer}>
+        <button className={styles.approveBtn} onClick={() => updateStatus("Approved")} disabled={isReadOnly}>Approve</button>
+        <button className={styles.rejectBtn} onClick={() => updateStatus("Rejected")} disabled={isReadOnly}>Reject</button>
+        <button className={styles.backBtn} onClick={() => window.history.back()}>Back</button>
+      </div>
 
-          <button className={styles.rejectBtn} onClick={() => updateStatus("Rejected")}>
-            Reject
-          </button>
+      {/* STATUS MESSAGE */}
+      {statusMsg && (
+        <div style={{
+          marginTop: "15px",
+          fontWeight: "600",
+          color: statusMsg.includes("❌") ? "red" : "green"
+        }}>
+          {statusMsg}
         </div>
       )}
-
-      {/* ✅ MESSAGE */}
-      <div className={styles.statusMsg}>{statusMsg}</div>
     </div>
   );
 };
