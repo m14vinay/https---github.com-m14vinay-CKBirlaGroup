@@ -189,7 +189,41 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
       <div className={styles.row}>
         {/* LEFT FORM */}
         <div className={styles['col-md-9']}>
-          
+          <div className={styles.leftPanel}>
+            <div className={styles.leftPanelHeader}>
+              <h4>CKBCSL/25-26/IV/Finance/12</h4>
+              <h4>Current Status: <span className={styles.status}>Rejected</span></h4>
+            </div>
+            <div className={styles.leftPanelStatusHeader}>
+              <div className={styles.statusBox}>
+                <div className={styles.content}>
+                <h5>Vinay Kumar</h5>
+                <h6>Department Head</h6>
+                <h4>Approved</h4>
+                </div>
+              </div>
+              <div className={`${styles.statusBox} ${styles.pendingBox}`}>
+                <div className={styles.content}>
+                <h5>Vinay Kumar</h5>
+                <h6>Department Head</h6>
+                <h4>Pending</h4>
+                </div>
+              </div>
+              <div className={`${styles.statusBox} ${styles.rejectedBox}`}>
+                <div className={styles.content}>
+                <h5>Vinay Kumar</h5>
+                <h6>Department Head</h6>
+                <h4>Rejected</h4>
+                </div>
+              </div>
+              <div className={`${styles.statusBox} ${styles.upcomingBox}`}>
+                <div className={styles.content}>
+                <h5>Vinay Kumar</h5>
+                <h6>Department Head</h6>
+                <h4>Upcoming Approver</h4>
+                </div>
+              </div>
+            </div>
             <div className={styles.formGroup}>
               <label>Project Code</label>
               <input value={form.projectCode} readOnly />
@@ -263,21 +297,12 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
                 <li>DigiFlow_Training_Manual.pdf</li>
               </ul>
             </div>
-
-            <div className={styles.card}>
-              <h4>Important Guidelines</h4>
-              <ol>
-                <li>Select approval path carefully.</li>
-                <li>Use project reference if needed.</li>
-                <li>Attach all documents (Max 25 MB).</li>
-                <li>Avoid special characters in file names.</li>
-              </ol>
-            </div>
           </div>
         </div>
       </div>
-        </div>
-  )
+    </div >
+    </div>
+  );
 };
 
 export default PurchaseOrderApproval;

@@ -68,21 +68,20 @@ export default class Service {
     );
   }
   //Insert Record in List
-  public async InsertRecord(items: any[]): Promise<void> {
-  for (const item of items) {
-    await fetch(
-      `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`,
-      {
-        method: "POST",
-        headers: {
+  public async InsertRecord(data: any[]): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;   
+    const response = await this.context.spHttpClient.post(
+      url,
+     SPHttpClient.configurations.v1,
+        {
+          headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          Title: item.Title
-        })
-      }
+          },
+          body: JSON.stringify(data[0])
+        }
     );
-  }
+    const result = await response.json();
+    return result;
 };
 }

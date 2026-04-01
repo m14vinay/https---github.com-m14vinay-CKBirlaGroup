@@ -43,6 +43,14 @@ const handleCancel = () => {
   window.location.assign(url);
 };
 const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files ? e.target.files[0] : null;
+  if (!file) return;
+  const maxSize = 25 * 1024 * 1024; // 25 MB in bytes
+  if (file.size > maxSize) {
+    alert("File size must be less than 25 MB");
+    e.target.value = ""; // reset file input
+    return;
+  }
   setForm({
     ...form,
     files: e.target.files
@@ -141,34 +149,48 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   // 🔹 UI
   return (
     <div className={styles.container}>
-      <div className={styles.leftPanel}>
-        <h2>Upload New Document</h2>
-          <h4>My Document List/ Upload New Document</h4>
-          {errors.TypeOfDocument && (
-  <span style={{ color: "red" }}>
-    {errors.TypeOfDocument}
-  </span>
-)}
-          <label>Type of Document</label>
-        <Dropdown
-          options={departmentOptions}
-          selectedKey={form.TypeOfDocumentID}
-          onChange={(e, option) =>
-            setForm({ ...form, TypeOfDocument: option?.text as string,TypeOfDocumentID: option?.key as string, })
-          }
-        />
-        {errors.Title && (
-  <span style={{ color: "red" }}>
-    {errors.Title}
-  </span>
-)}
+      <div className={styles.header}>
+        <h2>Upload New Document</h2>          
+      </div>
+      <div className={styles.row}>
+        <div className={styles["col-md-9"]}>
+          <div className={styles.leftPanel}>
+            <div className={styles.leftPanelHeader}>
+              <h4>Upload New Document</h4>              
+            </div>
+          <div className={styles.formGroup}>
+                      {errors.TypeOfDocument && (
+              <span style={{ color: "red" }}>
+                {errors.TypeOfDocument}
+              </span>
+            )}
+                      <label>Type of Document</label>
+                    <Dropdown
+                      options={departmentOptions}
+                      selectedKey={form.TypeOfDocumentID}
+                      onChange={(e, option) =>
+                        setForm({ ...form, TypeOfDocument: option?.text as string,TypeOfDocumentID: option?.key as string, })
+                      }
+                    />
+                    {errors.Title && (
+              <span style={{ color: "red" }}>
+                {errors.Title}
+              </span>
+            )}
+            </div>
+            <div className={styles.formGroup}>
            <label>Name of Document</label>
           <input name="Title" value={form.Title}  onChange={handleChange} required/>
+          </div>
+           <div className={styles.formGroup}>
           <label>Vendor Name</label>
           <input name="VendorName" value={form.VendorName}  onChange={handleChange} required />
+          </div>
+            <div className={styles.formGroup}>
           <label>Bill Number</label>
-          <input name="BillNumber" value={form.BillNumber} onChange={handleChange} required >
-          </input>
+          <input name="BillNumber" value={form.BillNumber} onChange={handleChange} required />
+          </div>
+            <div className={styles.formGroup}>
           <label>Bill Date</label>
                     <input
             name="BillDate"
@@ -181,11 +203,17 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             onChange={handleDateChange}
             required
           />
+          </div>
+           <div className={styles.formGroup}>
           <label>Bill Amount</label>
           <input name="BillAmount" type='number' value={form.BillAmount} onChange={handleChange} required/>
+          </div>
+            <div className={styles.formGroup}>
           <label>Remarks</label>
           <input name="Remarks" value={form.Remarks} onChange={handleChange}  required>
           </input>
+          </div>
+           <div className={styles.formGroup}>
           {errors.files && (
   <span style={{ color: "red" }}>
     {errors.files}
@@ -193,24 +221,29 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 )}
           <label>Attachments</label>
           <input name="files" type="file" multiple onChange={handleFileChange} required />
-        <div className={styles.buttonGroup}>
-            <button className={styles.submitBtn} onClick={handleSave}>Submit</button>
-            <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
           </div>
-      </div>
-       <div className={styles.rightPanel}>
+        <div className={styles.buttonGroup}>
+            <button className={styles.ApproveBtn} onClick={handleSave}>Submit</button>
+            <button className={styles.RejectBtn} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        </div>
+      <div className={styles["col-md-3"]}>
+        <div className={styles.leftPanelHeader}>
+        <h6>My Document List / Upload New Document</h6>          
+        </div>        
+      <div className={styles.rightPanel}>        
           {/* Templates */}
           <div className={styles.card}>
-            <h4>Templates</h4>
-            <ul>
-              <li>PO_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
-            </ul>
+             <div>
+              <h4>Templates</h4>              
+            </div>
           </div>
           {/* Guidelines */}
           <div className={styles.card}>
-            <h4>Important Guidelines</h4>
+             <div>
+              <h4>Importance Guidelines</h4>              
+            </div>
             <ol>
               <li>Select approval path carefully.</li>
               <li>Use project reference if needed.</li>
@@ -219,7 +252,8 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             </ol>
           </div>
         </div>
-
+      </div>
+    </div>
     </div>
   );
 };

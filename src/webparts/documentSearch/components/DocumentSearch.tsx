@@ -176,20 +176,20 @@ const getDatafromListByTitle = async (parm_vendorname:string, parm_billamount:st
   }
 };
   return (
-<div className={styles.pagecontainer}>
-  <div className={styles.headerbar}>
-      <h2 className={styles.leftPanel}>My Documents List</h2>      
+<div className={styles.container}>
+  <div className={styles.header}>
+        <h2>My Document List</h2>          
+  </div>
+  <div className={styles.row}>    
     <div className={styles.rightPanel}> 
       <span className={styles.rightPanel}>Digiflow / My Documents List</span>
       <br></br>      
     </div>
-  </div>
-  <div className={styles.searchbox}>
     <span><h3>Search My Document</h3>    
-      <button className={styles.btnadd} onClick={handleAddNewDocument}>Add New Document</button></span>    
-    <div className={styles.searchrow}>
-      <div className={styles.field}>
-        <label className={styles.field}>Vendor Name</label>
+      <button className={styles.RejectBtn} onClick={handleAddNewDocument}>Add New Document</button></span>    
+      <div className={styles["col-md-12"]}>
+      <span className={styles['col-4']}>
+        <label>Vendor Name</label>
         <Dropdown
                   options={vendorOptions}
                   selectedKey={form.VendorName}
@@ -198,9 +198,9 @@ const getDatafromListByTitle = async (parm_vendorname:string, parm_billamount:st
                   }
                 />
                 
-      </div>
-      <div className={styles.field}>
-        <label className={styles.field}>Bill Number</label>
+      </span>
+      <span className={styles['col-4']}>
+        <label>Bill Number</label>
         <Dropdown
                   options={BillNumberOptions}
                   selectedKey={form.BillNumber}
@@ -209,9 +209,9 @@ const getDatafromListByTitle = async (parm_vendorname:string, parm_billamount:st
                   }
                 />
                 
-      </div>
-      <div className={styles.field}>
-        <label className={styles.field}>Bill Amount</label>
+      </span>
+      <span className={styles['col-4']}>
+        <label>Bill Amount</label>
         <Dropdown
                   options={BillAmountOptions}
                   selectedKey={form.BillAmount}
@@ -220,11 +220,9 @@ const getDatafromListByTitle = async (parm_vendorname:string, parm_billamount:st
                   }
                 />
                 
-      </div> 
-    </div>
-    <div className={styles.searchrow}>
-      <div className={styles.field}>
-        <label className={styles.field}>Bill Date</label>
+      </span> 
+      <span className={styles['col-4']}>
+        <label>Bill Date</label>
         <Dropdown
                   options={BillDateOptions}
                   selectedKey={form.BillDate}
@@ -233,24 +231,23 @@ const getDatafromListByTitle = async (parm_vendorname:string, parm_billamount:st
                   }
                 />
                 
-      </div>
-      <div className={styles.field}>
-        <label className={styles.field}>Document Name</label>
+      </span>
+      <span className={styles['col-4']}>
+        <label>Document Name</label>
         <Dropdown
                   options={TitleOptions}
                   selectedKey={form.Title}
                   onChange={(e, option) =>
                     setForm({ ...form, Title: option?.text as string,ID: option?.key as string, })
                   }
-                />
-                
-      </div> 
-      <div className={styles.btnarea}>
-        <button className={styles.btnsearch} onClick={handlesearch}>Search</button>
-      </div>
+                />                
+      </span>       
+      <span className={styles['col-4']} style={{display:"flex", alignItems:"flex-end"}}>
+        <button className={styles.ApproveBtn} onClick={handlesearch}>Search</button>
+      </span>
     </div>
   </div>
-      <div className={styles.pagecontainer}>
+      <div className={styles.table}>
         <Label style={{display:"inline-block"}}>My Documents List</Label>
          <input
                     value={globalFilter ?? ""}
