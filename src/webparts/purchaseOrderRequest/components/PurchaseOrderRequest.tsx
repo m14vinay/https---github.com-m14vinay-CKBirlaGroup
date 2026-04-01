@@ -123,7 +123,7 @@ const handleCancel = () => {
   window.location.assign(url);
 };
 const handleDownload = () => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+  const url = `${props.context.pageContext.web.absoluteUrl}/sites/DigiflowUAT/Shared%20Documents/PO_Format%20(1).xlsx?d=w7b16074a3861495c96494464b6b1818d&csf=1&web=1&e=rkBQLk`;
   window.location.assign(url);
 };
 const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
@@ -357,7 +357,8 @@ const validatePO = (value: string) => {
       <div className={styles.leftPanel}>
         <h2>PO Approval Request Form</h2>
         <h4>PO Approval / Request Form</h4>
-       <button style={{backgroundColor:'purple',color:'white',fontSize:'bold'}} onClick={handleDownload}>Download Purchase Order</button>
+       <button style={{backgroundColor:'purple',color:'white',fontSize:'bold',width:'100%'}} onClick={handleDownload}>Download Purchase Order</button>
+       <div></div>
         <label>Project Code <span className={styles.required}>*</span> </label>
         <input name="projectCode" value={POrequestNo} onChange={handleRequestNoChange} />
 
