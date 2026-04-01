@@ -122,6 +122,10 @@ const handleCancel = () => {
   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
   window.location.assign(url);
 };
+const handleDownload = () => {
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+  window.location.assign(url);
+};
 const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
     const files = event?.target?.files;
   if (!files) return;
@@ -353,7 +357,7 @@ const validatePO = (value: string) => {
       <div className={styles.leftPanel}>
         <h2>PO Approval Request Form</h2>
         <h4>PO Approval / Request Form</h4>
-
+       <button style={{backgroundColor:'purple',color:'white',fontSize:'bold'}} onClick={handleDownload}>Download Purchase Order</button>
         <label>Project Code <span className={styles.required}>*</span> </label>
         <input name="projectCode" value={POrequestNo} onChange={handleRequestNoChange} />
 
