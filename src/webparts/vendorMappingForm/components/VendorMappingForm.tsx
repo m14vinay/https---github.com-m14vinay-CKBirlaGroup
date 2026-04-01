@@ -1,236 +1,505 @@
 import * as React from 'react';
+import { useState } from 'react';
+import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import styles from './VendorMappingForm.module.scss';
 import { IVendorMappingFormProps } from './IVendorMappingFormProps';
-import { SPHttpClient } from '@microsoft/sp-http';
+import SharePointService from '../service/Service';
+import Service from '../service/Service';
 
 
-interface IState {
-  requestNo:string;
-   requestNoError: string;
-  projectCode: string;
-  projectTitle: string;
-  projectDescription: string;
-  vendorName: string;
-  vendorDescription: string;
-  files: FileList | null;
-  filesError: string;
-}
+const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
 
-export default class VendorMappingForm extends React.Component<IVendorMappingFormProps, IState> {
+  const [form, setForm]=React.useState({
+    projectCode: '',
+    projectTitle: '',
+    projectDescription: '',
+    vendorName: '',
+    vendorDescription: '',
+    files: [] as File[],
+    Attachments: [],
+    CurrentStatus:''
+  });
 
-  constructor(props: IVendorMappingFormProps) {
-    super(props);
+  const [requestNo, setRequestNo] = React.useState('');
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+  const [projectTitle, setProjectTitle] = React.useState('');
+  const [projectDescription, setProjectDescription] = React.useState('');
+  const [requestNoError, setRequestNoError] = React.useState('');
+  const [isSubmitted, setIsSubmitted] = React.useState('');
+  const MAX_TOTAL_SIZE_MB = 25;
+  const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
+   const [attachments, setAttachments] = React.useState<any[]>([]);
 
-    this.state = {
-      requestNo:'',
-       requestNoError: '',
-      projectCode: '',
-      projectTitle: '',
-      projectDescription: '',
-      vendorName: '',
-      vendorDescription: '',
-      files: null,
-      filesError: ''
-      
+
+
+  // --- 1️⃣ Get ID from query string ---
+    const getIdFromQueryString = (): number | null => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('ID');
+      return id ? parseInt(id, 10) : null;
     };
-  }
+  
+    // --- 3️⃣ Load data on mount ---
+    React.useEffect(() => {
+      const id = getIdFromQueryString();
+      if (id) {
+        handleFetchById(id);
+      }
+    }, []);
+  
+  
+     const loadAttachments = async (id:number) => {
+      try{
+    const files = await service.getAttachments(id);
+    console.log("Attachments:", files);
+    setAttachments(files);
+      }catch(error)
+      {
+        console.error(error);
+      }
+     };
+     React.useEffect(() => {
+       if (itemId) {
+         loadAttachments(itemId);
+        
+       }
+     }, [itemId]);
+    const handleFetchById = async (id: number) => {
+    try {
+     
+      console.log("Calling API with ID:", id);
 
-   // --- VALIDATIONS ---
-  validateProjectCode = (value: string): string => {
+      const result = await service.getItemByRequestNo(id);
+
+      console.log("Result:", result);
+
+      if (result.CurrentStatus==='Draft') {
+        setItemId(result.Id);
+
+        setForm(prev => ({
+        ...prev,
+          projectCode: result.ProjectCode || '',
+          projectTitle: result.ProjectTitle || '',
+          projectDescription: result.ProjectDescription || '',
+          vendorName: result.VendorName || '',
+          vendorDescription: result.VendorDescription || ''
+          //attachments: result.Attachments || []
+
+          
+        }));
+          
+      } else {
+        alert("No data found");
+      }
+      
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+
+  // --- VALIDATIONS ---
+  const validateProjectCode = (value: string): string => {
     if (!value) return 'Project Code is required';
     if (!/^[a-zA-Z0-9-]+$/.test(value)) return 'Project Code must be alphanumeric';
     if (value.length > 10) return 'Project Code must be at most 10 characters';
     return '';
   }
 
-  validateVendorName = (value: string): string => {
+  const validateVendorName = (value: string): string => {
     if (!value) return 'Vendor selection is required';
     return '';
   }
 
-  validateFiles = (files: FileList | null): string => {
+
+
+
+
+  const validateFiles = (files: FileList | null): string => {
     if (!files || files.length === 0) return 'At least one file is required';
     return '';
   }
 
-
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
-  };
-
- private getRequestDetails = async (requestNo: string) => {
- 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
-
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
+  // --- HANDLE FIELD CHANGES ---
   
- const data = await response.json();
+  const handleCancel = () => {
+     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url);
+   };
+   const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event?.target?.files;
+  if (!files) return;
 
-  if (data.value.length > 0) {
-    this.setState({
-      projectTitle: data.value[0].ProjectTitle,
-      projectDescription: data.value[0].ProjectDescription
-    });
-  } else {
+  
+  const filesArray = Array.from(files);
+
+  const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
+  if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
+    alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+    return;
+  }
+   // Invalid filename check
+  const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
+  if (invalidFiles.length > 0) {
+    alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+    return;
+  }
+   if (event.target.files) {
+    const selectedFiles = Array.from(event.target.files);
+
+    setForm((prev: any) => ({
+      ...prev,
+      files: [...prev.files, ...selectedFiles]
+    }));
+  }
+};
+
+
+
+const removeFile = (index: number) => {
+  setForm((prev: any) => ({
+    ...prev,
+    files: prev.files.filter((_: File, i: number) => i !== index)
+  }));
+};
+
+const removeExistingFile = async (index: number) => {
+ const file = attachments[index];
+
+
+  await service.deleteAttachmentFromSP(file);
+  setAttachments(prev => prev.filter((_, i) => i !== index));
+};
+
+
+
+
+  // const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+  //   setRequestNo(value);
    
-    this.setState({
+  //   const errorMsg = validateProjectCode(value);
+  // setRequestNoError(errorMsg);
+
+  // if (errorMsg) {
+  //   // validation failed → reset dependent fields
+  //   setProjectTitle('');
+  //   setProjectDescription('');
+  //   return; // API call skip karo
+  // }
+  //   if (!value) {
+  //   setProjectTitle('');
+  //    setProjectDescription('');
+  //   return;
+  // }
+  //   try {
+  //     const result =  await service.getRequestDetails(value);
+
+  //     if (result.length > 0) {
+  //       setProjectTitle(result[0].ProjectTitle || '');
+  //       setProjectDescription(result[0].ProjectDescription || '');
+  //     } else { 
+  //       setProjectTitle('');
+  //       setProjectDescription('');
+  //     }
+  
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
+
+
+const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+
+  // ✅ form me update karo (IMPORTANT)
+  setForm(prev => ({
+    ...prev,
+    projectCode: value
+  }));
+
+  // validation
+  const errorMsg = validateProjectCode(value);
+  setRequestNoError(errorMsg);
+
+  if (errorMsg || !value) {
+    setForm(prev => ({
+      ...prev,
       projectTitle: '',
       projectDescription: ''
-    });
+    }));
+    return;
   }
-};
- 
 
+  try {
+    const result = await service.getRequestDetails(value);
 
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const errorMsg = this.validateProjectCode(value);
-
-    this.setState({ requestNo: value, requestNoError: errorMsg });
-
-    if (!errorMsg) {
-      this.getRequestDetails(value);
+    if (result.length > 0) {
+      setForm(prev => ({
+        ...prev,
+        projectTitle: result[0].ProjectTitle || '',
+        projectDescription: result[0].ProjectDescription || ''
+      }));
     } else {
-      this.setState({ projectTitle: '', projectDescription: '' });
+      setForm(prev => ({
+        ...prev,
+        projectTitle: '',
+        projectDescription: ''
+      }));
     }
+
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
+
+  // 🔹 Handle input change
+   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: value
+    });
   };
 
-  private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    const errorMsg = this.validateFiles(files);
-    this.setState({ files: files, filesError: errorMsg });
-  };
-  // private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   this.setState({ files: e.target.files });
-  // };
-  private saveData = async () => {
 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
+  //SAVE DRAFT DATA
 
-  const body = {
-  
-    ProjectCode: this.state.requestNo,
-    ProjectTitle: this.state.projectTitle,
-    ProjectDescription: this.state.projectDescription,
-    VendorName : this.state.vendorName,
-    VendorDescription: this.state.vendorDescription,
-    Attachments: this.state.files
+  const handleSaveOrUpdate = async () => {
+  // 🔹 Validations
+  if (!form.projectCode) return alert("Project Code required");
+  if (!form.vendorName) return alert("Select Vendor");
+ if (
+  (!form.files || form.files.length === 0) &&
+  (!attachments || attachments.length === 0)
+) {
+  return alert("Attach files");
+}
+
+  // 🔹 Payload (common)
+  const payload = {
+    ProjectCode: form.projectCode,
+    ProjectTitle: form.projectTitle,
+    ProjectDescription: form.projectDescription,
+    VendorName: form.vendorName,
+    VendorDescription: form.vendorDescription,
+    CurrentStatus: 'Draft'
   };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
+
+  try {
+    if (!itemId) {
+      // 🔹 CREATE
+      const res = await service.createItem(payload);
+      setItemId(res.Id); // store ID for future updates
+
+      if (res.Id > 0 && form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(res.Id, form.files[i]);
+        }
+      }
+      alert("Data Saved Successfully ✅");
+    } else {
+      // 🔹 UPDATE
+      await service.updateItem(itemId, payload);
+
+      if (form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(itemId, form.files[i]);
+        }
+      }
+      alert("Data Updated Successfully ✅");
     }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
-
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred ❌");
   }
 };
   
   
-  private handleSubmit = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
+// SUBMIT DATA
+const handleUpdate = async () => {
+   if (!form.projectCode) return alert("Project Code required");
+    if (!form.vendorName) return alert("Select Vendor");
+    if (
+  (!form.files || form.files.length === 0) &&
+  (!attachments || attachments.length === 0)
+) {
+  return alert("Attach files");
+}
+  const payload = {
+    ProjectCode: form.projectCode,
+     ProjectDescription: form.projectDescription,
+    ProjectTitle: form.projectTitle,
+    VendorName:  form.vendorName, 
+    VendorDescription: form.vendorDescription,
+    CurrentStatus: 'Pending'
   };
+  try {
+    if (itemId) {
+      //  UPDATE
+     await service.updateItem(itemId, payload);
+    if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(itemId, form.files[i]);
+      }
+    }
+   
+      alert("Data Submitted Successfully ✅");  
+      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url);     
+       // Reset form
+  // setForm({
+  //   projectCode: '',
+  //   projectTitle: '',
+  //   projectDescription: '',
+  //   vendorName: '',
+  //   vendorDescription: '',
+  //   files: [] as File[]
+  // });
+  // setRequestNo('');
+  // setProjectTitle('');
+  // setProjectDescription('');
+  // setItemId(null);
+  //setIsSubmitted(true); // freeze inputs
+};
+    
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred");
+  }
+};
 
-  private handleSave = () => {
-    console.log("Saved Data:", this.state);
-    alert("Saved");
-  };
 
-  public render(): React.ReactElement<IVendorMappingFormProps> {
-    const { requestNo, requestNoError, projectTitle, vendorName, filesError } = this.state;
 
-    // Form is invalid if any required field has an error
-    const isFormInvalid = !!requestNoError  || !!filesError || !requestNo || !vendorName || !this.state.files;
 
-    return (
-      <div className={styles.container}>
 
-        {/* LEFT FORM */}
-        <div className={styles.leftPanel}>
-          <h2>Vendor Mapping Form</h2>
-          <h4>Vendor Mapping / New Vendor Registration Form</h4>
 
-          <label>Project Code <span className={styles.required}>*</span></label>
-          <input
-            name="requestNo"
-            value={requestNo}
-            onChange={this.handleRequestNoChange}
-            className={requestNoError ? styles.buttonGroup : ''}
-          />
-          {requestNoError && <span className={styles.error}>{requestNoError}</span>}
 
-          <label>Project Title</label>
-          <input name="projectTitle" value={this.state.projectTitle} readOnly />
 
-          <label>Project Description</label>
-          <input name="projectDescription" value={this.state.projectDescription} readOnly  >
-          </input>
 
-          <label>Select Vendor <span className={styles.required}>*</span></label>
-          <select name="vendorName" onChange={this.handleChange}>
-            <option value="">Select Vendor</option>
-            <option value="Vendor1">Vendor </option>
-            <option value="Vendor2">Vendor 2</option>
-          </select>
 
-          <label>Additional Information & Remarks</label>
-          <textarea name="VendorDescription" onChange={this.handleChange}></textarea>
 
-          <label>Attach Documents <span className={styles.required}>*</span></label>
-           <input type="file" multiple onChange={this.handleFileChange} />
-          {filesError && <span className={styles.required}>{filesError}</span>}
+  // --- RENDER ---
+  return (
+    <div className={styles.container}>
 
-          {/* Buttons */}
+      <div className={styles.leftPanel}>
+        <h2>Vendor Mapping Form</h2>
+        <h4>Vendor Mapping / New Vendor Registration Form</h4>
+      
+
+        <label>Project Code <span className={styles.required}>*</span></label>
+        <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange}   />
+       {requestNoError && <span className={styles.error}>{requestNoError}</span>}
+       
+        <label>Project Title</label>
+        <input name="projectTitle" value={form.projectTitle} readOnly   />
+
+        <label>Project Description</label>
+        <input name="projectDescription" value={form.projectDescription} readOnly  />
+
+
+        <label>Select Vendor <span className={styles.required}>*</span></label>
+      <select name="vendorName" value={form.vendorName} onChange={(e) =>setForm(prev => ({
+      ...prev,vendorName: e.target.value}))} >
+       <option value="">Select Vendor</option>
+  <option value="Vendor1">Vendor 1</option>
+  <option value="Vendor2">Vendor 2</option>
+</select>
+        <label>Additional Information & Remarks</label>
+        <input name="vendorDescription" value={form.vendorDescription} onChange={handleChange}  />
+        
+
+        <label>Attachments <span className={styles.required}>*</span></label>
+       <input type="file" multiple onChange={handleFileChange}  />
+
+       {/*  Existing Files (API se) */}
+{attachments?.length > 0 && (
+  <ul style={{ listStyle: "none", padding: 0 }}>
+    {attachments.map((file, index) => (
+      <li
+        key={index}
+        style={{ display: "flex", alignItems: "center", gap: "10px" }}
+      >
+        {/* ❌ Remove Button */}
+        <span
+          style={{
+            color: "red",
+            cursor: "pointer",
+            fontWeight: "bold"
+          }}
+          onClick={() => removeExistingFile(index)}
+        >
+          ✕
+        </span>
+
+        {/* 📄 File Link */}
+        <a
+          href={file.ServerRelativeUrl}
+         
+          rel="noopener noreferrer"
+        >
+          {file.FileName}
+        </a>
+      </li>
+    ))}
+  </ul>
+)}
+      
+        {/* Selected Files */}
+       {form.files.length > 0 && (
+    <ul style={{ listStyle: "none", padding: 0 }}>
+      {form.files.map((file: File, index: number) => (
+        <li key={index} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          
+          {/* ❌ Remove */}
+          <span
+            style={{ cursor: "pointer", color: "red", fontWeight: "bold" }}
+            onClick={() => removeFile(index)}
+          >
+            ✕
+          </span>
+
+          {/* File Name */}
+          <span>{file.name}</span>
+
+        </li>
+      ))}
+    </ul>
+       )}
+
+       {/* Buttons */}
           <div className={styles.buttonGroup}>
-            <button className={styles.submitBtn} onClick={this.handleSubmit}>Submit</button>
-            <button className={styles.saveBtn} onClick={this.saveData}>Save</button>
-            <button className={styles.cancelBtn}>Cancel</button>
+            <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
+            <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
+            <button className={styles.cancelBtn} onClick={handleCancel} >Cancel</button>
           </div>
         </div>
 
-        {/* RIGHT PANEL */}
-        <div className={styles.rightPanel}>
+      <div className={styles.rightPanel}>
+        <div className={styles.card}>
+          <h4>Templates</h4>
+          <ul>
+            <li>Vendor_Registration_Form_v1.0.xlsx</li>
+            <li>SOP_Procurement_of_Goods_Services.pdf</li>
+            <li>DigiFlow_Training_Manual.pdf</li>
+          </ul>
+        </div>
 
-          {/* Templates */}
-          <div className={styles.card}>
-            <h4>Templates</h4>
-            <ul>
-              <li>Vendor_Registration_Form_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
-            </ul>
-          </div>
-
-          {/* Guidelines */}
-          <div className={styles.card}>
-            <h4>Important Guidelines</h4> 
-            <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
-            </ol>
-          </div>
-
+        <div className={styles.card}>
+          <h4>Important Guidelines</h4>
+          <ol>
+            <li>Select approval path carefully.</li>
+            <li>Use project reference if needed.</li>
+            <li>Attach all documents (Max 25 MB).</li>
+            <li>Avoid special characters in file names.</li>
+          </ol>
         </div>
       </div>
-    );
-  }
-}
+
+    </div>
+   );
+};
+
+export default VendorMappingForm;

@@ -11,7 +11,8 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'DocumentUploadWebPartStrings';
 import DocumentUpload from './components/DocumentUpload';
 import { IDocumentUploadProps } from './components/IDocumentUploadProps';
-
+import { Environment, EnvironmentType } from '@microsoft/sp-core-library';
+import * as microsoftTeams from "@microsoft/teams-js";
 export interface IDocumentUploadWebPartProps {
   description: string;
 }
@@ -45,32 +46,49 @@ export default class DocumentUploadWebPart extends BaseClientSideWebPart<IDocume
 
 
 
-  private _getEnvironmentMessage(): Promise<string> {
-    if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
-        .then(context => {
-          let environmentMessage: string = '';
-          switch (context.app.host.name) {
-            case 'Office': // running in Office
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
-              break;
-            case 'Outlook': // running in Outlook
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
-              break;
-            case 'Teams': // running in Teams
-            case 'TeamsModern':
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
-              break;
-            default:
-              environmentMessage = strings.UnknownEnvironment;
-          }
+ private _getEnvironmentMessage(): Promise<string> {
 
-          return environmentMessage;
-        });
-    }
+  const isLocal: boolean = Environment.type === EnvironmentType.Local;
 
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
+  if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
+    return microsoftTeams.app.getContext()
+      .then((context: any) => {
+        let environmentMessage: string = '';
+
+        switch (context.app.host.name) {
+          case 'Office': // running in Office
+            environmentMessage = isLocal
+              ? strings.AppLocalEnvironmentOffice
+              : strings.AppOfficeEnvironment;
+            break;
+
+          case 'Outlook': // running in Outlook
+            environmentMessage = isLocal
+              ? strings.AppLocalEnvironmentOutlook
+              : strings.AppOutlookEnvironment;
+            break;
+
+          case 'Teams': // running in Teams
+          case 'TeamsModern':
+            environmentMessage = isLocal
+              ? strings.AppLocalEnvironmentTeams
+              : strings.AppTeamsTabEnvironment;
+            break;
+
+          default:
+            environmentMessage = strings.UnknownEnvironment;
+        }
+
+        return environmentMessage;
+      });
   }
+
+  return Promise.resolve(
+    isLocal
+      ? strings.AppLocalEnvironmentSharePoint
+      : strings.AppSharePointEnvironment
+  );
+}
 
   protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
     if (!currentTheme) {
@@ -94,8 +112,12 @@ export default class DocumentUploadWebPart extends BaseClientSideWebPart<IDocume
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
+  private _dataVersion: Version = Version.parse('1.0');
   protected get dataVersion(): Version {
-    return Version.parse('1.0');
+    return this._dataVersion;
+  }
+  protected set dataVersion(value: Version) {
+    this._dataVersion = value;
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {

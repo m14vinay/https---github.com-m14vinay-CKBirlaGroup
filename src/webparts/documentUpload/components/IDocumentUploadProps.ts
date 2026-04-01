@@ -7,3 +7,14 @@ export interface IDocumentUploadProps {
   userDisplayName: string;
   context: WebPartContext;
 }
+export interface IState {
+  TypeofDocument:any;
+  TypeofDocumentID:any;
+  NameofDocument: any;
+  BillNumber: any;
+  BillDate: Date;
+  vendorName: any;
+  BillAmount: number;
+  Remarks: any;
+  files: FileList | null;
+}

@@ -15,7 +15,7 @@
         {
           "entrypoint": "./lib/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.js",
           "manifest": "./src/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.manifest.json"
-    }
+        }
       ]
     },
     "vendor-mapping-form-web-part": {
@@ -89,7 +89,7 @@
           "manifest": "./src/webparts/billProcessingDetailView/BillProcessingDetailViewWebPart.manifest.json"
         }
       ]
-    }, 
+    },
     "quotation-request-detail-view-nei-bt-web-part": {
       "components": [
         {
@@ -114,7 +114,6 @@
         }
       ]
     },
-    
     "reimbursement-request-form-web-part": {
       "components": [
         {
@@ -163,11 +162,72 @@
         }
       ]
     },
+    "summary-report-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/summaryReport/SummaryReportWebPart.js",
+          "manifest": "./src/webparts/summaryReport/SummaryReportWebPart.manifest.json"
+        }
+      ]
+    },
+    "finance-report-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/financeReport/FinanceReportWebPart.js",
+          "manifest": "./src/webparts/financeReport/FinanceReportWebPart.manifest.json"
+        }
+      ]
+    },
+    "request-history-report-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/requestHistoryReport/RequestHistoryReportWebPart.js",
+          "manifest": "./src/webparts/requestHistoryReport/RequestHistoryReportWebPart.manifest.json"
+        }
+      ]
+    },
+    "vendor-registration-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorRegistration/VendorRegistrationWebPart.js",
+          "manifest": "./src/webparts/vendorRegistration/VendorRegistrationWebPart.manifest.json"
+        }
+      ]
+    },
+    "vendor-registration-manually-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorRegistrationManually/VendorRegistrationManuallyWebPart.js",
+          "manifest": "./src/webparts/vendorRegistrationManually/VendorRegistrationManuallyWebPart.manifest.json"
+        }
+      ]
+    },
+    "vendor-registration-detail-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorRegistrationDetail/VendorRegistrationDetailWebPart.js",
+          "manifest": "./src/webparts/vendorRegistrationDetail/VendorRegistrationDetailWebPart.manifest.json"
+        }
+      ]
+    },
+    "vendor-registration-search-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vendorRegistrationSearch/VendorRegistrationSearchWebPart.js",
+          "manifest": "./src/webparts/vendorRegistrationSearch/VendorRegistrationSearchWebPart.manifest.json"
     "qa-request-approval-form-web-part": {
       "components": [
         {
           "entrypoint": "./lib/webparts/qaRequestApprovalForm/QaRequestApprovalFormWebPart.js",
           "manifest": "./src/webparts/qaRequestApprovalForm/QaRequestApprovalFormWebPart.manifest.json"
+        }
+      ]
+    },
+    "qr-details-status-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/qrDetailsStatus/QrDetailsStatusWebPart.js",
+          "manifest": "./src/webparts/qrDetailsStatus/QrDetailsStatusWebPart.manifest.json"
         }
       ]
     }
@@ -194,6 +254,14 @@
     "DocumentSearchWebPartStrings": "lib/webparts/documentSearch/loc/{locale}.js",
     "DocumentUploadWebPartStrings": "lib/webparts/documentUpload/loc/{locale}.js",
     "DocumentViewWebPartStrings": "lib/webparts/documentView/loc/{locale}.js",
-    "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js"
+    "SummaryReportWebPartStrings": "lib/webparts/summaryReport/loc/{locale}.js",
+    "FinanceReportWebPartStrings": "lib/webparts/financeReport/loc/{locale}.js",
+    "RequestHistoryReportWebPartStrings": "lib/webparts/requestHistoryReport/loc/{locale}.js",
+    "VendorRegistrationWebPartStrings": "lib/webparts/vendorRegistration/loc/{locale}.js",
+    "VendorRegistrationManuallyWebPartStrings": "lib/webparts/vendorRegistrationManually/loc/{locale}.js",
+    "VendorRegistrationDetailWebPartStrings": "lib/webparts/vendorRegistrationDetail/loc/{locale}.js",
+    "VendorRegistrationSearchWebPartStrings": "lib/webparts/vendorRegistrationSearch/loc/{locale}.js"
+    "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js",
+    "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js"
   }
 }

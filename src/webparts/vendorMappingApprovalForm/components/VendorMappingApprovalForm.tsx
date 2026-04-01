@@ -1,244 +1,214 @@
 import * as React from 'react';
+import { useState } from 'react';
+import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import styles from './VendorMappingApprovalForm.module.scss';
 import { IVendorMappingApprovalFormProps } from './IVendorMappingApprovalFormProps';
-import { SPHttpClient } from '@microsoft/sp-http';
-
-interface IState {
-   requestNo:string;
-   requestNoError: string;
-  projectCode: string;
-  projectTitle: string;
-  projectDescription: string;
-  vendorName: string;
-  vendorDescription: string;
-  files: FileList | null;
-  filesError: string;
-  approverComments:string;
-  approverCommentsError:string;
-}
-
-export default class VendorMappingForm extends React.Component<IVendorMappingApprovalFormProps, IState> {
-
-  constructor(props: IVendorMappingApprovalFormProps) {
-    super(props);
-
-    this.state = {
-      requestNo:'',
-       requestNoError: '',
-      projectCode: '',
-      projectTitle: '',
-      projectDescription: '',
-      vendorName: '',
-      vendorDescription: '',
-      files: null,
-      filesError: '',
-      approverComments:'',
-      approverCommentsError:''
+import SharePointService from '../service/Service';
+import Service from '../service/Service';
 
 
-    };
-  }
+const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => {
 
-   // --- VALIDATIONS ---
-  validateProjectCode = (value: string): string => {
-    if (!value) return 'Project Code is required';
-    if (!/^[a-zA-Z0-9]+$/.test(value)) return 'Project Code must be alphanumeric';
-    if (value.length > 10) return 'Project Code must be at most 10 characters';
-    return '';
-  }
+  const [form, setForm]=React.useState({
+    projectCode: '',
+    projectTitle: '',
+    projectDescription: '',
+    vendorName: '',
+    vendorDescription: '',
+    files: null as FileList | null,
+     attachments: [],
+     CurrentStatus:''
+    
+  });
 
-  validateVendorName = (value: string): string => {
-    if (!value) return 'Vendor selection is required';
-    return '';
-  }
-
-  validateFiles = (files: FileList | null): string => {
-    if (!files || files.length === 0) return 'At least one file is required';
-    return '';
-  }
+  ;
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+  const [approverComment, setApproverComment] = React.useState('');
+   const [Actiondate1, setactiondate1] = React.useState('');
+   const [attachments, setAttachments] = React.useState<any[]>([]);
+ 
   
-  validateApproverComments = (value: string): string => {
-    if (!value) return 'Vendor approver is required';
-    return '';
-  }
-
-
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
+  // --- 1️⃣ Get ID from query string ---
+  const getIdFromQueryString = (): number | null => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('ID');
+    return id ? parseInt(id, 10) : null;
   };
 
- private getRequestDetails = async (requestNo: string) => {
- 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
+  // --- 3️⃣ Load data on mount ---
+  React.useEffect(() => {
+    const id = getIdFromQueryString();
+    if (id) {
+      handleFetchById(id);
+    }
+  }, []);
 
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
+
+   const loadAttachments = async (id:number) => {
+    try{
+  const files = await service.getAttachments(id);
+  console.log("Attachments:", files);
+  setAttachments(files);
+    }catch(error)
+    {
+      console.error(error);
+    }
+   };
+   React.useEffect(() => {
+     if (itemId) {
+       loadAttachments(itemId);
+      
+     }
+   }, [itemId]);
   
- const data = await response.json();
+//FETCH DATA-----
+const handleFetchById = async (id: number) => {
+    try {
+     
+      console.log("Calling API with ID:", id);
 
-  if (data.value.length > 0) {
-    this.setState({
-      projectTitle: data.value[0].ProjectTitle,
-      projectDescription: data.value[0].ProjectDescription
-    });
-  } else {
-   
-    this.setState({
-      projectTitle: '',
-      projectDescription: ''
-    });
-  }
-};
- 
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const errorMsg = this.validateProjectCode(value);
+      const result = await service.getItemByRequestNo(id);
 
-    this.setState({ requestNo: value, requestNoError: errorMsg });
+      console.log("Result:", result);
 
-    if (!errorMsg) {
-      this.getRequestDetails(value);
-    } else {
-      this.setState({ projectTitle: '', projectDescription: '' });
+      if (result.CurrentStatus==='Pending' || result.CurrentStatus==='Approved' ) {
+        setItemId(result.Id);
+
+        setForm(prev => ({
+        ...prev,
+          projectCode: result.ProjectCode || '',
+          projectTitle: result.ProjectTitle || '',
+          projectDescription: result.ProjectDescription || '',
+          vendorName: result.VendorName || '',
+          vendorDescription: result.VendorDescription || '',
+          files: null
+        }));
+         setApproverComment(result.ApproverComment || ''); // 
+         
+      } else {
+        alert("No data found");
+      }
+      
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
-   private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      const errorMsg = this.validateFiles(files);
-      this.setState({ files: files, filesError: errorMsg });
-    };
 
-   private handleApproverCommentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;                    // get text input value
-  const errorMsg = this.validateApproverComments(value);  // validate required field
-  this.setState({ approverComments: value, approverCommentsError: errorMsg });
-};
-  private saveData = async () => {
 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
+  const handleApprove = async () => {
+  try {
+       if (!approverComment) return alert("Approver Comment required");
+    if (!itemId) return;
 
-  const body = {
-  
-    ProjectCode: this.state.requestNo,
-    ProjectTitle: this.state.projectTitle,
-    ProjectDescription: this.state.projectDescription,
-    VendorName : this.state.vendorName,
-    VendorDescription: this.state.vendorDescription,
-    Attachments: this.state.files
-  };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
-    }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
-
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
+    await service.updateItemdata(itemId, "Approved", approverComment);
+    
+    alert("✅ Approved successfully");
+    setApproverComment('');
+  } catch (error) {
+    console.error(error);
   }
 };
-  
-  
-  private handleApprove = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
-  };
 
-  private handleReject = () => {
-    console.log("Saved Data:", this.state);
-    alert("Saved");
-  };
+const handleReject = async () => {
+  try {
+    if (!approverComment) return alert("Approver Comment required");
+    if (!itemId) return;
 
-  public render(): React.ReactElement<IVendorMappingApprovalFormProps> {
-    const { requestNo, requestNoError, projectTitle, projectDescription, vendorName, filesError } = this.state;
+    if (!approverComment) {
+      alert("Comment is required for rejection ❗");
+      return;
+    }
 
-    // Form is invalid if any required field has an error
-    const isFormInvalid = !!requestNoError  || !!filesError || !requestNo || !vendorName || !this.state.files;
+    await service.updateItemdata(itemId, "Rejected", approverComment);
 
-    return (
-      <div className={styles.container}>
+    alert("❌ Rejected successfully");
+    setApproverComment('');
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-        {/* LEFT FORM */}
-        <div className={styles.leftPanel}>
-          <h2>Vendor Mapping Approval Form</h2>
+    
+ 
+
+
+  // --- RENDER ---
+  return (
+    <div className={styles.container}>
+
+      <div className={styles.leftPanel}>
+        <h2>Vendor Mapping Approval Form</h2>
        
-           <label>Project Code </label>
-    <input name="requestNo" value={this.state.requestNo} readOnly/>
+        <label>Project Code <span className={styles.required}>*</span></label>
+        <input name="projectCode" value={form.projectCode}   readOnly />
+       
+       
+        <label>Project Title</label>
+        <input name="projectTitle" value={form.projectTitle}   readOnly />
 
-    {/* Project Title (Read Only) */}
-    <label>Project Title</label>
-    <input name="projectTitle" value={this.state.projectTitle} readOnly/>
+        <label>Project Description</label>
+        <input name="projectDescription" value={form.projectDescription}  readOnly />
+        
+        <label>Select Vendor <span className={styles.required}>*</span></label>
+      <input name="vendorName" value={form.vendorName}  readOnly />
 
-    {/* Project Description (Read Only) */}
-    <label>Project Description</label>
-    <input name="projectDescription" value={this.state.projectDescription} readOnly/>
+        <label>Additional Information & Remarks</label>
+        <input name="vendorDescription" value={form.vendorDescription}  readOnly />
+        
 
-    {/* Vendor Name (Read Only) */}
-    <label>Select Vendor </label>
-    <input name="vendorName" value={this.state.vendorName}readOnly/>
-
-    {/* Additional Information / Remarks (Read Only) */}
-    <label>Additional Information & Remarks</label>
-    <input  name="VendorDescription"  value={this.state.vendorDescription} readOnly />
-
-    <label>Attach Documents</label>
-           
-          
-  <label>Approver Comments <span className={styles.required}>*</span></label>
-<input name="ApproverComments" value={this.state.approverComments} onChange={this.handleApproverCommentsChange}
-  className={this.state.approverCommentsError ? styles.inputError : ''}
-/>
-{this.state.approverCommentsError && (
-  <span className={styles.error}>{this.state.approverCommentsError}</span>
-)}
-
-          {/* Buttons */}
+        <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px", marginBottom:"10px" }}>
+           <label>
+            Attachments <span className={styles.required}>*</span>
+            </label>
+     
+    <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
+      {attachments.map((file: any, index: number) => (
+        <a
+          key={index}
+            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+          {file.FileName}
+        </a>
+       ))}
+    </div>
+ 
+</div>    
+       <label>Approver Comments <span className={styles.required}>*</span></label>
+       <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}  style={{ marginBottom: "15px" }} />
+        
+       {/* Buttons */}
           <div className={styles.buttonGroup}>
-            <button className={styles.ApproveBtn} onClick={this.handleApprove}>Approve</button>
-            <button className={styles.RejectBtn} onClick={this.handleReject}>Reject</button>
+            <button className={styles.ApproveBtn} onClick={handleApprove}>Approve</button>
+            <button className={styles.RejectBtn} onClick={handleReject} >Reject</button>
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
+        
+      
         </div>
 
-        {/* RIGHT PANEL */}
-        <div className={styles.rightPanel}>
+      <div className={styles.rightPanel}>
+        <div className={styles.card}>
+          <h4>Templates</h4>
+          <ul>
+            <li>Vendor_Registration_Form_v1.0.xlsx</li>
+            <li>SOP_Procurement_of_Goods_Services.pdf</li>
+            <li>DigiFlow_Training_Manual.pdf</li>
+          </ul>
+        </div>
 
-          {/* Templates */}
-          <div className={styles.card}>
-            <h4>Templates</h4>
-            <ul>
-              <li>Vendor_Registration_Form_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
-            </ul>
-          </div>
-
-          {/* Guidelines */}
-          <div className={styles.card}>
-            <h4>Important Guidelines</h4>
-            <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
-            </ol>
-          </div>
-
+        <div className={styles.card}>
+          <h4>Important Guidelines</h4>
+          <ol>
+            <li>Select approval path carefully.</li>
+            <li>Use project reference if needed.</li>
+            <li>Attach all documents (Max 25 MB).</li>
+            <li>Avoid special characters in file names.</li>
+          </ol>
         </div>
       </div>
-    );
-  }
-}
+
+    </div>
+   );
+};
+
+export default VendorMappingForm;

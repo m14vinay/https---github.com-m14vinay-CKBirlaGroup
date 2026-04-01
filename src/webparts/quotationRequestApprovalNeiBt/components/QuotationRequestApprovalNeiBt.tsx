@@ -5,133 +5,14 @@ import { escape } from '@microsoft/sp-lodash-subset';
 import { SPHttpClient } from '@microsoft/sp-http';
 import { useEffect, useState } from 'react';
 import { TextField, Dropdown, PrimaryButton, formProperties } from '@fluentui/react';
+import SharePointService from '../service/Service';
 
-export default class QuotationRequestApprovalNeiBt extends React.Component<IQuotationRequestApprovalNeiBtProps, IState,IForm> {
-  constructor(props: IQuotationRequestApprovalNeiBtProps) {
-    super(props);
+const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProps> = (props) => {
 
-    const [form, setForm] = useState<IForm>({
-    projectTitle: '',
-    projectDescription: '',
-    department: '',
-    approvalPath: '',
-    vendor1: '',
-    vendor2: '',
-    vendor3: '',
-    selectedVendor: '',
-    quote1: 0,
-    quote2: 0,
-    quote3: 0,
-    selectedQuote: 0,
-    projectRef: '',
-    files: []
-  });
-
-  const [departments, setDepartments] = useState<any[]>([]);
-  const [paths, setPaths] = useState<any[]>([]);
-  useEffect(() => {
-    loadDepartments();
-  }, []);
-
-  const loadDepartments = async () => {
-    const res = await fetch(
-      `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items`,
-      { headers: { Accept: 'application/json;odata=verbose' } }
-    );
-    const data = await res.json();
-    setDepartments(data.d.results);
-  };
-
-// 🔹 Bind approval path
-  const bindPath = async (dept: string) => {
-    const res = await fetch(
-      `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items?$filter=DepartmentName eq '${dept}'`,
-      { headers: { Accept: 'application/json;odata=verbose' } }
-    );
-    const data = await res.json();
-    setPaths(data.d.results);
-  };
-
-  // 🔹 Handle change
-  const handleChange = (field: keyof IForm, value: any) => {
-    setForm({ ...form, [field]: value });
-  };
- 
- // 🔹 File upload
-  const handleFile = (e: any) => {
-    setForm({ ...form, files: Array.from(e.target.files) });
-  };
-
-  // 🔹 Validation + Save
-  const handleSubmit = async () => {
-
-    if (!form.projectTitle) return alert("Project Title required");
-    if (!form.projectDescription) return alert("Description required");
-    if (!form.department) return alert("Department required");
-    if (!form.approvalPath) return alert("Approval Path required");
-    if (!form.vendor1) return alert("Vendor1 required");
-    if (!form.quote1) return alert("Quote1 required");
-    if (!form.selectedVendor) return alert("Select Vendor");
-    if (!form.selectedQuote) return alert("Select Quote");
-    if (form.files.length === 0) return alert("Attach files");
-  const body = {
-      __metadata: { type: "SP.Data.QuotationApprovalNEIBTAdminListItem" },
-      ProjectTitle: form.projectTitle,
-      ProjectDescription: form.projectDescription,
-      Vendor1: form.vendor1,
-      Vendor2: form.vendor2,
-      Vendor3: form.vendor3,
-      Selectedvendor: form.selectedVendor,
-      Quote1: form.quote1,
-      Quote2: form.quote2,
-      Quote3: form.quote3,
-      SelectedQuote: form.selectedQuote,
-      ProjectReffNo: form.projectRef,
-      Department: form.department,
-      ApprovalPath: form.approvalPath
-    };
-
-    const res = await fetch(
-      `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApprovalNEIBTAdmin')/items`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json;odata=verbose",
-          "Content-Type": "application/json;odata=verbose",
-          "X-RequestDigest": (document.getElementById("__REQUESTDIGEST") as HTMLInputElement).value
-        },
-        body: JSON.stringify(body)
-      }
-    );
-    const data = await res.json();
-    const itemId = data.d.Id;
-  if (data.value.length > 0) {
-    this.setState({
-      QARequestNo: data.value[0].QARequestNo,
-      ProjectTitle: data.value[0].ProjectTitle,
-      ProjectReferenceNo: data.value[0].ProjectReferenceNo,
-      projectDescription: data.value[0].projectDescription,
-      TotalProjectAmount: data.value[0].TotalProjectAmount,
-      ApplicableTaxes: data.value[0].ApplicableTaxes,
-      Vendor1: data.value[0].Vendor1,
-      Vendor2: data.value[0].Vendor2,
-      Vendor3: data.value[0].Vendor3,
-      Quote1: data.value[0].Quote1,
-      Quote2: data.value[0].Quote2,
-      Quote3: data.value[0].Quote3,
-      Vendor: data.value[0].Vendor,
-      Quote: data.value[0].Quote,
-      Department: data.value[0].Department,
-      AdvancePayment: data.value[0].AdvancePayment,
-      ApprovalPath: data.value[0].ApprovalPath
-    });
-  } else {
-   
-    this.setState({
-       QARequestNo:'',
-      ProjectTitle:'',
-      ProjectReferenceNo:'',
-      projectDescription: '',
+     const [form, setForm] = React.useState({
+   ProjectTitle:'',
+      ProjectReffNo:'',
+      ProjectDescription: '',
       TotalProjectAmount:0,
       ApplicableTaxes:0,
       Vendor1: '',
@@ -140,58 +21,167 @@ export default class QuotationRequestApprovalNeiBt extends React.Component<IQuot
       Quote1:'',
       Quote2:'',
       Quote3:'',
-      Vendor:'',
-      Quote:'',
+      Selectedvendor:'',
+      SelectedQuote:'',
       Department:'',
-      AdvancePayment:0,
-      ApprovalPath: ''
-    });
+      Advancepayment:0,
+      ApprovalPath: '',
+      files: null,
+      attachments: [],
+       ApproverComment1:'',
+       CurrentStatus:''
+  });
+
+   const [itemId, setItemId] = React.useState<number | null>(null);
+    const service = new SharePointService(props.context);
+    const [approverComment, setApproverComment] = React.useState('');
+    const [attachments, setAttachments] = React.useState<any[]>([]);
+  // useEffect(() => {
+  //   loadDepartments();
+  // }, []);
+
+  // const loadDepartments = async () => {
+  //   const res = await fetch(
+  //     `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items`,
+  //     { headers: { Accept: 'application/json;odata=verbose' } }
+  //   );
+  //   const data = await res.json();
+  //   setDepartments(data.d.results);
+  // };
+
+    // --- 1️⃣ Get ID from query string ---
+     const getIdFromQueryString = (): number | null => {
+       const params = new URLSearchParams(window.location.search);
+       const id = params.get('ID');
+       return id ? parseInt(id, 10) : null;
+     };
+   
+     // --- 3️⃣ Load data on mount ---
+     React.useEffect(() => {
+       const id = getIdFromQueryString();
+       if (id) {
+         handleFetchById(id);
+       }
+     }, []);
+
+const loadAttachments = async (id:number) => {
+    try{
+  const files = await service.getAttachments(id);
+  console.log("Attachments:", files);
+  setAttachments(files);
+    }catch(error)
+    {
+      console.error(error);
+    }
+   };
+
+React.useEffect(() => {
+  if (itemId) {
+    loadAttachments(itemId);
+     // 👈 dynamic ID use karo
   }
-   // 🔥 Upload files
-    for (let file of form.files) {
-      await uploadFile(itemId, file);
+}, [itemId]);
+
+
+const handleFetchById = async (id: number) => {
+    try {
+      console.log("Calling API with ID:", id);
+
+      const result = await service.getItemByRequestNo(id);
+
+      console.log("Result:", result);
+
+      if (result.CurrentStatus==='Pending' || result.CurrentStatus==='Approved' ) {
+      setItemId(result.Id);
+
+      setForm(prev => ({
+        ...prev,
+        ProjectTitle: result.ProjectTitle || '',
+        ProjectReffNo: result. ProjectReffNo || '',
+        ProjectDescription: result.ProjectDescription || '',
+        TotalProjectAmount: result.TotalProjectAmount || 0,
+         ApplicableTaxes: result.ApplicableTaxes || 0,
+          Vendor1: result.Vendor1 || '',
+      Vendor2: result.Vendor2 || '',
+      Vendor3: result.Vendor3 || '',
+      Quote1: result.Quote1 || '',
+      Quote2:result.Quote2 || '',
+      Quote3: result.Quote3 || '',
+      Selectedvendor: result.Selectedvendor || '',
+      SelectedQuote: result.SelectedQuote || '',
+      Department: result.Department || '',
+      Advancepayment: result.Advancepayment || 0,
+      ApprovalPath: result.ApprovalPath || '',
+      files: null
+      }));
+  setApproverComment(result.ApproverComment1 || '');
+    } else {
+      alert("No data found");
     }
 
-    alert("Submitted Successfully");
-    clearForm();
-  };
-  // 🔹 Upload file
-  const uploadFile = async (itemId: number, file: File) => {
-    const buffer = await file.arrayBuffer();
-    await fetch(
-      `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApprovalNEIBTAdmin')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json;odata=verbose",
-          "X-RequestDigest": (document.getElementById("__REQUESTDIGEST") as HTMLInputElement).value
-        },
-        body: buffer
-      }
-    );
-  };
-// 🔹 Clear form
-  const clearForm = () => {
-    setForm({
-      projectTitle: '',
-      projectDescription: '',
-      department: '',
-      approvalPath: '',
-      vendor1: '',
-      vendor2: '',
-      vendor3: '',
-      selectedVendor: '',
-      quote1: 0,
-      quote2: 0,
-      quote3: 0,
-      selectedQuote: 0,
-      projectRef: '',
-      files: []
-    });
-  };
+  } catch (error) {
+    console.error("Error:", error);
+  }
 };
 
-  public render(): React.ReactElement<IQuotationRequestApprovalNeiBtProps> {
+
+  const handleApprove = async () => {
+  try {
+       if (!approverComment) return alert("Approver Comment required");
+    if (!itemId) return;
+
+    await service.updateItemdata(itemId, "Approved", approverComment);
+
+    alert("✅ Approved successfully");
+    setApproverComment('');
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const handleReject = async () => {
+  try {
+    if (!approverComment) return alert("Approver Comment required");
+    if (!itemId) return;
+
+    if (!approverComment) {
+      alert("Comment is required for rejection ❗");
+      return;
+    }
+
+    await service.updateItemdata(itemId, "Rejected", approverComment);
+
+    alert("❌ Rejected successfully");
+    setApproverComment('');
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
+// // 🔹 Bind approval path
+//   const bindPath = async (dept: string) => {
+//     const res = await fetch(
+//       `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items?$filter=DepartmentName eq '${dept}'`,
+//       { headers: { Accept: 'application/json;odata=verbose' } }
+//     );
+//     const data = await res.json();
+//     setPaths(data.d.results);
+//   };
+
+  // 🔹 Handle change
+  const handleChange = (field: keyof IForm, value: any) => {
+    setForm({ ...form, [field]: value });
+  };
+ 
+//  // 🔹 File upload
+//   const handleFile = (e: any) => {
+//     setForm({ ...form, files: Array.from(e.target.files) });
+//   };
+
+  
+    
+  
     return (
       <div className={styles.container}>
         {/* LEFT FORM */}
@@ -200,67 +190,82 @@ export default class QuotationRequestApprovalNeiBt extends React.Component<IQuot
           <h4>Quotation Approval Form-NEI BT Admin/Request Approval</h4>
 
           <label>Project Title</label>
-          <input value={formProperties.ProjectTitle}  />
+          <input name="ProjectTitle" value={form.ProjectTitle} readOnly />
 
           <label>Project Reference No</label>
-          <input name="projectReferenceNo" value={formProperties.ProjectReferenceNo}   >
+          <input name="ProjectReffNo" value={form.ProjectReffNo}  readOnly >
           </input>
 
           <label>Project Description & Advance Payment Details</label>
-          <input name="projectDescription" value={formProperties.projectDescription}   >
+          <input name="projectDescription" value={form.ProjectDescription}  readOnly >
           </input>
 
           <label>Total Project Amount</label>
-          <input name="totalProjectAmount" value={formProperties.TotalProjectAmount }  />
+          <input name="TotalProjectAmount" value={form.TotalProjectAmount } readOnly />
 
           <label>Applicable Taxes</label>
-          <input name="applicableTaxes" value={formProperties.ApplicableTaxes}   >
+          <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly  >
           </input>
 
           <label>Vendor 1</label>
-          <input name="vendor1" value={formProperties.Vendor1}  />
+          <input name="Vendor1" value={form.Vendor1} readOnly />
 
           <label>Vendor 2</label>
-          <input name="vendor2" value={formProperties.Vendor2}  />
+          <input name="Vendor2" value={form.Vendor2} readOnly />
 
           <label>Vendor 3</label>
-          <input name="vendor3" value={formProperties.Vendor3}  />
+          <input name="Vendor3" value={form.Vendor3} readOnly />
 
           <label>Quote 1</label>
-          <input name="quote1" value={formProperties.Quote1}  />
+          <input name="Quote1" value={form.Quote1} readOnly />
 
           <label>Quote 2</label>
-          <input name="quote2" value={formProperties.Quote2}  />
+          <input name="Quote2" value={form.Quote2} readOnly  />
 
           <label>Quote 3</label>
-          <input name="quote3" value={formProperties.Quote3}  />
+          <input name="Quote3" value={form.Quote3} readOnly  />
 
           <label>Select Vendor</label>
-          <input name="vendor" value={formProperties.Vendor}  />
+          <input name="Selectedvendor" value={form.Selectedvendor} readOnly  />
 
           <label>Select Quote</label>
-          <input name="quote" value={formProperties.Quote}   >
+          <input name="SelectedQuote" value={form.SelectedQuote} readOnly   >
           </input>
 
           <label>Department</label>
-          <input name="Department" value={formProperties.Department}   >
+          <input name="Department" value={form.Department}  readOnly >
           </input>
 
           <label>Advance Amount</label>
-          <input name="AdvanceAmount" value={formProperties.AdvancePayment}   >
+          <input name="AdvancePayment" value={form.Advancepayment} readOnly  >
           </input>
 
           <label>Approval Path</label>
-          <input name="ApprovalPath" value={formProperties.ApprovalPath}   >
+          <input name="ApprovalPath" value={form.ApprovalPath}  readOnly >
           </input>          
+ <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px" , marginBottom:"10px"}}>
+           <label>
+            Attachments <span className={styles.required}>*</span>
+            </label>
+           <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
+      {attachments.map((file: any, index: number) => (
+        <a
+          key={index}
+            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+          {file.FileName}
+        </a>
+       ))}
+    </div>
+</div>
 
-          <label>Attach Documents</label>
-          <input type="file" multiple /> 
-
+<label></label>
+        <label></label>
+        <label>Approver Comments <span className={styles.required}>*</span></label>
+       <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}/>
           {/* Buttons */}
-          <div className={styles.buttonGroup}>
-            <button className={styles.ApproveBtn} >Approve</button>
-            <button className={styles.RejectBtn} >Reject</button>
+         <div className={styles.buttonGroup}>
+            <button className={styles.ApproveBtn} onClick={handleApprove}>Approve</button>
+            <button className={styles.RejectBtn} onClick={handleReject} >Reject</button>
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
         </div>
@@ -291,5 +296,6 @@ export default class QuotationRequestApprovalNeiBt extends React.Component<IQuot
       </div>
     );
   }
-}
 
+
+export default QuotationRequestApprovalNeiBt;
