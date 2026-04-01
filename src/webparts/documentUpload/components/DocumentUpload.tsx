@@ -229,19 +229,19 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         </div>
         </div>
       <div className={styles["col-md-3"]}>
-        <div className={styles.rightPanelHeader}>
+        <div className={styles.leftPanelHeader}>
         <h6>My Document List / Upload New Document</h6>          
         </div>        
       <div className={styles.rightPanel}>        
           {/* Templates */}
           <div className={styles.card}>
-             <div className={styles.rightPanelHeader}>
+             <div>
               <h4>Templates</h4>              
             </div>
           </div>
           {/* Guidelines */}
           <div className={styles.card}>
-             <div className={styles.rightPanelHeader}>
+             <div>
               <h4>Importance Guidelines</h4>              
             </div>
             <ol>
