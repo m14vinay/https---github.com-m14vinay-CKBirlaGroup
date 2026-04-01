@@ -14,7 +14,7 @@ import {
 } from '@tanstack/react-table';
 import Table from 'react-bootstrap/Table';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Icon, Label } from '@fluentui/react';
+import { Icon, Label, Modal } from '@fluentui/react';
 import { SharePointContext } from './SharePointContext';
 
 export default function MyRequests() {
@@ -22,6 +22,20 @@ export default function MyRequests() {
     const context = React.useContext(SharePointContext) as WebPartContext;
 
     const columnHelper = createColumnHelper<any>()
+
+    const openForm = (row:any) => {
+        console.log(row);
+
+        if(row["@odata.type"]){
+            switch(row["@odata.type"]){
+                case '#SP.Data.QuotationApprovalListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationView.aspx?requestId=" + row.Id,"_blank");
+                default:
+                    alert("Page not found");
+                    break;
+            }
+        }
+    }
 
     const columns = [
         columnHelper.accessor('RequestNo', {
@@ -53,7 +67,7 @@ export default function MyRequests() {
         }),
         columnHelper.accessor('Created', {
             header: 'View',
-            cell: (info) => <span>TBD</span>
+            cell: (info) => <span style={{cursor:"pointer"}}><Icon iconName="RedEye" onClick={() => openForm(info.row.original)}></Icon></span>
         })
     ]
     const [data, _setData] = useState<any[]>(() => []);

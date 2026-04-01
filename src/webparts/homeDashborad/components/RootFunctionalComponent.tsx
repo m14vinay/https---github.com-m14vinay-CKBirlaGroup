@@ -10,6 +10,7 @@ import MyWorkflowStatusChart from './MyWorkflowStatusChart';
 import MyDepartmentWiseChart from './MyDepartmentWiseChart';
 import MyPendingRequests from './MyPendingRequests';
 import WorkflowPendingAtChart from './WorkflowPendingAtChart';
+import CarousalMenu from './CarousalMenu';
 
 export default function RootFunctionalComponent(props: IHomeDashboradProps) {
 
@@ -32,6 +33,7 @@ export default function RootFunctionalComponent(props: IHomeDashboradProps) {
             <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
                 <MyDepartmentWiseChart/>
             </div>
+            {/* <CarousalMenu/> */}
             <div>
                 <MyPendingRequests/>
             </div>
