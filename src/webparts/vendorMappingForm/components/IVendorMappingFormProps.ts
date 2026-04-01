@@ -1,10 +1,9 @@
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 
 export interface IVendorMappingFormProps {
-  description: string;
-  isDarkTheme: boolean;
-  environmentMessage: string;
-  hasTeamsContext: boolean;
-  userDisplayName: string;
-   context: WebPartContext;   
+  context: any; // required
+  description?: string;
+  isDarkTheme?: boolean;
+  environmentMessage?: string;
+  hasTeamsContext?: boolean;
 }

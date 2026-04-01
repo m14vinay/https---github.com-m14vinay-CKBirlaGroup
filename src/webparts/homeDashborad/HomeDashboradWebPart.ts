@@ -106,10 +106,14 @@ private _getEnvironmentMessage(): Promise<string> {
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
-  //protected dataVersion: Version = Version.parse('1.0');
+  private _dataVersion: Version = Version.parse('1.0');
   protected get dataVersion(): Version {
-    return Version.parse('1.0');
+    return this._dataVersion;
   }
+  protected set dataVersion(value: Version) {
+    this._dataVersion = value;
+  }
+
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
