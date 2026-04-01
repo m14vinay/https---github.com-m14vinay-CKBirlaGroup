@@ -5,5 +5,5 @@ export interface IPurchaseOrderRequestProps {
   environmentMessage: string;
   hasTeamsContext: boolean;
   userDisplayName: string;
-  context: WebPartContext;
+  context: any;
 }

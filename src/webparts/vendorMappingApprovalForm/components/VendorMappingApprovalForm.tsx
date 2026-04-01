@@ -4,13 +4,17 @@ import { IVendorMappingApprovalFormProps } from './IVendorMappingApprovalFormPro
 import { SPHttpClient } from '@microsoft/sp-http';
 
 interface IState {
-  requestNo:string;
+   requestNo:string;
+   requestNoError: string;
   projectCode: string;
   projectTitle: string;
   projectDescription: string;
   vendorName: string;
   vendorDescription: string;
   files: FileList | null;
+  filesError: string;
+  approverComments:string;
+  approverCommentsError:string;
 }
 
 export default class VendorMappingForm extends React.Component<IVendorMappingApprovalFormProps, IState> {
@@ -20,14 +24,44 @@ export default class VendorMappingForm extends React.Component<IVendorMappingApp
 
     this.state = {
       requestNo:'',
+       requestNoError: '',
       projectCode: '',
       projectTitle: '',
       projectDescription: '',
       vendorName: '',
       vendorDescription: '',
-      files: null
+      files: null,
+      filesError: '',
+      approverComments:'',
+      approverCommentsError:''
+
+
     };
   }
+
+   // --- VALIDATIONS ---
+  validateProjectCode = (value: string): string => {
+    if (!value) return 'Project Code is required';
+    if (!/^[a-zA-Z0-9]+$/.test(value)) return 'Project Code must be alphanumeric';
+    if (value.length > 10) return 'Project Code must be at most 10 characters';
+    return '';
+  }
+
+  validateVendorName = (value: string): string => {
+    if (!value) return 'Vendor selection is required';
+    return '';
+  }
+
+  validateFiles = (files: FileList | null): string => {
+    if (!files || files.length === 0) return 'At least one file is required';
+    return '';
+  }
+  
+  validateApproverComments = (value: string): string => {
+    if (!value) return 'Vendor approver is required';
+    return '';
+  }
+
 
   private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -61,18 +95,28 @@ export default class VendorMappingForm extends React.Component<IVendorMappingApp
 };
  
 private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
+    const value = e.target.value;
+    const errorMsg = this.validateProjectCode(value);
 
-  this.setState({ requestNo: value });
+    this.setState({ requestNo: value, requestNoError: errorMsg });
 
- // optional
-    this.getRequestDetails(value);
-  
-};
-
-  private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ files: e.target.files });
+    if (!errorMsg) {
+      this.getRequestDetails(value);
+    } else {
+      this.setState({ projectTitle: '', projectDescription: '' });
+    }
   };
+   private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      const errorMsg = this.validateFiles(files);
+      this.setState({ files: files, filesError: errorMsg });
+    };
+
+   private handleApproverCommentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;                    // get text input value
+  const errorMsg = this.validateApproverComments(value);  // validate required field
+  this.setState({ approverComments: value, approverCommentsError: errorMsg });
+};
   private saveData = async () => {
 
   const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
@@ -83,8 +127,8 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     ProjectTitle: this.state.projectTitle,
     ProjectDescription: this.state.projectDescription,
     VendorName : this.state.vendorName,
-    VendorDescription: this.state.vendorDescription
-    //Attachments: this.state.files
+    VendorDescription: this.state.vendorDescription,
+    Attachments: this.state.files
   };
   
   const response = await this.props.context.spHttpClient.post(
@@ -119,6 +163,10 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   };
 
   public render(): React.ReactElement<IVendorMappingApprovalFormProps> {
+    const { requestNo, requestNoError, projectTitle, projectDescription, vendorName, filesError } = this.state;
+
+    // Form is invalid if any required field has an error
+    const isFormInvalid = !!requestNoError  || !!filesError || !requestNo || !vendorName || !this.state.files;
 
     return (
       <div className={styles.container}>
@@ -126,30 +174,36 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         {/* LEFT FORM */}
         <div className={styles.leftPanel}>
           <h2>Vendor Mapping Approval Form</h2>
-          <h4>Vendor Mapping / Request Form</h4>
+       
+           <label>Project Code </label>
+    <input name="requestNo" value={this.state.requestNo} readOnly/>
 
-          <label>Project Code</label>
-          <input value={this.state.requestNo}  onChange={this.handleRequestNoChange}  />
+    {/* Project Title (Read Only) */}
+    <label>Project Title</label>
+    <input name="projectTitle" value={this.state.projectTitle} readOnly/>
 
-          <label>Project Title</label>
-          <input name="projectTitle" value={this.state.projectTitle} readOnly />
+    {/* Project Description (Read Only) */}
+    <label>Project Description</label>
+    <input name="projectDescription" value={this.state.projectDescription} readOnly/>
 
-          <label>Project Description</label>
-          <input name="projectDescription" value={this.state.projectDescription} readOnly  >
-          </input>
+    {/* Vendor Name (Read Only) */}
+    <label>Select Vendor </label>
+    <input name="vendorName" value={this.state.vendorName}readOnly/>
 
-          <label>Select Vendor</label>
-          <select name="vendorName" onChange={this.handleChange}>
-            <option value="">Select Vendor</option>
-            <option value="Vendor1">Vendor </option>
-            <option value="Vendor2">Vendor 2</option>
-          </select>
+    {/* Additional Information / Remarks (Read Only) */}
+    <label>Additional Information & Remarks</label>
+    <input  name="VendorDescription"  value={this.state.vendorDescription} readOnly />
 
-          <label>Additional Information & Remarks</label>
-          <textarea name="VendorDescription" onChange={this.handleChange}></textarea>
-
-          {/* <label>Attach Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} /> */}
+    <label>Attach Documents</label>
+           
+          
+  <label>Approver Comments <span className={styles.required}>*</span></label>
+<input name="ApproverComments" value={this.state.approverComments} onChange={this.handleApproverCommentsChange}
+  className={this.state.approverCommentsError ? styles.inputError : ''}
+/>
+{this.state.approverCommentsError && (
+  <span className={styles.error}>{this.state.approverCommentsError}</span>
+)}
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>

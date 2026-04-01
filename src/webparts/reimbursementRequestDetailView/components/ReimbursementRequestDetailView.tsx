@@ -147,9 +147,7 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <label>Select Department</label>
           <input value={this.state.Department}  onChange={this.handleRequestNoChange}  />
 
-          <div className={styles.gridContainer}>
-
-          </div>
+          
 
           <label>Total Amount</label>
           <input name="totalAmount" value={this.state.TotalAmount}   >
