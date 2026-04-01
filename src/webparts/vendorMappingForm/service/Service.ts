@@ -2,9 +2,11 @@ import { SPHttpClient } from '@microsoft/sp-http';
 export default class Service {
 
   private context: any;
-  private listname="PoApproval";
+  private listname="VendorMapping";
   private Departmentmaster ="DepartmentMaster";
+   private FetchList ="QuotationApproval";
   private VendorList="";
+
 
   constructor(context: any) {
     this.context = context;
@@ -39,21 +41,17 @@ export default class Service {
   // Save the Record
   public async createItem(data: any): Promise<any> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;
-    const body = {
-      __metadata: { type: "SP.Data.VendorMappingListItem" },
-      ...data
-    };
     const response = await this.context.spHttpClient.post(
       url,
       SPHttpClient.configurations.v1,
-      {
-        headers: {
-          "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/json;odata=nometadata"
-        },
-        body: JSON.stringify(body)
-      }
-    );
+             {
+               headers: {
+                 'Accept': 'application/json',
+                 'Content-Type': 'application/json'
+               },
+               body: JSON.stringify(data)
+             }
+         );
     return response.json();
   }
 
@@ -77,18 +75,46 @@ export default class Service {
   }
 
   // Fetch the Record
-  public async getItemByRequestNo(requestNo: string): Promise<any> {
-
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=POrequestNo eq '${requestNo}'`;
-
-    const res = await this.context.spHttpClient.get(
-      url,
-      SPHttpClient.configurations.v1
-    );
-
-    const data = await res.json();
-    return data.value.length > 0 ? data.value[0] : null;
+    public async getItemByRequestNo(ID: Number): Promise<any> {
+  
+      const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})?$expand=AttachmentFiles`;
+      const res = await this.context.spHttpClient.get(
+        url,
+        SPHttpClient.configurations.v1
+      );
+  
+      const item = await res.json();
+     
+     if (item && item.Id) {
+      return {
+        Id: item.Id,
+        ProjectCode: item.ProjectCode,
+        ProjectTitle: item.ProjectTitle,
+        ProjectDescription: item.ProjectDescription,
+        VendorName: item.VendorName,
+        VendorDescription: item.VendorDescription, // 👈 check column name
+        Attachments: item.AttachmentFiles || [],
+        CurrentStatus:item.CurrentStatus  // 👈 important
+      };
+    }
+  
+    return null;
   }
+
+
+// Fetch QuotationApproval Record
+  public async getRequestDetails (requestNo: string) :Promise<any> {
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.FetchList}')/items?$filter=RequestNo eq '${requestNo}'`;
+  console.log("URL:",url)  
+  const response = await this.context.spHttpClient.get(
+    url,SPHttpClient.configurations.v1
+  );
+
+ const data = await response.json();
+
+ return data.value;
+}
+
   // Upload Files
 
   public async uploadFile(itemId: number, file: File): Promise<void> {
@@ -105,6 +131,47 @@ export default class Service {
         },
         body: buffer
       }
+      
     );
+    
+
   }
+
+
+// Fetch the Files from List
+  public async getAttachments(itemId: number): Promise<any[]> {
+
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
+
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1,
+    {
+      headers: {
+        "Accept": "application/json;"
+      }
+    }
+  );
+
+  const data = await res.json();
+
+  return data.value; // array of attachments
 }
+ public async deleteAttachmentFromSP(file: any) : Promise<void> {
+  
+     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getfilebyserverrelativeurl('${file.ServerRelativeUrl}')`;
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "DELETE"
+        }
+      }
+    );
+
+};
+  }
+

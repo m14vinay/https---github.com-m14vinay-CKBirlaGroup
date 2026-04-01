@@ -4,7 +4,8 @@ export default class Service {
   private context: any;
   private listname="PoApproval";
   private Departmentmaster ="DepartmentMaster";
-  private VendorList="VendorMapping";
+  private FetchList ="QuotationApproval";
+  private VendorList="";
 
   constructor(context: any) {
     this.context = context;
@@ -51,20 +52,16 @@ private async getListItemType(): Promise<string> {
   public async createItem(data: any): Promise<any> {
     const itemType = await this.getListItemType();
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;   
-    const body = {
-    __metadata: { type: itemType }, // ✅ dynamic
-    ...data
-  };
     const response = await this.context.spHttpClient.post(
       url,
-      SPHttpClient.configurations.v1,
-      {
-        headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-        body: JSON.stringify(body)
-      }
+     SPHttpClient.configurations.v1,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        }
     );
     return response.json();
   }
@@ -78,29 +75,61 @@ private async getListItemType(): Promise<string> {
       SPHttpClient.configurations.v1,
       {
         headers: {
-          "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/json;odata=nometadata",
-          "IF-MATCH": "*",
-          "X-HTTP-Method": "MERGE"
-        },
+            'IF-MATCH': '*',
+            'X-HTTP-Method': 'MERGE',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
         body: JSON.stringify(data)
       }
     );
   }
 
-  // Fetch the Record
-  public async getItemByRequestNo(requestNo: string): Promise<any> {
+  public async getItemByRequestNo(ID: Number): Promise<any> {
 
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=POrequestNo eq '${requestNo}'`;
-
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})?$expand=AttachmentFiles`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
     );
 
-    const data = await res.json();
-    return data.value.length > 0 ? data.value[0] : null;
+    const item = await res.json();
+   
+   if (item && item.Id) {
+    return {
+      Id: item.Id,
+      ProjectCode: item.ProjectCode,
+      Department: item.Department,
+      ProjectTitle: item.ProjectTitle,
+      VendorName: item.VendorName,
+      POAmount: item.POAmount,
+      ApplicableTaxes: item.ApplicableTaxes,
+    //POCategory: form.POCategory,
+      ProjectDescription: item.ProjectDescription, 
+       Attachments: item.AttachmentFiles || [],
+        CurrentStatus:item.CurrentStatus  // 👈 important
+    };
   }
+
+  return null;
+};
+  
+
+  //Get ProjectCode Data
+ public async getRequestDetails (requestNo: string) :Promise<any> {
+ 
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.FetchList}')/items?$filter=RequestNo eq '${requestNo}'`;
+
+    console.log("URL:",url)  
+  const response = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+
+ const data = await response.json();
+
+ return data.value;
+}
   // Upload Files
 
   public async uploadFile(itemId: number, file: File): Promise<void> {
@@ -119,4 +148,67 @@ private async getListItemType(): Promise<string> {
       }
     );
   }
+
+  //GET Approver Name
+  public async GetApprover(DepartmentName: string): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Departmentmaster}')/items
+?$select=Id,Title,
+Approval1/Id,Approval1/Title,
+Approval2/Id,Approval2/Title,
+Approval3/Id,Approval3/Title,
+Approval4/Id,Approval4/Title,
+Approval5/Id,Approval5/Title,
+Departmenthead/Id,Departmenthead/Title
+&$expand=Approval1,Approval2,Approval3,Approval4,Approval5,Departmenthead
+&$filter=DepartmentName eq '${DepartmentName}'`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0] : null;
+  }
+// Fetch the Files from List
+  public async getAttachments(itemId: number): Promise<any[]> {
+
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
+
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1,
+    {
+      headers: {
+        "Accept": "application/json;"
+      }
+    }
+  );
+
+  const data = await res.json();
+
+  return data.value; // array of attachments
 }
+
+//Atatchments Delete
+ public async deleteAttachmentFromSP(file: any) : Promise<void> {
+  
+     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getfilebyserverrelativeurl('${file.ServerRelativeUrl}')`;
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "DELETE"
+        }
+      }
+    );
+
+};
+  }
+
+
+

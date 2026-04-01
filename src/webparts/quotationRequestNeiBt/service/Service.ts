@@ -2,7 +2,7 @@ import { SPHttpClient } from '@microsoft/sp-http';
 export default class Service {
 
   private context: any;
-  private listname="PoApproval";
+  private listname="QuotationApprovalNEIBTAdmin";
   private Departmentmaster ="DepartmentMaster";
   private VendorList="";
 
@@ -39,20 +39,16 @@ export default class Service {
   // Save the Record
   public async createItem(data: any): Promise<any> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;
-    const body = {
-      __metadata: { type: "SP.Data.VendorMappingListItem" },
-      ...data
-    };
     const response = await this.context.spHttpClient.post(
       url,
-      SPHttpClient.configurations.v1,
-      {
-        headers: {
-          "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/json;odata=nometadata"
-        },
-        body: JSON.stringify(body)
-      }
+     SPHttpClient.configurations.v1,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        }
     );
     return response.json();
   }
@@ -66,11 +62,11 @@ export default class Service {
       SPHttpClient.configurations.v1,
       {
         headers: {
-          "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/json;odata=nometadata",
-          "IF-MATCH": "*",
-          "X-HTTP-Method": "MERGE"
-        },
+            'IF-MATCH': '*',
+            'X-HTTP-Method': 'MERGE',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
         body: JSON.stringify(data)
       }
     );
@@ -91,7 +87,7 @@ export default class Service {
   }
   // Upload Files
 
-  public async uploadFile(itemId: number, file: File): Promise<void> {
+   public async uploadFile(itemId: number, file: File): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
 
     const buffer = await file.arrayBuffer();
@@ -101,7 +97,7 @@ export default class Service {
       SPHttpClient.configurations.v1,
       {
         headers: {
-          "Accept": "application/json;odata=nometadata"
+          "Accept": "application/json;"
         },
         body: buffer
       }
