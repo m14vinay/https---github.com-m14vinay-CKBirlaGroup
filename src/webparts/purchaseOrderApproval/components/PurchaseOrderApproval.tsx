@@ -310,7 +310,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 
