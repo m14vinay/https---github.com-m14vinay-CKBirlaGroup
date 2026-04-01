@@ -23,10 +23,18 @@ export default function MyRequests() {
 
     const columnHelper = createColumnHelper<any>()
 
-    const [showForm, setShowForm] = useState<boolean>(false);
+    const openForm = (row:any) => {
+        console.log(row);
 
-    const openForm = () => {
-        setShowForm(true);
+        if(row["@odata.type"]){
+            switch(row["@odata.type"]){
+                case '#SP.Data.QuotationApprovalListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationView.aspx?requestId=" + row.Id,"_blank");
+                default:
+                    alert("Page not found");
+                    break;
+            }
+        }
     }
 
     const columns = [
@@ -59,7 +67,7 @@ export default function MyRequests() {
         }),
         columnHelper.accessor('Created', {
             header: 'View',
-            cell: (info) => <span><Icon iconName="RedEye" onClick={openForm}></Icon></span>
+            cell: (info) => <span style={{cursor:"pointer"}}><Icon iconName="RedEye" onClick={() => openForm(info.row.original)}></Icon></span>
         })
     ]
     const [data, _setData] = useState<any[]>(() => []);
@@ -240,7 +248,6 @@ export default function MyRequests() {
                     </select>
                 </div>
             </div>
-            {showForm && <Modal isOpen={true}><iframe src='https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/QuotationForm.aspx?isDlg=1' width={1080} height={720}></iframe></Modal>}
         </div>
     )
 }
