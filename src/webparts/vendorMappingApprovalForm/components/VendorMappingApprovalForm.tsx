@@ -174,7 +174,7 @@ const handleReject = async () => {
  
 </div>    
        <label>Approver Comments <span className={styles.required}>*</span></label>
-       <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}/>
+       <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}  style={{ marginBottom: "15px" }} />
         
        {/* Buttons */}
           <div className={styles.buttonGroup}>

@@ -4,6 +4,7 @@ import type { IQuotationRequestNeiBtProps } from './IQuotationRequestNeiBtProps'
 import { escape } from '@microsoft/sp-lodash-subset';
 import { SPHttpClient } from '@microsoft/sp-http';
 import SharePointService from '../service/Service';
+import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
 
 
 //const QuotationRequestNeiBt: React.FC<IQuotationRequestNeiBtProps> = (props) => {
@@ -42,7 +43,7 @@ import SharePointService from '../service/Service';
     const [projectTitle, setProjectTitle] = React.useState('');
     const MAX_TOTAL_SIZE_MB = 25;
     const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
-
+const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   
 
 
@@ -85,6 +86,21 @@ import SharePointService from '../service/Service';
       files: prev.files.filter((_: File, i: number) => i !== index)
     }));
   };
+  
+   const loadDepartments = async () => {
+      const data = await service.getDepartments();
+      const options = data.map((item: any) => ({
+        key: item.Id,
+        text: item.DepartmentName
+      }));
+  
+      setDepartmentOptions(options);
+    };
+  // 🔹 Load data
+    React.useEffect(() => {
+      loadDepartments();
+      //loadVendor();
+    }, []);
   
  
  // 🔹 Handle input change
@@ -233,15 +249,33 @@ const handleUpdate = async () => {
           <label>Applicable Taxes</label>
           <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange}/>
         
-
+{/* 
           <label>Vendor 1 <span className={styles.required}>*</span></label>
-          <input name="Vendor1" value={form.Vendor1} onChange={handleChange}  />
+          <input name="Vendor1" value={form.Vendor1} onChange={handleChange}  /> */}
 
-          <label>Vendor 2</label>
-          <input name="Vendor2" value={form.Vendor2} onChange={handleChange} />
+        <label>Vendor1 <span className={styles.required}>*</span></label>
+              <select name="vendorName" value={form.Vendor1} onChange={(e) =>setForm(prev => ({
+              ...prev,Vendor1: e.target.value}))} >
+               <option value="">Select Vendor</option>
+          <option value="Vendor1">Vendor 1</option>
+          <option value="Vendor2">Vendor 2</option>
+        </select>
 
-          <label>Vendor 3</label>
-          <input name="Vendor3" value={form.Vendor3} onChange={handleChange} />
+           <label>Vendor2 <span className={styles.required}>*</span></label>
+              <select name="vendorName" value={form.Vendor2} onChange={(e) =>setForm(prev => ({
+              ...prev,Vendor2: e.target.value}))} >
+               <option value="">Select Vendor</option>
+          <option value="Vendor1">Vendor 1</option>
+          <option value="Vendor2">Vendor 2</option>
+        </select>
+
+        <label>Vendor3 <span className={styles.required}>*</span></label>
+              <select name="vendorName" value={form.Vendor3} onChange={(e) =>setForm(prev => ({
+              ...prev,Vendor3: e.target.value}))} >
+               <option value="">Select Vendor</option>
+          <option value="Vendor1">Vendor 1</option>
+          <option value="Vendor2">Vendor 2</option>
+        </select>
 
           <label>Quote 1 <span className={styles.required}>*</span></label>
           <input name="Quote1" value={form.Quote1} onChange={handleChange} />
@@ -252,15 +286,31 @@ const handleUpdate = async () => {
           <label>Quote 3</label>
           <input name="Quote3" value={form.Quote3} onChange={handleChange} />
 
-          <label>Select Vendor <span className={styles.required}>*</span></label>
-          <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange}  />
+         <label>Select Vendor <span className={styles.required}>*</span></label>
+              <select name="vendorName" value={form.Selectedvendor} onChange={(e) =>setForm(prev => ({
+              ...prev,vendorName: e.target.value}))} >
+               <option value="">Select Vendor</option>
+          <option value="Vendor1">Vendor 1</option>
+          <option value="Vendor2">Vendor 2</option>
+        </select>
 
-          <label>Select Quote <span className={styles.required}>*</span></label>
+          <label>Selected Quote <span className={styles.required}>*</span></label>
           <input name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} />
           
-
-          <label>Department</label>
-          <input name="Department" value={form.Department} onChange={handleChange}   />
+    
+        <label>Department</label>
+        <Dropdown
+          options={departmentOptions}
+          selectedKey={form.Department}
+  onChange={(e, option) =>
+    setForm(prev => ({
+      ...prev,
+      Department: option?.text || ""  // safe default empty string
+    }))
+  }
+/>
+          {/* <label>Department</label>
+          <input name="Department" value={form.Department} onChange={handleChange}   /> */}
        
           <label>Advance Amount <span className={styles.required}>*</span></label>
           <input name="Advancepayment" value={form.Advancepayment} onChange={handleChange}    />

@@ -100,7 +100,9 @@ private async getListItemType(): Promise<string> {
         },
         body: JSON.stringify({
         CurrentStatus: status,
-         ApproverComment1: comments
+         ApproverComment1: comments,
+         Actiondate1: new Date().toISOString(),
+         //Actiondate2: new Date().toISOString()
      })
       }
     );

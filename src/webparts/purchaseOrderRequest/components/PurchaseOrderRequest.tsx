@@ -21,11 +21,18 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     Department: '',
     POAmount: 0,
     ApplicableTaxes: 0,
-    POCategory: '',
+    PoMaster: '',
     Comments: '',
    files: [] as File[],
+     Attachments: [],
     POrequestNo:'',
-    CurrentStatus:''
+    CurrentStatus:'',
+    approver1: '',
+   approver2: '',
+   approver3: '',
+   approver4: '',
+   approver5: '',
+   DepartmentHead: ''
   });
 
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
@@ -36,7 +43,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const [Approver3ID, setApprover3ID] = React.useState<number | null>(null);
   const [Approver4ID, setApprover4ID] = React.useState<number | null>(null);
   const [Approver5ID, setApprover5ID] = React.useState<number | null>(null);
-  const [Departmenthead, setDepartmenthead] = React.useState<number | null>(null);
+  const [Departmenthead, setDepartmentHead] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
    const [POrequestNo, setPORequestNo] = React.useState('');
   const [POrequestNoError, setPORequestNoError] = React.useState('');
@@ -56,66 +63,67 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     };
   
     // --- 3️⃣ Load data on mount ---
-    // React.useEffect(() => {
-    //   const id = getIdFromQueryString();
-    //   if (id) {
-    //     handleFetchById(id);
-    //   }
-    // }, []);
+    React.useEffect(() => {
+      const id = getIdFromQueryString();
+      if (id) {
+        handleFetchById(id);
+      }
+    }, []);
   
   
-//      const loadAttachments = async (id:number) => {
-//       try{
-//     const files = await service.getAttachments(id);
-//     console.log("Attachments:", files);
-//     setAttachments(files);
-//       }catch(error)
-//       {
-//         console.error(error);
-//       }
-//      };
-//      React.useEffect(() => {
-//        if (itemId) {
-//          loadAttachments(itemId);
-        
-//        }
-//      }, [itemId]);
+     const loadAttachments = async (id:number) => {
+      try{
+    const files = await service.getAttachments(id);
+    console.log("Attachments:", files);
+    setAttachments(files);
+      }catch(error)
+      {
+        console.error(error);
+      }
+     };
+     React.useEffect(() => {
+       if (itemId) {
+         loadAttachments(itemId);
+        getApprover();
+       }
+     }, [itemId]);
 
-// //FETCH DATA-----
-//   const handleFetchById = async (id: number) => {
-//     try {
-//       console.log("Calling API with ID:", id);
+//FETCH DATA-----
+  const handleFetchById = async (id: number) => {
+    try {
+      console.log("Calling API with ID:", id);
 
-//       const result = await service.getItemByRequestNo(id);
+      const result = await service.getItemByRequestNo(id);
 
-//       console.log("Result:", result);
+      console.log("Result:", result);
 
-//       if (result.CurrentStatus==='Draft') {
-//       setItemId(result.Id);
+      if (result.CurrentStatus==='Draft') {
+      setItemId(result.Id);
 
-//         setForm(prev => ({
-//           ...prev,
-//           POrequestNo: result.POrequestNo || '',
-//           projectCode: result.ProjectCode || '',
-//           Department: result.Department || '',
-//           projectTitle: result.ProjectTitle || '',
-//           vendorName: result.VendorName || '',
-//           POAmount: result.POAmount || 0,
-//           ApplicableTaxes: result.ApplicableTaxes || 0,
-//           ProjectDescription: result.ProjectDescription || '',
+        setForm(prev => ({
+          ...prev,
+          
+          projectCode: result.ProjectCode || '',
+          Department: result.Department || '',
+          projectTitle: result.ProjectTitle || '',
+          vendorName: result.VendorName || '',
+          POAmount: result.POAmount || 0,
+          ApplicableTaxes: result.ApplicableTaxes || 0,
+          Comments: result.ProjectDescription || ''
+          
          
-//         }));
+        }));
 
        
 
-//       } else {
-//         alert("No data found");
-//       }
+      } else {
+        alert("No data found");
+      }
 
-//     } catch (error) {
-//       console.error("Error:", error);
-//     }
-//   };
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
 
 const handleCancel = () => {
@@ -149,7 +157,6 @@ const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
     }));
   }
 };
-
 const removeFile = (index: number) => {
   setForm((prev: any) => ({
     ...prev,
@@ -157,38 +164,92 @@ const removeFile = (index: number) => {
   }));
 };
 
+const removeExistingFile = async (index: number) => {
+ const file = attachments[index];
 
 
+  await service.deleteAttachmentFromSP(file);
+  setAttachments(prev => prev.filter((_, i) => i !== index));
+};
+
+
+
+
+const resetFields = () => {
+  setForm(prev => ({
+    ...prev,
+    Department: '',
+    ProjectTitle: ''
+  }));
+
+  setApprover1ID(null);
+  setApprover2ID(null);
+  setApprover3ID(null);
+  setApprover4ID(null);
+  setApprover5ID(null);
+  setDepartmentHead(null);
+};
+
+
+const getApprover = async () => {
+    try {
+      const data = await service.GetApprover('');
+
+      console.log("Approver Data:", data);
+
+      if (data && data.length > 0) {
+        setApprover1ID(data[0].approver1 || '');
+        setApprover3ID(data[0].approver2 || '');
+        setApprover3ID(data[0].approver3 || '');
+        setApprover4ID(data[0].approver4 || '');
+        setApprover5ID(data[0].approver5 || '');
+        setDepartmentHead(data[0].DepartmentHead || '');
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value;
 
-  setPORequestNo(value);
+  setForm(prev => ({
+    ...prev,
+    projectCode: value
+  }));
 
-  if (!value) return;
+  if (!value) {
+    resetFields();
+    return;
+  }
 
   try {
     const result = await service.getRequestDetails(value);
+
     if (result.length > 0) {
-      setDepartment(result[0].Department || '');
-      setProjectTitle(result[0].ProjectTitle || '');
-      const data=await service.GetApprover(result[0].Department);
-      if(data.Id>0){
-      setApprover1ID(data.Approval1 ? data.Approval1.Id : null);
-      setApprover2ID(data.Approval2 ? data.Approval2.Id : null);  
-      setApprover3ID(data.Approval3 ? data.Approval3.Id : null);
-      setApprover4ID(data.Approval4 ? data.Approval4.Id : null);
-      setApprover5ID(data.Approval5 ? data.Approval5.Id : null);
-      setDepartmenthead(data.Departmenthead ? data.Departmenthead.Id : null);        
+      const item = result[0];
+
+      // 👉 Form fields update
+      setForm(prev => ({
+        ...prev,
+        Department: item.Department || '',
+        projectTitle: item.ProjectTitle || ''
+      }));
+
+      // 👉 Approver API call
+      const data = await service.GetApprover(item.Department);
+
+      if (data?.Id > 0) {
+        setApprover1ID(data.Approval1?.Id || null);
+        setApprover2ID(data.Approval2?.Id || null);
+        setApprover3ID(data.Approval3?.Id || null);
+        setApprover4ID(data.Approval4?.Id || null);
+        setApprover5ID(data.Approval5?.Id || null);
+        setDepartmentHead(data.Departmenthead?.Id || null);
       }
-    } else { 
-      setDepartment('');
-      setProjectTitle('');
-      setApprover1ID(null);
-      setApprover2ID(null);
-      setApprover3ID(null);
-      setApprover4ID(null);
-      setApprover5ID(null);
-      setDepartmenthead(null);
+
+    } else {
+      resetFields();
     }
 
   } catch (error) {
@@ -202,12 +263,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     { key: '2', text: 'Internal Compliance' }
   ];
 
-  // 🔹 Load data
-  React.useEffect(() => {
-    loadDepartments();
-    loadVendor();
-  }, []);
-
+  
   const loadDepartments = async () => {
     const data = await service.getDepartments();
     const options = data.map((item: any) => ({
@@ -217,18 +273,23 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
     setDepartmentOptions(options);
   };
+// 🔹 Load data
+  React.useEffect(() => {
+    loadDepartments();
+    //loadVendor();
+  }, []);
 
-  const loadVendor = async () => {    
-    const data = await service.getVendor();
-    const options = data.map((item: any) => ({
-      key: item.Id,
-      text: item.VendorName
-    }));
+  // const loadVendor = async () => {    
+  //   const data = await service.getVendor();
+  //   const options = data.map((item: any) => ({
+  //     key: item.Id,
+  //     text: item.VendorName
+  //   }));
 
-    setvendorOptions(options);
-  };
+  //   setvendorOptions(options);
+  // };
 
-  // 🔹 Handle input change
+  // // 🔹 Handle input change
  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const { name, value } = e.target;
 
@@ -238,31 +299,42 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
   });
 };
 
-
+const getPOCategoryText = () => {
+  if (form.PoMaster === "1") return "Issue To Vendor";
+  if (form.PoMaster === "2") return "Internal Compliance";
+  return "";
+};
 
 //SAVE DRAFT DATA
 
   const handleSaveOrUpdate = async () => {
   // 🔹 Validations
-  if(!POrequestNo) return alert("Project Code required");
+  if(!form.projectCode) return alert("Project Code required");
     if(!form.POAmount) return alert("Enter POAmount");
     if(!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
-    if(!form.POCategory) return alert("Choose POCategory");
-     if (!form.files || form.files.length === 0) return alert("Attach files");
+    if(!form.POAmount) return alert("Choose POCategory");
+    if (
+  (!form.files || form.files.length === 0) &&
+  (!attachments || attachments.length === 0)
+) {
+  return alert("Attach files");
+}
 
   // 🔹 Payload (common)
   const payload = {
-    ProjectCode: POrequestNo,
-    Department: department,
-    ProjectTitle: projectTitle,
+    ProjectCode: form.projectCode,
+    Department: form.Department,
+    ProjectTitle: form.projectTitle,
     VendorName: 'vinay',
     //TotalAmount:form.TotalAmount,
     //OccupiedAmount: form.OccupiedAmount,
     //RemainingAmount: form.RemainingAmount,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
-    //POCategory: form.POCategory,
+   PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
+    Departmenthead: setDepartmentHead,
+     Approver2: setApprover2ID,
     CurrentStatus:'Draft'
   };
 
@@ -299,23 +371,30 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
 // Update
 const handleUpdate = async () => {
-   if(!POrequestNo) return alert("Project Code required");
+   if(!form.projectCode) return alert("Project Code required");
   if(!form.POAmount) return alert("Enter POAmount");
     if(!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
-    if(!form.POCategory) return alert("Choose POCategory");
-     if (!form.files || form.files.length === 0) return alert("Attach files");
+    if(!form.PoMaster) return alert("Choose POCategory");
+     if (
+  (!form.files || form.files.length === 0) &&
+  (!attachments || attachments.length === 0)
+) {
+  return alert("Attach files");
+}
   const payload = {
     Title:"Testing",
-    ProjectCode: POrequestNo,
-    ProjectTitle: projectTitle,
+    ProjectCode: form.projectCode,
+    ProjectTitle: form.projectTitle,
     VendorName: 'Vinay',
     //RemainingAmount: form.RemainingAmount,
-    Department: department,
+    Department: form.Department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
-    //POCategory: form.POCategory,
+   PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
-    CurrentStatus:'Pending'
+    CurrentStatus:'Pending',
+    Departmenthead: setDepartmentHead,
+     Approver2: setApprover2ID
   };
   try {
     if (itemId) {
@@ -355,7 +434,7 @@ const validatePO = (value: string) => {
         <h4>PO Approval / Request Form</h4>
 
         <label>Project Code <span className={styles.required}>*</span> </label>
-        <input name="projectCode" value={POrequestNo} onChange={handleRequestNoChange} />
+        <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange} />
 
         {/* <label>Department</label>
         <Dropdown
@@ -368,11 +447,11 @@ const validatePO = (value: string) => {
          
 
          <label>Department</label>
-          <input name="Department" value={department} readOnly />
+          <input name="Department" value={form.Department} readOnly />
         
 
         <label>Project Title</label>
-        <input name="projectTitle" value={projectTitle} readOnly />
+        <input name="projectTitle" value={form.projectTitle} readOnly />
 
         <label>Select Vendor Name</label>
         <Dropdown
@@ -401,22 +480,55 @@ const validatePO = (value: string) => {
         <ChoiceGroup
   label="PO Category"
   options={poOptions}
-  selectedKey={form.POCategory}   // ✅ form se bind karo
+  selectedKey={form.PoMaster}   // ✅ form se bind karo
   onChange={(e, option) =>{
-    if (!option) return;
-
     setForm(prev => ({
       ...prev,
-      POCategory: option.key as string  // '1' or '2'
+      PoMaster: option?.text as string
     }));
-  }}
+  }
+}
 />
+
 
         <label>Additional Information & Remarks</label>
         <input name="Comments" value={form.Comments} onChange={handleChange} />
 
        <label>Attachments <span className={styles.required}>*</span></label>
        <input type="file" multiple onChange={handleFileChange}  />
+        {/*  Existing Files (API se) */}
+{attachments?.length > 0 && (
+  <ul style={{ listStyle: "none", padding: 0 }}>
+    {attachments.map((file, index) => (
+      <li
+        key={index}
+        style={{ display: "flex", alignItems: "center", gap: "10px" }}
+      >
+        {/* ❌ Remove Button */}
+        <span
+          style={{
+            color: "red",
+            cursor: "pointer",
+            fontWeight: "bold"
+          }}
+          onClick={() => removeExistingFile(index)}
+        >
+          ✕
+        </span>
+
+        {/* 📄 File Link */}
+        <a
+          href={file.ServerRelativeUrl}
+         
+          rel="noopener noreferrer"
+        >
+          {file.FileName}
+        </a>
+      </li>
+    ))}
+  </ul>
+)}
+      
         {/* Selected Files */}
        {form.files.length > 0 && (
     <ul style={{ listStyle: "none", padding: 0 }}>

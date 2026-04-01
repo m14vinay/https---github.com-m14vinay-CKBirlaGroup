@@ -131,7 +131,10 @@ export default class Service {
         },
         body: buffer
       }
+      
     );
+    
+
   }
 
 
@@ -154,4 +157,21 @@ export default class Service {
 
   return data.value; // array of attachments
 }
-}
+ public async deleteAttachmentFromSP(file: any) : Promise<void> {
+  
+     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getfilebyserverrelativeurl('${file.ServerRelativeUrl}')`;
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "DELETE"
+        }
+      }
+    );
+
+};
+  }
+

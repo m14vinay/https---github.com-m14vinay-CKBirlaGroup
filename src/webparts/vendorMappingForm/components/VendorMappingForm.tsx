@@ -155,19 +155,20 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   }
 };
 
+
+
 const removeFile = (index: number) => {
   setForm((prev: any) => ({
     ...prev,
     files: prev.files.filter((_: File, i: number) => i !== index)
   }));
 };
-// const removeExistingFile = (index: number) => {
-//   setAttachments((prev: any[]) =>
-//     prev.filter((_, i) => i !== index)
-//   );
-// };
 
-const removeExistingFile = (index: number) => {
+const removeExistingFile = async (index: number) => {
+ const file = attachments[index];
+
+
+  await service.deleteAttachmentFromSP(file);
   setAttachments(prev => prev.filter((_, i) => i !== index));
 };
 
@@ -386,29 +387,7 @@ const handleUpdate = async () => {
       <div className={styles.leftPanel}>
         <h2>Vendor Mapping Form</h2>
         <h4>Vendor Mapping / New Vendor Registration Form</h4>
-       
-       {/* <label>Project Code <span>*</span></label>
-<input
-  name="projectCode"
-  value={form.projectCode}         // ← bind directly from form
-  onChange={handleRequestNoChange}
-/>
-{requestNoError && <span>{requestNoError}</span>}
-
-<label>Project Title</label>
-<input
-  name="projectTitle"
-  value={form.projectTitle}        // ← auto-fill from API
-  readOnly
-/>
-
-<label>Project Description</label>
-<input
-  name="projectDescription"
-  value={form.projectDescription}  // ← auto-fill from API
-  readOnly
-/> */}
-
+      
 
         <label>Project Code <span className={styles.required}>*</span></label>
         <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange}   />

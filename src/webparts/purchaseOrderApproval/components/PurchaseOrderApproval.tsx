@@ -184,46 +184,12 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h4>PO Approval Details & Status</h4>
+        <h4>PO Approval Form</h4>
       </div>
       <div className={styles.row}>
         {/* LEFT FORM */}
         <div className={styles['col-md-9']}>
-          <div className={styles.leftPanel}>
-            <div className={styles.leftPanelHeader}>
-              <h4>CKBCSL/25-26/IV/Finance/12</h4>
-              <h4>Current Status: <span className={styles.status}>Rejected</span></h4>
-            </div>
-            <div className={styles.leftPanelStatusHeader}>
-              <div className={styles.statusBox}>
-                <div className={styles.content}>
-                <h5>Vinay Kumar</h5>
-                <h6>Department Head</h6>
-                <h4>Approved</h4>
-                </div>
-              </div>
-              <div className={`${styles.statusBox} ${styles.pendingBox}`}>
-                <div className={styles.content}>
-                <h5>Vinay Kumar</h5>
-                <h6>Department Head</h6>
-                <h4>Pending</h4>
-                </div>
-              </div>
-              <div className={`${styles.statusBox} ${styles.rejectedBox}`}>
-                <div className={styles.content}>
-                <h5>Vinay Kumar</h5>
-                <h6>Department Head</h6>
-                <h4>Rejected</h4>
-                </div>
-              </div>
-              <div className={`${styles.statusBox} ${styles.upcomingBox}`}>
-                <div className={styles.content}>
-                <h5>Vinay Kumar</h5>
-                <h6>Department Head</h6>
-                <h4>Upcoming Approver</h4>
-                </div>
-              </div>
-            </div>
+          
             <div className={styles.formGroup}>
               <label>Project Code</label>
               <input value={form.projectCode} readOnly />
@@ -239,10 +205,6 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
             <div className={styles.formGroup}>
               <label>Select Vendor Name</label>
               <input name="vendorName" value={form.vendorName} readOnly />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Remaining Amount</label>
-              <input name="RemainingAmount" value={form.RemainingAmount} readOnly />
             </div>
             <div className={styles.formGroup}>
               <label>PO Amount</label>
@@ -279,17 +241,18 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
             <label></label>
             <label></label>
             <label>Approver Comments <span className={styles.required}>*</span></label>
-            <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)} />
+            <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}  />
 
             {/* Buttons */}
+            <div>
             <div className={styles.buttonGroup}>
               <button className={styles.ApproveBtn} onClick={handleApprove}>Approve</button>
               <button className={styles.RejectBtn} onClick={handleReject} >Reject</button>
               <button className={styles.cancelBtn}>Cancel</button>
             </div>
-
+    </div>
           </div>
-        </div>
+      
         <div className={styles['col-md-3']}>
           <div className={styles.rightPanel}>
             <div className={styles.card}>
@@ -313,8 +276,8 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
           </div>
         </div>
       </div>
-    </div >
-  );
+        </div>
+  )
 };
 
 export default PurchaseOrderApproval;

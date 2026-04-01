@@ -153,7 +153,8 @@ Departmenthead/Id,Departmenthead/Title
      ApplicableTaxes: item.ApplicableTaxes,
     //POCategory: form.POCategory,
     ProjectDescription: item.ProjectDescription, 
-      Attachments: item.AttachmentFiles || [] // 👈 important
+      Attachments: item.AttachmentFiles || [] ,
+       CurrentStatus:item.CurrentStatus // 👈 important
     };
   }
 

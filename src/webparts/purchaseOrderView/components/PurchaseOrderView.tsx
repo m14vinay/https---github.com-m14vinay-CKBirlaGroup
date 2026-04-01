@@ -186,53 +186,98 @@ const handleReject = async () => {
 
         {/* LEFT FORM */}
         <div className={styles.leftPanel}>
-          <h2>PO Approval Form</h2>
-          <h4>PO Approval / Request Approval</h4>
-
-          <label>Project Code</label>
-          <input value={form.projectCode}   readOnly />
-
-          <label>Department</label>
-          <input name="department" value={form.Department} readOnly />
-
-          <label>Project Title</label>
-          <input name="projectTitle" value={form.projectTitle} readOnly />
-
-          <label>Select Vendor Name</label>
-          <input name="vendorName" value={form.vendorName} readOnly   >
-          </input>
-
-          <label>Remaining Amount</label>
-          <input name="RemainingAmount" value={form.RemainingAmount} readOnly  />
-
-          <label>PO Amount</label>
-          <input name="POAmount" value={form.POAmount} readOnly  />
-
-          <label>Applicable Taxes</label>
-          <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly   >
-          </input>
-
-           <label>PO Category</label>
-          <input name="POCategory" value={form.POCategory} readOnly   >
-          </input>
-
-          <label>Additional Information & Remarks</label>
-          <input name="comments" value={form.ProjectDescription}  readOnly >
-          </input>
-         <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px" }}>
-           <label>
-            Attachments <span className={styles.required}>*</span>
-            </label>
-           <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
-      {attachments.map((file: any, index: number) => (
-        <a
-          key={index}
-            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
-          {file.FileName}
-        </a>
-       ))}
-    </div>
- </div>
+        
+          <h4>PO Approval Details & Status</h4>
+          <div className={styles.row}>
+                {/* LEFT FORM */}
+                <div className={styles['col-md-9']}>
+                  <div className={styles.leftPanel}>
+                    <div className={styles.leftPanelHeader}>
+                      <h4>CKBCSL/25-26/IV/Finance/12</h4>
+                      <h4>Current Status: <span className={styles.status}>Rejected</span></h4>
+                    </div>
+                    <div className={styles.leftPanelStatusHeader}>
+                      <div className={styles.statusBox}>
+                        <div className={styles.content}>
+                        <h5>Vinay Kumar</h5>
+                        <h6>Department Head</h6>
+                        <h4>Approved</h4>
+                        </div>
+                      </div>
+                      <div className={`${styles.statusBox} ${styles.pendingBox}`}>
+                        <div className={styles.content}>
+                        <h5>Vinay Kumar</h5>
+                        <h6>Department Head</h6>
+                        <h4>Pending</h4>
+                        </div>
+                      </div>
+                      <div className={`${styles.statusBox} ${styles.rejectedBox}`}>
+                        <div className={styles.content}>
+                        <h5>Vinay Kumar</h5>
+                        <h6>Department Head</h6>
+                        <h4>Rejected</h4>
+                        </div>
+                      </div>
+                      <div className={`${styles.statusBox} ${styles.upcomingBox}`}>
+                        <div className={styles.content}>
+                        <h5>Vinay Kumar</h5>
+                        <h6>Department Head</h6>
+                        <h4>Upcoming Approver</h4>
+                        </div>
+                      </div>
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Project Code</label>
+                      <input value={form.projectCode} readOnly />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Department</label>
+                      <input name="department" value={form.Department} readOnly />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Project Title</label>
+                      <input name="projectTitle" value={form.projectTitle} readOnly />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Selected Vendor Name</label>
+                      <input name="vendorName" value={form.vendorName} readOnly />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>PO Amount</label>
+                      <input name="POAmount" value={form.POAmount} readOnly />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Applicable Taxes</label>
+                      <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>PO Category</label>
+                      <input name="POCategory" value={form.POCategory} readOnly />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Additional Information & Remarks</label>
+                      <input name="comments" value={form.ProjectDescription} readOnly />
+                    </div>
+                    
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "10px" }}>
+                      <label>
+                        Attachments <span className={styles.required}>*</span>
+                      </label>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", }}>
+                        {attachments.map((file: any, index: number) => (
+                          <a
+                            key={index}
+                            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+                            {file.FileName}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+        </div>
+        </div>
+        </div>
+        
+          
  
         </div>
     </div>
