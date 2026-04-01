@@ -29,7 +29,13 @@ export default function MyRequests() {
         if(row["@odata.type"]){
             switch(row["@odata.type"]){
                 case '#SP.Data.QuotationApprovalListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationView.aspx?requestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationView.aspx?Id=" + row.Id,"_blank");
+                case '#SP.Data.PoApprovalListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchaseOrderView.aspx?Id=" + row.Id,"_blank");
+                case '#SP.Data.VendorMappingListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingDetails.aspx?Id=" + row.Id,"_blank");
+                case '#SP.Data.Remb_ExpanseMasterListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementDetails.aspx?Id=" + row.Id,"_blank");                
                 default:
                     alert("Page not found");
                     break;
