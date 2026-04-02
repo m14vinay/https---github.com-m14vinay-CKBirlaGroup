@@ -15,13 +15,13 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     projectTitle: '',
     vendorName: '',
     vendorNameID:'',
-    RemainingAmount: '',
-    TotalAmount:'',
-    OccupiedAmount:'',
+    RemainingAmount: 0,
+    TotalAmount:0,
+    OccupiedAmount:0,
     Department: '',
     POAmount: 0,
     ApplicableTaxes: 0,
-    AssignedTo: 0,
+    AssignedTo: '',
     PoMaster: '',
     Comments: '',
    files: [] as File[],
@@ -77,7 +77,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
      React.useEffect(() => {
        if (itemId) {
          loadAttachments(itemId);
-        getApprover();
+        //getApprover();
        }
      }, [itemId]);
 
@@ -206,7 +206,8 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
       setForm(prev => ({
         ...prev,
         Department: item.Department || '',
-        projectTitle: item.ProjectTitle || ''
+        projectTitle: item.ProjectTitle || '',
+        vendorName: item.Selectedvendor || ''
       }));
 
       // 👉 Approver API call
@@ -215,7 +216,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
         setApprover2ID(data.Approval2?.Id || null);
         setDepartmentHead(data.Departmenthead?.Id || null);
 
-        const User=await service.getUserById(data.Approval2.ID);
+        const User=await service.getUserById(data.Departmenthead.Id);
         if(User?.Id)
         {
           setAssignedID(User.Title);
@@ -289,7 +290,7 @@ const getPOCategoryText = () => {
     ProjectCode: form.projectCode,
     Department: form.Department,
     ProjectTitle: form.projectTitle,
-    VendorName: form.Selectedvendor,
+    VendorName: form.vendorName,
     TotalAmount:form.TotalAmount,
     OccupiedAmount: form.OccupiedAmount,
     RemainingAmount: form.RemainingAmount,
@@ -297,8 +298,9 @@ const getPOCategoryText = () => {
     ApplicableTaxes: form.ApplicableTaxes,
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
-    Departmenthead: setDepartmentHead,
-    Approver2: setApprover2ID,
+    AssignedTo: AssignedID,
+    DepartmentHead: Number(Departmenthead),
+    Approver2: Number(Approver2ID) ,
     CurrentStatus:'Draft'
   };
 
@@ -349,7 +351,7 @@ const handleUpdate = async () => {
     Title:"Testing",
     ProjectCode: form.projectCode,
     ProjectTitle: form.projectTitle,
-    VendorName: form.Selectedvendor,
+    VendorName: form.vendorName,
     RemainingAmount: form.RemainingAmount,
     Department: form.Department,
     POAmount: form.POAmount,
@@ -357,8 +359,9 @@ const handleUpdate = async () => {
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
     CurrentStatus:'Pending',
-    Departmenthead: setDepartmentHead,
-    Approver2: setApprover2ID
+    AssignedTo: AssignedID,
+    DepartmentHead: Number(Departmenthead),
+    Approver2: Number(Approver2ID) ,
   };
   try {
     if (itemId) {
@@ -408,7 +411,7 @@ const validatePO = (value: string) => {
         <input name="projectTitle" value={form.projectTitle} readOnly />
 
         <label>Vendor Name</label>
-        <input name="VendorName" value={form.Selectedvendor} readOnly />
+        <input name="VendorName" value={form.vendorName} readOnly />
 
         <label>Total Amount</label>
         <input name="TotalAmount" value={form.TotalAmount} onChange={handleChange} />
