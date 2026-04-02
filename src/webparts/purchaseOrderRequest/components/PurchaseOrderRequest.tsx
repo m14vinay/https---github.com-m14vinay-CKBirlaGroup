@@ -241,7 +241,8 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
       setForm(prev => ({
         ...prev,
         Department: item.Department || '',
-        projectTitle: item.ProjectTitle || ''
+        projectTitle: item.ProjectTitle || '',
+        Selectedvendor:item.selectedVendor || ''
       }));
 
       // 👉 Approver API call
@@ -327,7 +328,7 @@ const getPOCategoryText = () => {
     RemainingAmount: form.RemainingAmount,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
-   PoMaster:form.PoMaster,
+    PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
     Departmenthead: setDepartmentHead,
     Approver2: setApprover2ID,
