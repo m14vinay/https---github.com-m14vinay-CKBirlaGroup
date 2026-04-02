@@ -332,7 +332,8 @@ const getPOCategoryText = () => {
     ProjectDescription: form.Comments,
     Departmenthead: Departmenthead,
     Approver2: Approver2ID,
-    CurrentStatus:'Draft'
+    CurrentStatus:'Draft',
+    AssignedTo: Approver2ID
   };
 
   try {
@@ -391,7 +392,8 @@ const handleUpdate = async () => {
     ProjectDescription: form.Comments,
     CurrentStatus:'Pending',
     Departmenthead: Departmenthead,
-    Approver2: Approver2ID
+    Approver2: Approver2ID,
+    AssignedTo: Approver2ID
   };
   try {
     if (itemId) {
