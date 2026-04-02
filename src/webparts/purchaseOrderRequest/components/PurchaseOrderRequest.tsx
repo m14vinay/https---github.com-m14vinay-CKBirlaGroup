@@ -36,19 +36,11 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   });
 
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
-  const [vendorOptions, setvendorOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
-  const [Approver1ID, setApprover1ID] = React.useState<number | null>(null);
   const [Approver2ID, setApprover2ID] = React.useState<number | null>(null);
-  const [Approver3ID, setApprover3ID] = React.useState<number | null>(null);
-  const [Approver4ID, setApprover4ID] = React.useState<number | null>(null);
-  const [Approver5ID, setApprover5ID] = React.useState<number | null>(null);
+  const [AssignedID, setAssignedID] = React.useState<number | null>(null);
   const [Departmenthead, setDepartmentHead] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
-   const [POrequestNo, setPORequestNo] = React.useState('');
-  const [POrequestNoError, setPORequestNoError] = React.useState('');
-  const [department, setDepartment] = React.useState('');
-    const [projectTitle, setProjectTitle] = React.useState('');
      const [attachments, setAttachments] = React.useState<any[]>([]);
     const MAX_TOTAL_SIZE_MB = 25;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
@@ -83,8 +75,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
      };
      React.useEffect(() => {
        if (itemId) {
-         loadAttachments(itemId);
-        getApprover();
+         loadAttachments(itemId);        
        }
      }, [itemId]);
 
@@ -179,10 +170,6 @@ const removeExistingFile = async (index: number) => {
   await service.deleteAttachmentFromSP(file);
   setAttachments(prev => prev.filter((_, i) => i !== index));
 };
-
-
-
-
 const resetFields = () => {
   setForm(prev => ({
     ...prev,
@@ -190,34 +177,10 @@ const resetFields = () => {
     ProjectTitle: ''
   }));
 
-  setApprover1ID(null);
   setApprover2ID(null);
-  setApprover3ID(null);
-  setApprover4ID(null);
-  setApprover5ID(null);
   setDepartmentHead(null);
 };
 
-
-const getApprover = async () => {
-    try {
-      const data = await service.GetApprover('');
-
-      console.log("Approver Data:", data);
-
-      if (data && data.length > 0) {
-        setApprover1ID(data[0].approver1 || '');
-        setApprover3ID(data[0].approver2 || '');
-        setApprover3ID(data[0].approver3 || '');
-        setApprover4ID(data[0].approver4 || '');
-        setApprover5ID(data[0].approver5 || '');
-        setDepartmentHead(data[0].DepartmentHead || '');
-      }
-
-    } catch (error) {
-      console.error(error);
-    }
-  };
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value;
 
@@ -236,7 +199,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
     if (result.length > 0) {
       const item = result[0];
-
+      
       // 👉 Form fields update
       setForm(prev => ({
         ...prev,
@@ -247,14 +210,16 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
       // 👉 Approver API call
       const data = await service.GetApprover(item.Department);
-
-      if (data?.Id > 0) {
-        setApprover1ID(data.Approval1?.Id || null);
+      if (data?.Id > 0) {        
         setApprover2ID(data.Approval2?.Id || null);
-        setApprover3ID(data.Approval3?.Id || null);
-        setApprover4ID(data.Approval4?.Id || null);
-        setApprover5ID(data.Approval5?.Id || null);
         setDepartmentHead(data.Departmenthead?.Id || null);
+
+        const User=await service.getUserById(data.Approval2.ID);
+        if(User?.Id)
+        {
+          setAssignedID(User.Title);
+        }
+
       }
 
     } else {
@@ -317,6 +282,7 @@ const getPOCategoryText = () => {
 ) {
   return alert("Attach files");
 }
+
   // 🔹 Payload (common)
   const payload = {
     ProjectCode: form.projectCode,
@@ -330,10 +296,10 @@ const getPOCategoryText = () => {
     ApplicableTaxes: form.ApplicableTaxes,
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
-    Departmenthead: Departmenthead,
-    Approver2: Approver2ID,
+    Departmenthead: Number(Departmenthead),
+    Approver2: Number(Approver2ID),
     CurrentStatus:'Draft',
-    AssignedTo: Approver2ID
+    AssignedTo: AssignedID
   };
 
   try {
@@ -393,7 +359,7 @@ const handleUpdate = async () => {
     CurrentStatus:'Pending',
     Departmenthead: Departmenthead,
     Approver2: Approver2ID,
-    AssignedTo: Approver2ID
+    AssignedTo: AssignedID
   };
   try {
     if (itemId) {
@@ -471,8 +437,6 @@ const validatePO = (value: string) => {
     }));
   }}
 />
-
-
         <label>Additional Information & Remarks</label>
         <input name="Comments" value={form.Comments} onChange={handleChange} />
 
