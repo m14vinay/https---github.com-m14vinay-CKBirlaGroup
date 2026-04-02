@@ -166,9 +166,7 @@ const removeFile = (index: number) => {
 
 const removeExistingFile = async (index: number) => {
  const file = attachments[index];
-
-
-  await service.deleteAttachmentFromSP(file);
+await service.deleteAttachmentFromSP(file);
   setAttachments(prev => prev.filter((_, i) => i !== index));
 };
 
@@ -279,6 +277,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
   // 🔹 Payload (common)
   const payload = {
+    
     ProjectCode: form.projectCode,
     ProjectTitle: form.projectTitle,
     ProjectDescription: form.projectDescription,
@@ -299,6 +298,10 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
         }
       }
       alert("Data Saved Successfully ✅");
+       await service.updateItem(res.Id, {
+       RequestNo: `VMR-${res.Id}`
+  });
+
     } else {
       // 🔹 UPDATE
       await service.updateItem(itemId, payload);
@@ -386,9 +389,7 @@ const handleUpdate = async () => {
 
       <div className={styles.leftPanel}>
         <h2>Vendor Mapping Form</h2>
-        <h4>Vendor Mapping / New Vendor Registration Form</h4>
-      
-
+        
         <label>Project Code <span className={styles.required}>*</span></label>
         <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange}   />
        {requestNoError && <span className={styles.error}>{requestNoError}</span>}

@@ -91,13 +91,15 @@ export default class Service {
      if (item && item.Id) {
       return {
         Id: item.Id,
+        RequestNo:item.RequestNo,
         ProjectCode: item.ProjectCode,
         ProjectTitle: item.ProjectTitle,
         ProjectDescription: item.ProjectDescription,
         VendorName: item.VendorName,
         VendorDescription: item.VendorDescription,
         ApproverComments: item.ApproverComments, // 👈 check column name
-        Attachments: item.AttachmentFiles || [] // 👈 important
+        Attachments: item.AttachmentFiles || [],
+        CurrentStatus:item.CurrentStatus // 👈 important
       };
     }
   

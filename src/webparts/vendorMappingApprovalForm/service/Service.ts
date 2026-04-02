@@ -117,6 +117,7 @@ export default class Service {
    if (item && item.Id) {
     return {
       Id: item.Id,
+      RequestNo: item.RequestNo,
       ProjectCode: item.ProjectCode,
       ProjectTitle: item.ProjectTitle,
       ProjectDescription: item.ProjectDescription,

@@ -17,7 +17,8 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
     vendorDescription: '',
     files: null as FileList | null,
      attachments: [],
-     CurrentStatus:''
+     CurrentStatus:'',
+     RequestNo:''
     
   });
 
@@ -77,6 +78,7 @@ const handleFetchById = async (id: number) => {
 
         setForm(prev => ({
         ...prev,
+        RequestNo:result.RequestNo ||'',
           projectCode: result.ProjectCode || '',
           projectTitle: result.ProjectTitle || '',
           projectDescription: result.ProjectDescription || '',
@@ -104,7 +106,9 @@ const handleFetchById = async (id: number) => {
     await service.updateItemdata(itemId, "Approved", approverComment);
     
     alert("✅ Approved successfully");
-    setApproverComment('');
+     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url);  
+    //setApproverComment('');
   } catch (error) {
     console.error(error);
   }
@@ -123,7 +127,9 @@ const handleReject = async () => {
     await service.updateItemdata(itemId, "Rejected", approverComment);
 
     alert("❌ Rejected successfully");
-    setApproverComment('');
+     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url);  
+    //setApproverComment('');
   } catch (error) {
     console.error(error);
   }
@@ -139,7 +145,9 @@ const handleReject = async () => {
 
       <div className={styles.leftPanel}>
         <h2>Vendor Mapping Approval Form</h2>
-       
+        
+        <label style={{fontWeight: "bold"}}>Vendor Mapping- {form.RequestNo}</label>
+         <br /><br />
         <label>Project Code <span className={styles.required}>*</span></label>
         <input name="projectCode" value={form.projectCode}   readOnly />
        
