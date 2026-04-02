@@ -17,7 +17,9 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
     vendorName: '',
     vendorDescription: '',
     files: null as FileList | null,
-     attachments: []
+     attachments: [],
+     RequestNo:'',
+     CurrentStatus:''
   });
 
   ;
@@ -74,12 +76,14 @@ const handleFetchById = async (id: number) => {
 
         setForm(prev => ({
         ...prev,
+        RequestNo:result.RequestNo || '',
           projectCode: result.ProjectCode || '',
           projectTitle: result.ProjectTitle || '',
           projectDescription: result.ProjectDescription || '',
           vendorName: result.VendorName || '',
           vendorDescription: result.VendorDescription || '',
-          files: null
+          files: null,
+          CurrentStatus:result.CurrentStatus || ''
         }));
       
 
@@ -100,26 +104,51 @@ const handleFetchById = async (id: number) => {
   // --- RENDER ---
   return (
     <div className={styles.container}>
-
-      <div className={styles.leftPanel}>
-        <h2>Vendor Mapping Approval Form</h2>
-       
-        <label>Project Code <span className={styles.required}>*</span></label>
-        <input name="projectCode" value={form.projectCode}   readOnly />
-       
-       
+      <div className={styles.header}>
+             <h4>Vendor Mapping Detals & Status</h4>
+           </div>
+      
+      <div className={styles.row}>
+        <div className={styles['col-md-9']}>
+          <div className={styles.leftPanel}>
+            <div className={styles.leftPanelHeader}>
+              <h4>{form.RequestNo}</h4>
+              <h4>Current Status:  <span className={
+    form.CurrentStatus === "Approved"
+      ? styles.Approved : styles.Rejected
+       }>{form.CurrentStatus}</span></h4>
+            </div>
+             <div className={styles.leftPanelStatusHeader}>
+                          <div className={styles.statusBox}>
+                            <div className={styles.content}>
+                            <h5>Vinay Kumar</h5>
+                            <h6>Department Head</h6>
+                            <h4>Approved</h4>
+                            </div>
+                          </div>
+                          </div>
+          <div className={styles.formGroup}>
+                      <label>Project Code</label>
+                    <input name="projectCode" value={form.projectCode}   readOnly />
+                    </div>
+         <div className={styles.formGroup}>
         <label>Project Title</label>
         <input name="projectTitle" value={form.projectTitle}   readOnly />
-
+</div>
+<div className={styles.formGroup}>
         <label>Project Description</label>
         <input name="projectDescription" value={form.projectDescription}  readOnly />
-        
+        </div>
+       <div className={styles.formGroup}>
         <label>Select Vendor <span className={styles.required}>*</span></label>
       <input name="vendorName" value={form.vendorName}  readOnly />
-
+  </div>
+  <div className={styles.formGroup}>
         <label>Additional Information & Remarks</label>
         <input name="vendorDescription" value={form.vendorDescription}  readOnly />
-        
+        </div>
+
+       <div className={styles.formGroup}>
        <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px" }}>
            <label>
             Attachments <span className={styles.required}>*</span>
@@ -134,34 +163,38 @@ const handleFetchById = async (id: number) => {
         </a>
        ))}
     </div>
- 
-</div>        
-      
-        </div>
-
-      <div className={styles.rightPanel}>
-        <div className={styles.card}>
-          <h4>Templates</h4>
-          <ul>
-            <li>Vendor_Registration_Form_v1.0.xlsx</li>
-            <li>SOP_Procurement_of_Goods_Services.pdf</li>
-            <li>DigiFlow_Training_Manual.pdf</li>
-          </ul>
-        </div>
-
-        <div className={styles.card}>
-          <h4>Important Guidelines</h4>
-          <ol>
-            <li>Select approval path carefully.</li>
-            <li>Use project reference if needed.</li>
-            <li>Attach all documents (Max 25 MB).</li>
-            <li>Avoid special characters in file names.</li>
-          </ol>
+ </div>
+</div> 
+</div> 
+</div> 
+     <div className={styles["col-md-3"]}>
+        <div className={styles.leftPanelHeader}>
+        <h6>My Document List / Upload New Document</h6>          
+        </div>        
+      <div className={styles.rightPanel}>        
+          {/* Templates */}
+          <div className={styles.card}>
+             <div>
+              <h4>Templates</h4>              
+            </div>
+          </div>
+          {/* Guidelines */}
+          <div className={styles.card}>
+             <div>
+              <h4>Importance Guidelines</h4>              
+            </div>
+            <ol>
+              <li>Select approval path carefully.</li>
+              <li>Use project reference if needed.</li>
+              <li>Attach all documents (Max 25 MB).</li>
+              <li>Avoid special characters in file names.</li>
+            </ol>
+          </div>
         </div>
       </div>
-
     </div>
-   );
+    </div>
+  );
 };
 
 export default VendorMappingForm;

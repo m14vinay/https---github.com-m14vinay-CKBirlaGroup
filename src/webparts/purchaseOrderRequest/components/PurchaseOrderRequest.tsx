@@ -434,8 +434,8 @@ const validatePO = (value: string) => {
     <div className={styles.container}>
 
       <div className={styles.leftPanel}>
-        <h2>PO Approval Request Form</h2>
-        <h4>PO Approval / Request Form</h4>
+        <h2>PO Approval Form</h2>
+        <h4>PO Approval Form</h4>
        <button style={{backgroundColor:'purple',color:'white',fontSize:'bold',width:'100%'}} onClick={handleDownload}>Download Purchase Order</button>
        <div></div>
         <label>Project Code <span className={styles.required}>*</span> </label>
@@ -485,14 +485,13 @@ const validatePO = (value: string) => {
         <ChoiceGroup
   label="PO Category"
   options={poOptions}
-  selectedKey={form.PoMaster}   // ✅ form se bind karo
-  onChange={(e, option) =>{
+  selectedKey={poOptions.find(opt => opt.text === form.PoMaster)?.key} // selectedKey ko key set karo based on text match
+  onChange={(_, option) => {
     setForm(prev => ({
       ...prev,
-      PoMaster: option?.text as string
+      PoMaster: option?.text || ""  // text store karo
     }));
-  }
-}
+  }}
 />
 
 
