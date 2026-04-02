@@ -15,12 +15,13 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     projectTitle: '',
     vendorName: '',
     vendorNameID:'',
-    RemainingAmount: '',
-    TotalAmount:'',
-    OccupiedAmount:'',
+    RemainingAmount: 0,
+    TotalAmount:0,
+    OccupiedAmount:0,
     Department: '',
     POAmount: 0,
     ApplicableTaxes: 0,
+    AssignedTo: 0,
     PoMaster: '',
     Comments: '',
    files: [] as File[],
@@ -28,11 +29,11 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     POrequestNo:'',
     CurrentStatus:'',
     approver1: '',
-   approver2: '',
+   approver2: 0,
    approver3: '',
    approver4: '',
    approver5: '',
-   DepartmentHead: ''
+   DepartmentHead: 0
   });
 
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
@@ -84,7 +85,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
      React.useEffect(() => {
        if (itemId) {
          loadAttachments(itemId);
-        getApprover();
+        //getApprover();
        }
      }, [itemId]);
 
@@ -237,7 +238,8 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
       setForm(prev => ({
         ...prev,
         Department: item.Department || '',
-        projectTitle: item.ProjectTitle || ''
+        projectTitle: item.ProjectTitle || '',
+        vendorName: item.Selectedvendor || ''
       }));
 
       // 👉 Approver API call
@@ -323,10 +325,11 @@ const getPOCategoryText = () => {
     RemainingAmount: form.RemainingAmount,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
-   PoMaster:form.PoMaster,
+    PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
-    Departmenthead: setDepartmentHead,
-    Approver2: setApprover2ID,
+    AssignedTo: Number(form.DepartmentHead),
+    Departmenthead: Number(form.DepartmentHead),
+    Approver2: Number(form.approver2) ,
     CurrentStatus:'Draft'
   };
 
@@ -385,8 +388,9 @@ const handleUpdate = async () => {
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
     CurrentStatus:'Pending',
-    Departmenthead: setDepartmentHead,
-    Approver2: setApprover2ID
+    AssignedTo: Number(Departmenthead),
+    Departmenthead: Number(Departmenthead),
+    Approver2: Number(Approver2ID) ,
   };
   try {
     if (itemId) {
