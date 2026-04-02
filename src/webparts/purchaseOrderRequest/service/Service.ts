@@ -6,6 +6,7 @@ export default class Service {
   private Departmentmaster ="DepartmentMaster";
   private FetchList ="QuotationApproval";
   private VendorList="";
+  private FinanceController="FinanceController";
 
   constructor(context: any) {
     this.context = context;
@@ -208,7 +209,35 @@ Departmenthead/Id,Departmenthead/Title
     );
 
 };
+///Get User Details by ID
+public async getUserById(userId: number): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getuserbyid(${userId})`;
+    const response = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+  const user = await response.json();
+  return user;
   }
+  public async GetApproverFromFinance(Category: string): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.FinanceController}')/items
+?$select=Id,Title,
+FinanceController/Id,FinanceController/Title
+&$expand=FinanceController&$filter=FinananceControllerUser eq '${Category}'`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0] : null;
+  }
+  };
+
 
 
 
