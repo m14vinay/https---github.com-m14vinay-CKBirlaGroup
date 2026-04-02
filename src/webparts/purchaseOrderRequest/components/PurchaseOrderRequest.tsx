@@ -27,18 +27,12 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
    files: [] as File[],
      Attachments: [],
     POrequestNo:'',
-    CurrentStatus:'',
-    approver1: '',
-   approver2: 0,
-   approver3: '',
-   approver4: '',
-   approver5: '',
-   DepartmentHead: 0
+    CurrentStatus:''
   });
 
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
-  const [Approver2ID, setApprover2ID] = React.useState<number | null>(null);
+  const [FinanceController, setApprover2ID] = React.useState<number | null>(null);
   const [AssignedID, setAssignedID] = React.useState<number | null>(null);
   const [Departmenthead, setDepartmentHead] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
@@ -106,12 +100,23 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
           OccupiedAmount: result.OccupiedAmount || '',  
           POAmount: result.POAmount || 0,
           ApplicableTaxes: result.ApplicableTaxes || 0,
-          Comments: result.ProjectDescription || ''
-          
-         
+          Comments: result.ProjectDescription || '',
+          PoMaster: result.PoMaster || ''         
         }));
-
-       
+      const data = await service.GetApprover(result.Department);
+      if (data?.Id > 0) {                
+        setDepartmentHead(data.Departmenthead?.Id || null);
+        const User=await service.getUserById(data.Departmenthead.Id);
+        if(User?.Id)
+        {
+          setAssignedID(User.Title);
+        }
+        const dataApprover = await service.GetApproverFromFinance(result.PoMaster);
+        if(dataApprover?.Id)
+        {
+          setApprover2ID(dataApprover.FinanceController?.Id || null);
+        }
+      }      
 
       } else {
         alert("No data found");
@@ -212,17 +217,19 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
       // 👉 Approver API call
       const data = await service.GetApprover(item.Department);
-      if (data?.Id > 0) {        
-        setApprover2ID(data.Approval2?.Id || null);
+      if (data?.Id > 0) {                
         setDepartmentHead(data.Departmenthead?.Id || null);
-
         const User=await service.getUserById(data.Departmenthead.Id);
         if(User?.Id)
         {
           setAssignedID(User.Title);
         }
-
-      }
+        const dataApprover = await service.GetApproverFromFinance(item.PoMaster);
+        if(dataApprover?.Id)
+        {
+          setApprover2ID(dataApprover.FinanceController?.Id || null);
+        }
+      }  
 
     } else {
       resetFields();
@@ -285,6 +292,11 @@ const getPOCategoryText = () => {
   return alert("Attach files");
 }
 
+       const dataApprover = await service.GetApproverFromFinance(form.PoMaster);
+        if(dataApprover?.Id)
+        {
+          setApprover2ID(dataApprover.FinanceController?.Id || null);
+        }
   // 🔹 Payload (common)
   const payload = {
     ProjectCode: form.projectCode,
@@ -300,7 +312,7 @@ const getPOCategoryText = () => {
     ProjectDescription: form.Comments,
     AssignedTo: AssignedID,
     DepartmentHeadId: Number(Departmenthead),
-    Approver2Id: Number(Approver2ID) ,
+    Approver2Id: Number(FinanceController) ,
     CurrentStatus:'Draft'
   };
 
@@ -347,6 +359,11 @@ const handleUpdate = async () => {
 ) {
   return alert("Attach files");
 }
+        const dataApprover = await service.GetApproverFromFinance(form.PoMaster);
+        if(dataApprover?.Id)
+        {
+          setApprover2ID(dataApprover.FinanceController?.Id || null);
+        }
   const payload = {
     Title:"Testing",
     ProjectCode: form.projectCode,
@@ -363,7 +380,7 @@ const handleUpdate = async () => {
     CurrentStatus:'Pending',
     AssignedTo: AssignedID,
     DepartmentHeadId: Number(Departmenthead),
-    Approver2Id: Number(Approver2ID) ,
+    Approver2Id: Number(FinanceController) ,
   };
   try {
     if (itemId) {
