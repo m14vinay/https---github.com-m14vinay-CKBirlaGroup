@@ -214,7 +214,9 @@
       "components": [
         {
           "entrypoint": "./lib/webparts/vendorRegistrationSearch/VendorRegistrationSearchWebPart.js",
-          "manifest": "./src/webparts/vendorRegistrationSearch/VendorRegistrationSearchWebPart.manifest.json"
+          "manifest": "./src/webparts/vendorRegistrationSearch/VendorRegistrationSearchWebPart.manifest.json"}
+      ]
+    },
     "qa-request-approval-form-web-part": {
       "components": [
         {
@@ -260,7 +262,7 @@
     "VendorRegistrationWebPartStrings": "lib/webparts/vendorRegistration/loc/{locale}.js",
     "VendorRegistrationManuallyWebPartStrings": "lib/webparts/vendorRegistrationManually/loc/{locale}.js",
     "VendorRegistrationDetailWebPartStrings": "lib/webparts/vendorRegistrationDetail/loc/{locale}.js",
-    "VendorRegistrationSearchWebPartStrings": "lib/webparts/vendorRegistrationSearch/loc/{locale}.js"
+    "VendorRegistrationSearchWebPartStrings": "lib/webparts/vendorRegistrationSearch/loc/{locale}.js",
     "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js",
     "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js"
   }
