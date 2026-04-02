@@ -280,18 +280,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 // 🔹 Load data
   React.useEffect(() => {
     loadDepartments();
-    //loadVendor();
   }, []);
-
-  // const loadVendor = async () => {    
-  //   const data = await service.getVendor();
-  //   const options = data.map((item: any) => ({
-  //     key: item.Id,
-  //     text: item.VendorName
-  //   }));
-
-  //   setvendorOptions(options);
-  // };
 
   // // 🔹 Handle input change
  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -323,22 +312,21 @@ const getPOCategoryText = () => {
 ) {
   return alert("Attach files");
 }
-
   // 🔹 Payload (common)
   const payload = {
     ProjectCode: form.projectCode,
     Department: form.Department,
     ProjectTitle: form.projectTitle,
-    VendorName: 'vinay',
-    //TotalAmount:form.TotalAmount,
-    //OccupiedAmount: form.OccupiedAmount,
-    //RemainingAmount: form.RemainingAmount,
+    VendorName: form.vendorName,
+    TotalAmount:form.TotalAmount,
+    OccupiedAmount: form.OccupiedAmount,
+    RemainingAmount: form.RemainingAmount,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
    PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
     Departmenthead: setDepartmentHead,
-     Approver2: setApprover2ID,
+    Approver2: setApprover2ID,
     CurrentStatus:'Draft'
   };
 
@@ -389,16 +377,16 @@ const handleUpdate = async () => {
     Title:"Testing",
     ProjectCode: form.projectCode,
     ProjectTitle: form.projectTitle,
-    VendorName: 'Vinay',
-    //RemainingAmount: form.RemainingAmount,
+    VendorName: form.vendorName,
+    RemainingAmount: form.RemainingAmount,
     Department: form.Department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
-   PoMaster:form.PoMaster,
+    PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
     CurrentStatus:'Pending',
     Departmenthead: setDepartmentHead,
-     Approver2: setApprover2ID
+    Approver2: setApprover2ID
   };
   try {
     if (itemId) {
@@ -441,31 +429,14 @@ const validatePO = (value: string) => {
         <label>Project Code <span className={styles.required}>*</span> </label>
         <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange} />
 
-        {/* <label>Department</label>
-        <Dropdown
-          options={departmentOptions}
-          selectedKey={form.Department}
-          onChange={(e, option) =>
-            setForm({ ...form, Department: option?.text as string })
-          }
-        /> */}
-         
-
          <label>Department</label>
-          <input name="Department" value={form.Department} readOnly />
-        
+          <input name="Department" value={form.Department} readOnly />        
 
         <label>Project Title</label>
         <input name="projectTitle" value={form.projectTitle} readOnly />
 
         <label>Select Vendor Name</label>
-        <Dropdown
-          options={vendorOptions}
-          selectedKey={form.vendorNameID}     
-          onChange={(e, option) =>
-            setForm({ ...form, vendorName: option?.text as string,vendorNameID: option?.key as string, })
-          }    
-        />
+        <input name="vendorName" value={form.vendorName} readOnly />
 
         <label>Total Amount</label>
         <input name="TotalAmount" value={form.TotalAmount} onChange={handleChange} />
