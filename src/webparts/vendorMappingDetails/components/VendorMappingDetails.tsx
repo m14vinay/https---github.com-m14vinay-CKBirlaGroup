@@ -115,8 +115,10 @@ const handleFetchById = async (id: number) => {
               <h4>{form.RequestNo}</h4>
               <h4>Current Status:  <span className={
     form.CurrentStatus === "Approved"
-      ? styles.Approved : styles.Rejected
-       }>{form.CurrentStatus}</span></h4>
+      ? styles.Approved
+      : form.CurrentStatus === "Rejected"
+      ? styles.Rejected
+      : styles.Pending }>{form.CurrentStatus}</span></h4>
             </div>
              <div className={styles.leftPanelStatusHeader}>
                           <div className={styles.statusBox}>
