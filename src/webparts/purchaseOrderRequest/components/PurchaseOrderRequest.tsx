@@ -13,8 +13,8 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     projectCode: '',
     department:'',
     projectTitle: '',
-    vendorName: '',
-    vendorNameID:'',
+    Selectedvendor: '',
+    VendorNameID:'',
     RemainingAmount: '',
     TotalAmount:'',
     OccupiedAmount:'',
@@ -106,7 +106,11 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
           projectCode: result.ProjectCode || '',
           Department: result.Department || '',
           projectTitle: result.ProjectTitle || '',
-          vendorName: result.VendorName || '',
+          VendorName: result.VendorName || '',
+          VendorNameID: result.VendorNameID || '',
+          RemainingAmount: result.RemainingAmount || '',
+          TotalAmount: result.TotalAmount || '',
+          OccupiedAmount: result.OccupiedAmount || '',  
           POAmount: result.POAmount || 0,
           ApplicableTaxes: result.ApplicableTaxes || 0,
           Comments: result.ProjectDescription || ''
@@ -317,7 +321,7 @@ const getPOCategoryText = () => {
     ProjectCode: form.projectCode,
     Department: form.Department,
     ProjectTitle: form.projectTitle,
-    VendorName: form.vendorName,
+    VendorName: form.Selectedvendor,
     TotalAmount:form.TotalAmount,
     OccupiedAmount: form.OccupiedAmount,
     RemainingAmount: form.RemainingAmount,
@@ -377,7 +381,7 @@ const handleUpdate = async () => {
     Title:"Testing",
     ProjectCode: form.projectCode,
     ProjectTitle: form.projectTitle,
-    VendorName: form.vendorName,
+    VendorName: form.Selectedvendor,
     RemainingAmount: form.RemainingAmount,
     Department: form.Department,
     POAmount: form.POAmount,
@@ -435,8 +439,8 @@ const validatePO = (value: string) => {
         <label>Project Title</label>
         <input name="projectTitle" value={form.projectTitle} readOnly />
 
-        <label>Select Vendor Name</label>
-        <input name="vendorName" value={form.vendorName} readOnly />
+        <label>Vendor Name</label>
+        <input name="VendorName" value={form.Selectedvendor} readOnly />
 
         <label>Total Amount</label>
         <input name="TotalAmount" value={form.TotalAmount} onChange={handleChange} />
