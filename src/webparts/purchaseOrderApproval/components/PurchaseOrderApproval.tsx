@@ -25,13 +25,13 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     files: null,
     attachments: [],
     approver1: '',
-   approver2: '',
-   approver3: '',
-   approver4: '',
-   approver5: '',
-   DepartmentHead: '',
-   CurrentStatus:''
-    
+    approver2: '',
+    approver3: '',
+    approver4: '',
+    approver5: '',
+    DepartmentHead: '',
+    CurrentStatus: ''
+
   });
 
 
@@ -115,8 +115,8 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
 
       console.log("Result:", result);
 
-      if (result.CurrentStatus==='Pending' || result.CurrentStatus==='Approved') {
-      setItemId(result.Id);
+      if (result.CurrentStatus === 'Pending' || result.CurrentStatus === 'Approved') {
+        setItemId(result.Id);
 
         setForm(prev => ({
           ...prev,
@@ -197,30 +197,30 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
             <div className={styles.leftPanelStatusHeader}>
               <div className={styles.statusBox}>
                 <div className={styles.content}>
-                <h5>Vinay Kumar</h5>
-                <h6>Department Head</h6>
-                <h4>Approved</h4>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Approved</h4>
                 </div>
               </div>
               <div className={`${styles.statusBox} ${styles.pendingBox}`}>
                 <div className={styles.content}>
-                <h5>Vinay Kumar</h5>
-                <h6>Department Head</h6>
-                <h4>Pending</h4>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Pending</h4>
                 </div>
               </div>
               <div className={`${styles.statusBox} ${styles.rejectedBox}`}>
                 <div className={styles.content}>
-                <h5>Vinay Kumar</h5>
-                <h6>Department Head</h6>
-                <h4>Rejected</h4>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Rejected</h4>
                 </div>
               </div>
               <div className={`${styles.statusBox} ${styles.upcomingBox}`}>
                 <div className={styles.content}>
-                <h5>Vinay Kumar</h5>
-                <h6>Department Head</h6>
-                <h4>Upcoming Approver</h4>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Upcoming Approver</h4>
                 </div>
               </div>
             </div>
@@ -275,32 +275,58 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
             <label></label>
             <label></label>
             <label>Approver Comments <span className={styles.required}>*</span></label>
-            <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}  />
+            <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)} />
 
             {/* Buttons */}
             <div>
-            <div className={styles.buttonGroup}>
-              <button className={styles.ApproveBtn} onClick={handleApprove}>Approve</button>
-              <button className={styles.RejectBtn} onClick={handleReject} >Reject</button>
-              <button className={styles.cancelBtn}>Cancel</button>
-            </div>
-    </div>
-          </div>
-      
-        <div className={styles['col-md-3']}>
-          <div className={styles.rightPanel}>
-            <div className={styles.card}>
-              <h4>Templates</h4>
-              <ul>
-                <li>Vendor_Registration_Form_v1.0.xlsx</li>
-                <li>SOP_Procurement_of_Goods_Services.pdf</li>
-                <li>DigiFlow_Training_Manual.pdf</li>
-              </ul>
+              <div className={styles.buttonGroup}>
+                <button className={styles.ApproveBtn} onClick={handleApprove}>Approve</button>
+                <button className={styles.RejectBtn} onClick={handleReject} >Reject</button>
+                <button className={styles.cancelBtn}>Cancel</button>
+              </div>
             </div>
           </div>
         </div>
+        <div className={styles['col-md-3']}>
+          <div className={styles.rightPanel}>
+            <div className={styles.rightPanelHeader}>
+              <h4>Timeline of the Request - FBP-543</h4>
+            </div>
+            <ul>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Request Initiated</span>
+                <span>Initiator: M.Ponnamalai</span>
+                <span>Date & Time: 10 mar 2026 AT 10:00 AM</span>
+              </li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Department Head</span>
+                <span>Approver Name: Vinay Kumar</span>
+                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
+                <span>Action Date: 12 mar 2026 AT 12:00 AM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Billing Approver</span>
+                <span>Approver Name: Sanjay Tiwari</span>
+                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
+                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li className={styles.crossIcon}>
+                <span className={styles.spanHeader}>Finance Controller</span>
+                <span>Approver Name: Indrajeet Singh</span>
+                <span>Action Taken: <span className={styles.rejStatus}>Rejected</span></span>
+                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li>
+                <span className={styles.spanHeader}>Billing Approver</span>
+                <span>Approver Name: Sanjay Tiwari</span>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
-    </div >
     </div>
   );
 };
