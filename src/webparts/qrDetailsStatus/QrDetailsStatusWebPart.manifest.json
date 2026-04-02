@@ -1,0 +1,22 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "3bd8c45d-9f14-40a3-b149-bce7e7af1584",
+  "alias": "QrDetailsStatusWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+    "group": { "default": "Advanced" },
+    "title": { "default": "QR DetailsStatus" },
+    "description": { "default": "QR DetailsStatus;Status description" },
+    "officeFabricIconFontName": "Page",
+    "properties": {
+      "description": "QR DetailsStatus;Status"
+    }
+  }]
+}
