@@ -291,16 +291,16 @@ const getPOCategoryText = () => {
     Department: form.Department,
     ProjectTitle: form.projectTitle,
     VendorName: form.vendorName,
-    TotalAmount:form.TotalAmount,
-    OccupiedAmount: form.OccupiedAmount,
-    RemainingAmount: form.RemainingAmount,
+    TotalAmount:Number(form.TotalAmount),
+    OccupiedAmount: Number(form.OccupiedAmount),
+    RemainingAmount: Number(form.RemainingAmount),
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
     AssignedTo: AssignedID,
-    DepartmentHead: Number(Departmenthead),
-    Approver2: Number(Approver2ID) ,
+    DepartmentHeadId: Number(Departmenthead),
+    Approver2Id: Number(Approver2ID) ,
     CurrentStatus:'Draft'
   };
 
@@ -352,16 +352,18 @@ const handleUpdate = async () => {
     ProjectCode: form.projectCode,
     ProjectTitle: form.projectTitle,
     VendorName: form.vendorName,
-    RemainingAmount: form.RemainingAmount,
+    RemainingAmount: Number(form.RemainingAmount),
     Department: form.Department,
     POAmount: form.POAmount,
+    TotalAmount:Number(form.TotalAmount),
+    OccupiedAmount: Number(form.OccupiedAmount),
     ApplicableTaxes: form.ApplicableTaxes,
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
     CurrentStatus:'Pending',
     AssignedTo: AssignedID,
-    DepartmentHead: Number(Departmenthead),
-    Approver2: Number(Approver2ID) ,
+    DepartmentHeadId: Number(Departmenthead),
+    Approver2Id: Number(Approver2ID) ,
   };
   try {
     if (itemId) {
