@@ -18,7 +18,8 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
     files: null as FileList | null,
      attachments: [],
      CurrentStatus:'',
-     RequestNo:''
+     RequestNo:'',
+     AssignedTo:''
     
   });
 
@@ -28,6 +29,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
   const [approverComment, setApproverComment] = React.useState('');
    const [Actiondate1, setactiondate1] = React.useState('');
    const [attachments, setAttachments] = React.useState<any[]>([]);
+  const [currentUser, setCurrentUser] = React.useState('');
  
   
   // --- 1️⃣ Get ID from query string ---
@@ -59,39 +61,53 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
    React.useEffect(() => {
      if (itemId) {
        loadAttachments(itemId);
+       //CurrentUser();
       
      }
    }, [itemId]);
   
+
+
+
 //FETCH DATA-----
 const handleFetchById = async (id: number) => {
     try {
-     
+      
+    
       console.log("Calling API with ID:", id);
-
+      const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
 
       console.log("Result:", result);
+    
 
-      if (result.CurrentStatus==='Pending' || result.CurrentStatus==='Approved' ) {
+      if (result.AssignedTo === currentuser.Title) {
+
+      if (result.CurrentStatus === 'Pending' || result.CurrentStatus === 'Approved') {
+
         setItemId(result.Id);
 
         setForm(prev => ({
-        ...prev,
-        RequestNo:result.RequestNo ||'',
+          ...prev,
+          RequestNo: result.RequestNo || '',
           projectCode: result.ProjectCode || '',
           projectTitle: result.ProjectTitle || '',
           projectDescription: result.ProjectDescription || '',
           vendorName: result.VendorName || '',
           vendorDescription: result.VendorDescription || '',
+          AssignedTo: result.AssignedTo || '',
           files: null
         }));
-         setApproverComment(result.ApproverComment || ''); // 
-         
+       
+        setApproverComment(result.ApproverComment || '');
+
       } else {
         alert("No data found");
       }
-      
+
+    } else {
+      alert("❌ This action has already taken.Please wait for queue");
+    }
     } catch (error) {
       console.error("Error:", error);
     }
@@ -103,7 +119,7 @@ const handleFetchById = async (id: number) => {
        if (!approverComment) return alert("Approver Comment required");
     if (!itemId) return;
 
-    await service.updateItemdata(itemId, "Approved", approverComment);
+    await service.updateItemdata(itemId, "Approved", approverComment,"Approved");
     
     alert("✅ Approved successfully");
      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -124,7 +140,7 @@ const handleReject = async () => {
       return;
     }
 
-    await service.updateItemdata(itemId, "Rejected", approverComment);
+    await service.updateItemdata(itemId, "Rejected", approverComment,"Rejected");
 
     alert("❌ Rejected successfully");
      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -185,7 +201,7 @@ const handleReject = async () => {
        <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}  style={{ marginBottom: "15px" }} />
         
        {/* Buttons */}
-          <div className={styles.buttonGroup}>
+          <div className={styles.buttonGroup} >
             <button className={styles.ApproveBtn} onClick={handleApprove}>Approve</button>
             <button className={styles.RejectBtn} onClick={handleReject} >Reject</button>
             <button className={styles.cancelBtn}>Cancel</button>

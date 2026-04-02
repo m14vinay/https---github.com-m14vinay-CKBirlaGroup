@@ -81,7 +81,7 @@ export default class Service {
   }
 
   // Update the Record (Submit)
-  public async updateItemdata(id: number,status:string, comments: string ): Promise<void> {
+  public async updateItemdata(id: number,status:string, comments: string,AssignedStatus: string ): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
     await this.context.spHttpClient.post(
@@ -97,6 +97,7 @@ export default class Service {
         body: JSON.stringify({
         CurrentStatus: status,
          ApproverComment: comments,
+         AssignedTo:AssignedStatus,
          Actiondate1: new Date().toISOString()
      })
       }
@@ -126,7 +127,8 @@ export default class Service {
       ApproverComments: item.ApproverComments, // 👈 check column name
       Attachments: item.AttachmentFiles || [],
       CurrentStatus:item.CurrentStatus ,// 👈 important
-      Actiondate1 : item.Actiondate1
+      Actiondate1 : item.Actiondate1,
+      AssignedTo : item.AssignedTo
     };
   }
 
@@ -170,6 +172,16 @@ export default class Service {
 
   return data.value; // array of attachments
 }
+
+ public async getUser(): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data;
+  }
   }
 
 
