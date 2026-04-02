@@ -330,8 +330,8 @@ const getPOCategoryText = () => {
     ApplicableTaxes: form.ApplicableTaxes,
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
-    Departmenthead: setDepartmentHead,
-    Approver2: setApprover2ID,
+    Departmenthead: Departmenthead,
+    Approver2: Approver2ID,
     CurrentStatus:'Draft'
   };
 
@@ -390,8 +390,8 @@ const handleUpdate = async () => {
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
     CurrentStatus:'Pending',
-    Departmenthead: setDepartmentHead,
-    Approver2: setApprover2ID
+    Departmenthead: Departmenthead,
+    Approver2: Approver2ID
   };
   try {
     if (itemId) {
