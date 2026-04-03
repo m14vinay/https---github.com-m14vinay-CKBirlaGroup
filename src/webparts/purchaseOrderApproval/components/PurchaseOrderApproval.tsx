@@ -5,6 +5,7 @@ import styles from './PurchaseOrderApproval.module.scss';
 import { IPurchaseOrderApprovalProps } from './IPurchaseOrderApprovalProps';
 import SharePointService from '../service/Service';
 import Service from '../service/Service';
+import { FabricPerformance } from '@fluentui/react';
 
 
 const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => {
@@ -29,8 +30,11 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     approver3: '',
     approver4: '',
     approver5: '',
+    ActionDate1:'',
+    ActionDate2:'',
     DepartmentHead: '',
-    CurrentStatus: ''
+    CurrentStatus: '',
+    Approver2Id:''
 
   });
 
@@ -38,13 +42,16 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
   const [approverComment, setApproverComment] = React.useState('');
+   const [approverComment2, setApproverComment2] = React.useState('');
   const [attachments, setAttachments] = React.useState<any[]>([]);
+   const [AssignedID, setAssignedID] = React.useState<number | null>(null);
   const [approver1, setApprover1] = React.useState('');
   const [approver2, setApprover2] = React.useState('');
   const [approver3, setApprover3] = React.useState('');
   const [approver4, setApprover4] = React.useState('');
   const [approver5, setApprover5] = React.useState('');
   const [departmentHead, setDepartmentHead] = React.useState('');
+  const [isDisabled, setIsDisabled] = useState(false);
 
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
@@ -101,19 +108,17 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     }
   }, [itemId]);
 
-  // componentDidMount(): void {
-  //   this.loadAttachments();
-  //   this.GetApprover();
-  // }
-
+  
   //FETCH DATA-----
   const handleFetchById = async (id: number) => {
     try {
       console.log("Calling API with ID:", id);
-
+       const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
-
+   const User=await service.getUserById(result.Approver2Id);
       console.log("Result:", result);
+
+       if (result.AssignedTo === currentuser.Title) {
 
       if (result.CurrentStatus === 'Pending' || result.CurrentStatus === 'Approved') {
         setItemId(result.Id);
@@ -126,17 +131,37 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
           projectTitle: result.ProjectTitle || '',
           vendorName: result.VendorName || '',
           POAmount: result.POAmount || 0,
+          POCategory: result.PoMaster || '',
           ApplicableTaxes: result.ApplicableTaxes || 0,
           ProjectDescription: result.ProjectDescription || '',
+          ActionDate1:result.ActionDate1 || '',
+          ActionDate2:result.ActionDate2 || '',
+          approver2: User?.Title || '',
           files: null
         }));
+       
+        if(User?.Id)
+        {
+          setAssignedID(User.Title);
+        //approver2:
+        }
 
-        setApproverComment(result.ApproverComment1 || '');
+      if (!result.ActionDate1 || !result.ActionDate2) {
+  setIsDisabled(false);  // enable
+} else {
+  setIsDisabled(true);   // disable
+}
+       
+       
 
-      } else {
+
+     } else {
         alert("No data found");
       }
 
+    } else {
+      alert("❌ This action has already taken.Please wait for queue");
+    }
     } catch (error) {
       console.error("Error:", error);
     }
@@ -146,11 +171,26 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
   const handleApprove = async () => {
     try {
       if (!approverComment) return alert("Approver Comment required");
+      
       if (!itemId) return;
-
-      await service.updateItemdata(itemId, "Approved", approverComment);
-
-      alert("✅ Approved successfully");
+     if(form.ActionDate1==='')
+     {
+      await service.updateItemdata(itemId, "Approved", approverComment,form.approver2 || '');
+        alert("✅ First level approved");
+ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url); 
+      return; 
+     }
+     else if(form.ActionDate2==='')
+     {
+       await service.updateItemdata2(itemId, "Approved",approverComment,'Approved');
+       alert("✅ Final approval done");
+       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url); 
+      return; // 🔥 stop again
+    }
+     
+     
       setApproverComment('');
     } catch (error) {
       console.error(error);
@@ -166,9 +206,24 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
         alert("Comment is required for rejection ❗");
         return;
       }
+      if(form.ActionDate1==='')
+      {
+      await service.updateItemdata(itemId, "Rejected", approverComment,"Rejected");
+        alert("✅ First level Rejected successfully");
+         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url); 
+        return;
 
-      await service.updateItemdata(itemId, "Rejected", approverComment);
-
+      }
+       else if(form.ActionDate2==='')
+     {
+       await service.updateItemdata2(itemId, "Rejected", approverComment,'Rejected');
+        alert("✅ Final Rejection done");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url); 
+      return; // 🔥 stop again
+       
+     }
       alert("❌ Rejected successfully");
       setApproverComment('');
     } catch (error) {
@@ -280,8 +335,8 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
             {/* Buttons */}
             <div>
               <div className={styles.buttonGroup}>
-                <button className={styles.ApproveBtn} onClick={handleApprove}>Approve</button>
-                <button className={styles.RejectBtn} onClick={handleReject} >Reject</button>
+                <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled} >Approve</button>
+                <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled}>Reject</button>
                 <button className={styles.cancelBtn}>Cancel</button>
               </div>
             </div>

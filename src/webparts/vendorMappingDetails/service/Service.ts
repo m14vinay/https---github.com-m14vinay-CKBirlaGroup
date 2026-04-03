@@ -86,24 +86,11 @@ export default class Service {
         SPHttpClient.configurations.v1
       );
   
-      const item = await res.json();
-     
-     if (item && item.Id) {
-      return {
-        Id: item.Id,
-        RequestNo:item.RequestNo,
-        ProjectCode: item.ProjectCode,
-        ProjectTitle: item.ProjectTitle,
-        ProjectDescription: item.ProjectDescription,
-        VendorName: item.VendorName,
-        VendorDescription: item.VendorDescription,
-        ApproverComments: item.ApproverComments, // 👈 check column name
-        Attachments: item.AttachmentFiles || [],
-        CurrentStatus:item.CurrentStatus // 👈 important
-      };
-    }
-  
-    return null;
+       const item = await res.json();
+   
+   
+
+  return item;
   }
   // Upload Files
 
@@ -142,6 +129,16 @@ export default class Service {
 
   return data.value; // array of attachments
 }
+
+public async getUser(): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data;
   }
+}
 
   

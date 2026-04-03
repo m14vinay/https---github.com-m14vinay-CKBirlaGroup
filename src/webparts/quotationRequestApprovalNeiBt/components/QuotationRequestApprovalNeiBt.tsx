@@ -29,25 +29,33 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
       files: null,
       attachments: [],
        ApproverComment1:'',
-       CurrentStatus:''
+       CurrentStatus:'',
+       approver1: '',
+    approver2: '',
+    approver3: '',
+    approver4: '',
+    approver5: '',
+    ActionDate1:'',
+    ActionDate2:'',
+    DepartmentHead: '',
+    RequestNo:''
+   
   });
 
    const [itemId, setItemId] = React.useState<number | null>(null);
     const service = new SharePointService(props.context);
     const [approverComment, setApproverComment] = React.useState('');
+     const [approverComment2, setApproverComment2] = React.useState('');
     const [attachments, setAttachments] = React.useState<any[]>([]);
-  // useEffect(() => {
-  //   loadDepartments();
-  // }, []);
-
-  // const loadDepartments = async () => {
-  //   const res = await fetch(
-  //     `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items`,
-  //     { headers: { Accept: 'application/json;odata=verbose' } }
-  //   );
-  //   const data = await res.json();
-  //   setDepartments(data.d.results);
-  // };
+     const [AssignedID, setAssignedID] = React.useState<number | null>(null);
+    const [approver1, setApprover1] = React.useState('');
+    const [approver2, setApprover2] = React.useState('');
+    const [approver3, setApprover3] = React.useState('');
+    const [approver4, setApprover4] = React.useState('');
+    const [approver5, setApprover5] = React.useState('');
+    const [departmentHead, setDepartmentHead] = React.useState('');
+    const [isDisabled, setIsDisabled] = useState(false);
+  
 
     // --- 1️⃣ Get ID from query string ---
      const getIdFromQueryString = (): number | null => {
@@ -75,10 +83,31 @@ const loadAttachments = async (id:number) => {
     }
    };
 
+
+
+ const getApprover = async () => {
+    try {
+      const data = await service.getApprover('');
+
+      console.log("Approver Data:", data);
+
+      if (data && data.length > 0) {
+        setApprover1(data[0].approver1 || '');
+        setApprover2(data[0].approver2 || '');
+        setApprover3(data[0].approver3 || '');
+        setApprover4(data[0].approver4 || '');
+        setApprover5(data[0].approver5 || '');
+        setDepartmentHead(data[0].DepartmentHead || '');
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
 React.useEffect(() => {
   if (itemId) {
     loadAttachments(itemId);
-     // 👈 dynamic ID use karo
+     getApprover();// 👈 dynamic ID use karo
   }
 }, [itemId]);
 
@@ -86,11 +115,12 @@ React.useEffect(() => {
 const handleFetchById = async (id: number) => {
     try {
       console.log("Calling API with ID:", id);
-
+      const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
 
       console.log("Result:", result);
 
+       if (result.AssignedTo === currentuser.Title) {
       if (result.CurrentStatus==='Pending' || result.CurrentStatus==='Approved' ) {
       setItemId(result.Id);
 
@@ -112,13 +142,21 @@ const handleFetchById = async (id: number) => {
       Department: result.Department || '',
       Advancepayment: result.Advancepayment || 0,
       ApprovalPath: result.ApprovalPath || '',
+      RequestNo : result.RequestNo || '',
       files: null
       }));
-  setApproverComment(result.ApproverComment1 || '');
+  if (!result.ActionDate1 || !result.ActionDate2 || !result.ActionDate3) {
+  setIsDisabled(false);  // enable
+} else {
+  setIsDisabled(true);   // disable
+}
+       
     } else {
       alert("No data found");
     }
-
+ } else {
+      alert("❌ This action has already taken.Please wait for queue");
+    }
   } catch (error) {
     console.error("Error:", error);
   }
@@ -129,10 +167,25 @@ const handleFetchById = async (id: number) => {
   try {
        if (!approverComment) return alert("Approver Comment required");
     if (!itemId) return;
+if(form.ActionDate1==='')
+     {
+      await service.updateItemdata(itemId, "Approved", approverComment,form.approver2 || '');
+        alert("✅ First level approved");
+ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url); 
+      return; 
+     }
+     else if(form.ActionDate2==='')
+     {
+       await service.updateItemdata2(itemId, "Approved",approverComment,'Approved');
+       alert("✅ Final approval done");
+       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url); 
+      return; // 🔥 stop again
+    }
+   
 
-    await service.updateItemdata(itemId, "Approved", approverComment);
-
-    alert("✅ Approved successfully");
+    
     setApproverComment('');
   } catch (error) {
     console.error(error);
@@ -149,9 +202,26 @@ const handleReject = async () => {
       return;
     }
 
-    await service.updateItemdata(itemId, "Rejected", approverComment);
+   if(form.ActionDate1==='')
+      {
+      await service.updateItemdata(itemId, "Rejected", approverComment,"Rejected");
+        alert("✅ First level Rejected successfully");
+         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url); 
+        return;
 
-    alert("❌ Rejected successfully");
+      }
+       else if(form.ActionDate2==='')
+     {
+       await service.updateItemdata2(itemId, "Rejected", approverComment,'Rejected');
+        alert("✅ Final Rejection done");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url); 
+      return; // 🔥 stop again
+       
+     }
+      alert("❌ Rejected successfully");
+     
     setApproverComment('');
   } catch (error) {
     console.error(error);
@@ -186,9 +256,16 @@ const handleReject = async () => {
       <div className={styles.container}>
         {/* LEFT FORM */}
         <div className={styles.leftPanel}>
-          <h2>Quotation Approval Form-NEI BT Admin</h2>
-          <h4>Quotation Approval Form-NEI BT Admin/Request Approval</h4>
-
+          <h4>Quotation Approval Form-NEI BT Admin</h4>
+              <div className={styles.row}>
+        {/* LEFT FORM */}
+        <div className={styles['col-md-9']}>
+          <div className={styles.leftPanel}>
+            <div className={styles.leftPanelHeader}>
+              <h4>Quotation Approval NEI BT Admin-{form.RequestNo} </h4>
+              <h4>Current Status: <span className={styles.status}>Rejected</span></h4>
+            </div>
+  
           <label>Project Title</label>
           <input name="ProjectTitle" value={form.ProjectTitle} readOnly />
 
@@ -294,6 +371,10 @@ const handleReject = async () => {
           </div>
         </div>
       </div>
+      </div>
+      </div>
+      </div>
+      
     );
   }
 

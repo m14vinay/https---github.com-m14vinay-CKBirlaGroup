@@ -229,9 +229,8 @@ const handleUpdate = async () => {
 
         {/* LEFT FORM */}
         <div className={styles.leftPanel}>
-          <h2>Quotation Approval Form-NEI BT Admin</h2>
-          <h4>Quotation Request Form</h4>
-
+          <h4>Quotation Approval Form-NEI BT Admin</h4>
+        
           <label>Project Title <span className={styles.required}>*</span></label>
           <input name="ProjectTitle" value={form.ProjectTitle}  onChange={handleChange}  />
 
@@ -300,12 +299,13 @@ const handleUpdate = async () => {
     
         <label>Department</label>
         <Dropdown
+          placeholder="Select Department"
           options={departmentOptions}
           selectedKey={form.Department}
   onChange={(e, option) =>
     setForm(prev => ({
       ...prev,
-      Department: option?.text || ""  // safe default empty string
+      Department: option?.key as string // safe default empty string
     }))
   }
 />
@@ -317,7 +317,7 @@ const handleUpdate = async () => {
           
 
           <label>Approval Path <span className={styles.required}>*</span></label>
-          <input name="ApprovalPath" value={form.ApprovalPath} onChange={handleChange}    />
+          <input name="ApprovalPath" value={form.ApprovalPath} onChange={handleChange} readOnly   />
              
 
         <label>Attachments <span className={styles.required}>*</span></label>

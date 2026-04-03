@@ -19,7 +19,11 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
      attachments: [],
      CurrentStatus:'',
      RequestNo:'',
-     AssignedTo:''
+     AssignedTo:'',
+      AuthorId:'',
+     Created:'',
+     Actiondate1:'',
+     ApproverComment: ''
     
   });
 
@@ -30,6 +34,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
    const [Actiondate1, setactiondate1] = React.useState('');
    const [attachments, setAttachments] = React.useState<any[]>([]);
   const [currentUser, setCurrentUser] = React.useState('');
+  const [isDisabled, setIsDisabled] = useState(false);
  
   
   // --- 1️⃣ Get ID from query string ---
@@ -96,10 +101,18 @@ const handleFetchById = async (id: number) => {
           vendorName: result.VendorName || '',
           vendorDescription: result.VendorDescription || '',
           AssignedTo: result.AssignedTo || '',
+          Author:result.Author || '',
+          Created:(result.Created),
+          Actiondate1: (result.Actiondate1),
+          ApproverComment:result.ApproverComment || '',
           files: null
         }));
        
-        setApproverComment(result.ApproverComment || '');
+         if (!result.Actiondate1) {
+  setIsDisabled(false);  // enable
+} else {
+  setIsDisabled(true);   // disable
+}
 
       } else {
         alert("No data found");
@@ -156,82 +169,112 @@ const handleReject = async () => {
 
 
   // --- RENDER ---
-  return (
-    <div className={styles.container}>
-
-      <div className={styles.leftPanel}>
-        <h2>Vendor Mapping Approval Form</h2>
+  return(
+  <div className={styles.container}>
+        <div className={styles.header}>
+                <h4>PO Approval Form</h4>
+             </div>
         
-        <label style={{fontWeight: "bold"}}>Vendor Mapping- {form.RequestNo}</label>
-         <br /><br />
-        <label>Project Code <span className={styles.required}>*</span></label>
-        <input name="projectCode" value={form.projectCode}   readOnly />
-       
-       
-        <label>Project Title</label>
-        <input name="projectTitle" value={form.projectTitle}   readOnly />
-
-        <label>Project Description</label>
-        <input name="projectDescription" value={form.projectDescription}  readOnly />
-        
-        <label>Select Vendor <span className={styles.required}>*</span></label>
-      <input name="vendorName" value={form.vendorName}  readOnly />
-
-        <label>Additional Information & Remarks</label>
-        <input name="vendorDescription" value={form.vendorDescription}  readOnly />
-        
-
-        <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px", marginBottom:"10px" }}>
-           <label>
-            Attachments <span className={styles.required}>*</span>
-            </label>
-     
-    <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
-      {attachments.map((file: any, index: number) => (
-        <a
-          key={index}
-            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
-          {file.FileName}
-        </a>
-       ))}
+        <div className={styles.row}>
+          <div className={styles['col-md-9']}>
+            <div className={styles.leftPanel}>
+              <div className={styles.leftPanelHeader}>
+             <label style={{fontWeight: "bold"}}>Vendor Mapping- {form.RequestNo}</label>
+            </div>
+            <div className={styles.formGroup}>
+                        <label>Project Code</label>
+                      <input name="projectCode" value={form.projectCode}   readOnly />
+                      </div>
+           <div className={styles.formGroup}>
+          <label>Project Title</label>
+          <input name="projectTitle" value={form.projectTitle}   readOnly />
+  </div>
+  <div className={styles.formGroup}>
+          <label>Project Description</label>
+          <input name="projectDescription" value={form.projectDescription}  readOnly />
+          </div>
+         <div className={styles.formGroup}>
+          <label>Select Vendor <span className={styles.required}>*</span></label>
+        <input name="vendorName" value={form.vendorName}  readOnly />
     </div>
- 
-</div>    
+    <div className={styles.formGroup}>
+          <label>Additional Information & Remarks</label>
+          <input name="vendorDescription" value={form.vendorDescription}  readOnly />
+          </div>
+  
+         
+         <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px" }}>
+             <label>
+              Attachments <span className={styles.required}>*</span>
+              </label>
+       
+      <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
+        {attachments.map((file: any, index: number) => (
+          <a
+            key={index}
+              href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+            {file.FileName}
+          </a>
+         ))}
+      </div>
+   </div>
+  
        <label>Approver Comments <span className={styles.required}>*</span></label>
        <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}  style={{ marginBottom: "15px" }} />
         
        {/* Buttons */}
+       <div>
           <div className={styles.buttonGroup} >
-            <button className={styles.ApproveBtn} onClick={handleApprove}>Approve</button>
-            <button className={styles.RejectBtn} onClick={handleReject} >Reject</button>
+            <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled}>Approve</button>
+            <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled} >Reject</button>
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
-        
+        </div>
       
         </div>
-
-      <div className={styles.rightPanel}>
-        <div className={styles.card}>
-          <h4>Templates</h4>
-          <ul>
-            <li>Vendor_Registration_Form_v1.0.xlsx</li>
-            <li>SOP_Procurement_of_Goods_Services.pdf</li>
-            <li>DigiFlow_Training_Manual.pdf</li>
-          </ul>
         </div>
 
-        <div className={styles.card}>
-          <h4>Important Guidelines</h4>
-          <ol>
-            <li>Select approval path carefully.</li>
-            <li>Use project reference if needed.</li>
-            <li>Attach all documents (Max 25 MB).</li>
-            <li>Avoid special characters in file names.</li>
-          </ol>
-        </div>
+       <div className={styles['col-md-3']}>
+            <div className={styles.rightPanel}>
+              <div className={styles.rightPanelHeader}>
+                <h4>Timeline of the Request - {form.RequestNo}</h4>
+              </div>
+              <ul>
+                <li className={styles.tickIcon}>
+                  <span className={styles.spanHeader}>Request Initiated</span>
+                    <span>Request Initiator:{form.AuthorId}</span>
+                  <span>Date & Time: {form.Created}</span>
+                </li>
+                <li className={styles.tickIcon}>
+                  <span className={styles.spanHeader}>Finance Controller</span>
+                  <span>Approver Name: Indrajit Ghatak</span>
+                  <span>Action Taken: <span className={styles.apprStatus}>{form.CurrentStatus}</span></span>
+                  <span>Action Date: {form.Actiondate1}</span>
+                  <span>Comments: {form.ApproverComment}</span>
+                </li>
+                <li className={styles.tickIcon}>
+                  <span className={styles.spanHeader}>Billing Approver</span>
+                  <span>Approver Name: Sanjay Tiwari</span>
+                  <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
+                  <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                  <span>Comments: Comments submitted by approver while taking action.</span>
+                </li>
+                <li className={styles.crossIcon}>
+                  <span className={styles.spanHeader}>Finance Controller</span>
+                  <span>Approver Name: Indrajeet Singh</span>
+                  <span>Action Taken: <span className={styles.rejStatus}>Rejected</span></span>
+                  <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                  <span>Comments: Comments submitted by approver while taking action.</span>
+                </li>
+                <li>
+                  <span className={styles.spanHeader}>Billing Approver</span>
+                  <span>Approver Name: Sanjay Tiwari</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+     </div>
       </div>
-
-    </div>
    );
 };
 

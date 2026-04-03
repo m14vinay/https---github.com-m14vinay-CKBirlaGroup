@@ -374,6 +374,7 @@ const handleUpdate = async () => {
     RemainingAmount: Number(form.RemainingAmount),
     Department: form.Department,
     POAmount: form.POAmount,
+
     ApplicableTaxes: form.ApplicableTaxes,
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,

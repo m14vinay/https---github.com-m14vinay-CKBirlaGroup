@@ -5,6 +5,8 @@ export default class Service {
   private listname="PoApproval";
   private Departmentmaster ="DepartmentMaster";
   private VendorList="VendorMapping";
+  private FinanceController="FinanceController";
+
 
   constructor(context: any) {
     this.context = context;
@@ -85,7 +87,7 @@ private async getListItemType(): Promise<string> {
   }
 
  // Update the Record (Submit)
-  public async updateItemdata(id: number,status:string, comments: string): Promise<void> {
+  public async updateItemdata(id: number,status:string, comments: string,Assigned:string): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
     await this.context.spHttpClient.post(
@@ -101,8 +103,38 @@ private async getListItemType(): Promise<string> {
         body: JSON.stringify({
         CurrentStatus: status,
          ApproverComment1: comments,
-         Actiondate1: new Date().toISOString(),
+         ActionDate1: new Date().toISOString(),
+         AssignedTo: Assigned
+         //Approver2:approver2Name
+         
          //Actiondate2: new Date().toISOString()
+     })
+      }
+    );
+  }
+
+
+
+
+  public async updateItemdata2(id: number,status:string, comments: string,Assigned:string): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;",
+          "Content-Type": "application/json;",
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "MERGE"
+        },
+        body: JSON.stringify({
+        CurrentStatus: status,
+         ApproverComment2: comments,
+         ActionDate2: new Date().toISOString(),
+         AssignedTo: Assigned
+         
      })
       }
     );
@@ -124,6 +156,8 @@ public async getApprover(DepartmentName: string): Promise<any> {
     return data.value.length > 0 ? data.value[0] : null;
   }
 
+  
+
   // Fetch the Record
   public async getItemByRequestNo(ID: Number): Promise<any> {
 
@@ -135,23 +169,9 @@ public async getApprover(DepartmentName: string): Promise<any> {
 
     const item = await res.json();
    
-   if (item && item.Id) {
-    return {
-      Id: item.Id,
-      ProjectCode: item.ProjectCode,
-      ProjectTitle: item.ProjectTitle,
-      VendorName: item.VendorName,
-      Department: item.Department,
-       POAmount: item.POAmount,
-     ApplicableTaxes: item.ApplicableTaxes,
-    //POCategory: form.POCategory,
-    ProjectDescription: item.ProjectDescription, 
-    CurrentStatus:item.CurrentStatus,
-      Attachments: item.AttachmentFiles || [] // 👈 important
-    };
-  }
+   
 
-  return null;
+  return item;
 };
   
   // Upload Files
@@ -192,4 +212,43 @@ public async getApprover(DepartmentName: string): Promise<any> {
 
   return data.value; // array of attachments
 }
-}
+public async getUser(): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data;
+  }
+  ///Get User Details by ID
+public async getUserById(userId: number): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getuserbyid(${userId})`;
+    const response = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+  const user = await response.json();
+  return user;
+  }
+  ///Get Approver from Finance Controller List
+  public async GetApproverFromFinance(Category: string): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.FinanceController}')/items
+?$select=Id,Title,
+FinanceController/Id,FinanceController/Title
+&$expand=FinanceController&$filter=FinananceControllerUser eq '${Category}'`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0] : null;
+  }
+  };
+  
+

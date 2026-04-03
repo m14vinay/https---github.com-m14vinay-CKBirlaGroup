@@ -1,33 +1,248 @@
 @import '~@fluentui/react/dist/sass/References.scss';
+@import "~bootstrap/scss/bootstrap";
 
 .container {
-  display: flex;
-  gap: 20px;
-  padding: 20px;
+  // display: flex;
+  // gap: 20px;
+  padding: 10px;
+}
+
+.header {
+  margin-bottom: 15px;
 }
 
 .leftPanel {
-  flex: 2;
   background: #fff;
-  padding: 20px;
   border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex: 2;
+  padding: 10px;
+}
+
+.leftPanelHeader {
+  border-bottom: 1px solid #848484;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+}
+
+.leftPanelHeader h4 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.status {
+  color: red;
+  font-weight: bold;
+}
+
+.leftPanelStatusHeader {
+  display: flex;
+  padding: 20px 0;
+}
+
+.statusBox {
+  background-color: #225a22;
+  color: #fff;
+  padding: 19px 10px 8px;
+  position: relative;
+  width: 150px;
+}
+
+.statusBox::after {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #225a22;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  position: absolute;
+  right: -61%;
+  top: 0;
+}
+
+.pendingBox {
+  background-color: #cdcd17;
+}
+
+.pendingBox::after {
+  border-left-color: #cdcd17;
+}
+
+.pendingBox::before {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #225a22;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.rejectedBox {
+  background-color: #8b3222;
+}
+
+.rejectedBox::after {
+  border-left-color: #8b3222;
+}
+
+.rejectedBox::before {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #cdcd17;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.upcomingBox {
+  background-color: #ee7606;
+}
+
+.upcomingBox::after {
+  border-left-color: #ee7606;
+}
+
+.upcomingBox::before {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #8b3222;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.statusBox h5 {
+  margin: 0;
+  font-size: 12px;
+}
+
+.statusBox h6 {
+  margin: 0;
+  font-size: 10px;
+}
+
+.statusBox h4 {
+  margin: 5px 0 0;
+  font-size: 14px;
+}
+
+.pendingBox .content,
+.rejectedBox .content,
+.upcomingBox .content {
+  padding-left: 40px;
+}
+
+.formGroup {
+  margin-bottom: 10px;
 }
 
 .rightPanel {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   flex: 1;
+  padding: 10px;
 }
 
-.card {
-  background: #fff;
-  padding: 15px;
+.rightPanelHeader {
+  border-bottom: 1px solid #848484;
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 15px;
-  border-radius: 6px;
+  padding-bottom: 10px;
 }
 
-input, textarea, select {
+.rightPanelHeader h4 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.rightPanel ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 35px;
+  position: relative;
+}
+
+.rightPanel ul::before {
+  border: 0.5px dotted #13ab13;
+  content: "";
+  display: inline-block;
+  height: 100%;
+  left: 13px;
+  position: absolute;
+  width: 0.5px;
+}
+
+.rightPanel ul li {
+  margin-bottom: 5px;
+  position: relative;
+}
+
+.rightPanel ul li::before {
+  align-items: center;
+  border-radius: 50%;
+  color: #fff;
+  display: inline-flex;
+  font-weight: bold;
+  height: 25px;
+  justify-content: center;
+  left: -35px;
+  position: absolute;
+  top: -3px;
+  width: 25px;
+}
+
+.rightPanel ul li.tickIcon::before {
+  background-color: #13ab13;
+  content: "\2713";
+}
+
+.rightPanel ul li.crossIcon::before {
+  background-color: #e64e4e;
+  content: "\00d7";
+  font-size: 20px;
+}
+
+.rightPanel ul li span {
+  display: block;
+  font-size: 12px;
+}
+
+.rightPanel ul li span.spanHeader {
+  font-weight: 600;
+}
+
+.rightPanel ul li span.apprStatus {
+  color: #0e9e0e;
+  font-weight: bold;
+}
+
+.rightPanel ul li span.rejStatus {
+  color: #9a1111;
+  font-weight: bold;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+
+}
+
+input,
+textarea,
+select {
   width: 100%;
-  padding: 8px;
-  margin: 8px 0 16px 0;
+  padding: 6px 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
@@ -43,7 +258,7 @@ input, textarea, select {
 }
 
 .ApproveBtn {
-  background: orange;
+  background: green;
   color: white;
 }
 
@@ -57,6 +272,7 @@ button {
   border: none;
   cursor: pointer;
 }
+
 .required {
   color: red;
   margin-left: 2px;
