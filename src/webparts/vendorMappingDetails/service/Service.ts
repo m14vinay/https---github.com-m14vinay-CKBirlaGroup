@@ -142,7 +142,7 @@ public async getUser(): Promise<any> {
   }
   // Get the History Record
   public async GetHistoryItem(ID:Number,FormCode:string): Promise<any> {
-    const url =`${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${ID}`;   
+    const url =`${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${ID} and Title eq '${encodeURIComponent(FormCode)}'`;   
     console.log("URL:",url)  
   const response = await this.context.spHttpClient.get(
     url,
