@@ -30,6 +30,7 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
    const [attachments, setAttachments] = React.useState<any[]>([]);
+   const [History, setHistory] = React.useState<any[]>([]);
   
  
   
@@ -84,7 +85,9 @@ const handleFetchById = async (id: number) => {
 
       const result = await service.getItemByRequestNo(id);
      const user = await service.getUser();
-      console.log("Result:", result);
+     const historydata=await service.GetHistoryItem(id,"VMR");
+     setHistory(historydata);
+    console.log("Result:", result);
 
       if (result) {
         setItemId(result.Id);
@@ -193,37 +196,45 @@ const handleFetchById = async (id: number) => {
             <div className={styles.rightPanelHeader}>
               <h4>Timeline of the Request - {form.RequestNo}</h4>
             </div>
-            <ul>
-              <li className={styles.tickIcon}>
-                <span className={styles.spanHeader}>Request Initiated</span>
-                  <span>Request Initiator:{form.AuthorId}</span>
-                <span>Date & Time: {form.Created}</span>
-              </li>
-              <li className={styles.tickIcon}>
-                <span className={styles.spanHeader}>Finance Controller</span>
-                <span>Approver Name: Indrajit Ghatak</span>
-                <span>Action Taken: <span className={styles.apprStatus}>{form.CurrentStatus}</span></span>
-                <span>Action Date: {form.Actiondate1}</span>
-                <span>Comments: {form.ApproverComment}</span>
-              </li>
-              <li className={styles.tickIcon}>
-                <span className={styles.spanHeader}>Billing Approver</span>
-                <span>Approver Name: Sanjay Tiwari</span>
-                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
-                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
-                <span>Comments: Comments submitted by approver while taking action.</span>
-              </li>
-              <li className={styles.crossIcon}>
-                <span className={styles.spanHeader}>Finance Controller</span>
-                <span>Approver Name: Indrajeet Singh</span>
-                <span>Action Taken: <span className={styles.rejStatus}>Rejected</span></span>
-                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
-                <span>Comments: Comments submitted by approver while taking action.</span>
-              </li>
-              <li>
-                <span className={styles.spanHeader}>Billing Approver</span>
-                <span>Approver Name: Sanjay Tiwari</span>
-              </li>
+            <ul>              
+              {History.map((item, index) => {
+    const isApproved = item.UserAction === "Approved";
+    const isRejected = item.UserAction === "Rejected";
+    const isInitiated = item.UserAction === "Request Initiator";
+    return (
+      <li
+        key={index}
+        className={
+          isApproved
+            ? styles.tickIcon
+            : isRejected
+            ? styles.crossIcon
+            : isInitiated ?styles.tickIcon:""
+        }
+      >
+        <span className={styles.spanHeader}>{item.Designation}</span>
+        <span>Approver Name: {item.UserName}</span>
+        {item.UserAction && (
+          <span>
+            Action Taken:{" "}
+            <span
+              className={
+                isApproved
+                  ? styles.apprStatus
+                  : isRejected
+                  ? styles.rejStatus
+                  : ""
+              }
+            >
+              {item.UserAction}
+            </span>
+          </span>
+        )}
+        {item.ActionDate && <span>Action Date: {item.ActionDate}</span>}
+        {item.UserComment && <span>Comments: {item.UserComment}</span>}
+      </li>
+    );
+  })}
             </ul>
           </div>
         </div>
