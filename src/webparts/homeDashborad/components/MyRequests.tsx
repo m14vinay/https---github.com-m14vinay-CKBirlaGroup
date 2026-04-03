@@ -4,13 +4,13 @@ import { SPHttpClient } from '@microsoft/sp-http';
 import styles from './HomeDashborad.module.scss'
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import {
-  createColumnHelper,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  flexRender,
-  useReactTable,
+    createColumnHelper,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    getFilteredRowModel,
+    flexRender,
+    useReactTable,
 } from '@tanstack/react-table';
 import Table from 'react-bootstrap/Table';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -62,7 +62,7 @@ export default function MyRequests() {
     const [globalFilter, setGlobalFilter] = useState("");
     const [sorting, setSorting] = useState<any>([]);
     const webUrl = context.pageContext.web.absoluteUrl;
-    const lists = ["QuotationApproval","PoApproval","ITApproval","ReimburseExpenseMaster","BillProcessing","VendorMapping"];
+    const lists = ["QuotationApproval", "PoApproval", "ITApproval", "ReimburseExpenseMaster", "BillProcessing", "VendorMapping"];
 
     const getUser = () => {
         console.log("context user : ", context);
@@ -80,16 +80,16 @@ export default function MyRequests() {
 
     useEffect(() => {
         getUser();
-    },[]);
+    }, []);
 
-    const getData = (listName:string) => {
+    const getData = (listName: string) => {
         console.log("context user : ", context);
         let resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AuthorId eq " + user.Id;
         context.spHttpClient.get(
             `${resturl}`,
             SPHttpClient.configurations.v1
         ).then(res => res.json()).then(data => {
-            console.log(listName,data);
+            console.log(listName, data);
             if (data.value.length > 0) {
                 _setData((d) => [...d.concat(data.value)]);
             }
@@ -99,12 +99,12 @@ export default function MyRequests() {
     }
 
     useEffect(() => {
-        if(user){
+        if (user) {
             lists.forEach(l => {
                 getData(l);
             })
         }
-    },[user]);
+    }, [user]);
 
     const table = useReactTable({
         data,
@@ -124,47 +124,47 @@ export default function MyRequests() {
     return (
         <div className="p-2">
             <div>
-                <Label style={{display:"inline-block"}}>My Requests</Label>
+                <Label style={{ display: "inline-block" }}>My Requests</Label>
                 <input
                     value={globalFilter ?? ""}
                     onChange={(e) => setGlobalFilter(e.target.value)}
                     placeholder="Search..."
-                    style={{ marginBottom: "10px", padding: "5px", float:"right" }}
+                    style={{ marginBottom: "10px", padding: "5px", float: "right" }}
                 />
             </div>
             <Table striped bordered hover>
                 <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                        <th 
-                        key={header.id} 
-                        onClick={header.column.getToggleSortingHandler()}>
-                        {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                            )}
-                            {{
-                                asc: <Icon iconName='ChevronUpMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
-                                desc: <Icon iconName='ChevronDownMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
-                            }[header.column.getIsSorted() as string] ?? null}
-                        </th>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                        <tr key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => (
+                                <th
+                                    key={header.id}
+                                    onClick={header.column.getToggleSortingHandler()}>
+                                    {header.isPlaceholder
+                                        ? null
+                                        : flexRender(
+                                            header.column.columnDef.header,
+                                            header.getContext(),
+                                        )}
+                                    {{
+                                        asc: <Icon iconName='ChevronUpMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
+                                        desc: <Icon iconName='ChevronDownMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
+                                    }[header.column.getIsSorted() as string] ?? null}
+                                </th>
+                            ))}
+                        </tr>
                     ))}
-                    </tr>
-                ))}
                 </thead>
                 <tbody>
-                {table.getRowModel().rows.map((row) => (
-                    <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
+                    {table.getRowModel().rows.map((row) => (
+                        <tr key={row.id}>
+                            {row.getVisibleCells().map((cell) => (
+                                <td key={cell.id}>
+                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                </td>
+                            ))}
+                        </tr>
                     ))}
-                    </tr>
-                ))}
                 </tbody>
             </Table>
 
@@ -174,9 +174,9 @@ export default function MyRequests() {
                     Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
                     {table.getRowCount().toLocaleString()} Rows
                 </span>
-                <div style={{float:"right"}} className="flex items-center gap-2">
+                <div style={{ float: "right" }} className="flex items-center gap-2">
                     <label>
-                    Go to page:
+                        Go to page:
                     </label>
                     <label>
                         <input
@@ -185,52 +185,52 @@ export default function MyRequests() {
                             max={table.getPageCount()}
                             defaultValue={table.getState().pagination.pageIndex + 1}
                             onChange={(e) => {
-                            const page = e.target.value ? Number(e.target.value) - 1 : 0
-                            table.setPageIndex(page)
+                                const page = e.target.value ? Number(e.target.value) - 1 : 0
+                                table.setPageIndex(page)
                             }}
                             className="border p-1 rounded w-16"
                         />
                     </label>
                     <button
-                    className="border rounded p-1"
-                    onClick={() => table.firstPage()}
-                    disabled={!table.getCanPreviousPage()}
+                        className="border rounded p-1"
+                        onClick={() => table.firstPage()}
+                        disabled={!table.getCanPreviousPage()}
                     >
-                    {'<<'}
+                        {'<<'}
                     </button>
                     <button
-                    className="border rounded p-1"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
+                        className="border rounded p-1"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
                     >
-                    {'<'}
+                        {'<'}
                     </button>
                     <button
-                    className="border rounded p-1"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
+                        className="border rounded p-1"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
                     >
-                    {'>'}
+                        {'>'}
                     </button>
                     <button
-                    className="border rounded p-1"
-                    onClick={() => table.lastPage()}
-                    disabled={!table.getCanNextPage()}
+                        className="border rounded p-1"
+                        onClick={() => table.lastPage()}
+                        disabled={!table.getCanNextPage()}
                     >
-                    {'>>'}
+                        {'>>'}
                     </button>
                     <span>Page size</span>
                     <select
-                    value={table.getState().pagination.pageSize}
-                    onChange={(e) => {
-                        table.setPageSize(Number(e.target.value))
-                    }}
+                        value={table.getState().pagination.pageSize}
+                        onChange={(e) => {
+                            table.setPageSize(Number(e.target.value))
+                        }}
                     >
-                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                        <option key={pageSize} value={pageSize}>
-                        {pageSize}
-                        </option>
-                    ))}
+                        {[10, 20, 30, 40, 50].map((pageSize) => (
+                            <option key={pageSize} value={pageSize}>
+                                {pageSize}
+                            </option>
+                        ))}
                     </select>
                 </div>
             </div>
