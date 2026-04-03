@@ -19,7 +19,11 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
     files: null as FileList | null,
      attachments: [],
      RequestNo:'',
-     CurrentStatus:''
+     CurrentStatus:'',
+     AuthorId:'',
+     Created:'',
+     Actiondate1:'',
+     ApproverComment: ''
   });
 
   ;
@@ -61,14 +65,25 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
         // 👈 dynamic ID use karo
      }
    }, [itemId]);
-  
+ function formatDate(iso: string) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const day = d.getUTCDate() < 10 ? '0' + d.getUTCDate() : d.getUTCDate().toString();
+  const month = d.toLocaleString('default', { month: 'long', timeZone: 'UTC' });
+  const year = d.getFullYear();
+  let hours = d.getUTCHours();
+  const minutes = d.getUTCMinutes() < 10 ? '0' + d.getUTCMinutes() : d.getUTCMinutes().toString();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12; // convert to 12-hour
+  return `${day} ${month} ${year} AT ${hours}:${minutes} ${ampm}`;
+}
 //FETCH DATA-----
 const handleFetchById = async (id: number) => {
     try {
       console.log("Calling API with ID:", id);
 
       const result = await service.getItemByRequestNo(id);
-
+     const user = await service.getUser();
       console.log("Result:", result);
 
       if (result) {
@@ -83,7 +98,11 @@ const handleFetchById = async (id: number) => {
           vendorName: result.VendorName || '',
           vendorDescription: result.VendorDescription || '',
           files: null,
-          CurrentStatus:result.CurrentStatus || ''
+          CurrentStatus:result.CurrentStatus || '',
+          Author:result.Author || '',
+          Created:formatDate(result.Created),
+          Actiondate1: formatDate(result.Actiondate1),
+          ApproverComment:result.ApproverComment || ''
         }));
       
 
@@ -169,31 +188,45 @@ const handleFetchById = async (id: number) => {
 </div> 
 </div> 
 </div> 
-     <div className={styles["col-md-3"]}>
-        <div className={styles.leftPanelHeader}>
-        <h6>My Document List / Upload New Document</h6>          
-        </div>        
-      <div className={styles.rightPanel}>        
-          {/* Templates */}
-          <div className={styles.card}>
-             <div>
-              <h4>Templates</h4>              
+     <div className={styles['col-md-3']}>
+          <div className={styles.rightPanel}>
+            <div className={styles.rightPanelHeader}>
+              <h4>Timeline of the Request - {form.RequestNo}</h4>
             </div>
-          </div>
-          {/* Guidelines */}
-          <div className={styles.card}>
-             <div>
-              <h4>Importance Guidelines</h4>              
-            </div>
-            <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
-            </ol>
+            <ul>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Request Initiated</span>
+                  <span>Request Initiator:{form.AuthorId}</span>
+                <span>Date & Time: {form.Created}</span>
+              </li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Finance Controller</span>
+                <span>Approver Name: Indrajit Ghatak</span>
+                <span>Action Taken: <span className={styles.apprStatus}>{form.CurrentStatus}</span></span>
+                <span>Action Date: {form.Actiondate1}</span>
+                <span>Comments: {form.ApproverComment}</span>
+              </li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Billing Approver</span>
+                <span>Approver Name: Sanjay Tiwari</span>
+                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
+                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li className={styles.crossIcon}>
+                <span className={styles.spanHeader}>Finance Controller</span>
+                <span>Approver Name: Indrajeet Singh</span>
+                <span>Action Taken: <span className={styles.rejStatus}>Rejected</span></span>
+                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li>
+                <span className={styles.spanHeader}>Billing Approver</span>
+                <span>Approver Name: Sanjay Tiwari</span>
+              </li>
+            </ul>
           </div>
         </div>
-      </div>
     </div>
     </div>
   );

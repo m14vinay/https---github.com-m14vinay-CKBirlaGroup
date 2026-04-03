@@ -29,7 +29,9 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
    approver3: '',
    approver4: '',
    approver5: '',
-   DepartmentHead: ''
+   DepartmentHead: '',
+   CurrentStatus: '',
+   RequestNo:''
     
   });
 
@@ -128,6 +130,8 @@ const handleFetchById = async (id: number) => {
         POAmount: result.POAmount || 0,
         ApplicableTaxes: result.ApplicableTaxes || 0,
         ProjectDescription: result.ProjectDescription || '',
+        CurrentStatus: result.Currentstatus || '',
+        RequestNo: result.RequestNo || '',
         files: null
       }));
 
@@ -182,106 +186,148 @@ const handleReject = async () => {
 
   // --- RENDER ---
   return (
-     <div className={styles.container}>
-
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h4>PO Approval Details & Status</h4>
+      </div>
+      <div className={styles.row}>
         {/* LEFT FORM */}
-        <div className={styles.leftPanel}>
-        
-          <h4>PO Approval Details & Status</h4>
-          <div className={styles.row}>
-                {/* LEFT FORM */}
-                <div className={styles['col-md-9']}>
-                  <div className={styles.leftPanel}>
-                    <div className={styles.leftPanelHeader}>
-                      <h4>CKBCSL/25-26/IV/Finance/12</h4>
-                      <h4>Current Status: <span className={styles.status}>Rejected</span></h4>
-                    </div>
-                    <div className={styles.leftPanelStatusHeader}>
-                      <div className={styles.statusBox}>
-                        <div className={styles.content}>
-                        <h5>Vinay Kumar</h5>
-                        <h6>Department Head</h6>
-                        <h4>Approved</h4>
-                        </div>
-                      </div>
-                      <div className={`${styles.statusBox} ${styles.pendingBox}`}>
-                        <div className={styles.content}>
-                        <h5>Vinay Kumar</h5>
-                        <h6>Department Head</h6>
-                        <h4>Pending</h4>
-                        </div>
-                      </div>
-                      <div className={`${styles.statusBox} ${styles.rejectedBox}`}>
-                        <div className={styles.content}>
-                        <h5>Vinay Kumar</h5>
-                        <h6>Department Head</h6>
-                        <h4>Rejected</h4>
-                        </div>
-                      </div>
-                      <div className={`${styles.statusBox} ${styles.upcomingBox}`}>
-                        <div className={styles.content}>
-                        <h5>Vinay Kumar</h5>
-                        <h6>Department Head</h6>
-                        <h4>Upcoming Approver</h4>
-                        </div>
-                      </div>
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label>Project Code</label>
-                      <input value={form.projectCode} readOnly />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label>Department</label>
-                      <input name="department" value={form.Department} readOnly />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label>Project Title</label>
-                      <input name="projectTitle" value={form.projectTitle} readOnly />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label>Selected Vendor Name</label>
-                      <input name="vendorName" value={form.vendorName} readOnly />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label>PO Amount</label>
-                      <input name="POAmount" value={form.POAmount} readOnly />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label>Applicable Taxes</label>
-                      <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label>PO Category</label>
-                      <input name="POCategory" value={form.POCategory} readOnly />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label>Additional Information & Remarks</label>
-                      <input name="comments" value={form.ProjectDescription} readOnly />
-                    </div>
-                    
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "10px" }}>
-                      <label>
-                        Attachments <span className={styles.required}>*</span>
-                      </label>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", }}>
-                        {attachments.map((file: any, index: number) => (
-                          <a
-                            key={index}
-                            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
-                            {file.FileName}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
+        <div className={styles['col-md-9']}>
+          <div className={styles.leftPanel}>
+            <div className={styles.leftPanelHeader}>
+              <h4>{form.RequestNo}</h4>
+             <h4>Current Status:  <span className={
+    form.CurrentStatus === "Approved"
+      ? styles.Approved
+      : form.CurrentStatus === "Rejected"
+      ? styles.Rejected
+      : styles.Pending }>{form.CurrentStatus}</span></h4>
+            </div>
+            <div className={styles.leftPanelStatusHeader}>
+              <div className={styles.statusBox}>
+                <div className={styles.content}>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Approved</h4>
+                </div>
+              </div>
+              <div className={`${styles.statusBox} ${styles.pendingBox}`}>
+                <div className={styles.content}>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Pending</h4>
+                </div>
+              </div>
+              <div className={`${styles.statusBox} ${styles.rejectedBox}`}>
+                <div className={styles.content}>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Rejected</h4>
+                </div>
+              </div>
+              <div className={`${styles.statusBox} ${styles.upcomingBox}`}>
+                <div className={styles.content}>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Upcoming Approver</h4>
+                </div>
+              </div>
+            </div>
+            <div className={styles.formGroup}>
+              <label>Project Code</label>
+              <input value={form.projectCode} readOnly />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Department</label>
+              <input name="department" value={form.Department} readOnly />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Project Title</label>
+              <input name="projectTitle" value={form.projectTitle} readOnly />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Select Vendor Name</label>
+              <input name="vendorName" value={form.vendorName} readOnly />
+            </div>
+            <div className={styles.formGroup}>
+              <label>PO Amount</label>
+              <input name="POAmount" value={form.POAmount} readOnly />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Applicable Taxes</label>
+              <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly />
+            </div>
+            <div className={styles.formGroup}>
+              <label>PO Category</label>
+              <input name="POCategory" value={form.POCategory} readOnly />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Additional Information & Remarks</label>
+              <input name="comments" value={form.ProjectDescription} readOnly />
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "10px" }}>
+              <label>
+                Attachments <span className={styles.required}>*</span>
+              </label>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px", }}>
+                {attachments.map((file: any, index: number) => (
+                  <a
+                    key={index}
+                    href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+                    {file.FileName}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+
+           
+            
+          </div>
         </div>
+        <div className={styles['col-md-3']}>
+          <div className={styles.rightPanel}>
+            <div className={styles.rightPanelHeader}>
+              <h4>Timeline of the Request - FBP-543</h4>
+            </div>
+            <ul>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Request Initiated</span>
+                <span>Initiator: M.Ponnamalai</span>
+                <span>Date & Time: 10 mar 2026 AT 10:00 AM</span>
+              </li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Department Head</span>
+                <span>Approver Name: Vinay Kumar</span>
+                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
+                <span>Action Date: 12 mar 2026 AT 12:00 AM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Billing Approver</span>
+                <span>Approver Name: Sanjay Tiwari</span>
+                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
+                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li className={styles.crossIcon}>
+                <span className={styles.spanHeader}>Finance Controller</span>
+                <span>Approver Name: Indrajeet Singh</span>
+                <span>Action Taken: <span className={styles.rejStatus}>Rejected</span></span>
+                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li>
+                <span className={styles.spanHeader}>Billing Approver</span>
+                <span>Approver Name: Sanjay Tiwari</span>
+              </li>
+            </ul>
+          </div>
         </div>
-        </div>
-        
-          
- 
-        </div>
+      </div>
     </div>
-   );
+  );
 };
+
 
 export default PurchaseOrderView;

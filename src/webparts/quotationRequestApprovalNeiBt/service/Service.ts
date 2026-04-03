@@ -5,6 +5,7 @@ export default class Service {
   private listname="QuotationApprovalNEIBTAdmin";
   private Departmentmaster ="DepartmentMaster";
   private VendorList="";
+private FinanceController="FinanceController";
 
   constructor(context: any) {
     this.context = context;
@@ -57,8 +58,30 @@ export default class Service {
     return response.json();
   }
 
-  // Update the Record (Submit)
-   public async updateItemdata(id: number,status:string, comments: string): Promise<void> {
+  // // Update the Record (Submit)
+  //  public async updateItemdata(id: number,status:string, comments: string): Promise<void> {
+  //   const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
+
+  //   await this.context.spHttpClient.post(
+  //     url,
+  //     SPHttpClient.configurations.v1,
+  //     {
+  //       headers: {
+  //         "Accept": "application/json;",
+  //         "Content-Type": "application/json;",
+  //         "IF-MATCH": "*",
+  //         "X-HTTP-Method": "MERGE"
+  //       },
+  //       body: JSON.stringify({
+  //       CurrentStatus: status,
+  //        ApproverComment1: comments
+  //    })
+  //     }
+  //   );
+  // }
+
+ //Update the Record (Submit)
+  public async updateItemdata(id: number,status:string, comments: string,Assigned:string): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
     await this.context.spHttpClient.post(
@@ -73,11 +96,44 @@ export default class Service {
         },
         body: JSON.stringify({
         CurrentStatus: status,
-         ApproverComment1: comments
+         ApproverComment1: comments,
+         ActionDate1: new Date().toISOString(),
+         AssignedTo: Assigned
+         //Approver2:approver2Name
+         
+         //Actiondate2: new Date().toISOString()
      })
       }
     );
   }
+
+
+
+
+  public async updateItemdata2(id: number,status:string, comments: string,Assigned:string): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;",
+          "Content-Type": "application/json;",
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "MERGE"
+        },
+        body: JSON.stringify({
+        CurrentStatus: status,
+         ApproverComment2: comments,
+         ActionDate2: new Date().toISOString(),
+         AssignedTo: Assigned
+         
+     })
+      }
+    );
+  }
+
 
 
 
@@ -91,32 +147,8 @@ export default class Service {
     );
 
     const item = await res.json();
-   
-   if (item && item.Id) {
-    return {
-      Id: item.Id,
-      ProjectTitle: item.ProjectTitle ,
-        ProjectReffNo: item.ProjectReffNo ,
-        ProjectDescription: item.ProjectDescription ,
-        TotalProjectAmount: item.TotalProjectAmount ,
-         ApplicableTaxes: item.ApplicableTaxes ,
-          Vendor1: item.Vendor1 ,
-      Vendor2: item.Vendor2 ,
-      Vendor3: item.Vendor3 ,
-      Quote1: item.Quote1 ,
-      Quote2:item.Quote2 ,
-      Quote3: item.Quote3 ,
-      Selectedvendor: item.Selectedvendor ,
-      SelectedQuote: item.SelectedQuote ,
-      Department: item.Department ,
-      Advancepayment: item.Advancepayment,
-      ApprovalPath: item.ApprovalPath,
-      CurrentStatus: item.CurrentStatus,
-      Attachments: item.AttachmentFiles || [] // 👈 important
-    };
-  }
-
-  return null;
+  
+  return item;
 };
   
   // Upload Files
@@ -154,5 +186,60 @@ export default class Service {
 
   return data.value; // array of attachments
 }
-}
+
+// Get Approver from Department List
+public async getApprover(DepartmentName: string): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Departmentmaster}')/items?$filter=DepartmentName eq '${DepartmentName}'`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0] : null;
+  }
+
+  
+public async getUser(): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data;
+  }
+  ///Get User Details by ID
+public async getUserById(userId: number): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getuserbyid(${userId})`;
+    const response = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+  const user = await response.json();
+  return user;
+  }
+  ///Get Approver from Finance Controller List
+  public async GetApproverFromFinance(Category: string): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.FinanceController}')/items
+?$select=Id,Title,
+FinanceController/Id,FinanceController/Title
+&$expand=FinanceController&$filter=FinananceControllerUser eq '${Category}'`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0] : null;
+  }
+  };
+  
+
 
