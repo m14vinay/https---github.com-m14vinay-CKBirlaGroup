@@ -140,11 +140,11 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
     }
   };
   const handleAddNewDocument = () => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/DocumentUpload.aspx`;
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistration.aspx`;
     window.location.assign(url);
   };
   const handleView = (documentId: string) => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/DocumentView.aspx?ID=${documentId}`;
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationDetail.aspx?ID=${documentId}`;
     window.location.assign(url);
   };
   const handlesearch = async () => {
