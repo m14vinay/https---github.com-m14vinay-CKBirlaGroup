@@ -263,7 +263,7 @@ const handleReject = async () => {
           <div className={styles.leftPanel}>
             <div className={styles.leftPanelHeader}>
               <h4>Quotation Approval NEI BT Admin-{form.RequestNo} </h4>
-              <h4>Current Status: <span className={styles.status}>Rejected</span></h4>
+              <h4>Current Status: <span className={styles.status}>{form.CurrentStatus}</span></h4>
             </div>
   
           <label>Project Title</label>
@@ -346,31 +346,49 @@ const handleReject = async () => {
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
         </div>
+      </div>
+
 
         {/* RIGHT PANEL */}
-        <div className={styles.rightPanel}>
-          {/* Templates */}
-          <div className={styles.card}>
-            <h4>Templates</h4>
+       <div className={styles['col-md-3']}>
+          <div className={styles.rightPanel}>
+            <div className={styles.rightPanelHeader}>
+              <h4>Timeline of the Request - {form.RequestNo}</h4>
+            </div>
             <ul>
-              <li>Quotation_Approval_Form_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services-CKBCS.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Request Initiated</span>
+                <span>Initiator: M.Ponnamalai</span>
+                <span>Date & Time: 10 mar 2026 AT 10:00 AM</span>
+              </li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Department Head</span>
+                <span>Approver Name: Vinay Kumar</span>
+                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
+                <span>Action Date: 12 mar 2026 AT 12:00 AM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Billing Approver</span>
+                <span>Approver Name: Sanjay Tiwari</span>
+                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
+                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li className={styles.crossIcon}>
+                <span className={styles.spanHeader}>Finance Controller</span>
+                <span>Approver Name: Indrajeet Singh</span>
+                <span>Action Taken: <span className={styles.rejStatus}>Rejected</span></span>
+                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li>
+                <span className={styles.spanHeader}>Billing Approver</span>
+                <span>Approver Name: Sanjay Tiwari</span>
+              </li>
             </ul>
           </div>
-
-          {/* Guidelines */}
-          <div className={styles.card}>
-            <h4>Important Guidelines</h4>
-            <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
-            </ol>
-          </div>
         </div>
-      </div>
       </div>
       </div>
       </div>

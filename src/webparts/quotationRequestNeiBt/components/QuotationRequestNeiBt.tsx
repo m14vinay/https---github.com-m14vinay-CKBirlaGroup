@@ -27,10 +27,19 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
       Selectedvendor:'',
       SelectedQuote:'',
       Department:'',
-      Advancepayment:0,
+      Advancepayment:'',
       ApprovalPath: '',
       files: [] as File[],
-      CurrentStatus:''
+      CurrentStatus:'',
+    approver1: '',
+    approver2: '',
+    approver3: '',
+    approver4: '',
+    approver5: '',
+    ActionDate1:'',
+    ActionDate2:'',
+    DepartmentHead: '',
+    RequestNo:''
   });
 
 
@@ -41,11 +50,106 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
     const [POrequestNoError, setPORequestNoError] = React.useState('');
     const [department, setDepartment] = React.useState('');
     const [projectTitle, setProjectTitle] = React.useState('');
+      const [approver1, setApprover1] = React.useState('');
+        const [approver2, setApprover2] = React.useState('');
+        const [approver3, setApprover3] = React.useState('');
+        const [approver4, setApprover4] = React.useState('');
+        const [approver5, setApprover5] = React.useState('');
+        const [departmentHead, setDepartmentHead] = React.useState('');
+        const [attachments, setAttachments] = React.useState<any[]>([]);
     const MAX_TOTAL_SIZE_MB = 25;
     const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
 const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   
 
+// --- 1️⃣ Get ID from query string ---
+    const getIdFromQueryString = (): number | null => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('ID');
+      return id ? parseInt(id, 10) : null;
+    };
+  
+    // --- 3️⃣ Load data on mount ---
+    React.useEffect(() => {
+      const id = getIdFromQueryString();
+      if (id) {
+        handleFetchById(id);
+      }
+    }, []);
+  const removeExistingFile = async (index: number) => {
+ const file = attachments[index];
+
+
+  await service.deleteAttachmentFromSP(file);
+  setAttachments(prev => prev.filter((_, i) => i !== index));
+};
+const loadAttachments = async (id:number) => {
+      try{
+    const files = await service.getAttachments(id);
+    console.log("Attachments:", files);
+    setAttachments(files);
+      }catch(error)
+      {
+        console.error(error);
+      }
+     };
+     React.useEffect(() => {
+       if (itemId) {
+         loadAttachments(itemId);
+        //getApprover();
+       }
+     }, [itemId]);
+
+
+     //FETCH
+
+
+
+     const handleFetchById = async (id: number) => {
+    try {
+      console.log("Calling API with ID:", id);
+    
+      const result = await service.getItemByRequestNo(id);
+
+      console.log("Result:", result);
+
+         if (result.CurrentStatus==='Draft') {
+      setItemId(result.Id);
+
+        setForm(prev => ({
+          ...prev,
+        ProjectTitle: result.ProjectTitle || '',
+        ProjectReffNo: result. ProjectReffNo || '',
+        ProjectDescription: result.ProjectDescription || '',
+        TotalProjectAmount: result.TotalProjectAmount || 0,
+         ApplicableTaxes: result.ApplicableTaxes || 0,
+          Vendor1: result.Vendor1 || '',
+      Vendor2: result.Vendor2 || '',
+      Vendor3: result.Vendor3 || '',
+      Quote1: result.Quote1 || '',
+      Quote2:result.Quote2 || '',
+      Quote3: result.Quote3 || '',
+      Selectedvendor: result.Selectedvendor || '',
+      SelectedQuote: result.SelectedQuote || '',
+      Department: result.Department || '',
+      Advancepayment: result.Advancepayment || 0,
+      ApprovalPath: result.ApprovalPath || '',
+      RequestNo : result.RequestNo || ''
+      }));
+//   if (!result.ActionDate1 || !result.ActionDate2 || !result.ActionDate3) {
+//   setIsDisabled(false);  // enable
+// } else {
+//   setIsDisabled(true);   // disable
+// }
+       
+    } else {
+      alert("No data found");
+    }
+ 
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
 
   const handleCancel = () => {
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -88,20 +192,55 @@ const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption
   };
   
    const loadDepartments = async () => {
-      const data = await service.getDepartments();
+      const data = await service.getDepartmentsNeiBT();
       const options = data.map((item: any) => ({
-        key: item.Id,
+        key: item.DepartmentName,
         text: item.DepartmentName
       }));
+
+      // ✅ remove duplicates
+  const uniqueDepartments = Array.from(
+    new Map(
+      options.map(item => [item.key, item])
+    ).values()
+  );
+
+  setDepartmentOptions(uniqueDepartments);
   
-      setDepartmentOptions(options);
+      //setDepartmentOptions(options);
     };
+
+    const getApprover = async () => {
+    try {
+      const data = await service.getDepartmentsNeiBT();
+
+      console.log("Approver Data:", data);
+
+      if (data && data.length > 0) {
+        setApprover1(data[0].approver1 || '');
+        setApprover2(data[0].approver2 || '');
+        setApprover3(data[0].approver3 || '');
+        setApprover4(data[0].approver4 || '');
+        setApprover5(data[0].approver5 || '');
+        setDepartmentHead(data[0].DepartmentHead || '');
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
   // 🔹 Load data
     React.useEffect(() => {
       loadDepartments();
       //loadVendor();
+      getApprover();
     }, []);
   
+ const poOptions: IChoiceGroupOption[] = [
+    { key: '1', text: 'Yes' },
+    { key: '2', text: 'No' }
+  ];
+    
  
  // 🔹 Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,6 +281,9 @@ const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
+      Approval1:form.approver1,
+       Approval2:form.approver2,
+        Approval3:form.approver3,
       CurrentStatus:'Draft'
    
   };
@@ -312,38 +454,79 @@ const handleUpdate = async () => {
           {/* <label>Department</label>
           <input name="Department" value={form.Department} onChange={handleChange}   /> */}
        
-          <label>Advance Amount <span className={styles.required}>*</span></label>
-          <input name="Advancepayment" value={form.Advancepayment} onChange={handleChange}    />
+          {/* <label>Advance Amount <span className={styles.required}>*</span></label>
+          <input name="Advancepayment" value={form.Advancepayment} onChange={handleChange}    /> */}
           
-
+          <ChoiceGroup
+            label="Advance Payment"
+            options={poOptions}
+            selectedKey={poOptions.find(opt => opt.text === form.Advancepayment)?.key} // selectedKey ko key set karo based on text match
+            onChange={(_, option) => {
+              setForm(prev => ({
+                ...prev,
+                Advancepayment: option?.text || ""  // text store karo
+              }));
+            }}
+          />
           <label>Approval Path <span className={styles.required}>*</span></label>
           <input name="ApprovalPath" value={form.ApprovalPath} onChange={handleChange} readOnly   />
              
+ <label>Attachments <span className={styles.required}>*</span></label>
+       <input type="file" multiple onChange={handleFileChange}  />
+        {/*  Existing Files (API se) */}
+{attachments?.length > 0 && (
+  <ul style={{ listStyle: "none", padding: 0 }}>
+    {attachments.map((file, index) => (
+      <li
+        key={index}
+        style={{ display: "flex", alignItems: "center", gap: "10px" }}
+      >
+        {/* ❌ Remove Button */}
+        <span
+          style={{
+            color: "red",
+            cursor: "pointer",
+            fontWeight: "bold"
+          }}
+          onClick={() => removeExistingFile(index)}
+        >
+          ✕
+        </span>
 
-        <label>Attachments <span className={styles.required}>*</span></label>
-               <input type="file" multiple onChange={handleFileChange}  />
-                {/* Selected Files */}
-               {form.files.length > 0 && (
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {form.files.map((file: File, index: number) => (
-                <li key={index} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  
-                  {/* ❌ Remove */}
-                  <span
-                    style={{ cursor: "pointer", color: "red", fontWeight: "bold" }}
-                    onClick={() => removeFile(index)}
-                  >
-                    ✕
-                  </span>
-        
-                  {/* File Name */}
-                  <span>{file.name}</span>
-        
-                </li>
-              ))}
-            </ul>
-               )}
+        {/* 📄 File Link */}
+        <a
+          href={file.ServerRelativeUrl}
+         
+          rel="noopener noreferrer"
+        >
+          {file.FileName}
+        </a>
+      </li>
+    ))}
+  </ul>
+)}
+      
+        {/* Selected Files */}
+       {form.files.length > 0 && (
+    <ul style={{ listStyle: "none", padding: 0 }}>
+      {form.files.map((file: File, index: number) => (
+        <li key={index} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          
+          {/* ❌ Remove */}
+          <span
+            style={{ cursor: "pointer", color: "red", fontWeight: "bold" }}
+            onClick={() => removeFile(index)}
+          >
+            ✕
+          </span>
 
+          {/* File Name */}
+          <span>{file.name}</span>
+
+        </li>
+      ))}
+    </ul>
+       )}
           {/* Buttons */}
           <div className={styles.buttonGroup}>
            <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>

@@ -29,6 +29,9 @@ const QuotationRequestDetailViewNeiBt: React.FC<IQuotationRequestDetailViewNeiBt
       files: null,
       attachments: [],
        ApproverComment1:'',
+       CurrentStatus: '',
+       RequestNo:''
+    
   });
 
    const [itemId, setItemId] = React.useState<number | null>(null);
@@ -111,7 +114,10 @@ const handleFetchById = async (id: number) => {
       Department: result.Department || '',
       Advancepayment: result.Advancepayment || 0,
       ApprovalPath: result.ApprovalPath || '',
-      files: null
+      CurrentStatus: result.Currentstatus || '',
+        RequestNo: result.RequestNo || '',
+      files: null,
+      
       }));
   setApproverComment(result.ApproverComment1 || '');
     } else {
@@ -149,11 +155,52 @@ const handleFetchById = async (id: number) => {
   
     return (
       <div className={styles.container}>
+      <div className={styles.header}>
+        <h4>Quotation Approval NEI BT Admin Request Details & Status</h4>
+      </div>
+      <div className={styles.row}>
         {/* LEFT FORM */}
-        <div className={styles.leftPanel}>
-          <h2>Quotation Approval Form-NEI BT Admin</h2>
-          <h4>Quotation Approval Form-NEI BT Admin/Request Approval</h4>
-
+        <div className={styles['col-md-9']}>
+          <div className={styles.leftPanel}>
+            <div className={styles.leftPanelHeader}>
+              <h4>{form.RequestNo}</h4>
+             <h4>Current Status:  <span className={
+    form.CurrentStatus === "Approved"
+      ? styles.Approved
+      : form.CurrentStatus === "Rejected"
+      ? styles.Rejected
+      : styles.Pending }>{form.CurrentStatus}</span></h4>
+            </div>
+            <div className={styles.leftPanelStatusHeader}>
+              <div className={styles.statusBox}>
+                <div className={styles.content}>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Approved</h4>
+                </div>
+              </div>
+              <div className={`${styles.statusBox} ${styles.pendingBox}`}>
+                <div className={styles.content}>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Pending</h4>
+                </div>
+              </div>
+              <div className={`${styles.statusBox} ${styles.rejectedBox}`}>
+                <div className={styles.content}>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Rejected</h4>
+                </div>
+              </div>
+              <div className={`${styles.statusBox} ${styles.upcomingBox}`}>
+                <div className={styles.content}>
+                  <h5>Vinay Kumar</h5>
+                  <h6>Department Head</h6>
+                  <h4>Upcoming Approver</h4>
+                </div>
+              </div>
+            </div>
           <label>Project Title</label>
           <input name="ProjectTitle" value={form.ProjectTitle} readOnly />
 
@@ -222,38 +269,55 @@ const handleFetchById = async (id: number) => {
        ))}
     </div>
 </div>
+</div>
+</div>
 
-<label></label>
-        <label></label>
+
         
-        </div>
 
-        {/* RIGHT PANEL */}
-        <div className={styles.rightPanel}>
-          {/* Templates */}
-          <div className={styles.card}>
-            <h4>Templates</h4>
+         <div className={styles['col-md-3']}>
+          <div className={styles.rightPanel}>
+            <div className={styles.rightPanelHeader}>
+              <h4>Timeline of the Request - FBP-543</h4>
+            </div>
             <ul>
-              <li>Quotation_Approval_Form_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services-CKBCS.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Request Initiated</span>
+                <span>Initiator: M.Ponnamalai</span>
+                <span>Date & Time: 10 mar 2026 AT 10:00 AM</span>
+              </li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Department Head</span>
+                <span>Approver Name: Vinay Kumar</span>
+                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
+                <span>Action Date: 12 mar 2026 AT 12:00 AM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li className={styles.tickIcon}>
+                <span className={styles.spanHeader}>Billing Approver</span>
+                <span>Approver Name: Sanjay Tiwari</span>
+                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
+                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li className={styles.crossIcon}>
+                <span className={styles.spanHeader}>Finance Controller</span>
+                <span>Approver Name: Indrajeet Singh</span>
+                <span>Action Taken: <span className={styles.rejStatus}>Rejected</span></span>
+                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
+                <span>Comments: Comments submitted by approver while taking action.</span>
+              </li>
+              <li>
+                <span className={styles.spanHeader}>Billing Approver</span>
+                <span>Approver Name: Sanjay Tiwari</span>
+              </li>
             </ul>
-          </div>
-
-          {/* Guidelines */}
-          <div className={styles.card}>
-            <h4>Important Guidelines</h4>
-            <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
-            </ol>
           </div>
         </div>
       </div>
-    );
-  }
+              </div>
 
-
+  
+  );
+};
 export default QuotationRequestDetailViewNeiBt;

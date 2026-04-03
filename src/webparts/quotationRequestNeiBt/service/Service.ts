@@ -4,6 +4,7 @@ export default class Service {
   private context: any;
   private listname="QuotationApprovalNEIBTAdmin";
   private Departmentmaster ="DepartmentMaster";
+  private DepartmentmasterNEBT ="DepartmentMasterNEI";
   private VendorList="";
 
   constructor(context: any) {
@@ -14,6 +15,18 @@ export default class Service {
   public async getDepartments(): Promise<any[]> {
 
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Departmentmaster}')/items`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data.value;
+  }
+
+  public async getDepartmentsNeiBT(): Promise<any[]> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.DepartmentmasterNEBT}')/items`;
 
     const res = await this.context.spHttpClient.get(
       url,
@@ -73,18 +86,20 @@ export default class Service {
   }
 
   // Fetch the Record
-  public async getItemByRequestNo(requestNo: string): Promise<any> {
-
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=POrequestNo eq '${requestNo}'`;
-
-    const res = await this.context.spHttpClient.get(
-      url,
-      SPHttpClient.configurations.v1
-    );
-
-    const data = await res.json();
-    return data.value.length > 0 ? data.value[0] : null;
-  }
+  public async getItemByRequestNo(ID: Number): Promise<any> {
+  
+      const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})?$expand=AttachmentFiles`;
+      const res = await this.context.spHttpClient.get(
+        url,
+        SPHttpClient.configurations.v1
+      );
+  
+      const item = await res.json();
+     
+     return item;
+     
+    } 
+  
   // Upload Files
 
    public async uploadFile(itemId: number, file: File): Promise<void> {
@@ -103,4 +118,53 @@ export default class Service {
       }
     );
   }
+  // Fetch the Files from List
+    public async getAttachments(itemId: number): Promise<any[]> {
+  
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
+  
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;"
+        }
+      }
+    );
+  
+    const data = await res.json();
+  
+    return data.value; // array of attachments
+  }
+  
+  //Atatchments Delete
+   public async deleteAttachmentFromSP(file: any) : Promise<void> {
+    
+       const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getfilebyserverrelativeurl('${file.ServerRelativeUrl}')`;
+  
+      await this.context.spHttpClient.post(
+        url,
+        SPHttpClient.configurations.v1,
+        {
+          headers: {
+            "IF-MATCH": "*",
+            "X-HTTP-Method": "DELETE"
+          }
+        }
+      );
+  
+  };
+  ///Get User Details by ID
+  public async getUserById(userId: number): Promise<any> {
+  
+      const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getuserbyid(${userId})`;
+      const response = await this.context.spHttpClient.get(
+        url,
+        SPHttpClient.configurations.v1
+      );
+  
+    const user = await response.json();
+    return user;
+    }
 }

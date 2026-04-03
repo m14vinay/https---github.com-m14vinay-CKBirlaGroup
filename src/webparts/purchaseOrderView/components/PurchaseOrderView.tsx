@@ -30,7 +30,8 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
    approver4: '',
    approver5: '',
    DepartmentHead: '',
-   CurrentStatus: ''
+   CurrentStatus: '',
+   RequestNo:''
     
   });
 
@@ -130,6 +131,7 @@ const handleFetchById = async (id: number) => {
         ApplicableTaxes: result.ApplicableTaxes || 0,
         ProjectDescription: result.ProjectDescription || '',
         CurrentStatus: result.Currentstatus || '',
+        RequestNo: result.RequestNo || '',
         files: null
       }));
 
@@ -193,7 +195,7 @@ const handleReject = async () => {
         <div className={styles['col-md-9']}>
           <div className={styles.leftPanel}>
             <div className={styles.leftPanelHeader}>
-              <h4>CKBCSL/25-26/IV/Finance/12</h4>
+              <h4>{form.RequestNo}</h4>
              <h4>Current Status:  <span className={
     form.CurrentStatus === "Approved"
       ? styles.Approved

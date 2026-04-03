@@ -96,24 +96,10 @@ private async getListItemType(): Promise<string> {
 
     const item = await res.json();
    
-   if (item && item.Id) {
-    return {
-      Id: item.Id,
-      ProjectCode: item.ProjectCode,
-      Department: item.Department,
-      ProjectTitle: item.ProjectTitle,
-      VendorName: item.VendorName,
-      POAmount: item.POAmount,
-      ApplicableTaxes: item.ApplicableTaxes,
-    //POCategory: form.POCategory,
-      ProjectDescription: item.ProjectDescription, 
-       Attachments: item.AttachmentFiles || [],
-        CurrentStatus:item.CurrentStatus  // 👈 important
-    };
-  }
+   return item;
+   
+  } 
 
-  return null;
-};
   
 
   //Get ProjectCode Data
