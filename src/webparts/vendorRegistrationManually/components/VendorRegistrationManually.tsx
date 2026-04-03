@@ -18,6 +18,30 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
     return (
       <section>
         <div className='container'>
+          <div className={styles.header}>
+            <h2>New Vendor Registration
+              <span>Digiflow / All Vendor List / New Vendor Registration</span>
+            </h2>
+          </div>
+          <div className={styles.row}>
+            <div className={styles['col-md-9']}>
+              <div className={styles.searchBox}>
+                <h3>New Vendor Registration</h3>
+                <div className={styles.container}>
+                  <div className={styles.row}>
+                    <div className={styles['col-md-12']}>
+                      
+                    </div>
+                    <div className={styles['col-md-12']}>
+                      <label>Name of the Vendor</label>
+                      <input className='form-control' type='text' />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={styles['col-md-3']}></div>
+          </div>
         </div>
         <div className="accordion" id="accordionPanelsStayOpenExample">
           <div className="accordion-item">
