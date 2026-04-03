@@ -278,11 +278,7 @@ const handleReject = async () => {
                   </a>
                 ))}
               </div>
-            </div>
-
-
-           
-            
+            </div>           
           </div>
         </div>
         <div className={styles['col-md-3']}>
