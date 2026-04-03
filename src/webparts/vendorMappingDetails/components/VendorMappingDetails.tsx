@@ -212,11 +212,11 @@ const handleFetchById = async (id: number) => {
             : isInitiated ?styles.tickIcon:""
         }
       >
-        <span className={styles.spanHeader}>{item.Designation}</span>
-        <span>Approver Name: {item.UserName}</span>
+        <span className={styles.spanHeader} style={{fontSize:"bold"}}>{item.Designation}</span>
+        <span><b>Approver Name: </b>{item.UserName}</span>
         {item.UserAction && (
           <span>
-            Action Taken:{" "}
+            <b>Action Taken:{" "}</b>
             <span
               className={
                 isApproved
@@ -230,8 +230,8 @@ const handleFetchById = async (id: number) => {
             </span>
           </span>
         )}
-        {item.ActionDate && <span>Action Date: {item.ActionDate}</span>}
-        {item.UserComment && <span>Comments: {item.UserComment}</span>}
+        {item.ActionDate && <span><b>Action Date: </b>{item.ActionDate}</span>}
+        {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
       </li>
     );
   })}
