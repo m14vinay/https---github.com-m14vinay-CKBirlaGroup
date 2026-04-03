@@ -173,18 +173,17 @@ const RequestHistoryReport: React.FC<IRequestHistoryReportProps> = (props) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>All Vendors
-          <span>Digiflow / All Vendor List</span>
+        <h2>Request History Report
+          <span>Digiflow / AP Report /  History Report</span>
         </h2>
       </div>
-      <div className={styles.searchBox}>
-        <h3>Search Vendor
-          <button className={styles.btnAdd} onClick={handleAddNewDocument}>Add New Document</button>
-        </h3>
+      <div className={styles.searchBox}>        
         <div className={styles.container}>
           <div className={styles.row}>
             <div className={styles['col-md-4']}>
-              <label>Vendor Name</label>
+              <label>From Date</label>
+            </div>
+            <div className={styles['col-md-8']}>
               <Dropdown
                 options={vendorOptions}
                 selectedKey={form.VendorName}
@@ -192,60 +191,33 @@ const RequestHistoryReport: React.FC<IRequestHistoryReportProps> = (props) => {
                   setForm({ ...form, VendorName: option?.text as string, ID: option?.key as string, })
                 }
               />
-
             </div>
-            <div className={styles['col-md-4']}>
-              <label>GST</label>
+            <div className={styles['col-md-4']} style={{paddingTop:"10px"}}>
+              <label>To Date</label>
+            </div>
+            <div className={styles['col-md-8']} style={{paddingTop:"10px"}}>              
               <Dropdown
-                options={BillNumberOptions}
-                selectedKey={form.BillNumber}
+                options={vendorOptions}
+                selectedKey={form.VendorName}
                 onChange={(e, option) =>
-                  setForm({ ...form, BillNumber: option?.text as string, ID: option?.key as string, })
+                  setForm({ ...form, VendorName: option?.text as string, ID: option?.key as string, })
                 }
               />
-
-            </div>
-            <div className={styles['col-md-4']}>
-              <label>PAN</label>
-              <Dropdown
-                options={BillAmountOptions}
-                selectedKey={form.BillAmount}
-                onChange={(e, option) =>
-                  setForm({ ...form, BillAmount: option?.text as string, ID: option?.key as string, })
-                }
-              />
-
-            </div>
-            <div className={styles['col-md-4']}>
-              <label>Vendor Code</label>
-              <Dropdown
-                options={BillDateOptions}
-                selectedKey={form.BillDate}
-                onChange={(e, option) =>
-                  setForm({ ...form, BillDate: option?.text as string, ID: option?.key as string, })
-                }
-              />
-
-            </div>
-            <div className={styles['col-md-4']}>
-              <label>TIN Number</label>
-              <Dropdown
-                options={TitleOptions}
-                selectedKey={form.Title}
-                onChange={(e, option) =>
-                  setForm({ ...form, Title: option?.text as string, ID: option?.key as string, })
-                }
-              />
-            </div>
-            <div className={styles['col-md-4']} style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
+            </div>        
+            <div className={styles['col-md-12']} style={{ paddingTop:"10px",textAlign:"right",alignItems: "flex-end", justifyContent: "flex-end" }}>
               <button className={styles.btnSearch} onClick={handlesearch}>Search</button>
+            </div>
+            <div className={styles['col-md-6']} style={{ width:"22%",paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
+              <button className={styles.btnSearch} onClick={handlesearch}>Export to Excel</button>
+            </div>
+            <div className={styles['col-md-6']} style={{paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
+              <button className={styles.btnSearch} onClick={handlesearch}>Export to CSV</button>
             </div>
           </div>
         </div>
       </div>
       <div className="p-2">
-        <div>
-          <Label style={{ display: "inline-block" }}>All Vendor List</Label>
+        <div>          
           <input
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}

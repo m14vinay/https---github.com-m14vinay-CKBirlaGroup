@@ -173,79 +173,38 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>All Vendors
-          <span>Digiflow / All Vendor List</span>
+        <h2>Summary Report
+          <span>Digiflow / AP Report / Summary Report</span>
         </h2>
       </div>
-      <div className={styles.searchBox}>
-        <h3>Search Vendor
-          <button className={styles.btnAdd} onClick={handleAddNewDocument}>Add New Document</button>
-        </h3>
+      <div className={styles.searchBox}>        
         <div className={styles.container}>
-          <div className={styles.row}>
-            <div className={styles['col-md-4']}>
-              <label>Vendor Name</label>
-              <Dropdown
-                options={vendorOptions}
-                selectedKey={form.VendorName}
-                onChange={(e, option) =>
-                  setForm({ ...form, VendorName: option?.text as string, ID: option?.key as string, })
-                }
-              />
-
+          <div className={styles.row}>            
+            <div className={styles['col-md-3']}>
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:"red"}} onClick={handlesearch}>Quotation Approval</button>
+            </div>  
+            <div className={styles['col-md-3']}>
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:"grey"}} onClick={handlesearch}>Vendor Mapping</button>
+            </div>  
+            <div className={styles['col-md-3']} >
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:"grey"}} onClick={handlesearch}>PO Approval</button>
+            </div>  
+            <div className={styles['col-md-3']}>
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:"grey"}} onClick={handlesearch}>Bill Processing</button>
+            </div>                
+            <div style={{paddingBottom:"5%"}}></div>
+            <div className={styles['col-md-6']} style={{ width:"22%",paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
+              <button className={styles.btnSearch} onClick={handlesearch}>Export to Excel</button>
             </div>
-            <div className={styles['col-md-4']}>
-              <label>GST</label>
-              <Dropdown
-                options={BillNumberOptions}
-                selectedKey={form.BillNumber}
-                onChange={(e, option) =>
-                  setForm({ ...form, BillNumber: option?.text as string, ID: option?.key as string, })
-                }
-              />
-
-            </div>
-            <div className={styles['col-md-4']}>
-              <label>PAN</label>
-              <Dropdown
-                options={BillAmountOptions}
-                selectedKey={form.BillAmount}
-                onChange={(e, option) =>
-                  setForm({ ...form, BillAmount: option?.text as string, ID: option?.key as string, })
-                }
-              />
-
-            </div>
-            <div className={styles['col-md-4']}>
-              <label>Vendor Code</label>
-              <Dropdown
-                options={BillDateOptions}
-                selectedKey={form.BillDate}
-                onChange={(e, option) =>
-                  setForm({ ...form, BillDate: option?.text as string, ID: option?.key as string, })
-                }
-              />
-
-            </div>
-            <div className={styles['col-md-4']}>
-              <label>TIN Number</label>
-              <Dropdown
-                options={TitleOptions}
-                selectedKey={form.Title}
-                onChange={(e, option) =>
-                  setForm({ ...form, Title: option?.text as string, ID: option?.key as string, })
-                }
-              />
-            </div>
-            <div className={styles['col-md-4']} style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
-              <button className={styles.btnSearch} onClick={handlesearch}>Search</button>
+            <div className={styles['col-md-6']} style={{paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
+              <button className={styles.btnSearch} onClick={handlesearch}>Export to CSV</button>
             </div>
           </div>
         </div>
       </div>
       <div className="p-2">
         <div>
-          <Label style={{ display: "inline-block" }}>All Vendor List</Label>
+          <Label style={{ display: "inline-block" }}>{}</Label>
           <input
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
