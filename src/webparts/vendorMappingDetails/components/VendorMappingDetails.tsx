@@ -143,14 +143,30 @@ const handleFetchById = async (id: number) => {
       : styles.Pending }>{form.CurrentStatus}</span></h4>
             </div>
              <div className={styles.leftPanelStatusHeader}>
-                          <div className={styles.statusBox}>
-                            <div className={styles.content}>
-                            <h5>Vinay Kumar</h5>
-                            <h6>Department Head</h6>
-                            <h4>Approved</h4>
-                            </div>
-                          </div>
-                          </div>
+                        {History.map((item, index) => {
+    let statusClass = styles.statusBox;
+
+    if (item.UserAction === "Approved") {
+      statusClass = `${styles.statusBox}`;
+    } else if (item.UserAction === "Request Initiator") {
+      statusClass = `${styles.statusBox} ${styles.statusBox}`;
+    } else if (item.UserAction === "Rejected") {
+      statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+    } else {
+      statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
+    }
+
+    return (
+      <div className={statusClass} key={index}>
+        <div className={styles.content}>
+          <h5>{item.UserName}</h5>
+          <h6>{item.Designation}</h6>
+          <h4>{item.UserAction || "Upcoming Approver"}</h4>
+        </div>
+      </div>
+    );
+  })}
+             </div>
           <div className={styles.formGroup}>
                       <label>Project Code</label>
                     <input name="projectCode" value={form.projectCode}   readOnly />
