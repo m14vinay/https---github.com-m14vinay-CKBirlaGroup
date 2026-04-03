@@ -33,6 +33,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
   const [approverComment, setApproverComment] = React.useState('');
    const [Actiondate1, setactiondate1] = React.useState('');
    const [attachments, setAttachments] = React.useState<any[]>([]);
+   const [history, setHistory] = React.useState<any[]>([]);
   const [currentUser, setCurrentUser] = React.useState('');
   const [isDisabled, setIsDisabled] = useState(false);
  
@@ -66,13 +67,23 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
    React.useEffect(() => {
      if (itemId) {
        loadAttachments(itemId);
+      loadHistory(itemId, "VMR");
        //CurrentUser();
       
      }
    }, [itemId]);
   
 
-
+const loadHistory = async (id:Number,FormCode:string) => {
+    try{
+  const historyData = await service.GetHistoryItem(id,FormCode);
+ console.log("History:", historyData);
+  setHistory(historyData);
+    }catch(error)
+    {
+      console.error(error);
+    }
+   };
 
 //FETCH DATA-----
 const handleFetchById = async (id: number) => {
@@ -127,13 +138,45 @@ const handleFetchById = async (id: number) => {
   };
 
 
+   const handleSaveApproveHistory = async (id: number) => {
+
+  const currentuser = await service.getUser();
+
+  const payload = {
+    Title: 'VMR',
+    FID: id,  
+    UserName: currentuser.Title,
+    UserAction: 'Approved',
+    ActionDate: new Date().toISOString(),
+     Designation: currentuser.JobTitle, 
+  };
+
+  await service.createHistoryItem(payload);
+};
+
+const handleSaveRejectedHistory = async (id: number) => {
+
+  const currentuser = await service.getUser();
+
+  const payload = {
+    Title: 'VMR',
+    FID: id,  
+    UserName: currentuser.Title,
+    UserAction: 'Rejected',
+    ActionDate: new Date().toISOString(),
+     Designation: currentuser.JobTitle, 
+  };
+
+  await service.createHistoryItem(payload);
+};
+
   const handleApprove = async () => {
   try {
        if (!approverComment) return alert("Approver Comment required");
     if (!itemId) return;
 
     await service.updateItemdata(itemId, "Approved", approverComment,"Approved");
-    
+     await handleSaveApproveHistory(itemId);
     alert("✅ Approved successfully");
      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url);  
@@ -154,7 +197,7 @@ const handleReject = async () => {
     }
 
     await service.updateItemdata(itemId, "Rejected", approverComment,"Rejected");
-
+    await handleSaveRejectedHistory(itemId);
     alert("❌ Rejected successfully");
      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url);  
@@ -172,7 +215,7 @@ const handleReject = async () => {
   return(
   <div className={styles.container}>
         <div className={styles.header}>
-                <h4>PO Approval Form</h4>
+                <h4>Vendor Mapping Approval Form</h4>
              </div>
         
         <div className={styles.row}>
