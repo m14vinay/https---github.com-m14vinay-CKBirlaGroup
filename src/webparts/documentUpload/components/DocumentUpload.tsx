@@ -39,7 +39,7 @@ const [loading, setLoading] = React.useState(false);
   return Object.keys(newErrors).length === 0;
 };
 const handleCancel = () => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
   window.location.assign(url);
 };
 const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
