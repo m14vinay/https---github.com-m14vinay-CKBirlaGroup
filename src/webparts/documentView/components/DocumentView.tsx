@@ -64,18 +64,33 @@ if(data.Id>0)
   // 🔹 UI
   return (
     <div className={styles.container}>
-      <div className={styles.leftPanel}>
-        <h2>Upload New Document</h2>
-          <h4>My Document List/ Upload New Document</h4>
+      <div className={styles.header}>
+        <h4>Document Detail-{form.Title}</h4>          
+      </div>
+     <div className={styles.row}>
+        <div className={styles["col-md-9"]}>
+          <div className={styles.leftPanel}>
+            <div className={styles.leftPanelHeader}>
+              <h4>{form.Title}</h4>              
+            </div>
+              <div className={styles.formGroup}>
           <label>Type of Document</label>
           <input name="TypeOfDocument" value={form.TypeOfDocument} readOnly/>
+          </div>
+            <div className={styles.formGroup}>
           <label>Name of Document</label>
           <input name="Title" value={form.Title} readOnly/>
+          </div>
+            <div className={styles.formGroup}>
           <label>Vendor Name</label>
           <input name="VendorName" value={form.VendorName} readOnly />
+          </div>
+            <div className={styles.formGroup}>
           <label>Bill Number</label>
           <input name="BillNumber" value={form.BillNumber}  readOnly>
           </input>
+          </div>
+            <div className={styles.formGroup}>
           <label>Bill Date</label>
           <input
             name="BillDate"
@@ -87,11 +102,17 @@ if(data.Id>0)
             }
             readOnly
           />
+          </div>
+            <div className={styles.formGroup}>
           <label>Bill Amount</label>
           <input name="BillAmount"  value={form.BillAmount} readOnly/>
+          </div>
+            <div className={styles.formGroup}>
           <label>Remarks</label>
-          <input name="Remarks" value={form.Remarks} readOnly>
+          <input name="Remarks" value={form.Remarks} readOnly>        
           </input>          
+          </div>
+            <div className={styles.formGroup}>
           <label>Attachments</label>
   {attachments.map((file, index) => (
   <div key={index}>
@@ -100,24 +121,29 @@ if(data.Id>0)
       </a>
   </div>
 ))}
-<div><br></br></div>
+</div>
+        <div><br></br></div>
         <div className={styles.buttonGroup}>          
-            <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
+            <button className={styles.RejectBtn} onClick={handleCancel}>Cancel</button>
           </div>
       </div>
-       <div className={styles.rightPanel}>
+      </div>
+       <div className={styles["col-md-3"]}>
+        <div className={styles.leftPanelHeader}>
+        <h6>My Document List / View Document</h6>          
+        </div>        
+      <div className={styles.rightPanel}>        
           {/* Templates */}
           <div className={styles.card}>
-            <h4>Templates</h4>
-            <ul>
-              <li>PO_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
-            </ul>
+             <div>
+              <h6>Templates</h6>              
+            </div>
           </div>
           {/* Guidelines */}
           <div className={styles.card}>
-            <h4>Important Guidelines</h4>
+             <div>
+              <h6>Importance Guidelines</h6>              
+            </div>
             <ol>
               <li>Select approval path carefully.</li>
               <li>Use project reference if needed.</li>
@@ -126,7 +152,8 @@ if(data.Id>0)
             </ol>
           </div>
         </div>
-
+      </div>
+    </div>
     </div>
   );
 };

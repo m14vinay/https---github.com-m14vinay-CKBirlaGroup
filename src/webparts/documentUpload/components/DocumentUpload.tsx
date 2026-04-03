@@ -150,7 +150,7 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>Upload New Document</h2>          
+        <h4>Upload New Document</h4>          
       </div>
       <div className={styles.row}>
         <div className={styles["col-md-9"]}>
@@ -236,13 +236,13 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           {/* Templates */}
           <div className={styles.card}>
              <div>
-              <h4>Templates</h4>              
+              <h6>Templates</h6>              
             </div>
           </div>
           {/* Guidelines */}
           <div className={styles.card}>
              <div>
-              <h4>Importance Guidelines</h4>              
+              <h6>Importance Guidelines</h6>              
             </div>
             <ol>
               <li>Select approval path carefully.</li>
