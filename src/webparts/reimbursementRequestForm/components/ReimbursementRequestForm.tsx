@@ -231,49 +231,49 @@ export default class ReimbursementRequestForm extends React.Component<IReimburse
           isBlocking={false}>          
           <div className={styles.searchBox}>
           <h3>Add Reimbursement Detail</h3>
-            <div className={styles['form-group']} style={{display:"inline-flex"}}>
+            <div className={styles.formGroup}>
               <label>Expense Type</label>
               <input name="expenseType" value={this.state.ExpenseType}>
               </input>
             </div>
-            <div className={styles['form-group']} style={{display:"inline-flex"}}>
+            <div className={styles.formGroup}>
               <label>Select Document</label>
               <input name="selectedDocument" value={this.state.SelectedDocument}>
               </input>
             </div>
-            <div className={styles['form-group']} style={{display:"inline-flex"}}>
+            <div className={styles.formGroup}>
               <label>Bill Number</label>
               <input name="billNo" value={this.state.BillNo}   >
               </input>
             </div>
-            <div className={styles['form-group']} style={{display:"inline-flex"}}>
+            <div className={styles.formGroup}>
               <label>Bill Amount</label>
               <input name="billAmount" value={this.state.BillAmount}>
               </input>
             </div>
-            <div className={styles['form-group']} style={{display:"inline-flex"}}>
+            <div className={styles.formGroup}>
               <label>Bill Date</label>
               <input name="remarks" value={this.state.BillDate}>
               </input>
             </div>
-            <div className={styles['form-group']} style={{display:"inline-flex"}}>
+            <div className={styles.formGroup}>
               <label>Claim Amount</label>
               <input name="claimAmount" value={this.state.ClaimAmount}   >
               </input>
             </div>
-            <div className={styles['form-group']} style={{display:"inline-flex"}}>
+            <div className={styles.formGroup}>
               <label>Description</label>
               <input name="description" value={this.state.Description}   >
               </input>
             </div>
-            <div className={styles['form-group']} style={{display:"inline-flex"}}>
+            <div className={styles.formGroup}>
               <label>Supporting Available</label>
               <Checkbox name="supportingAvailable" checked={this.state.SupportingAvailable}>
               </Checkbox>
             </div>
-            <div className={styles['btn-group']} style={{display:"inline-flex"}}>
+            <div className={styles.btnGroup}>
               <button className={styles.btnSubmit} onClick={this.handleSubmit}>Submit</button>
-              <PrimaryButton text="Close" onClick={() => this.setState({ isOpen: false })} />
+              <button className={styles.btnCancel} onClick={() => this.setState({ isOpen: false })} >Close</button>              
             </div>
             </div>
         </Modal>
