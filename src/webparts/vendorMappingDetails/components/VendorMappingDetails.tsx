@@ -225,7 +225,7 @@ const handleFetchById = async (id: number) => {
         }
       >
         <span className={styles.spanHeader} style={{fontSize:"bold"}}>{item.Designation}</span>
-        <span><b>Approver Name: </b>{item.UserName}</span>
+        <span><b>{isInitiated?"Initiator:":"Approver Name:"} </b>{item.UserName}</span>
         {item.UserAction && (
           <span>
             <b>Action Taken:{" "}</b>
