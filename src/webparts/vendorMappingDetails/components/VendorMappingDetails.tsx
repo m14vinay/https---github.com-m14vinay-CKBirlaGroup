@@ -156,7 +156,7 @@ const handleFetchById = async (id: number) => {
       <div className={statusClass} key={index}>
         <div className={styles.content}>
           <h5>{item.UserName}</h5>
-          <h6>{item.Designation}</h6>
+          <h6>{'NA'}</h6>
           <h4>{item.UserAction}</h4>
         </div>
       </div>

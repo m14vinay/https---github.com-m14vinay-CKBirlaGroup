@@ -1,78 +1,176 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
 .container {
-  display: flex;
-  gap: 20px;
   padding: 20px;
+}
+
+.header {
+  margin-bottom: 15px;
+}
+
+.header h2 {
+  align-items: center;
+  display: flex;
+  font-size: 16px;
+  font-weight: 600;
+  justify-content: space-between;
+}
+
+.header h2 span {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.searchBox {
+  background-color: #fff;
+  box-shadow: 0 3px 3px #8e8e8e;
+  margin-bottom: 20px;
+
+}
+
+.searchBox h3 {
+  align-items: center;
+  border-bottom: 1px solid #b7b7b7;
+  display: flex;
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding: 10px 15px 10px;
+}
+
+.searchBox .content {
+  padding: 15px;
+}
+
+.searchBox .content .btnAdd {
+  background-color: #da2525;
+  border: none;
+  border-radius: 30px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  padding: 8px 30px;
+}
+
+.selectDep {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.selectDepInner {
+  align-items: center;
+  display: flex;
+  width: 60%;
+}
+
+.selectDepInner label {
+  width: 50%;
+}
+
+.info {
+  align-items: center;
+  background-color: #cce9e7;
+  border-radius: 5px;
+  color: #0e848b;
+  display: flex;
+  gap: 30px;
+  margin: 20px 0;
+  padding: 15px;
+}
+
+.remBox {
+  border: 1px solid #939393;
+}
+
+.remBox h3 {
+  border-bottom: 1px solid #939393;
+  margin: 0;
+  padding: 10px;
+}
+
+.remBox p {
+  align-items: center;
+  display: flex;
+  gap: 5px;
+  margin: 0;
+  padding: 5px 10px;
+}
+
+.btnPara {
+  justify-content: center;
+}
+
+.btnPara .btnRemove {
+  background-color: #da2525;
+  border: none;
+  border-radius: 30px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  margin: 30px 0 15px;
+  padding: 5px 30px;
+}
+
+.form {
+  padding: 15px 0;
+  width: 60%;
+}
+.form .form-group {
+  align-items: center;
+  display: flex;
+  margin-bottom: 15px;
+}
+.form .form-group label {
+  width: 30%;
+}
+.form .form-group input {
+  width: 70%;
 }
 
 .leftPanel {
-  flex: 2;
-  background: #fff;
-  padding: 20px;
-  border-radius: 6px;
+  padding: 8px 30px;
 }
 
-.rightPanel {
-  flex: 1;
-}
-
-.card {
-  background: #fff;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 6px;
-}
-
-input, textarea, select {
-  width: 100%;
-  padding: 8px;
-  margin: 8px 0 16px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.buttonGroup {
+.btn-group {
   display: flex;
-  gap: 10px;
+  gap: 3px;
+  justify-content: center;
 }
 
-.submitBtn {
-  background: green;
-  color: white;
-}
-
-.AddNewBtn {
-  background: red;
-  color: white;
-}
-.saveBtn {
-  background: orange;
-  color: white;
-}
-
-.cancelBtn {
-  background: gray;
-  color: white;
-}
-
-button {
-  padding: 8px 16px;
+.btnSubmit {
+  background: #04d651;
   border: none;
-  cursor: pointer;
-}
-.required {
-  color: red;
-  margin-left: 2px;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 20px;
 }
 
-.error {
-  color: red;
-  font-size: 12px;
-  margin-top: 4px;
-  display: block;
+.btnSave {
+  background: #d0d010;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 20px;
 }
 
-.inputError {
-  border: 1px solid red;
+.btnCancel {
+  background: #3e3e3e;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 20px;
+}
+.form-group label {
+  display: inline-block;
+  margin-bottom: 0;
+  width: 50%;
+  flex: auto;
+}
+
+.form-group input {
+  height: 34px;
+  padding: 5px 10px;
 }
