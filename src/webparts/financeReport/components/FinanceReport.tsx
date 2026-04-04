@@ -45,7 +45,7 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
     columnHelper.accessor('ID', {
       header: () => <span>Vendor Code</span>
     }),    
-    columnHelper.accessor('VendorName', {
+    columnHelper.accessor('Test', {
       header: () => <span>Vendor Name</span>
     }),
     columnHelper.accessor('Title', {

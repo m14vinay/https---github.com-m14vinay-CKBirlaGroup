@@ -5,6 +5,8 @@ import { Dropdown, Icon, IDropdownOption, Label } from '@fluentui/react';
 import SharePointService from '../service/Service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import { useEffect, useState } from 'react';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -17,71 +19,20 @@ import {
 import Table from 'react-bootstrap/Table';
 import 'bootstrap/dist/css/bootstrap.min.css';
 const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
-  const [form, setForm] = React.useState({
-    VendorName: '',
-    ID: '',
-    BillNumber: '',
-    BillDate: '',
-    BillAmount: '',
-    Title: ''
-  });
-
-
   const [loading, setLoading] = React.useState(false);
-  const [vendorOptions, setVendorOptions] = React.useState<IDropdownOption[]>([]);
-  const [BillNumberOptions, setBillNumberOptions] = React.useState<IDropdownOption[]>([]);
-  const [BillDateOptions, setBillDateOptions] = React.useState<IDropdownOption[]>([]);
-  const [BillAmountOptions, setBillAmountOptions] = React.useState<IDropdownOption[]>([]);
-  const [TitleOptions, setTitleOptions] = React.useState<IDropdownOption[]>([]);
   const service = new SharePointService(props.context);
-  const [search, setSearch] = useState("");
   const [data, _setData] = useState<any[]>(() => []);
   const [user, setUser] = useState<any>(null);
+  const [isActiveQA, setIsActiveQA] = React.useState(false);
+  const [isActivePO, setIsActivePO] = React.useState(false);
+  const [isActiveVM, setIsActiveVM] = React.useState(false);
+  const [isActiveBP, setIsActiveBP] = React.useState(false);
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<any>([]);
-
-  const columnHelper = createColumnHelper<any>()
-  const columns = [
-    columnHelper.accessor('ID', {
-      header: () => <span>Vendor Code</span>
-    }),    
-    columnHelper.accessor('VendorName', {
-      header: () => <span>Vendor Name</span>
-    }),
-    columnHelper.accessor('Title', {
-      header: () => 'MSME Registration Number'
-    }),
-    columnHelper.accessor('BillNumber', {
-      header: 'PAN'
-    }),
-    columnHelper.accessor('BillDate', {
-      header: 'GST',
-      cell: info =>
-        info.getValue()
-          ? new Date(info.getValue()).toLocaleDateString()
-          : ""
-    }),
-    columnHelper.accessor('BillAmount', {
-      header: 'Submitted Date'
-    }),
-    columnHelper.accessor('Created', {
-      header: 'Establishment Year',
-      cell: info => new Date(info.getValue()).toLocaleDateString()
-    }),
-    columnHelper.accessor(row => user?.Title, {
-      id: 'Author',
-      header: 'Approval History'
-    }),
-    columnHelper.display({
-      id: 'view',
-      header: 'View',
-      cell: info => (
-        <button onClick={() => handleView(info.row.original.ID)}>
-          View
-        </button>
-      )
-    })
-  ]
+  const [Label, setLabel] = useState("");
+  const columnHelper = createColumnHelper<any>();
+  const [columns, setColumns] = React.useState<any[]>([]);
+  
   const table = useReactTable({
     data,
     columns,
@@ -99,66 +50,242 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
   // Load data
   React.useEffect(() => {
     getUser();
+    _setData(data);
+    setColumns(columns); 
+    handleQuotation();
   }, []);
   // Load the User Details
   const getUser = async () => {
     const data = await service.getUser();
     if (data.Id > 0) {
       setUser(data);
-      loadMaster(data.Id); // Load the Master Data for Dropdown based on User ID  
     }
   };
-  //Load the Master Data for Dropdown
-  const loadMaster = async (userId: number) => {
-    const data = await service.getMasterDocument(userId);
-    if (data && Array.isArray(data)) {
-      const BillNumberOption = data.map((item: any) => ({
-        key: item.BillNumber,
-        text: item.BillNumber
-      }));
-      const BillDateOption = data.map((item: any) => ({
-        key: item.BillDate ? new Date(item.BillDate).toLocaleDateString() : "",
-        text: item.BillDate ? new Date(item.BillDate).toLocaleDateString() : ""
-      }));
-      const BillAmountOption = data.map((item: any) => ({
-        key: item.BillAmount,
-        text: item.BillAmount
-      }));
-      const VendorOption = data.map((item: any) => ({
-        key: item.VendorName,
-        text: item.VendorName
-      }));
-      const TitleOption = data.map((item: any) => ({
-        key: item.Title,
-        text: item.Title
-      }));
-      setVendorOptions(VendorOption);
-      setBillNumberOptions(BillNumberOption);
-      setBillDateOptions(BillDateOption);
-      setBillAmountOptions(BillAmountOption);
-      setTitleOptions(TitleOption);
-    }
-  };
-  const handleAddNewDocument = () => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/DocumentUpload.aspx`;
-    window.location.assign(url);
-  };
-  const handleView = (documentId: string) => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/DocumentView.aspx?ID=${documentId}`;
-    window.location.assign(url);
-  };
-  const handlesearch = async () => {
+  const handleQuotation = async () => {
     _setData([]);
-    if (!form.VendorName && !form.BillAmount && !form.Title && !form.BillDate && !form.BillNumber) {
-      alert("Please select any one  fields to search");
-      return;
-    }
-    await getDatafromListByTitle(form.VendorName, form.BillAmount, form.Title, form.BillDate, form.BillNumber);
+    setLabel('Quotation Approval');
+    setIsActiveQA(true);
+    setIsActiveBP(false);
+    setIsActivePO(false);
+    setIsActiveVM(false);
+    const setDynamicColumns =[
+    columnHelper.accessor('RequestNo', {
+      header: "Request No"
+    }),
+    columnHelper.accessor('ProjectReffNo', {
+      header: "Description"
+    }),
+    columnHelper.accessor('ProjectTitle', {
+      header: "Project Title"
+    }),
+    columnHelper.accessor('ProjectDescription', {
+      header: "Project Description"
+    }),
+    columnHelper.accessor('Department', {
+      header: "Department"
+    }),
+    columnHelper.accessor('Status', {
+      header: "Status"
+    }),
+    columnHelper.accessor('ApprovalPath', {
+      header: "Approval Path"
+    })
+  ]
+   setColumns(setDynamicColumns);
+    await getDatafromListByTitle('QuotationApproval');
   };
-  const getDatafromListByTitle = async (parm_vendorname: string, parm_billamount: string, parm_title: string, parm_billdate: string, parm_billnumber: string) => {
+  const handleVendor = async () => {
+    _setData([]);
+    setLabel('Vendor Mapping');
+    setIsActiveQA(false);
+    setIsActiveBP(false);
+    setIsActivePO(false);
+    setIsActiveVM(true);
+    const setDynamicColumns = [
+    columnHelper.accessor('ProjectCode', {
+      header: "Project Code"
+    }),
+    columnHelper.accessor('ProjectReffNo', {
+      header: "Description"
+    }),
+    columnHelper.accessor('ProjectTitle', {
+      header: "Project Title"
+    }),
+    columnHelper.accessor('ProjectDescription', {
+      header: "Project Description"
+    }),
+    columnHelper.accessor('Department', {
+      header: "Department"
+    }),
+    columnHelper.accessor('Vendorcode', {
+      header: "Vendor Code"
+    }),
+    columnHelper.accessor('VendorName', {
+      header: "Vendor Name"
+    }),
+    columnHelper.accessor('CurrentStatus', {
+      header: "Status"
+    }),
+    columnHelper.accessor('RequestNo', {
+      header: "Request No"
+    })
+  ]
+    setColumns(setDynamicColumns);
+    await getDatafromListByTitle('VendorMapping');
+  };
+  const handlePO = async () => {
+    _setData([]);
+    setLabel('PO Approval');
+    setIsActiveQA(false);
+    setIsActiveBP(false);
+    setIsActivePO(true);
+    setIsActiveVM(false);
+    const setDynamicColumns = [
+    columnHelper.accessor('ProjectCode', {
+      header: "Project Code"
+    }),
+    columnHelper.accessor('ProjectDescription', {
+      header: "Description"
+    }),
+    columnHelper.accessor('Department', {
+      header: "Department"
+    }),
+    columnHelper.accessor('VendorName', {
+      header: "Vendor Name"
+    }),
+    columnHelper.accessor('CurrentStatus', {
+      header: "Status"
+    }),
+    columnHelper.accessor('RequestNo', {
+      header: "Request No"
+    })
+  ]
+    setColumns(setDynamicColumns);
+    await getDatafromListByTitle('PoApproval');
+  };
+  const handleBill = async () => {
+    _setData([]);
+     setLabel('Bill Processing');
+    setIsActiveQA(false);
+    setIsActiveBP(true);
+    setIsActivePO(false);
+    setIsActiveVM(false);
+const setDynamicColumns = [
+    columnHelper.accessor('ProjectCode', {
+      header: "Project Code"
+    }),
+    columnHelper.accessor('ProjectDescription', {
+  header: "Description",
+  cell: info => (
+    <div
+      dangerouslySetInnerHTML={{
+        __html: info.getValue()
+      }}
+    />
+  )
+}),
+    columnHelper.accessor('ProjectTitle', {
+      header: "Project Title"
+    }),
+    columnHelper.accessor('Vendorcode', {
+      header: "Vendor Code"
+    }),
+    columnHelper.accessor('VendorName', {
+      header: "Vendor Name"
+    }),
+    columnHelper.accessor('CurrentStatus', {
+      header: "Status"
+    }),
+    columnHelper.accessor('RequestNo', {
+      header: "Request No"
+    })
+  ]
+   setColumns(setDynamicColumns);
+    await getDatafromListByTitle('BillProcessing');
+  };
+const getVisibleColumns = () => {
+  return table
+    .getVisibleLeafColumns()
+    .map(col => ({
+      id: col.id,
+      header:
+        typeof col.columnDef.header === "function"
+          ? col.columnDef.header // if JSX/function
+          : col.columnDef.header
+    }));
+};
+const getVisibleRows = () => {
+  return table.getFilteredRowModel().rows;
+};
+const getExportData = () => {
+  const columns = getVisibleColumns();
+  const rows = getVisibleRows();
+
+  return rows.map(row => {
+    const obj: any = {};
+
+    columns.forEach(col => {
+      obj[col.id] = row.getValue(col.id);
+    });
+
+    return obj;
+  });
+};
+  const handleExcel = async () => {
+    try{
+  setLoading(true);
+  const data = getExportData();
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array"
+  });
+  const blob = new Blob([excelBuffer], {
+    type:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
+  });
+  saveAs(blob, "Data.xlsx");
+}
+catch
+{
+
+}
+finally
+{
+  setLoading(false);
+}
+  };
+  const handleCSV = async () => {
+    const data = getExportData();
+    const headers = Object.keys(data[0]);
+  const rows = data.map(row =>
+    headers
+      .map(field => {
+        let value = row[field] ?? "";
+        value = String(value).replace(/"/g, '""');
+        return `"${value}"`;
+      })
+      .join(",")
+  );
+  const csvContent = [headers.join(","), ...rows].join("\n");
+  const blob = new Blob([csvContent], {
+    type: "text/csv;charset=utf-8;"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "Data.csv";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  };
+  const getDatafromListByTitle = async (listname:string) => {
     try {
       setLoading(true);
-      const data = await service.getItemByTitle(parm_vendorname, parm_billamount, parm_title, parm_billdate, parm_billnumber);
+      const data = await service.getItemByTitle(listname);
       if (data) {
         _setData((d) => [...d.concat(data)]);
       }
@@ -181,30 +308,30 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
         <div className={styles.container}>
           <div className={styles.row}>            
             <div className={styles['col-md-3']}>
-             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:"red"}} onClick={handlesearch}>Quotation Approval</button>
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:isActiveQA?"red":"grey"}} onClick={handleQuotation}>Quotation Approval</button>
             </div>  
             <div className={styles['col-md-3']}>
-             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:"grey"}} onClick={handlesearch}>Vendor Mapping</button>
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:isActiveVM?"red":"grey"}} onClick={handleVendor}>Vendor Mapping</button>
             </div>  
             <div className={styles['col-md-3']} >
-             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:"grey"}} onClick={handlesearch}>PO Approval</button>
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:isActivePO?"red":"grey"}} onClick={handlePO}>PO Approval</button>
             </div>  
             <div className={styles['col-md-3']}>
-             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:"grey"}} onClick={handlesearch}>Bill Processing</button>
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:isActiveBP?"red":"grey"}} onClick={handleBill}>Bill Processing</button>
             </div>                
             <div style={{paddingBottom:"5%"}}></div>
             <div className={styles['col-md-6']} style={{ width:"22%",paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
-              <button className={styles.btnSearch} onClick={handlesearch}>Export to Excel</button>
+              <button className={styles.btnSearch} onClick={handleExcel}>Export to Excel</button>
             </div>
             <div className={styles['col-md-6']} style={{paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
-              <button className={styles.btnSearch} onClick={handlesearch}>Export to CSV</button>
+              <button className={styles.btnSearch} onClick={handleCSV}>Export to CSV</button>
             </div>
           </div>
         </div>
       </div>
       <div className="p-2">
         <div>
-          <Label style={{ display: "inline-block" }}>{}</Label>
+          <span style={{ display: "inline-block" }}>{Label}</span>
           <input
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
