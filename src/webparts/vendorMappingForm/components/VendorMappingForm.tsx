@@ -17,8 +17,15 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     vendorDescription: '',
     files: [] as File[],
     Attachments: [],
-    CurrentStatus:''
-  });
+    CurrentStatus:'',
+    Title:'',
+    FID:'',
+    Designation:'',
+    UserName:'',
+    UserAction:'',
+    UserComment:'',
+    ActionDate:''
+    });
 
   const [requestNo, setRequestNo] = React.useState('');
   const [itemId, setItemId] = React.useState<number | null>(null);
@@ -173,40 +180,7 @@ await service.deleteAttachmentFromSP(file);
 
 
 
-  // const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = e.target.value;
-  //   setRequestNo(value);
-   
-  //   const errorMsg = validateProjectCode(value);
-  // setRequestNoError(errorMsg);
-
-  // if (errorMsg) {
-  //   // validation failed → reset dependent fields
-  //   setProjectTitle('');
-  //   setProjectDescription('');
-  //   return; // API call skip karo
-  // }
-  //   if (!value) {
-  //   setProjectTitle('');
-  //    setProjectDescription('');
-  //   return;
-  // }
-  //   try {
-  //     const result =  await service.getRequestDetails(value);
-
-  //     if (result.length > 0) {
-  //       setProjectTitle(result[0].ProjectTitle || '');
-  //       setProjectDescription(result[0].ProjectDescription || '');
-  //     } else { 
-  //       setProjectTitle('');
-  //       setProjectDescription('');
-  //     }
   
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //   }
-  // };
-
 
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value;
@@ -262,6 +236,22 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
   };
 
 
+  const handleSaveHistory = async (id: number) => {
+
+  const currentuser = await service.getUser();
+
+  const payload = {
+    Title: 'VMR',
+    FID: id,  
+    UserName: currentuser.Title,
+    UserAction: 'Request Initiator',
+    ActionDate: new Date().toISOString(),
+     Designation: 'Request Initiator',
+  };
+
+  await service.createHistoryItem(payload);
+};
+
   //SAVE DRAFT DATA
 
   const handleSaveOrUpdate = async () => {
@@ -290,8 +280,8 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     if (!itemId) {
       // 🔹 CREATE
       const res = await service.createItem(payload);
-      setItemId(res.Id); // store ID for future updates
-
+               // store ID for future updates
+  
       if (res.Id > 0 && form.files.length > 0) {
         for (let i = 0; i < form.files.length; i++) {
           await service.uploadFile(res.Id, form.files[i]);
@@ -305,7 +295,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     } else {
       // 🔹 UPDATE
       await service.updateItem(itemId, payload);
-
+     
       if (form.files.length > 0) {
         for (let i = 0; i < form.files.length; i++) {
           await service.uploadFile(itemId, form.files[i]);
@@ -342,6 +332,7 @@ const handleUpdate = async () => {
     if (itemId) {
       //  UPDATE
      await service.updateItem(itemId, payload);
+      await handleSaveHistory(itemId);
     if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(itemId, form.files[i]);
