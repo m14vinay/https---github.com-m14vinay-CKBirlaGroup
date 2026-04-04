@@ -143,17 +143,13 @@ const handleFetchById = async (id: number) => {
       : styles.Pending }>{form.CurrentStatus}</span></h4>
             </div>
              <div className={styles.leftPanelStatusHeader}>
-                        {History.map((item, index) => {
+                        {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
     let statusClass = styles.statusBox;
-
     if (item.UserAction === "Approved") {
-      statusClass = `${styles.statusBox}`;
-    } else if (item.UserAction === "Request Initiator") {
-      statusClass = `${styles.statusBox} ${styles.statusBox}`;
-    } else if (item.UserAction === "Rejected") {
+      statusClass = `${styles.statusBox}`;    
+    } 
+    else if (item.UserAction === "Rejected") {
       statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-    } else {
-      statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
     }
 
     return (
@@ -161,7 +157,7 @@ const handleFetchById = async (id: number) => {
         <div className={styles.content}>
           <h5>{item.UserName}</h5>
           <h6>{item.Designation}</h6>
-          <h4>{item.UserAction || "Upcoming Approver"}</h4>
+          <h4>{item.UserAction}</h4>
         </div>
       </div>
     );
