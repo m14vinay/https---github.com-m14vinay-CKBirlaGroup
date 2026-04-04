@@ -186,14 +186,6 @@
         }
       ]
     },
-    "vendor-registration-web-part": {
-      "components": [
-        {
-          "entrypoint": "./lib/webparts/vendorRegistration/VendorRegistrationWebPart.js",
-          "manifest": "./src/webparts/vendorRegistration/VendorRegistrationWebPart.manifest.json"
-        }
-      ]
-    },
     "vendor-registration-manually-web-part": {
       "components": [
         {
@@ -259,7 +251,6 @@
     "SummaryReportWebPartStrings": "lib/webparts/summaryReport/loc/{locale}.js",
     "FinanceReportWebPartStrings": "lib/webparts/financeReport/loc/{locale}.js",
     "RequestHistoryReportWebPartStrings": "lib/webparts/requestHistoryReport/loc/{locale}.js",
-    "VendorRegistrationWebPartStrings": "lib/webparts/vendorRegistration/loc/{locale}.js",
     "VendorRegistrationManuallyWebPartStrings": "lib/webparts/vendorRegistrationManually/loc/{locale}.js",
     "VendorRegistrationDetailWebPartStrings": "lib/webparts/vendorRegistrationDetail/loc/{locale}.js",
     "VendorRegistrationSearchWebPartStrings": "lib/webparts/vendorRegistrationSearch/loc/{locale}.js",

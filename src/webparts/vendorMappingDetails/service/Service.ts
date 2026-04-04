@@ -5,6 +5,7 @@ export default class Service {
   private listname="VendorMapping";
   private Departmentmaster ="DepartmentMaster";
   private VendorList="";
+  private HistoryList="History";
 
   constructor(context: any) {
     this.context = context;
@@ -138,6 +139,17 @@ public async getUser(): Promise<any> {
     );
     const data = await res.json();
     return data;
+  }
+  // Get the History Record
+  public async GetHistoryItem(ID:Number,FormCode:string): Promise<any> {
+    const url =`${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${ID} and Title eq '${encodeURIComponent(FormCode)}'`;   
+    console.log("URL:",url)  
+  const response = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+ const data = await response.json();
+ return data.value;
   }
 }
 
