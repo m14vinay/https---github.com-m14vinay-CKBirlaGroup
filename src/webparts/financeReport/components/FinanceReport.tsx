@@ -5,6 +5,8 @@ import { Dropdown, Icon, IDropdownOption, Label } from '@fluentui/react';
 import SharePointService from '../service/Service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import { useEffect, useState } from 'react';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -17,24 +19,8 @@ import {
 import Table from 'react-bootstrap/Table';
 import 'bootstrap/dist/css/bootstrap.min.css';
 const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
-  const [form, setForm] = React.useState({
-    VendorName: '',
-    ID: '',
-    BillNumber: '',
-    BillDate: '',
-    BillAmount: '',
-    Title: ''
-  });
-
-
   const [loading, setLoading] = React.useState(false);
-  const [vendorOptions, setVendorOptions] = React.useState<IDropdownOption[]>([]);
-  const [BillNumberOptions, setBillNumberOptions] = React.useState<IDropdownOption[]>([]);
-  const [BillDateOptions, setBillDateOptions] = React.useState<IDropdownOption[]>([]);
-  const [BillAmountOptions, setBillAmountOptions] = React.useState<IDropdownOption[]>([]);
-  const [TitleOptions, setTitleOptions] = React.useState<IDropdownOption[]>([]);
   const service = new SharePointService(props.context);
-  const [search, setSearch] = useState("");
   const [data, _setData] = useState<any[]>(() => []);
   const [user, setUser] = useState<any>(null);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -43,43 +29,58 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
   const columnHelper = createColumnHelper<any>()
   const columns = [
     columnHelper.accessor('ID', {
-      header: () => <span>Vendor Code</span>
+      header: () => 'Req No.'
     }),    
-    columnHelper.accessor('Test', {
-      header: () => <span>Vendor Name</span>
+    columnHelper.accessor('ProjectTitle', {
+      header: () => 'Project Title'
     }),
     columnHelper.accessor('Title', {
-      header: () => 'MSME Registration Number'
+      header: () => 'Project Ref No.'
     }),
-    columnHelper.accessor('BillNumber', {
-      header: 'PAN'
+    columnHelper.accessor('Department', {
+      header: 'Department'
     }),
-    columnHelper.accessor('BillDate', {
-      header: 'GST',
-      cell: info =>
-        info.getValue()
-          ? new Date(info.getValue()).toLocaleDateString()
-          : ""
+    columnHelper.accessor('Description', {
+      header: 'Description'
     }),
-    columnHelper.accessor('BillAmount', {
-      header: 'Submitted Date'
-    }),
-    columnHelper.accessor('Created', {
-      header: 'Establishment Year',
-      cell: info => new Date(info.getValue()).toLocaleDateString()
+    columnHelper.accessor('Status', {
+      header: 'Status'
     }),
     columnHelper.accessor(row => user?.Title, {
-      id: 'Author',
-      header: 'Approval History'
+      header: 'Submitted Date'
     }),
-    columnHelper.display({
-      id: 'view',
-      header: 'View',
-      cell: info => (
-        <button onClick={() => handleView(info.row.original.ID)}>
-          View
-        </button>
-      )
+    columnHelper.accessor(row => user?.Title, {
+      header: 'Approved Date'
+    }),
+    columnHelper.accessor(row => user?.Title, {
+      header: 'Project Code'
+    }),
+    columnHelper.accessor(row => user?.Title, {
+      header: 'Approval Path'
+    }),
+    columnHelper.accessor(row => user?.Title, {
+      header: 'Approved Pending On'
+    }),
+    columnHelper.accessor('BillAmount', {
+      header: 'Approval Pending Date'
+    }),
+    columnHelper.accessor(row => user?.Title, {
+      header: 'Vendor Req No.'
+    }),
+    columnHelper.accessor(row => user?.Title, {
+      header: 'Vendor Code'
+    }),
+    columnHelper.accessor(row => user?.Title, {
+      header: 'Vendor Name'
+    }),
+    columnHelper.accessor(row => user?.Title, {
+      header: 'PO Request No.'
+    }),
+    columnHelper.accessor(row => user?.Title, {
+      header: 'Requestor Name'
+    }),
+    columnHelper.accessor(row => user?.Title, {
+      header: 'Bill Amount'
     })
   ]
   const table = useReactTable({
@@ -96,6 +97,10 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
   });
+  const [form, setForm] = React.useState({
+        FromDate: new Date(),
+        ToDate:new Date()
+    });
   // Load data
   React.useEffect(() => {
     getUser();
@@ -105,60 +110,102 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
     const data = await service.getUser();
     if (data.Id > 0) {
       setUser(data);
-      loadMaster(data.Id); // Load the Master Data for Dropdown based on User ID  
     }
   };
-  //Load the Master Data for Dropdown
-  const loadMaster = async (userId: number) => {
-    const data = await service.getMasterDocument(userId);
-    if (data && Array.isArray(data)) {
-      const BillNumberOption = data.map((item: any) => ({
-        key: item.BillNumber,
-        text: item.BillNumber
-      }));
-      const BillDateOption = data.map((item: any) => ({
-        key: item.BillDate ? new Date(item.BillDate).toLocaleDateString() : "",
-        text: item.BillDate ? new Date(item.BillDate).toLocaleDateString() : ""
-      }));
-      const BillAmountOption = data.map((item: any) => ({
-        key: item.BillAmount,
-        text: item.BillAmount
-      }));
-      const VendorOption = data.map((item: any) => ({
-        key: item.VendorName,
-        text: item.VendorName
-      }));
-      const TitleOption = data.map((item: any) => ({
-        key: item.Title,
-        text: item.Title
-      }));
-      setVendorOptions(VendorOption);
-      setBillNumberOptions(BillNumberOption);
-      setBillDateOptions(BillDateOption);
-      setBillAmountOptions(BillAmountOption);
-      setTitleOptions(TitleOption);
-    }
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: name === "BillDate" ? new Date(value) : value
+    });
   };
-  const handleAddNewDocument = () => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/DocumentUpload.aspx`;
-    window.location.assign(url);
+  const getVisibleColumns = () => {
+    return table
+      .getVisibleLeafColumns()
+      .map(col => ({
+        id: col.id,
+        header:
+          typeof col.columnDef.header === "function"
+            ? col.columnDef.header // if JSX/function
+            : col.columnDef.header
+      }));
   };
-  const handleView = (documentId: string) => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/DocumentView.aspx?ID=${documentId}`;
-    window.location.assign(url);
+  const getVisibleRows = () => {
+    return table.getFilteredRowModel().rows;
   };
+  const getExportData = () => {
+    const columns = getVisibleColumns();
+    const rows = getVisibleRows();
+  
+    return rows.map(row => {
+      const obj: any = {};
+  
+      columns.forEach(col => {
+        obj[col.id] = row.getValue(col.id);
+      });
+  
+      return obj;
+    });
+  };
+    const handleExcel = async () => {
+      try{
+    setLoading(true);
+    const data = getExportData();
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array"
+    });
+    const blob = new Blob([excelBuffer], {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
+    });
+    saveAs(blob, "Data.xlsx");
+  }
+  catch
+  {
+  
+  }
+  finally
+  {
+    setLoading(false);
+  }
+    };
+    const handleCSV = async () => {
+      const data = getExportData();
+      const headers = Object.keys(data[0]);
+    const rows = data.map(row =>
+      headers
+        .map(field => {
+          let value = row[field] ?? "";
+          value = String(value).replace(/"/g, '""');
+          return `"${value}"`;
+        })
+        .join(",")
+    );
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;"
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Data.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    };
   const handlesearch = async () => {
     _setData([]);
-    if (!form.VendorName && !form.BillAmount && !form.Title && !form.BillDate && !form.BillNumber) {
-      alert("Please select any one  fields to search");
-      return;
-    }
-    await getDatafromListByTitle(form.VendorName, form.BillAmount, form.Title, form.BillDate, form.BillNumber);
+    await getDatafromListByTitle();
   };
-  const getDatafromListByTitle = async (parm_vendorname: string, parm_billamount: string, parm_title: string, parm_billdate: string, parm_billnumber: string) => {
+  const getDatafromListByTitle = async () => {
     try {
       setLoading(true);
-      const data = await service.getItemByTitle(parm_vendorname, parm_billamount, parm_title, parm_billdate, parm_billnumber);
+      const data = await service.getItemByTitle(form.FromDate.toString(),form.ToDate.toString());
       if (data) {
         _setData((d) => [...d.concat(data)]);
       }
@@ -174,7 +221,7 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>Finance Report
-          <span>Digiflow / AP Report / Summary Report</span>
+          <span>Digiflow / AP Report / Finance Report</span>
         </h2>
       </div>
        <div className={styles.searchBox}>        
@@ -184,34 +231,42 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
               <label>From Date</label>
             </div>
             <div className={styles['col-md-8']}>
-              <Dropdown
-                options={vendorOptions}
-                selectedKey={form.VendorName}
-                onChange={(e, option) =>
-                  setForm({ ...form, VendorName: option?.text as string, ID: option?.key as string, })
-                }
-              />
+              <input
+            name="FromDate"
+            type="date"
+            value={
+              form.FromDate
+                ? new Date(form.FromDate).toISOString().split('T')[0]
+                : ''
+            }
+            style={{width:"100%"}}
+            onChange={handleDateChange}
+          />
             </div>
             <div className={styles['col-md-4']} style={{paddingTop:"10px"}}>
               <label>To Date</label>
             </div>
             <div className={styles['col-md-8']} style={{paddingTop:"10px"}}>              
-              <Dropdown
-                options={vendorOptions}
-                selectedKey={form.VendorName}
-                onChange={(e, option) =>
-                  setForm({ ...form, VendorName: option?.text as string, ID: option?.key as string, })
-                }
-              />
+               <input
+            name="ToDate"
+            type="date" 
+            value={
+              form.ToDate
+                ? new Date(form.ToDate).toISOString().split('T')[0]
+                : '' 
+            }
+            onChange={handleDateChange}
+            style={{width:"100%"}}
+          />
             </div>        
             <div className={styles['col-md-12']} style={{ paddingTop:"10px",textAlign:"right",alignItems: "flex-end", justifyContent: "flex-end" }}>
               <button className={styles.btnSearch} onClick={handlesearch}>Search</button>
             </div>
             <div className={styles['col-md-6']} style={{ width:"22%",paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
-              <button className={styles.btnSearch} onClick={handlesearch}>Export to Excel</button>
+              <button className={styles.btnSearch} onClick={handleExcel}>Export to Excel</button>
             </div>
             <div className={styles['col-md-6']} style={{paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
-              <button className={styles.btnSearch} onClick={handlesearch}>Export to CSV</button>
+              <button className={styles.btnSearch} onClick={handleCSV}>Export to CSV</button>
             </div>
           </div>
         </div>
