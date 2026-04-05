@@ -133,19 +133,13 @@ const loadAttachments = async (id:number) => {
       Department: result.Department || '',
       Advancepayment: result.Advancepayment || 0,
       ApprovalPath: result.ApprovalPath || '',
-      RequestNo : result.RequestNo || ''
-      }));
-//   if (!result.ActionDate1 || !result.ActionDate2 || !result.ActionDate3) {
-//   setIsDisabled(false);  // enable
-// } else {
-//   setIsDisabled(true);   // disable
-// }
-     setAssignedID(currentuser.Title);
-       
+      RequestNo : result.RequestNo || '',
+      AssignedTo:result.AssignedTo ||'',
+      ApprovalID:result.ApprovalPathID ||''
+      }));       
     } else {
       alert("No data found");
     }
- 
   } catch (error) {
     console.error("Error:", error);
   }
@@ -338,6 +332,7 @@ const handleSaveHistory = async (id: number) => {
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
+      ApprovalPathID:form.ApprovalID,
       AssignedTo: User.Title, 
       CurrentStatus:'Draft',
       Approval1Id:form.ApprovalID.split('_')[0],
@@ -412,6 +407,7 @@ const handleUpdate = async () => {
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
       CurrentStatus:'Pending',
+      ApprovalPathID:form.ApprovalID,
       AssignedTo: User.Title, 
       Approval1Id:form.ApprovalID.split('_')[0],
       Approval2Id:form.ApprovalID.split('_')[1],
