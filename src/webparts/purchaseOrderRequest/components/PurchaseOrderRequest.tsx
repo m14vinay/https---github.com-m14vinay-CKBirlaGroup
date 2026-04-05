@@ -30,28 +30,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     CurrentStatus:'',
     RequestNo:''
   });
- 
-const resetForm  = ()=>({
-    projectCode: '',
-    department:'',
-    projectTitle: '',
-    vendorName: '',
-    vendorNameID:'',
-    RemainingAmount: 0,
-    TotalAmount:0,
-    OccupiedAmount:0,
-    Department: '',
-    POAmount: 0,
-    ApplicableTaxes: 0,
-    AssignedTo: '',
-    PoMaster: '',
-    Comments: '',
-   files: [] as File[],
-     Attachments: [],
-    POrequestNo:'',
-    CurrentStatus:'',
-    RequestNo:''
-  });
+
 
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
@@ -216,7 +195,24 @@ const resetFields = () => {
   setForm(prev => ({
     ...prev,
     Department: '',
-    ProjectTitle: ''
+    ProjectTitle: '',
+    department:'',
+    projectTitle: '',
+    vendorName: '',
+    vendorNameID:'',
+    RemainingAmount: 0,
+    TotalAmount:0,
+    OccupiedAmount:0,
+    POAmount: 0,
+    ApplicableTaxes: 0,
+    AssignedTo: '',
+    PoMaster: '',
+    Comments: '',
+   files: [] as File[],
+     Attachments: [],
+    POrequestNo:'',
+    CurrentStatus:'',
+    RequestNo:''
   }));
 
   setApprover2ID(null);
@@ -244,7 +240,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     projectCode: value
   }));
   if (!value) {
-    resetForm();
+    resetFields();
     return;
   }
 
@@ -289,11 +285,16 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     }
     else {
       alert("This request is not approved ✅");
-      resetForm();
+      resetFields();
     }
     } 
+    else      
+      {
+    resetFields();
+      }
   } catch (error) {
     console.error("Error fetching data:", error);
+    resetFields();
   }
 };
  

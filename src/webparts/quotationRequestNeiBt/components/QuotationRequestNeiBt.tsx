@@ -11,6 +11,7 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
 
   // State
   const [form, setForm] = React.useState({
+      ID:0,
       ProjectTitle:'',
       ProjectReffNo:'',
       ProjectDescription: '',
@@ -29,6 +30,7 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
       ApprovalPath: '',
       files: [] as File[],
       CurrentStatus:'',
+      ApprovalID:'',
     approver1: '',
     approver2: '',
     approver3: '',
@@ -49,14 +51,14 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
   });
 
 
- const [AssignedID, setAssignedID] = React.useState<number | null>(null);
-    const [itemId, setItemId] = React.useState<number | null>(null);
-    const service = new SharePointService(props.context);
-          const [ApproverOptions, setApproverOptions] = React.useState<any[]>([]);
-        const [attachments, setAttachments] = React.useState<any[]>([]);
-    const MAX_TOTAL_SIZE_MB = 25;
-    const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
-const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
+ const [AssignedID, setAssignedID] = React.useState<string | null>(null);
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+  const [ApproverOptions, setApproverOptions] = React.useState<any[]>([]);
+  const [attachments, setAttachments] = React.useState<any[]>([]);
+  const MAX_TOTAL_SIZE_MB = 25;
+  const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
+   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   
 
 // --- 1️⃣ Get ID from query string ---
@@ -215,26 +217,6 @@ const loadAttachments = async (id:number) => {
   
       //setDepartmentOptions(options);
     };
-
-  //   const getApprover = async () => {
-  //   try {
-  //     const data = await service.getDepartmentsNeiBT();
-
-  //     console.log("Approver Data:", data);
-
-  //     if (data && data.length > 0) {
-  //       setApprover1(data[0].approver1 || '');
-  //       setApprover2(data[0].approver2 || '');
-  //       setApprover3(data[0].approver3 || '');
-  //       setApprover4(data[0].approver4 || '');
-  //       setApprover5(data[0].approver5 || '');
-  //       setDepartmentHead(data[0].DepartmentHead || '');
-  //     }
-
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
   // 🔹 Load data
     React.useEffect(() => {
       loadDepartments();
@@ -266,47 +248,34 @@ const loadAttachments = async (id:number) => {
 //  
 
 const approvalPaths = data.map((item: any) => {
-    const pathArray = [
-      item.Approval1?.Title,
-      item.Approval2?.Title,
-      item.Approval3?.Title
-    ].filter(Boolean);
+  // ✅ Titles
+  const titles = [
+    item.Approval1?.Title,
+    item.Approval2?.Title,
+    item.Approval3?.Title
+  ].filter(Boolean);
 
-    const path = pathArray
-      .map((name, index) => `${index + 1}.${name}`)
-      .join(" > ");
+  // ✅ IDs
+  const ids = [
+    item.Approval1?.Id,
+    item.Approval2?.Id,
+    item.Approval3?.Id
+  ].filter(Boolean);
 
-    return {
-      key: path,
-      text: path
-    };
-  });
+  // ✅ Text (for UI)
+  const text = titles
+    .map((name, index) => `${index + 1}. ${name}`)
+    .join(" > ");
 
-// const handleApprovalPathChange = (option: { key: string, text: string } | undefined) => {
-//   if (!option) return;
+  // ✅ Key (for backend/use)
+  const key = ids.join("_"); // e.g. "12_45_78"
 
-//   const path = option.key;  // e.g. "1.AP Automation > 2.Workflow1 > 3.Wotkflow2"
-//   const parts = path.split(' > ');
-//   const approvals = parts.map(p => p.replace(/^\d+\./, '').trim());
-
-//   setForm(prev => ({
-//     ...prev,
-//     ApprovalPath: path,
-//     Approval1: approvals[0] || '',
-//     Approval2: approvals[1] || '',
-//     Approval3: approvals[2] || ''
-//   }));
-// };
-
-
-
-
-  // Duplicate remove karne ke baad set karo:
-  const uniquePaths = Array.from(
-    new Map(approvalPaths.map(item => [item.key, item])).values()
-  );
-
-  setApproverOptions(uniquePaths);
+  return {
+    key:key,
+    text:text
+  };
+});
+  setApproverOptions(approvalPaths);
 };
  
  // 🔹 Handle input change
@@ -346,11 +315,11 @@ const handleSaveHistory = async (id: number) => {
     if(!form.Department) return alert("Select Department Name");
     if(!form.Advancepayment) return alert("Select Advance Payemnt");
      if (!form.files || form.files.length === 0) return alert("Attach files");
-    const User=await service.getUserById(Number(form.Approval1Id));
-  if(User?.Id)
-  {
-  setAssignedID(User.Title);
-  }
+    const User=await service.getUserById(Number(form.ApprovalID.split('_')[0]));
+      if(User?.Id)
+      {
+      setAssignedID(User.Title);
+      }
   // 🔹 Payload (common)
   const payload = {
     ProjectTitle: form.ProjectTitle,
@@ -369,12 +338,11 @@ const handleSaveHistory = async (id: number) => {
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
-      AssignedTo: AssignedID,  // ✅ must be numeric ID
-  Approval1: Number(form.Approval1Id),
-  Approval2: Number(form.Approval2Id ),
-  Approval3: Number(form.Approval3Id ),
-      CurrentStatus:'Draft'
-   
+      AssignedTo: User.Title, 
+      CurrentStatus:'Draft',
+      Approval1Id:form.ApprovalID.split('_')[0],
+      Approval2Id:form.ApprovalID.split('_')[1],
+      Approval3Id:form.ApprovalID.split('_')[2]
   };
 
   try {
@@ -421,6 +389,11 @@ const handleUpdate = async () => {
     if(!form.Department) return alert("Select Department Name");
     if(!form.Advancepayment) return alert("Select Advance Payemnt");
      if (!form.files || form.files.length === 0) return alert("Attach files");
+     const User=await service.getUserById(Number(form.ApprovalID.split('_')[0]));
+      if(User?.Id)
+      {
+      setAssignedID(User.Title);
+      }
   const payload = {
     ProjectTitle: form.ProjectTitle,
     ProjectReffNo: form.ProjectReffNo,
@@ -438,7 +411,11 @@ const handleUpdate = async () => {
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
-       CurrentStatus:'Pending'
+      CurrentStatus:'Pending',
+      AssignedTo: User.Title, 
+      Approval1Id:form.ApprovalID.split('_')[0],
+      Approval2Id:form.ApprovalID.split('_')[1],
+      Approval3Id:form.ApprovalID.split('_')[2]
   };
   try {
     if (itemId) {
@@ -462,28 +439,10 @@ const handleUpdate = async () => {
 
 const handleApprovalPathChange = (option?: IDropdownOption) => {
   if (!option) return;
-
-  const idPath = String(option.key);   // IDs
-  const namePath = option.text as string; // Names
-
-  // 🔹 IDs extract
-  const ids = idPath.split(' > ').map(p =>
-    Number(p.replace(/^\d+\./, '').trim())
-  );
-
-  // 🔹 Names extract
-  const names = namePath.split(' > ').map(p =>
-    p.replace(/^\d+\./, '').trim()
-  );
 setForm(prev => ({
   ...prev,
-  ApprovalPath: namePath,
-  Approval1: names[0] || '',
-  Approval2: names[1] || '',
-  Approval3: names[2] || '',
-  Approval1Id: ids[0] || null,
-  Approval2Id: ids[1] || null,
-  Approval3Id: ids[2] || null
+  ApprovalPath: option?.text||"",
+  ApprovalID:(option?.key).toString()||""
 }));
  
 };
@@ -576,24 +535,11 @@ setForm(prev => ({
             }}
           />
           
-
-
-{/* <Dropdown
-  placeholder="Select Approver"
-  options={ApproverOptions}
-  selectedKey={form.ApprovalPath}   // ✅ correct binding
-  onChange={(e, option) =>
-    setForm(prev => ({
-      ...prev,
-      ApprovalPath: option?.key as ''  // ✅ ID store karo
-    })) 
-  }
-/> */}
   <label>Approval Path</label>
  <Dropdown
       placeholder="Select Approver"
       options={ApproverOptions}
-      selectedKey={form.ApprovalPath}
+      selectedKey={form.ApprovalID}
       onChange={(e, option) => handleApprovalPathChange(option)} // ✅ Works now
     />
  <label>Attachments <span className={styles.required}>*</span></label>
