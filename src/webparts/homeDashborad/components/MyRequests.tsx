@@ -161,7 +161,7 @@ export default function MyRequests() {
                 {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                        <th 
+                        <th style={{cursor:"pointer"}}
                         key={header.id} 
                         onClick={header.column.getToggleSortingHandler()}>
                         {header.isPlaceholder

@@ -84,7 +84,7 @@ export default function MyPendingRequests() {
 
     const getData = (listName:string) => {
         console.log("context user : ", context);
-        let resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AuthorId eq " + user.Email;
+        let resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AssignedTo eq '" + user.Title + "'";
         context.spHttpClient.get(
             `${resturl}`,
             SPHttpClient.configurations.v1
@@ -137,7 +137,7 @@ export default function MyPendingRequests() {
                 {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                        <th 
+                        <th style={{cursor:"pointer"}}
                         key={header.id} 
                         onClick={header.column.getToggleSortingHandler()}>
                         {header.isPlaceholder
