@@ -119,6 +119,12 @@ export default class Service {
   // Upload Files
 
   public async uploadFile(itemId: number, file: File): Promise<void> {
+    // 🔹 Allowed file extensions
+  
+
+  
+    
+    
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
 
     const buffer = await file.arrayBuffer();

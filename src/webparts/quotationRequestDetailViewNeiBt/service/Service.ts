@@ -5,6 +5,7 @@ export default class Service {
   private listname="QuotationApprovalNEIBTAdmin";
   private Departmentmaster ="DepartmentMaster";
   private VendorList="";
+   private HistoryList="History";
 
   constructor(context: any) {
     this.context = context;
@@ -153,5 +154,57 @@ export default class Service {
 
   return data.value; // array of attachments
 }
+
+  // GetList Item
+private async getListItemType(): Promise<string> {
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')?$select=ListItemEntityTypeFullName`;
+
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+
+  const data = await res.json();
+  return data.ListItemEntityTypeFullName;
 }
+// Save the Hitory Record
+  public async createHistoryItem(data: any): Promise<any> {
+    const itemType = await this.getListItemType();
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items`;   
+    const response = await this.context.spHttpClient.post(
+      url,
+     SPHttpClient.configurations.v1,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        }
+    );
+    return response.json();
+  }
+  // Get the History Record
+  public async GetHistoryItem(ID:Number,FormCode:string): Promise<any> {
+      const url =`${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${ID} and Title eq '${encodeURIComponent(FormCode)}'`;   
+      console.log("URL:",url)  
+    const response = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+   const data = await response.json();
+   return data.value;
+    }
+    public async getUser(): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data;
+  }
+  
+}
+
 

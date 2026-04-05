@@ -213,3 +213,38 @@ button {
 .inputError {
   border: 1px solid red;
 }
+.searchBox {
+  background-color: #fff;
+  box-shadow: 0 3px 3px #8e8e8e;
+  margin-bottom: 20px;
+
+}
+
+.searchBox h3 {
+  align-items: center;
+  border-bottom: 1px solid #b7b7b7;
+  display: flex;
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding: 10px 15px 10px;
+}
+
+.searchBox h3 .btnAdd {
+  background-color: #da2525;
+  border: none;
+  border-radius: 30px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  padding: 8px 30px;
+}
+
+.searchBox .btnSearch {
+  background-color: #25da67;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 15px;
+}

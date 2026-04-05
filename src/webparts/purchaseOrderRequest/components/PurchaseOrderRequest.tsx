@@ -27,9 +27,10 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
    files: [] as File[],
      Attachments: [],
     POrequestNo:'',
-    CurrentStatus:''
+    CurrentStatus:'',
+    RequestNo:''
   });
-
+ 
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
   const [FinanceController, setApprover2ID] = React.useState<number | null>(null);
@@ -79,7 +80,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const handleFetchById = async (id: number) => {
     try {
       console.log("Calling API with ID:", id);
-
+      
       const result = await service.getItemByRequestNo(id);
 
       console.log("Result:", result);
@@ -136,32 +137,41 @@ const handleDownload = () => {
   const url = `${props.context.pageContext.web.absoluteUrl}/sites/DigiflowUAT/Shared%20Documents/PO_Format%20(1).xlsx?d=w7b16074a3861495c96494464b6b1818d&csf=1&web=1&e=rkBQLk`;
   window.location.assign(url);
 };
-const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event?.target?.files;
+ const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
+  const files = event?.target?.files;
   if (!files) return;
 
-  
+  const allowedExtensions = ['pdf', 'xlsx', 'docx'];
   const filesArray = Array.from(files);
 
+  // 🔹 Check each file
+  for (let file of filesArray) {
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
+      alert(`File type not allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
+      return; // stop execution
+    }
+  }
+
+  // 🔹 Total size check
   const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
   if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
     alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
     return;
   }
-   // Invalid filename check
+
+  // 🔹 Invalid filename check
   const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
   if (invalidFiles.length > 0) {
     alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
     return;
   }
-   if (event.target.files) {
-    const selectedFiles = Array.from(event.target.files);
 
-    setForm((prev: any) => ({
-      ...prev,
-      files: [...prev.files, ...selectedFiles]
-    }));
-  }
+  // ✅ Add valid files to form state
+  setForm((prev: any) => ({
+    ...prev,
+    files: [...prev.files, ...filesArray]
+  }));
 };
 const removeFile = (index: number) => {
   setForm((prev: any) => ({
@@ -206,7 +216,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
     if (result.length > 0) {
       const item = result[0];
-      
+        if (item.Status === 'Approved') {
       // 👉 Form fields update
       setForm(prev => ({
         ...prev,
@@ -230,8 +240,9 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
           setApprover2ID(dataApprover.FinanceController?.Id || null);
         }
       }  
-
+    }
     } else {
+      alert("This request is not approved ✅");
       resetFields();
     }
 
@@ -271,11 +282,23 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
   });
 };
 
-const getPOCategoryText = () => {
-  if (form.PoMaster === "1") return "Issue To Vendor";
-  if (form.PoMaster === "2") return "Internal Compliance";
-  return "";
+
+const handleSaveHistory = async (id: number) => {
+
+  const currentuser = await service.getUser();
+
+  const payload = {
+    Title: 'PO',
+    FID: id,  
+    UserName: currentuser.Title,
+    UserAction: 'Request Initiator',
+    ActionDate: new Date().toISOString(),
+     Designation: 'Request Initiator',
+  };
+
+  await service.createHistoryItem(payload);
 };
+
 
 //SAVE DRAFT DATA
 
@@ -325,9 +348,13 @@ const getPOCategoryText = () => {
       if (res.Id > 0 && form.files.length > 0) {
         for (let i = 0; i < form.files.length; i++) {
           await service.uploadFile(res.Id, form.files[i]);
-        }
+           
       }
+    }
       alert("Data Saved Successfully ✅");
+      await service.updateItem(res.Id, {
+          RequestNo: `CKBCSL/25-26/IV/Finance/${res.Id}`
+        });
     } else {
       // 🔹 UPDATE
       await service.updateItem(itemId, payload);
@@ -387,7 +414,8 @@ const handleUpdate = async () => {
     if (itemId) {
       // 🔥 UPDATE
      await service.updateItem(itemId, payload);
-    if (form.files && form.files.length > 0) {
+    await handleSaveHistory(itemId);
+     if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(itemId, form.files[i]);
       }
@@ -415,32 +443,37 @@ const validatePO = (value: string) => {
   // 🔹 UI
   return (
     <div className={styles.container}>
-
-      <div className={styles.leftPanel}>
-        <h2>PO Approval Form</h2>
-        <h4>PO Approval Form</h4>
+          <div className={styles.header}>
+            <h4>PO Approval Form </h4>          
+          </div>
+          <div className={styles.row}>
+            <div className={styles["col-md-9"]}>
+              <div className={styles.leftPanel}>
+                <div className={styles.leftPanelHeader}>
+                  <h4>PO Approval Form</h4>              
+                </div>
        <button style={{backgroundColor:'purple',color:'white',fontSize:'bold',width:'100%'}} onClick={handleDownload}>Download Purchase Order</button>
        <div></div>
         <label>Project Code <span className={styles.required}>*</span> </label>
         <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange} />
 
          <label>Department</label>
-          <input name="Department" value={form.Department} readOnly />        
+          <input name="Department" value={form.Department} readOnly style={{backgroundColor:"lightgray"}}  />        
 
         <label>Project Title</label>
-        <input name="projectTitle" value={form.projectTitle} readOnly />
+        <input name="projectTitle" value={form.projectTitle} readOnly style={{backgroundColor:"lightgray"}}  />
 
         <label>Vendor Name</label>
-        <input name="VendorName" value={form.vendorName} readOnly />
+        <input name="VendorName" value={form.vendorName} readOnly style={{backgroundColor:"lightgray"}}  />
 
         <label>Total Amount</label>
-        <input name="TotalAmount" value={form.TotalAmount} onChange={handleChange} />
+        <input name="TotalAmount" value={form.TotalAmount} onChange={handleChange} readOnly style={{backgroundColor:"lightgray"}}  />
 
         <label>Occupied Amount</label>
-        <input name="OccupiedAmount" value={form.OccupiedAmount} onChange={handleChange} />
+        <input name="OccupiedAmount" value={form.OccupiedAmount} onChange={handleChange} readOnly style={{backgroundColor:"lightgray"}}  />
 
         <label>Remaining Amount</label>
-        <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange} />
+        <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange}readOnly style={{backgroundColor:"lightgray"}}  />
 
         <label>PO Amount <span className={styles.required}>*</span></label>
         <input name="POAmount" value={form.POAmount} onChange={handleChange} />
@@ -523,20 +556,35 @@ const validatePO = (value: string) => {
           <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
           <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
         </div>
-      </div>
-       <div className={styles.rightPanel}>
+          </div>
+        </div>
+       <div className={styles['col-md-3']}>
+        <div className={styles.leftPanelHeader}>
+             
+        </div>        
+      <div className={styles.rightPanel}>        
           {/* Templates */}
           <div className={styles.card}>
-            <h4>Templates</h4>
-            <ul>
-              <li>PO_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
-            </ul>
+             <div>
+              <h6>Templates</h6>              
+            </div>
+            <ol>
+             <li>
+      <a 
+        href="Downloads/CKBCSL_VENDOR_LIST_11.06.18.xlsx" 
+        target="_blank" 
+        rel="noopener noreferrer"
+      >
+      
+      </a>
+    </li>
+            </ol>
           </div>
           {/* Guidelines */}
           <div className={styles.card}>
-            <h4>Important Guidelines</h4>
+             <div>
+              <h6>Importance Guidelines</h6>              
+            </div>
             <ol>
               <li>Select approval path carefully.</li>
               <li>Use project reference if needed.</li>
@@ -545,9 +593,10 @@ const validatePO = (value: string) => {
             </ol>
           </div>
         </div>
-
-    </div>
-  );
+      </div>
+      </div>
+      </div>
+    
+   );
 };
-
 export default PurchaseOrderRequest;

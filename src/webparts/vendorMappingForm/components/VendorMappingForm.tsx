@@ -135,31 +135,40 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
      window.location.assign(url);
    };
    const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event?.target?.files;
+  const files = event?.target?.files;
   if (!files) return;
 
-  
+  const allowedExtensions = ['pdf', 'xlsx', 'docx'];
   const filesArray = Array.from(files);
 
+  // 🔹 Check each file
+  for (let file of filesArray) {
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
+      alert(`File type not allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
+      return; // stop execution
+    }
+  }
+
+  // 🔹 Total size check
   const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
   if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
     alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
     return;
   }
-   // Invalid filename check
+
+  // 🔹 Invalid filename check
   const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
   if (invalidFiles.length > 0) {
     alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
     return;
   }
-   if (event.target.files) {
-    const selectedFiles = Array.from(event.target.files);
 
-    setForm((prev: any) => ({
-      ...prev,
-      files: [...prev.files, ...selectedFiles]
-    }));
-  }
+  // ✅ Add valid files to form state
+  setForm((prev: any) => ({
+    ...prev,
+    files: [...prev.files, ...filesArray]
+  }));
 };
 
 
@@ -182,16 +191,65 @@ await service.deleteAttachmentFromSP(file);
 
   
 
+// const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+//   const value = e.target.value;
+
+//   // ✅ form me update karo (IMPORTANT)
+//   setForm(prev => ({
+//     ...prev,
+//     projectCode: value
+//   }));
+
+//   // validation
+//   const errorMsg = validateProjectCode(value);
+//   setRequestNoError(errorMsg);
+
+//   if (errorMsg || !value) {
+//     setForm(prev => ({
+//       ...prev,
+//       projectTitle: '',
+//       projectDescription: ''
+//     }));
+//     return;
+//   }
+
+//   try {
+//     const result = await service.getRequestDetails(value);
+//     // if(result.Status==='Approved')
+//     // {
+//     if (result.length > 0) {
+//       setForm(prev => ({
+//         ...prev,
+//         projectTitle: result[0].ProjectTitle || '',
+//         projectDescription: result[0].ProjectDescription || ''
+//       }));
+//     } 
+  
+  
+//   else {
+//       setForm(prev => ({
+//         ...prev,
+//         projectTitle: '',
+//         projectDescription: ''
+//       }));
+//     }
+
+//   } catch (error) {
+//     console.error("Error fetching data:", error);
+//   }
+// };
+
+
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value;
 
-  // ✅ form me update karo (IMPORTANT)
+  // ✅ form me update karo
   setForm(prev => ({
     ...prev,
     projectCode: value
   }));
 
-  // validation
+  // 🔹 Validation
   const errorMsg = validateProjectCode(value);
   setRequestNoError(errorMsg);
 
@@ -205,24 +263,30 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
   }
 
   try {
+    // 🔹 Service call to fetch request details
     const result = await service.getRequestDetails(value);
 
     if (result.length > 0) {
-      setForm(prev => ({
-        ...prev,
-        projectTitle: result[0].ProjectTitle || '',
-        projectDescription: result[0].ProjectDescription || ''
-      }));
-    } else {
-      setForm(prev => ({
-        ...prev,
-        projectTitle: '',
-        projectDescription: ''
-      }));
+     
+      if (result[0].Status === 'Approved') {
+        setForm(prev => ({
+          ...prev,
+          projectTitle: result[0].ProjectTitle || '',
+          projectDescription: result[0].ProjectDescription || ''
+        }));
+      } else {
+        alert("This request is not approved ✅");
+        setForm(prev => ({
+          ...prev,
+          projectTitle: '',
+          projectDescription: ''
+        }));
+      }
+    
     }
-
   } catch (error) {
     console.error("Error fetching data:", error);
+    alert("Error fetching request details");
   }
 };
 
@@ -369,20 +433,26 @@ const handleUpdate = async () => {
 
   // --- RENDER ---
   return (
-    <div className={styles.container}>
-
-      <div className={styles.leftPanel}>
-        <h2>Vendor Mapping Form</h2>
+     <div className={styles.container}>
+          <div className={styles.header}>
+            <h4>Vendor Mapping Form </h4>          
+          </div>
+          <div className={styles.row}>
+            <div className={styles["col-md-9"]}>
+              <div className={styles.leftPanel}>
+                <div className={styles.leftPanelHeader}>
+                  <h4>Vendor Mapping</h4>              
+                </div>
         
         <label>Project Code <span className={styles.required}>*</span></label>
         <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange}   />
        {requestNoError && <span className={styles.error}>{requestNoError}</span>}
        
         <label>Project Title</label>
-        <input name="projectTitle" value={form.projectTitle} readOnly   />
+        <input name="projectTitle" value={form.projectTitle} readOnly style={{backgroundColor:"lightgray"}}  />
 
         <label>Project Description</label>
-        <input name="projectDescription" value={form.projectDescription} readOnly  />
+        <input name="projectDescription" value={form.projectDescription} readOnly style={{backgroundColor:"lightgray"}}  />
 
 
         <label>Select Vendor <span className={styles.required}>*</span></label>
@@ -460,30 +530,48 @@ const handleUpdate = async () => {
             <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
             <button className={styles.cancelBtn} onClick={handleCancel} >Cancel</button>
           </div>
+          </div>
         </div>
-
-      <div className={styles.rightPanel}>
-        <div className={styles.card}>
-          <h4>Templates</h4>
-          <ul>
-            <li>Vendor_Registration_Form_v1.0.xlsx</li>
-            <li>SOP_Procurement_of_Goods_Services.pdf</li>
-            <li>DigiFlow_Training_Manual.pdf</li>
-          </ul>
-        </div>
-
-        <div className={styles.card}>
-          <h4>Important Guidelines</h4>
-          <ol>
-            <li>Select approval path carefully.</li>
-            <li>Use project reference if needed.</li>
-            <li>Attach all documents (Max 25 MB).</li>
-            <li>Avoid special characters in file names.</li>
-          </ol>
+        
+   <div className={styles['col-md-3']}>
+        <div className={styles.leftPanelHeader}>
+             
+        </div>        
+      <div className={styles.rightPanel}>        
+          {/* Templates */}
+          <div className={styles.card}>
+             <div>
+              <h6>Templates</h6>              
+            </div>
+            <ol>
+             <li>
+      <a 
+        href="Downloads/CKBCSL_VENDOR_LIST_11.06.18.xlsx" 
+        target="_blank" 
+        rel="noopener noreferrer"
+      >
+      
+      </a>
+    </li>
+            </ol>
+          </div>
+          {/* Guidelines */}
+          <div className={styles.card}>
+             <div>
+              <h6>Importance Guidelines</h6>              
+            </div>
+            <ol>
+              <li>Select approval path carefully.</li>
+              <li>Use project reference if needed.</li>
+              <li>Attach all documents (Max 25 MB).</li>
+              <li>Avoid special characters in file names.</li>
+            </ol>
+          </div>
         </div>
       </div>
-
-    </div>
+      </div>
+      </div>
+    
    );
 };
 

@@ -34,7 +34,8 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     ActionDate2:'',
     DepartmentHead: '',
     CurrentStatus: '',
-    Approver2Id:''
+    Approver2Id:'',
+    RequestNo:''
 
   });
 
@@ -52,7 +53,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
   const [approver5, setApprover5] = React.useState('');
   const [departmentHead, setDepartmentHead] = React.useState('');
   const [isDisabled, setIsDisabled] = useState(false);
-
+const [History, setHistory] = useState<any[]>([]);
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -116,7 +117,9 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
        const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
    const User=await service.getUserById(result.Approver2Id);
-      console.log("Result:", result);
+     const historydata=await service.GetHistoryItem(id,"VMR");
+     setHistory(historydata);
+   console.log("Result:", result);
 
        if (result.AssignedTo === currentuser.Title) {
 
@@ -137,6 +140,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
           ActionDate1:result.ActionDate1 || '',
           ActionDate2:result.ActionDate2 || '',
           approver2: User?.Title || '',
+          RequestNo: result.RequestNo,
           files: null
         }));
        
@@ -168,6 +172,40 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
   };
 
 
+
+  const handleSaveApproveHistory = async (id: number) => {
+
+  const currentuser = await service.getUser();
+
+  const payload = {
+    Title: 'PO',
+    FID: id,  
+    UserName: currentuser.Title,
+    UserAction: 'Approved',
+    ActionDate: new Date().toISOString(),
+     Designation: currentuser.JobTitle, 
+  };
+
+  await service.createHistoryItem(payload);
+};
+
+const handleSaveRejectedHistory = async (id: number) => {
+
+  const currentuser = await service.getUser();
+
+  const payload = {
+    Title: 'PO',
+    FID: id,  
+    UserName: currentuser.Title,
+    UserAction: 'Rejected',
+    ActionDate: new Date().toISOString(),
+     Designation: currentuser.JobTitle, 
+  };
+
+  await service.createHistoryItem(payload);
+};
+
+
   const handleApprove = async () => {
     try {
       if (!approverComment) return alert("Approver Comment required");
@@ -176,7 +214,8 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
      if(form.ActionDate1==='')
      {
       await service.updateItemdata(itemId, "Approved", approverComment,form.approver2 || '');
-        alert("✅ First level approved");
+         await handleSaveApproveHistory(itemId);
+      alert("✅ First level approved");
  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url); 
       return; 
@@ -184,6 +223,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
      else if(form.ActionDate2==='')
      {
        await service.updateItemdata2(itemId, "Approved",approverComment,'Approved');
+        await handleSaveApproveHistory(itemId);
        alert("✅ Final approval done");
        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url); 
@@ -209,7 +249,8 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
       if(form.ActionDate1==='')
       {
       await service.updateItemdata(itemId, "Rejected", approverComment,"Rejected");
-        alert("✅ First level Rejected successfully");
+         await handleSaveRejectedHistory(itemId);
+      alert("✅ First level Rejected successfully");
          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url); 
         return;
@@ -218,7 +259,8 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
        else if(form.ActionDate2==='')
      {
        await service.updateItemdata2(itemId, "Rejected", approverComment,'Rejected');
-        alert("✅ Final Rejection done");
+         await handleSaveRejectedHistory(itemId);
+       alert("✅ Final Rejection done");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url); 
       return; // 🔥 stop again
@@ -246,41 +288,60 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
         <div className={styles['col-md-9']}>
           <div className={styles.leftPanel}>
             <div className={styles.leftPanelHeader}>
-              <h4>CKBCSL/25-26/IV/Finance/12</h4>
-              <h4>Current Status: <span className={styles.status}>{form.CurrentStatus}</span></h4>
+              <label style={{fontWeight: "bold"}}>PO Approval Form -{form.RequestNo}</label>
             </div>
-            
+            <div className={styles.leftPanelStatusHeader}>
+                        {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
+    let statusClass = styles.statusBox;
+    if (item.UserAction === "Approved") {
+      statusClass = `${styles.statusBox}`;    
+    } 
+    else if (item.UserAction === "Rejected") {
+      statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+    }
+
+    return (
+      <div className={statusClass} key={index}>
+        <div className={styles.content}>
+          <h5>{item.UserName}</h5>
+          <h6>{item.Designation}</h6>
+          <h4>{item.UserAction}</h4>
+        </div>
+      </div>
+    );
+  })}
+             </div>
             <div className={styles.formGroup}>
               <label>Project Code</label>
-              <input value={form.projectCode} readOnly />
+              <input value={form.projectCode} readOnly style={{backgroundColor:"lightgray"}}/>
             </div>
             <div className={styles.formGroup}>
               <label>Department</label>
-              <input name="department" value={form.Department} readOnly />
+              <input name="department" value={form.Department} readOnly style={{backgroundColor:"lightgray"}} />
             </div>
             <div className={styles.formGroup}>
               <label>Project Title</label>
-              <input name="projectTitle" value={form.projectTitle} readOnly />
+              <input name="projectTitle" value={form.projectTitle} readOnly style={{backgroundColor:"lightgray"}} />
             </div>
             <div className={styles.formGroup}>
               <label>Select Vendor Name</label>
-              <input name="vendorName" value={form.vendorName} readOnly />
+              <input name="vendorName" value={form.vendorName} readOnly style={{backgroundColor:"lightgray"}} />
             </div>
             <div className={styles.formGroup}>
               <label>PO Amount</label>
-              <input name="POAmount" value={form.POAmount} readOnly />
+              <input name="POAmount" value={form.POAmount} readOnly style={{backgroundColor:"lightgray"}}/>
             </div>
             <div className={styles.formGroup}>
               <label>Applicable Taxes</label>
-              <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly />
+              <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly style={{backgroundColor:"lightgray"}} />
             </div>
             <div className={styles.formGroup}>
               <label>PO Category</label>
-              <input name="POCategory" value={form.POCategory} readOnly />
+              <input name="POCategory" value={form.POCategory} readOnly style={{backgroundColor:"lightgray"}}/>
             </div>
             <div className={styles.formGroup}>
               <label>Additional Information & Remarks</label>
-              <input name="comments" value={form.ProjectDescription} readOnly />
+              <input name="comments" value={form.ProjectDescription} readOnly style={{backgroundColor:"lightgray"}}/>
             </div>
             <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "10px" }}>
               <label>
@@ -316,45 +377,55 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
         <div className={styles['col-md-3']}>
           <div className={styles.rightPanel}>
             <div className={styles.rightPanelHeader}>
-              <h4>Timeline of the Request - FBP-543</h4>
+              <h4>Timeline of the Request - {form.RequestNo}</h4>
             </div>
-            <ul>
-              <li className={styles.tickIcon}>
-                <span className={styles.spanHeader}>Request Initiated</span>
-                <span>Initiator: M.Ponnamalai</span>
-                <span>Date & Time: 10 mar 2026 AT 10:00 AM</span>
-              </li>
-              <li className={styles.tickIcon}>
-                <span className={styles.spanHeader}>Department Head</span>
-                <span>Approver Name: Vinay Kumar</span>
-                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
-                <span>Action Date: 12 mar 2026 AT 12:00 AM</span>
-                <span>Comments: Comments submitted by approver while taking action.</span>
-              </li>
-              <li className={styles.tickIcon}>
-                <span className={styles.spanHeader}>Billing Approver</span>
-                <span>Approver Name: Sanjay Tiwari</span>
-                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
-                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
-                <span>Comments: Comments submitted by approver while taking action.</span>
-              </li>
-              <li className={styles.crossIcon}>
-                <span className={styles.spanHeader}>Finance Controller</span>
-                <span>Approver Name: Indrajeet Singh</span>
-                <span>Action Taken: <span className={styles.rejStatus}>Rejected</span></span>
-                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
-                <span>Comments: Comments submitted by approver while taking action.</span>
-              </li>
-              <li>
-                <span className={styles.spanHeader}>Billing Approver</span>
-                <span>Approver Name: Sanjay Tiwari</span>
-              </li>
+            <ul>              
+              {History.map((item, index) => {
+    const isApproved = item.UserAction === "Approved";
+    const isRejected = item.UserAction === "Rejected";
+    const isInitiated = item.UserAction === "Request Initiator";
+    return (
+      <li
+        key={index}
+        className={
+          isApproved
+            ? styles.tickIcon
+            : isRejected
+            ? styles.crossIcon
+            : isInitiated ?styles.tickIcon:""
+        }
+      >
+        <span className={styles.spanHeader} style={{fontSize:"bold"}}>{item.Designation}</span>
+        <span><b>{isInitiated?"Initiator":"Approver Name:"} </b>{item.UserName}</span>
+        {item.UserAction && (
+          <span>
+            <b>Action Taken:{" "}</b>
+            <span
+              className={
+                isApproved
+                  ? styles.apprStatus
+                  : isRejected
+                  ? styles.rejStatus
+                  : ""
+              }
+            >
+              {item.UserAction}
+            </span>
+          </span>
+        )}
+        {item.ActionDate && <span><b>Action Date: </b>{item.ActionDate}</span>}
+        {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
+      </li>
+    );
+  })}
             </ul>
           </div>
         </div>
+     </div>
       </div>
-    </div>
-  );
+   );
 };
+  
+
 
 export default PurchaseOrderApproval;

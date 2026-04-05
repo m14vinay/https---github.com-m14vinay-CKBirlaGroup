@@ -33,7 +33,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
   const [approverComment, setApproverComment] = React.useState('');
    const [Actiondate1, setactiondate1] = React.useState('');
    const [attachments, setAttachments] = React.useState<any[]>([]);
-   const [history, setHistory] = React.useState<any[]>([]);
+   const [history, setHistory] = useState<any[]>([]);
   const [currentUser, setCurrentUser] = React.useState('');
   const [isDisabled, setIsDisabled] = useState(false);
  
@@ -67,23 +67,14 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
    React.useEffect(() => {
      if (itemId) {
        loadAttachments(itemId);
-      loadHistory(itemId, "VMR");
+     
        //CurrentUser();
       
      }
    }, [itemId]);
   
 
-const loadHistory = async (id:Number,FormCode:string) => {
-    try{
-  const historyData = await service.GetHistoryItem(id,FormCode);
- console.log("History:", historyData);
-  setHistory(historyData);
-    }catch(error)
-    {
-      console.error(error);
-    }
-   };
+
 
 //FETCH DATA-----
 const handleFetchById = async (id: number) => {
@@ -93,8 +84,10 @@ const handleFetchById = async (id: number) => {
       console.log("Calling API with ID:", id);
       const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
-
-      console.log("Result:", result);
+     const historydata=await service.GetHistoryItem(id,"VMR");
+     setHistory(historydata);
+    console.log("Result:", result);
+      
     
 
       if (result.AssignedTo === currentuser.Title) {
@@ -224,25 +217,46 @@ const handleReject = async () => {
               <div className={styles.leftPanelHeader}>
              <label style={{fontWeight: "bold"}}>Vendor Mapping- {form.RequestNo}</label>
             </div>
+             <div className={styles.leftPanelStatusHeader}>
+                        {history.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
+    let statusClass = styles.statusBox;
+    if (item.UserAction === "Approved") {
+      statusClass = `${styles.statusBox}`;    
+    } 
+    else if (item.UserAction === "Rejected") {
+      statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+    }
+
+    return (
+      <div className={statusClass} key={index}>
+        <div className={styles.content}>
+          <h5>{item.UserName}</h5>
+          <h6>{item.Designation}</h6>
+          <h4>{item.UserAction}</h4>
+        </div>
+      </div>
+    );
+  })}
+             </div>
             <div className={styles.formGroup}>
                         <label>Project Code</label>
-                      <input name="projectCode" value={form.projectCode}   readOnly />
+                      <input name="projectCode" value={form.projectCode}   readOnly style={{backgroundColor:"lightgray"}} />
                       </div>
            <div className={styles.formGroup}>
           <label>Project Title</label>
-          <input name="projectTitle" value={form.projectTitle}   readOnly />
+          <input name="projectTitle" value={form.projectTitle}   readOnly style={{backgroundColor:"lightgray"}}/>
   </div>
   <div className={styles.formGroup}>
           <label>Project Description</label>
-          <input name="projectDescription" value={form.projectDescription}  readOnly />
+          <input name="projectDescription" value={form.projectDescription} readOnly style={{backgroundColor:"lightgray"}} />
           </div>
          <div className={styles.formGroup}>
           <label>Select Vendor <span className={styles.required}>*</span></label>
-        <input name="vendorName" value={form.vendorName}  readOnly />
+        <input name="vendorName" value={form.vendorName} readOnly style={{backgroundColor:"lightgray"}}/>
     </div>
     <div className={styles.formGroup}>
           <label>Additional Information & Remarks</label>
-          <input name="vendorDescription" value={form.vendorDescription}  readOnly />
+          <input name="vendorDescription" value={form.vendorDescription} readOnly style={{backgroundColor:"lightgray"}} />
           </div>
   
          
@@ -278,44 +292,52 @@ const handleReject = async () => {
         </div>
 
        <div className={styles['col-md-3']}>
-            <div className={styles.rightPanel}>
-              <div className={styles.rightPanelHeader}>
-                <h4>Timeline of the Request - {form.RequestNo}</h4>
-              </div>
-              <ul>
-                <li className={styles.tickIcon}>
-                  <span className={styles.spanHeader}>Request Initiated</span>
-                    <span>Request Initiator:{form.AuthorId}</span>
-                  <span>Date & Time: {form.Created}</span>
-                </li>
-                <li className={styles.tickIcon}>
-                  <span className={styles.spanHeader}>Finance Controller</span>
-                  <span>Approver Name: Indrajit Ghatak</span>
-                  <span>Action Taken: <span className={styles.apprStatus}>{form.CurrentStatus}</span></span>
-                  <span>Action Date: {form.Actiondate1}</span>
-                  <span>Comments: {form.ApproverComment}</span>
-                </li>
-                <li className={styles.tickIcon}>
-                  <span className={styles.spanHeader}>Billing Approver</span>
-                  <span>Approver Name: Sanjay Tiwari</span>
-                  <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
-                  <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
-                  <span>Comments: Comments submitted by approver while taking action.</span>
-                </li>
-                <li className={styles.crossIcon}>
-                  <span className={styles.spanHeader}>Finance Controller</span>
-                  <span>Approver Name: Indrajeet Singh</span>
-                  <span>Action Taken: <span className={styles.rejStatus}>Rejected</span></span>
-                  <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
-                  <span>Comments: Comments submitted by approver while taking action.</span>
-                </li>
-                <li>
-                  <span className={styles.spanHeader}>Billing Approver</span>
-                  <span>Approver Name: Sanjay Tiwari</span>
-                </li>
-              </ul>
+          <div className={styles.rightPanel}>
+            <div className={styles.rightPanelHeader}>
+              <h4>Timeline of the Request - {form.RequestNo}</h4>
             </div>
+            <ul>              
+              {history.map((item, index) => {
+    const isApproved = item.UserAction === "Approved";
+    const isRejected = item.UserAction === "Rejected";
+    const isInitiated = item.UserAction === "Request Initiator";
+    return (
+      <li
+        key={index}
+        className={
+          isApproved
+            ? styles.tickIcon
+            : isRejected
+            ? styles.crossIcon
+            : isInitiated ?styles.tickIcon:""
+        }
+      >
+        <span className={styles.spanHeader} style={{fontSize:"bold"}}>{item.Designation}</span>
+        <span><b>{isInitiated?"Initiator":"Approver Name:"} </b>{item.UserName}</span>
+        {item.UserAction && (
+          <span>
+            <b>Action Taken:{" "}</b>
+            <span
+              className={
+                isApproved
+                  ? styles.apprStatus
+                  : isRejected
+                  ? styles.rejStatus
+                  : ""
+              }
+            >
+              {item.UserAction}
+            </span>
+          </span>
+        )}
+        {item.ActionDate && <span><b>Action Date: </b>{item.ActionDate}</span>}
+        {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
+      </li>
+    );
+  })}
+            </ul>
           </div>
+        </div>
      </div>
       </div>
    );
