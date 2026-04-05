@@ -219,14 +219,23 @@ Departmenthead/Id,Departmenthead/Title
   }
   // Get the History Record
   public async GetHistoryItem(ID:Number,FormCode:string): Promise<any> {
-    const itemType = await this.getListItemType();
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items$filter=FID eq ${ID} and Title eq '${FormCode}'`;   
-    console.log("URL:",url)  
-  const response = await this.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
- const data = await response.json();
- return data.value;
+      const url =`${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${ID} and Title eq '${encodeURIComponent(FormCode)}'`;   
+      console.log("URL:",url)  
+    const response = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+   const data = await response.json();
+   return data.value;
+    }
+    public async getUser(): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data;
   }
+  
 }

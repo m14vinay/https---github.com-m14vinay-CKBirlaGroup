@@ -127,7 +127,7 @@ const handleFetchById = async (id: number) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-             <h4>Vendor Mapping Detals & Status</h4>
+             <h4>Vendor Mapping Details & Status</h4>
            </div>
       
       <div className={styles.row}>
@@ -165,23 +165,23 @@ const handleFetchById = async (id: number) => {
              </div>
           <div className={styles.formGroup}>
                       <label>Project Code</label>
-                    <input name="projectCode" value={form.projectCode}   readOnly />
+                    <input name="projectCode" value={form.projectCode}   readOnly style={{backgroundColor:"lightgray"}} />
                     </div>
          <div className={styles.formGroup}>
         <label>Project Title</label>
-        <input name="projectTitle" value={form.projectTitle}   readOnly />
+        <input name="projectTitle" value={form.projectTitle}   readOnly style={{backgroundColor:"lightgray"}} />
 </div>
 <div className={styles.formGroup}>
         <label>Project Description</label>
-        <input name="projectDescription" value={form.projectDescription}  readOnly />
+        <input name="projectDescription" value={form.projectDescription}  readOnly style={{backgroundColor:"lightgray"}} />
         </div>
        <div className={styles.formGroup}>
         <label>Select Vendor <span className={styles.required}>*</span></label>
-      <input name="vendorName" value={form.vendorName}  readOnly />
+      <input name="vendorName" value={form.vendorName}  readOnly style={{backgroundColor:"lightgray"}} />
   </div>
   <div className={styles.formGroup}>
         <label>Additional Information & Remarks</label>
-        <input name="vendorDescription" value={form.vendorDescription}  readOnly />
+        <input name="vendorDescription" value={form.vendorDescription}  readOnly style={{backgroundColor:"lightgray"}} />
         </div>
 
        <div className={styles.formGroup}>
@@ -225,7 +225,8 @@ const handleFetchById = async (id: number) => {
         }
       >
         <span className={styles.spanHeader} style={{fontSize:"bold"}}>{item.Designation}</span>
-        <span><b>{isInitiated?"Initiator:":"Approver Name:"} </b>{item.UserName}</span>
+        <span><b>{isInitiated?"Initiator":"Approver Name:"} </b>{item.UserName}</span>
+       
         {item.UserAction && (
           <span>
             <b>Action Taken:{" "}</b>

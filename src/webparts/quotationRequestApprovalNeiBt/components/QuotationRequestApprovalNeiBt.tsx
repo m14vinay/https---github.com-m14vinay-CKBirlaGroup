@@ -55,7 +55,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     const [approver5, setApprover5] = React.useState('');
     const [departmentHead, setDepartmentHead] = React.useState('');
     const [isDisabled, setIsDisabled] = useState(false);
-  
+  const [History, setHistory] = useState<any[]>([]);
 
     // --- 1️⃣ Get ID from query string ---
      const getIdFromQueryString = (): number | null => {
@@ -228,17 +228,6 @@ const handleReject = async () => {
   }
 };
 
-
-// // 🔹 Bind approval path
-//   const bindPath = async (dept: string) => {
-//     const res = await fetch(
-//       `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items?$filter=DepartmentName eq '${dept}'`,
-//       { headers: { Accept: 'application/json;odata=verbose' } }
-//     );
-//     const data = await res.json();
-//     setPaths(data.d.results);
-//   };
-
   // 🔹 Handle change
   const handleChange = (field: keyof IForm, value: any) => {
     setForm({ ...form, [field]: value });
@@ -255,70 +244,91 @@ const handleReject = async () => {
     return (
       <div className={styles.container}>
         {/* LEFT FORM */}
-        <div className={styles.leftPanel}>
+        <div className={styles.header}>
           <h4>Quotation Approval Form-NEI BT Admin</h4>
+          </div>
               <div className={styles.row}>
         {/* LEFT FORM */}
         <div className={styles['col-md-9']}>
           <div className={styles.leftPanel}>
             <div className={styles.leftPanelHeader}>
-              <h4>Quotation Approval NEI BT Admin-{form.RequestNo} </h4>
-              <h4>Current Status: <span className={styles.status}>{form.CurrentStatus}</span></h4>
+              <label style={{fontWeight: "bold"}}>Quotation Approval NEI BT Admin-{form.RequestNo} </label>
             </div>
-  
+            
+   <div className={styles.leftPanelStatusHeader}>
+                        {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
+    let statusClass = styles.statusBox;
+    if (item.UserAction === "Approved") {
+      statusClass = `${styles.statusBox}`;    
+    } 
+    else if (item.UserAction === "Rejected") {
+      statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+    }
+
+    return (
+      <div className={statusClass} key={index}>
+        <div className={styles.content}>
+          <h5>{item.UserName}</h5>
+          <h6>{item.Designation}</h6>
+          <h4>{item.UserAction}</h4>
+        </div>
+      </div>
+    );
+  })}
+             </div>
           <label>Project Title</label>
-          <input name="ProjectTitle" value={form.ProjectTitle} readOnly />
+          <input name="ProjectTitle" value={form.ProjectTitle} readOnly style={{backgroundColor:"lightgray"}} />
 
           <label>Project Reference No</label>
-          <input name="ProjectReffNo" value={form.ProjectReffNo}  readOnly >
+          <input name="ProjectReffNo" value={form.ProjectReffNo}  readOnly style={{backgroundColor:"lightgray"}} >
           </input>
 
           <label>Project Description & Advance Payment Details</label>
-          <input name="projectDescription" value={form.ProjectDescription}  readOnly >
+          <input name="projectDescription" value={form.ProjectDescription}  readOnly style={{backgroundColor:"lightgray"}} >
           </input>
 
           <label>Total Project Amount</label>
-          <input name="TotalProjectAmount" value={form.TotalProjectAmount } readOnly />
+          <input name="TotalProjectAmount" value={form.TotalProjectAmount } readOnly style={{backgroundColor:"lightgray"}} />
 
           <label>Applicable Taxes</label>
-          <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly  >
+          <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly style={{backgroundColor:"lightgray"}}  >
           </input>
 
           <label>Vendor 1</label>
-          <input name="Vendor1" value={form.Vendor1} readOnly />
+          <input name="Vendor1" value={form.Vendor1} readOnly style={{backgroundColor:"lightgray"}}/>
 
           <label>Vendor 2</label>
-          <input name="Vendor2" value={form.Vendor2} readOnly />
+          <input name="Vendor2" value={form.Vendor2} readOnly style={{backgroundColor:"lightgray"}} />
 
           <label>Vendor 3</label>
-          <input name="Vendor3" value={form.Vendor3} readOnly />
+          <input name="Vendor3" value={form.Vendor3} readOnly style={{backgroundColor:"lightgray"}} />
 
           <label>Quote 1</label>
-          <input name="Quote1" value={form.Quote1} readOnly />
+          <input name="Quote1" value={form.Quote1} readOnly style={{backgroundColor:"lightgray"}} />
 
           <label>Quote 2</label>
-          <input name="Quote2" value={form.Quote2} readOnly  />
+          <input name="Quote2" value={form.Quote2} readOnly style={{backgroundColor:"lightgray"}} />
 
           <label>Quote 3</label>
-          <input name="Quote3" value={form.Quote3} readOnly  />
+          <input name="Quote3" value={form.Quote3} readOnly style={{backgroundColor:"lightgray"}} />
 
           <label>Select Vendor</label>
-          <input name="Selectedvendor" value={form.Selectedvendor} readOnly  />
+          <input name="Selectedvendor" value={form.Selectedvendor} readOnly style={{backgroundColor:"lightgray"}} />
 
           <label>Select Quote</label>
-          <input name="SelectedQuote" value={form.SelectedQuote} readOnly   >
+          <input name="SelectedQuote" value={form.SelectedQuote} readOnly  style={{backgroundColor:"lightgray"}} >
           </input>
 
           <label>Department</label>
-          <input name="Department" value={form.Department}  readOnly >
+          <input name="Department" value={form.Department}  readOnly style={{backgroundColor:"lightgray"}} >
           </input>
 
           <label>Advance Amount</label>
-          <input name="AdvancePayment" value={form.Advancepayment} readOnly  >
+          <input name="AdvancePayment" value={form.Advancepayment} readOnly  style={{backgroundColor:"lightgray"}}>
           </input>
 
           <label>Approval Path</label>
-          <input name="ApprovalPath" value={form.ApprovalPath}  readOnly >
+          <input name="ApprovalPath" value={form.ApprovalPath}  readOnly style={{backgroundColor:"lightgray"}}>
           </input>          
  <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px" , marginBottom:"10px"}}>
            <label>
@@ -347,51 +357,59 @@ const handleReject = async () => {
           </div>
         </div>
       </div>
+     
 
 
         {/* RIGHT PANEL */}
-       <div className={styles['col-md-3']}>
-          <div className={styles.rightPanel}>
-            <div className={styles.rightPanelHeader}>
-              <h4>Timeline of the Request - {form.RequestNo}</h4>
-            </div>
-            <ul>
-              <li className={styles.tickIcon}>
-                <span className={styles.spanHeader}>Request Initiated</span>
-                <span>Initiator: M.Ponnamalai</span>
-                <span>Date & Time: 10 mar 2026 AT 10:00 AM</span>
-              </li>
-              <li className={styles.tickIcon}>
-                <span className={styles.spanHeader}>Department Head</span>
-                <span>Approver Name: Vinay Kumar</span>
-                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
-                <span>Action Date: 12 mar 2026 AT 12:00 AM</span>
-                <span>Comments: Comments submitted by approver while taking action.</span>
-              </li>
-              <li className={styles.tickIcon}>
-                <span className={styles.spanHeader}>Billing Approver</span>
-                <span>Approver Name: Sanjay Tiwari</span>
-                <span>Action Taken: <span className={styles.apprStatus}>Approved</span></span>
-                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
-                <span>Comments: Comments submitted by approver while taking action.</span>
-              </li>
-              <li className={styles.crossIcon}>
-                <span className={styles.spanHeader}>Finance Controller</span>
-                <span>Approver Name: Indrajeet Singh</span>
-                <span>Action Taken: <span className={styles.rejStatus}>Rejected</span></span>
-                <span>Action Date: 14 mar 2026 AT 02:00 PM</span>
-                <span>Comments: Comments submitted by approver while taking action.</span>
-              </li>
-              <li>
-                <span className={styles.spanHeader}>Billing Approver</span>
-                <span>Approver Name: Sanjay Tiwari</span>
-              </li>
-            </ul>
+      <div className={styles['col-md-3']}>
+               <div className={styles.rightPanel}>
+                 <div className={styles.rightPanelHeader}>
+                   <h4>Timeline of the Request - {form.RequestNo}</h4>
+                 </div>
+                 <ul>              
+                   {History.map((item, index) => {
+         const isApproved = item.UserAction === "Approved";
+         const isRejected = item.UserAction === "Rejected";
+         const isInitiated = item.UserAction === "Request Initiator";
+         return (
+           <li
+             key={index}
+             className={
+               isApproved
+                 ? styles.tickIcon
+                 : isRejected
+                 ? styles.crossIcon
+                 : isInitiated ?styles.tickIcon:""
+             }
+           >
+             <span className={styles.spanHeader} style={{fontSize:"bold"}}>{item.Designation}</span>
+             <span><b>{isInitiated?"Initiator":"Approver Name:"} </b>{item.UserName}</span>
+             {item.UserAction && (
+               <span>
+                 <b>Action Taken:{" "}</b>
+                 <span
+                   className={
+                     isApproved
+                       ? styles.apprStatus
+                       : isRejected
+                       ? styles.rejStatus
+                       : ""
+                   }
+                 >
+                   {item.UserAction}
+                 </span>
+               </span>
+             )}
+             {item.ActionDate && <span><b>Action Date: </b>{item.ActionDate}</span>}
+             {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
+           </li>
+         );
+       })}
+                 </ul>
+               </div>
+             </div>
           </div>
-        </div>
-      </div>
-      </div>
-      </div>
+          </div>
       
     );
   }

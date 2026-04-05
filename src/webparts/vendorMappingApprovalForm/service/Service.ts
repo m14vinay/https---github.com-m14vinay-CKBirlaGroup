@@ -203,7 +203,7 @@ export default class Service {
     // Get the History Record
     public async GetHistoryItem(ID:Number,FormCode:string): Promise<any> {
       const itemType = await this.getListItemType();
-      const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items$filter=FID eq ${ID} and Title eq '${FormCode}'`;   
+       const url =`${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${ID} and Title eq '${encodeURIComponent(FormCode)}'`;  
       console.log("URL:",url)  
     const response = await this.context.spHttpClient.get(
       url,

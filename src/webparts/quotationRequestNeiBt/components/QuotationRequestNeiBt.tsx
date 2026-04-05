@@ -21,9 +21,9 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
       Vendor1: '',
       Vendor2: '',
       Vendor3: '',
-      Quote1:'',
-      Quote2:'',
-      Quote3:'',
+      Quote1:0,
+      Quote2:0,
+      Quote3:0,
       Selectedvendor:'',
       SelectedQuote:'',
       Department:'',
@@ -36,14 +36,22 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
     approver3: '',
     approver4: '',
     approver5: '',
+    Approval1Id: null as number | null, 
+  Approval2Id: null as number | null, 
+  Approval3Id: null as number | null,  
+    Approval1:'',
+    Approval2:'',
+    Approval3:'',
+    AssignedTo:'',
     ActionDate1:'',
     ActionDate2:'',
     DepartmentHead: '',
-    RequestNo:''
+    RequestNo:'',
+    selectedApprover: 0
   });
 
 
- 
+ const [AssignedID, setAssignedID] = React.useState<number | null>(null);
     const [itemId, setItemId] = React.useState<number | null>(null);
     const service = new SharePointService(props.context);
      const [POrequestNo, setPORequestNo] = React.useState('');
@@ -55,6 +63,7 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
         const [approver3, setApprover3] = React.useState('');
         const [approver4, setApprover4] = React.useState('');
         const [approver5, setApprover5] = React.useState('');
+          const [ApproverOptions, setApproverOptions] = React.useState<any[]>([]);
         const [departmentHead, setDepartmentHead] = React.useState('');
         const [attachments, setAttachments] = React.useState<any[]>([]);
     const MAX_TOTAL_SIZE_MB = 25;
@@ -108,7 +117,7 @@ const loadAttachments = async (id:number) => {
      const handleFetchById = async (id: number) => {
     try {
       console.log("Calling API with ID:", id);
-    
+     const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
 
       console.log("Result:", result);
@@ -126,9 +135,9 @@ const loadAttachments = async (id:number) => {
           Vendor1: result.Vendor1 || '',
       Vendor2: result.Vendor2 || '',
       Vendor3: result.Vendor3 || '',
-      Quote1: result.Quote1 || '',
-      Quote2:result.Quote2 || '',
-      Quote3: result.Quote3 || '',
+      Quote1: result.Quote1 || 0,
+      Quote2:result.Quote2 || 0,
+      Quote3: result.Quote3 || 0,
       Selectedvendor: result.Selectedvendor || '',
       SelectedQuote: result.SelectedQuote || '',
       Department: result.Department || '',
@@ -141,6 +150,7 @@ const loadAttachments = async (id:number) => {
 // } else {
 //   setIsDisabled(true);   // disable
 // }
+     setAssignedID(currentuser.Title);
        
     } else {
       alert("No data found");
@@ -157,33 +167,41 @@ const loadAttachments = async (id:number) => {
   };
 
   const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
-      const files = event?.target?.files;
+    const files = event?.target?.files;
     if (!files) return;
   
-    
+    const allowedExtensions = ['pdf', 'xlsx', 'docx'];
     const filesArray = Array.from(files);
   
+    // 🔹 Check each file
+    for (let file of filesArray) {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
+        alert(`File type not allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
+        return; // stop execution
+      }
+    }
+  
+    // 🔹 Total size check
     const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
     if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
       alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
       return;
     }
-     // Invalid filename check
+  
+    // 🔹 Invalid filename check
     const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
     if (invalidFiles.length > 0) {
       alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
       return;
     }
-     if (event.target.files) {
-      const selectedFiles = Array.from(event.target.files);
   
-      setForm((prev: any) => ({
-        ...prev,
-        files: [...prev.files, ...selectedFiles]
-      }));
-    }
+    // ✅ Add valid files to form state
+    setForm((prev: any) => ({
+      ...prev,
+      files: [...prev.files, ...filesArray]
+    }));
   };
-  
   const removeFile = (index: number) => {
     setForm((prev: any) => ({
       ...prev,
@@ -210,37 +228,98 @@ const loadAttachments = async (id:number) => {
       //setDepartmentOptions(options);
     };
 
-    const getApprover = async () => {
-    try {
-      const data = await service.getDepartmentsNeiBT();
+  //   const getApprover = async () => {
+  //   try {
+  //     const data = await service.getDepartmentsNeiBT();
 
-      console.log("Approver Data:", data);
+  //     console.log("Approver Data:", data);
 
-      if (data && data.length > 0) {
-        setApprover1(data[0].approver1 || '');
-        setApprover2(data[0].approver2 || '');
-        setApprover3(data[0].approver3 || '');
-        setApprover4(data[0].approver4 || '');
-        setApprover5(data[0].approver5 || '');
-        setDepartmentHead(data[0].DepartmentHead || '');
-      }
+  //     if (data && data.length > 0) {
+  //       setApprover1(data[0].approver1 || '');
+  //       setApprover2(data[0].approver2 || '');
+  //       setApprover3(data[0].approver3 || '');
+  //       setApprover4(data[0].approver4 || '');
+  //       setApprover5(data[0].approver5 || '');
+  //       setDepartmentHead(data[0].DepartmentHead || '');
+  //     }
 
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
   // 🔹 Load data
     React.useEffect(() => {
       loadDepartments();
       //loadVendor();
-      getApprover();
+      //getApprover();
+      
     }, []);
   
+  React.useEffect(() => {
+  if (form.Department && form.Advancepayment) {
+    loadApprovers();
+  }
+}, [form.Department, form.Advancepayment]);
+
  const poOptions: IChoiceGroupOption[] = [
     { key: '1', text: 'Yes' },
     { key: '2', text: 'No' }
   ];
-    
+
+  const loadApprovers = async () => {
+
+  const data = await service.getDepartmentApprovers(
+    form.Department,
+    form.Advancepayment   // Yes / No
+  );
+
+  console.log("Department Data:", data);
+
+//  
+
+const approvalPaths = data.map((item: any) => {
+    const pathArray = [
+      item.Approval1?.Title,
+      item.Approval2?.Title,
+      item.Approval3?.Title
+    ].filter(Boolean);
+
+    const path = pathArray
+      .map((name, index) => `${index + 1}.${name}`)
+      .join(" > ");
+
+    return {
+      key: path,
+      text: path
+    };
+  });
+
+// const handleApprovalPathChange = (option: { key: string, text: string } | undefined) => {
+//   if (!option) return;
+
+//   const path = option.key;  // e.g. "1.AP Automation > 2.Workflow1 > 3.Wotkflow2"
+//   const parts = path.split(' > ');
+//   const approvals = parts.map(p => p.replace(/^\d+\./, '').trim());
+
+//   setForm(prev => ({
+//     ...prev,
+//     ApprovalPath: path,
+//     Approval1: approvals[0] || '',
+//     Approval2: approvals[1] || '',
+//     Approval3: approvals[2] || ''
+//   }));
+// };
+
+
+
+
+  // Duplicate remove karne ke baad set karo:
+  const uniquePaths = Array.from(
+    new Map(approvalPaths.map(item => [item.key, item])).values()
+  );
+
+  setApproverOptions(uniquePaths);
+};
  
  // 🔹 Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -251,6 +330,23 @@ const loadAttachments = async (id:number) => {
      [name]: value
    });
   };
+
+const handleSaveHistory = async (id: number) => {
+
+  const currentuser = await service.getUser();
+
+  const payload = {
+    Title: 'QANEIBT',
+    FID: id,  
+    UserName: currentuser.Title,
+    UserAction: 'Request Initiator',
+    ActionDate: new Date().toISOString(),
+     Designation: 'Request Initiator',
+  };
+
+  await service.createHistoryItem(payload);
+};
+
    const handleSaveOrUpdate = async () => {
   // 🔹 Validations
   
@@ -281,9 +377,10 @@ const loadAttachments = async (id:number) => {
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
-      Approval1:form.approver1,
-       Approval2:form.approver2,
-        Approval3:form.approver3,
+      AssignedTo: Number(form.Approval1Id),  // ✅ must be numeric ID
+  Approval1: Number(form.Approval1Id),
+  Approval2: Number(form.Approval2Id ),
+  Approval3: Number(form.Approval3Id ),
       CurrentStatus:'Draft'
    
   };
@@ -300,6 +397,9 @@ const loadAttachments = async (id:number) => {
         }
       }
       alert("Data Saved Successfully ✅");
+       await service.updateItem(res.Id, {
+          RequestNo: `NEI-${res.Id}`
+        });
     } else {
       // 🔹 UPDATE
       await service.updateItem(itemId, payload);
@@ -352,7 +452,8 @@ const handleUpdate = async () => {
     if (itemId) {
       // 🔥 UPDATE
      await service.updateItem(itemId, payload);
-    if (form.files && form.files.length > 0) {
+        await handleSaveHistory(itemId);
+     if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(itemId, form.files[i]);
       }
@@ -366,12 +467,45 @@ const handleUpdate = async () => {
     alert("Error occurred");
   }
 };
-    return (
-      <div className={styles.container}>
 
-        {/* LEFT FORM */}
-        <div className={styles.leftPanel}>
-          <h4>Quotation Approval Form-NEI BT Admin</h4>
+const handleApprovalPathChange = (option?: IDropdownOption) => {
+  if (!option) return;
+
+  const idPath = String(option.key);   // IDs
+  const namePath = option.text as string; // Names
+
+  // 🔹 IDs extract
+  const ids = idPath.split(' > ').map(p =>
+    Number(p.replace(/^\d+\./, '').trim())
+  );
+
+  // 🔹 Names extract
+  const names = namePath.split(' > ').map(p =>
+    p.replace(/^\d+\./, '').trim()
+  );
+setForm(prev => ({
+  ...prev,
+  ApprovalPath: namePath,
+  Approval1: names[0] || '',
+  Approval2: names[1] || '',
+  Approval3: names[2] || '',
+  Approval1Id: ids[0] || null,
+  Approval2Id: ids[1] || null,
+  Approval3Id: ids[2] || null
+}));
+ 
+};
+    return (
+     <div className={styles.container}>
+               <div className={styles.header}>
+                 <h4>Quotation Approval Form - NEI BT Admin </h4>          
+               </div>
+               <div className={styles.row}>
+                 <div className={styles["col-md-9"]}>
+                   <div className={styles.leftPanel}>
+                     <div className={styles.leftPanelHeader}>
+                       <h4>Quotation Approval Form - NEI BT Admin </h4>              
+                     </div>
         
           <label>Project Title <span className={styles.required}>*</span></label>
           <input name="ProjectTitle" value={form.ProjectTitle}  onChange={handleChange}  />
@@ -395,45 +529,26 @@ const handleUpdate = async () => {
           <input name="Vendor1" value={form.Vendor1} onChange={handleChange}  /> */}
 
         <label>Vendor1 <span className={styles.required}>*</span></label>
-              <select name="vendorName" value={form.Vendor1} onChange={(e) =>setForm(prev => ({
-              ...prev,Vendor1: e.target.value}))} >
-               <option value="">Select Vendor</option>
-          <option value="Vendor1">Vendor 1</option>
-          <option value="Vendor2">Vendor 2</option>
-        </select>
+        <input name="Vendor1" value={form.Vendor1}  onChange={handleChange} />  
 
            <label>Vendor2 <span className={styles.required}>*</span></label>
-              <select name="vendorName" value={form.Vendor2} onChange={(e) =>setForm(prev => ({
-              ...prev,Vendor2: e.target.value}))} >
-               <option value="">Select Vendor</option>
-          <option value="Vendor1">Vendor 1</option>
-          <option value="Vendor2">Vendor 2</option>
-        </select>
+            <input name="Vendor2" value={form.Vendor2}  onChange={handleChange} />    
 
         <label>Vendor3 <span className={styles.required}>*</span></label>
-              <select name="vendorName" value={form.Vendor3} onChange={(e) =>setForm(prev => ({
-              ...prev,Vendor3: e.target.value}))} >
-               <option value="">Select Vendor</option>
-          <option value="Vendor1">Vendor 1</option>
-          <option value="Vendor2">Vendor 2</option>
-        </select>
+        <input name="Vendor3" value={form.Vendor3}  onChange={handleChange} />  
+      
 
           <label>Quote 1 <span className={styles.required}>*</span></label>
-          <input name="Quote1" value={form.Quote1} onChange={handleChange} />
+          <input name="Quote1" value={form.Quote1} type='number' onChange={handleChange} />
 
           <label>Quote 2</label>
-          <input name="Quote2" value={form.Quote2} onChange={handleChange} />
+          <input name="Quote2" value={form.Quote2} type='number' onChange={handleChange} />
 
           <label>Quote 3</label>
-          <input name="Quote3" value={form.Quote3} onChange={handleChange} />
+          <input name="Quote3" value={form.Quote3} type='number' onChange={handleChange} />
 
          <label>Select Vendor <span className={styles.required}>*</span></label>
-              <select name="vendorName" value={form.Selectedvendor} onChange={(e) =>setForm(prev => ({
-              ...prev,vendorName: e.target.value}))} >
-               <option value="">Select Vendor</option>
-          <option value="Vendor1">Vendor 1</option>
-          <option value="Vendor2">Vendor 2</option>
-        </select>
+        <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
 
           <label>Selected Quote <span className={styles.required}>*</span></label>
           <input name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} />
@@ -468,9 +583,27 @@ const handleUpdate = async () => {
               }));
             }}
           />
-          <label>Approval Path <span className={styles.required}>*</span></label>
-          <input name="ApprovalPath" value={form.ApprovalPath} onChange={handleChange} readOnly   />
-             
+          
+
+
+{/* <Dropdown
+  placeholder="Select Approver"
+  options={ApproverOptions}
+  selectedKey={form.ApprovalPath}   // ✅ correct binding
+  onChange={(e, option) =>
+    setForm(prev => ({
+      ...prev,
+      ApprovalPath: option?.key as ''  // ✅ ID store karo
+    })) 
+  }
+/> */}
+  <label>Approval Path</label>
+ <Dropdown
+      placeholder="Select Approver"
+      options={ApproverOptions}
+      selectedKey={form.ApprovalPath}
+      onChange={(e, option) => handleApprovalPathChange(option)} // ✅ Works now
+    />
  <label>Attachments <span className={styles.required}>*</span></label>
        <input type="file" multiple onChange={handleFileChange}  />
         {/*  Existing Files (API se) */}
@@ -534,22 +667,35 @@ const handleUpdate = async () => {
           <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
           </div>
         </div>
+        </div>
 
-        {/* RIGHT PANEL */}
-        <div className={styles.rightPanel}>
+         <div className={styles['col-md-3']}>
+        <div className={styles.leftPanelHeader}>
+             
+        </div>        
+      <div className={styles.rightPanel}>        
           {/* Templates */}
           <div className={styles.card}>
-            <h4>Templates</h4>
-            <ul>
-              <li>Quotation_Approval_Form_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services-CKBCS.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
-            </ul>
+             <div>
+              <h6>Templates</h6>              
+            </div>
+            <ol>
+             <li>
+      <a 
+        href="Downloads/CKBCSL_VENDOR_LIST_11.06.18.xlsx" 
+        target="_blank" 
+        rel="noopener noreferrer"
+      >
+      
+      </a>
+    </li>
+            </ol>
           </div>
-
           {/* Guidelines */}
           <div className={styles.card}>
-            <h4>Important Guidelines</h4>
+             <div>
+              <h6>Importance Guidelines</h6>              
+            </div>
             <ol>
               <li>Select approval path carefully.</li>
               <li>Use project reference if needed.</li>
@@ -559,6 +705,9 @@ const handleUpdate = async () => {
           </div>
         </div>
       </div>
+      </div>
+      </div>
+    
    );
 };
 
