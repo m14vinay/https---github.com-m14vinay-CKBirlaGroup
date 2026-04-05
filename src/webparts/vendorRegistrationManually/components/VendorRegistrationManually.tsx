@@ -455,9 +455,9 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                     </div>
                   </div>
                   <div className={styles['btn-group']}>
-                    <button className={styles.btnSubmit}>Submit</button>&nbsp;
-                    <button className={styles.btnSave}>Save</button>&nbsp;
-                    <button className={styles.btnCancel}>Cancel</button>
+                    <button className={styles.submitBtn}>Submit</button>&nbsp;
+                    <button className={styles.submitBtn}>Save</button>&nbsp;
+                    <button className={styles.cancelBtn}>Cancel</button>
                   </div>
                 </div>
               </div>
