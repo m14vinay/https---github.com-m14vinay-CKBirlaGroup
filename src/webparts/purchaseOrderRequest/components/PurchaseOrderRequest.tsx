@@ -39,6 +39,8 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const service = new SharePointService(props.context);
   const [attachments, setAttachments] = React.useState<any[]>([]);
   const[occupiedAmount,setoccupiedAmount]=React.useState(0);
+  const [loading, setLoading] = React.useState(false);
+  
   const MAX_TOTAL_SIZE_MB = 25;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
     
@@ -228,9 +230,16 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
   try {
     const result = await service.getRequestDetails(value);
-
+   let total=0;
     if (result.length > 0) {
       const item = result[0];
+      const OccupiedAmount = await service.getTotaloccupiedAmount(value);
+      let total = 0;
+      if (OccupiedAmount.length > 0) {
+        total = OccupiedAmount.reduce((sum: number, item: any) => {
+          return sum + Number(item.POAmount || 0);
+        }, 0);
+      }
         if (item.Status === 'Approved') {
       // 👉 Form fields update
       setForm(prev => ({
@@ -475,7 +484,7 @@ const validatePO = (value: string) => {
             <h4>PO Approval Form </h4>          
           </div>
           <div className={styles.row}>
-            <div className={styles["col-md-9"]}>
+            <div className={styles['col-md-9']}>
               <div className={styles.leftPanel}>
                 <div className={styles.leftPanelHeader}>
                   <h4>PO Approval Form</h4>              
