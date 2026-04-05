@@ -373,6 +373,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                           <div className={styles["accordion-body"]}>
                             <div className={styles['col-md-12']}>
                            <div className="form-group">
+                              <div className={styles["form-group" as keyof typeof styles]}>
                                 <label>Partnership Deed or Memorandum of Article of Association</label>
                                 <input name="files" type="file" multiple />
                               </div>
@@ -483,7 +484,9 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
             </div>
           </div>
         </div>
-      </section>
+        </div>
+        </section>
+      
     );
   }
 }
