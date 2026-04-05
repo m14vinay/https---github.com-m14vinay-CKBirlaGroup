@@ -34,7 +34,7 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
     columnHelper.accessor('ProjectTitle', {
       header: () => 'Project Title'
     }),
-    columnHelper.accessor('Title', {
+    columnHelper.accessor('ProjectReffNo', {
       header: () => 'Project Ref No.'
     }),
     columnHelper.accessor('Department', {
@@ -43,43 +43,43 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
     columnHelper.accessor('Description', {
       header: 'Description'
     }),
-    columnHelper.accessor('Status', {
+    columnHelper.accessor('CurrentStatus', {
       header: 'Status'
     }),
-    columnHelper.accessor(row => user?.Title, {
+    columnHelper.accessor('Created', {
       header: 'Submitted Date'
     }),
-    columnHelper.accessor(row => user?.Title, {
+    columnHelper.accessor('', {
       header: 'Approved Date'
     }),
-    columnHelper.accessor(row => user?.Title, {
+    columnHelper.accessor('ProjectCode', {
       header: 'Project Code'
     }),
-    columnHelper.accessor(row => user?.Title, {
+    columnHelper.accessor('', {
       header: 'Approval Path'
     }),
-    columnHelper.accessor(row => user?.Title, {
+    columnHelper.accessor('AssignedTo', {
       header: 'Approved Pending On'
     }),
-    columnHelper.accessor('BillAmount', {
+    columnHelper.accessor('', {
       header: 'Approval Pending Date'
     }),
-    columnHelper.accessor(row => user?.Title, {
+    columnHelper.accessor('VendorRequestNo', {
       header: 'Vendor Req No.'
     }),
-    columnHelper.accessor(row => user?.Title, {
+    columnHelper.accessor('VendorCode', {
       header: 'Vendor Code'
     }),
-    columnHelper.accessor(row => user?.Title, {
+    columnHelper.accessor('VendorName', {
       header: 'Vendor Name'
     }),
-    columnHelper.accessor(row => user?.Title, {
+    columnHelper.accessor('PORequestNo', {
       header: 'PO Request No.'
     }),
-    columnHelper.accessor(row => user?.Title, {
+    columnHelper.accessor('', {
       header: 'Requestor Name'
     }),
-    columnHelper.accessor(row => user?.Title, {
+    columnHelper.accessor('BillAmount', {
       header: 'Bill Amount'
     })
   ]
@@ -259,10 +259,10 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
               <button className={styles.btnSearch} onClick={handlesearch} style={{ marginTop: "10px" }}>Search</button>
             </div>
             <div className={styles['col-md-6']} style={{ width: "22%", paddingTop: "10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
-              <button className={styles.btnSearch} onClick={handleExcel}>Export to Excel</button>
+              <button className={styles.btnExport} onClick={handleExcel}>Export to Excel</button>
             </div>
             <div className={styles['col-md-6']} style={{ paddingTop: "10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
-              <button className={styles.btnSearch} onClick={handleCSV}>Export to CSV</button>
+              <button className={styles.btnExport} onClick={handleCSV}>Export to CSV</button>
             </div>
           </div>
         </div>

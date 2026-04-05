@@ -52,8 +52,15 @@
   padding: 8px 30px;
 }
 
-.searchBox .btnSearch {
+.searchBox .btnExport {
   background-color: #25da67;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 15px;
+}
+searchBox .btnSearch {
+  background-color: lightblue;
   border: none;
   border-radius: 5px;
   color: #fff;
