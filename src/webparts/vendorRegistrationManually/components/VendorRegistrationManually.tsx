@@ -56,79 +56,79 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                         <div id="panelsStayOpen-collapseOne" className="accordion-collapse collapse show">
                           <div className={styles["accordion-body"]}>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Name of the Vendor</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Year of Establishment</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Date of Commencement of Business</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>GST</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>PAN</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>TIN</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Central Sales Tax No.</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Service Tax Regd No.</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Nature of Services/Goods</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>MSME Registration No.</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>ESIC No.</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Excise Registration No.</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Work Contract Tax No</label>
                                 <input className='form-control' type='text' />
                               </div>
@@ -145,31 +145,31 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                         <div id="panelsStayOpen-collapseTwo" className="accordion-collapse collapse">
                           <div className={styles["accordion-body"]}>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Full Address</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Telephone No.</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Fax No.</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Email ID</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Contacted Person</label>
                                 <input className='form-control' type='text' />
                               </div>
@@ -186,31 +186,31 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                         <div id="panelsStayOpen-collapseThree" className="accordion-collapse collapse">
                           <div className={styles["accordion-body"]}>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Registered Full Address</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Registered Telephone No.</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Registered Fax No.</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Registered Email ID</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Registered Contacted Person</label>
                                 <input className='form-control' type='text' />
                               </div>
@@ -227,7 +227,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                         <div id="panelsStayOpen-collapseFour" className="accordion-collapse collapse">
                           <div className={styles["accordion-body"]}>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Whether Proprietary or Partnership firm or Pvt. Ltd. Or Public Ltd.</label>
                                 <input className='form-control' type='text' />
                               </div>
@@ -244,31 +244,31 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                         <div id="panelsStayOpen-collapseFive" className="accordion-collapse collapse">
                           <div className={styles["accordion-body"]}>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Manufacturer</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Authorized Agent</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Trader</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Consulting</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Other(Specify)</label>
                                 <input className='form-control' type='text' />
                               </div>
@@ -285,19 +285,19 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                         <div id="panelsStayOpen-collapseSix" className="accordion-collapse collapse">
                           <div className={styles["accordion-body"]}>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Name</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Address</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Contact No.</label>
                                 <input className='form-control' type='text' />
                               </div>
@@ -314,7 +314,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                         <div id="panelsStayOpen-collapseSeven" className="accordion-collapse collapse">
                           <div className={styles["accordion-body"]}>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Details (if any)</label>
                                 <input className='form-control' type='text' />
                               </div>
@@ -331,31 +331,31 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                         <div id="panelsStayOpen-collapseEight" className="accordion-collapse collapse">
                           <div className={styles["accordion-body"]}>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Bank Name</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Branch Address</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Name as appearing in account</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Bank Account No.</label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Bank IFSC/MICR code</label>
                                 <input className='form-control' type='text' />
                               </div>
@@ -372,79 +372,79 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                         <div id="panelsStayOpen-collapseNine" className="accordion-collapse collapse">
                           <div className={styles["accordion-body"]}>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Partnership Deed or Memorandum of Article of Association</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>MSME Registration Certificate</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Factory License</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>ISO 9001 Certificates</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Bank IFSC/MICR code</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Copy of Pan</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Service Tax Registration</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>VAT/CST Registration</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                           <div className="form-group">
                                 <label>Telephone and Electricity Bill</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                              <div className="form-group">
                                 <label>Name and Address of All Partners/ Directors</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                            <div className="form-group">
                                 <label>Cancelled cheque</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                          <div className="form-group">
                                 <label>Registration Certificate with any other authority (if required)</label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
-                              <div className={styles['form-group']}>
+                             <div className="form-group">
                                 <label>Any other document (as per the nature of the transaction/vendor)</label>
                                 <input name="files" type="file" multiple />
                               </div>
@@ -455,9 +455,9 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                     </div>
                   </div>
                   <div className={styles['btn-group']}>
-                    <button className={styles.submitBtn}>Submit</button>&nbsp;
-                    <button className={styles.submitBtn}>Save</button>&nbsp;
-                    <button className={styles.cancelBtn}>Cancel</button>
+                    <button className={styles.btnSubmit}>Submit</button>&nbsp;
+                    <button className={styles.btnSubmit}>Save</button>&nbsp;
+                    {/* <button className={styles.btnCancel}>Cancel</button> */}
                   </div>
                 </div>
               </div>

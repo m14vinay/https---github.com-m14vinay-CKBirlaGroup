@@ -150,7 +150,7 @@ const loadAttachments = async (id:number) => {
 // } else {
 //   setIsDisabled(true);   // disable
 // }
-     setAssignedID(currentuser.Title);
+    // setAssignedID(currentuser.Title);
        
     } else {
       alert("No data found");
@@ -358,7 +358,11 @@ const handleSaveHistory = async (id: number) => {
     if(!form.Department) return alert("Select Department Name");
     if(!form.Advancepayment) return alert("Select Advance Payemnt");
      if (!form.files || form.files.length === 0) return alert("Attach files");
-
+const User=await service.getUserById(Number(form.Approval1Id));
+  if(User?.Id)
+  {
+  setAssignedID(User.Title);
+  }
   // 🔹 Payload (common)
   const payload = {
     ProjectTitle: form.ProjectTitle,
@@ -377,11 +381,11 @@ const handleSaveHistory = async (id: number) => {
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
-      AssignedTo: Number(form.Approval1Id),  // ✅ must be numeric ID
-  Approval1: Number(form.Approval1Id),
-  Approval2: Number(form.Approval2Id ),
-  Approval3: Number(form.Approval3Id ),
-      CurrentStatus:'Draft'
+      AssignedTo: AssignedID,  // ✅ must be numeric ID
+  Approval1Id: Number(form.Approval1Id),
+  Approval2Id: Number(form.Approval2Id ),
+  Approval3Id: Number(form.Approval3Id ),
+  CurrentStatus:'Draft'
    
   };
 
@@ -493,7 +497,6 @@ setForm(prev => ({
   Approval2Id: ids[1] || null,
   Approval3Id: ids[2] || null
 }));
- 
 };
     return (
      <div className={styles.container}>

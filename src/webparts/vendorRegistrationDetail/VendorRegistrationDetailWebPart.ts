@@ -119,12 +119,15 @@ export default class VendorRegistrationDetailWebPart extends BaseClientSideWebPa
      ReactDom.unmountComponentAtNode(this.domElement);
    }
  
-   private _dataVersion: Version = Version.parse('1.0');
-   protected get dataVersion(): Version {
-     return this._dataVersion;
-   }
-   
+  //  private _dataVersion: Version = Version.parse('1.0');
+  //  protected get dataVersion(): Version {
+  //    return this._dataVersion;
+  //  }
+   //protected dataVersion: Version = Version.parse('1.0');
 
+   protected get dataVersion(): Version {
+  return Version.parse('1.0');
+}
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [

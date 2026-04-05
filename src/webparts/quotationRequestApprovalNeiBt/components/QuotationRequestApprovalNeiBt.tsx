@@ -37,6 +37,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     approver5: '',
     ActionDate1:'',
     ActionDate2:'',
+     ActionDate3:'',
     DepartmentHead: '',
     RequestNo:''
    
@@ -47,7 +48,8 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     const [approverComment, setApproverComment] = React.useState('');
      const [approverComment2, setApproverComment2] = React.useState('');
     const [attachments, setAttachments] = React.useState<any[]>([]);
-     const [AssignedID, setAssignedID] = React.useState<number | null>(null);
+     const [AssignedID2, setAssignedID2] = React.useState('');
+     const [AssignedID3, setAssignedID3] = React.useState('');
     const [approver1, setApprover1] = React.useState('');
     const [approver2, setApprover2] = React.useState('');
     const [approver3, setApprover3] = React.useState('');
@@ -117,7 +119,21 @@ const handleFetchById = async (id: number) => {
       console.log("Calling API with ID:", id);
       const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
-
+      if (result.Approval2Id) {
+  const user2 = await service.getUserById(result.Approval2Id);
+  if (user2?.Title) {
+    setAssignedID2(user2.Title);
+  }
+}
+if (result.Approval3Id) {
+  const user3 = await service.getUserById(result.Approval3Id);
+  if (user3?.Title) {
+    setAssignedID3(user3.Title);
+  }
+}
+        const User=await service.getUserById(result.Approval2Id);
+    const historydata=await service.GetHistoryItem(id,"QANEIBT");
+     setHistory(historydata); 
       console.log("Result:", result);
 
        if (result.AssignedTo === currentuser.Title) {
@@ -145,6 +161,9 @@ const handleFetchById = async (id: number) => {
       RequestNo : result.RequestNo || '',
       files: null
       }));
+   
+
+
   if (!result.ActionDate1 || !result.ActionDate2 || !result.ActionDate3) {
   setIsDisabled(false);  // enable
 } else {
@@ -163,13 +182,47 @@ const handleFetchById = async (id: number) => {
 };
 
 
+const handleSaveApproveHistory = async (id: number) => {
+
+  const currentuser = await service.getUser();
+
+  const payload = {
+    Title: 'QANEIBT',
+    FID: id,  
+    UserName: currentuser.Title,
+    UserAction: 'Approved',
+    ActionDate: new Date().toISOString(),
+     Designation: currentuser.JobTitle, 
+  };
+
+  await service.createHistoryItem(payload);
+};
+
+const handleSaveRejectedHistory = async (id: number) => {
+
+  const currentuser = await service.getUser();
+
+  const payload = {
+    Title: 'QANEIBT',
+    FID: id,  
+    UserName: currentuser.Title,
+    UserAction: 'Rejected',
+    ActionDate: new Date().toISOString(),
+     Designation: currentuser.JobTitle, 
+  };
+
+  await service.createHistoryItem(payload);
+};
+
+
   const handleApprove = async () => {
   try {
        if (!approverComment) return alert("Approver Comment required");
     if (!itemId) return;
 if(form.ActionDate1==='')
      {
-      await service.updateItemdata(itemId, "Approved", approverComment,form.approver2 || '');
+      await service.updateItemdata(itemId, "Approved", approverComment,AssignedID2);
+        await handleSaveApproveHistory(itemId);
         alert("✅ First level approved");
  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url); 
@@ -177,7 +230,17 @@ if(form.ActionDate1==='')
      }
      else if(form.ActionDate2==='')
      {
-       await service.updateItemdata2(itemId, "Approved",approverComment,'Approved');
+       await service.updateItemdata2(itemId, "Approved",approverComment,AssignedID3);
+       await handleSaveApproveHistory(itemId);
+       alert("✅ Second approval done");
+       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url); 
+      return; // 🔥 stop again
+    }
+    else if(form.ActionDate3==='')
+     {
+       await service.updateItemdata2(itemId, "Approved",approverComment,"Approved");
+       await handleSaveApproveHistory(itemId);
        alert("✅ Final approval done");
        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url); 
@@ -205,6 +268,7 @@ const handleReject = async () => {
    if(form.ActionDate1==='')
       {
       await service.updateItemdata(itemId, "Rejected", approverComment,"Rejected");
+        await handleSaveRejectedHistory(itemId);
         alert("✅ First level Rejected successfully");
          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url); 
@@ -214,7 +278,18 @@ const handleReject = async () => {
        else if(form.ActionDate2==='')
      {
        await service.updateItemdata2(itemId, "Rejected", approverComment,'Rejected');
-        alert("✅ Final Rejection done");
+         await handleSaveRejectedHistory(itemId);
+        alert("✅ Second level Rejected successfully");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+     window.location.assign(url); 
+      return; // 🔥 stop again
+       
+     }
+      else if(form.ActionDate2==='')
+     {
+       await service.updateItemdata3(itemId, "Rejected", approverComment,"Rejected");
+         await handleSaveRejectedHistory(itemId);
+        alert("✅ Final level Rejected successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url); 
       return; // 🔥 stop again
@@ -227,16 +302,6 @@ const handleReject = async () => {
     console.error(error);
   }
 };
-
-  // 🔹 Handle change
-  const handleChange = (field: keyof IForm, value: any) => {
-    setForm({ ...form, [field]: value });
-  };
- 
-//  // 🔹 File upload
-//   const handleFile = (e: any) => {
-//     setForm({ ...form, files: Array.from(e.target.files) });
-//   };
 
   
     
@@ -255,27 +320,6 @@ const handleReject = async () => {
               <label style={{fontWeight: "bold"}}>Quotation Approval NEI BT Admin-{form.RequestNo} </label>
             </div>
             
-   <div className={styles.leftPanelStatusHeader}>
-                        {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-    let statusClass = styles.statusBox;
-    if (item.UserAction === "Approved") {
-      statusClass = `${styles.statusBox}`;    
-    } 
-    else if (item.UserAction === "Rejected") {
-      statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-    }
-
-    return (
-      <div className={statusClass} key={index}>
-        <div className={styles.content}>
-          <h5>{item.UserName}</h5>
-          <h6>{item.Designation}</h6>
-          <h4>{item.UserAction}</h4>
-        </div>
-      </div>
-    );
-  })}
-             </div>
           <label>Project Title</label>
           <input name="ProjectTitle" value={form.ProjectTitle} readOnly style={{backgroundColor:"lightgray"}} />
 
@@ -400,7 +444,17 @@ const handleReject = async () => {
                  </span>
                </span>
              )}
-             {item.ActionDate && <span><b>Action Date: </b>{item.ActionDate}</span>}
+            {item.ActionDate && ( <span><b>Action Date: </b>
+    {new Date(item.ActionDate).toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).replace(',', ' at')}
+  </span>
+)}
              {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
            </li>
          );

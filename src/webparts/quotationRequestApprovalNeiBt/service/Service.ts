@@ -7,6 +7,7 @@ export default class Service {
   private VendorList="";
 private FinanceController="FinanceController";
    private HistoryList="History";
+    private DepartmentmasterNEBT ="DepartmentMasterNEI";
 
   constructor(context: any) {
     this.context = context;
@@ -112,6 +113,30 @@ private FinanceController="FinanceController";
 
 
   public async updateItemdata2(id: number,status:string, comments: string,Assigned:string): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;",
+          "Content-Type": "application/json;",
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "MERGE"
+        },
+        body: JSON.stringify({
+        CurrentStatus: status,
+         ApproverComment2: comments,
+         ActionDate2: new Date().toISOString(),
+         AssignedTo: Assigned
+         
+     })
+      }
+    );
+  }
+
+  public async updateItemdata3(id: number,status:string, comments: string,Assigned:string): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
     await this.context.spHttpClient.post(

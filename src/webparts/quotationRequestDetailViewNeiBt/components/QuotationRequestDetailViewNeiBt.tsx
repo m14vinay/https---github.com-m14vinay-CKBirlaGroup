@@ -337,7 +337,17 @@ const handleFetchById = async (id: number) => {
             </span>
           </span>
         )}
-        {item.ActionDate && <span><b>Action Date: </b>{item.ActionDate}</span>}
+       {item.ActionDate && ( <span><b>Action Date: </b>
+    {new Date(item.ActionDate).toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).replace(',', ' at')}
+  </span>
+)}
         {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
       </li>
     );

@@ -117,7 +117,7 @@ const [History, setHistory] = useState<any[]>([]);
        const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
    const User=await service.getUserById(result.Approver2Id);
-     const historydata=await service.GetHistoryItem(id,"VMR");
+     const historydata=await service.GetHistoryItem(id,"PO");
      setHistory(historydata);
    console.log("Result:", result);
 
@@ -258,7 +258,7 @@ const handleSaveRejectedHistory = async (id: number) => {
       }
        else if(form.ActionDate2==='')
      {
-       await service.updateItemdata2(itemId, "Rejected", approverComment,'Rejected');
+       await service.updateItemdata2(itemId, "Rejected", approverComment,"Rejected");
          await handleSaveRejectedHistory(itemId);
        alert("✅ Final Rejection done");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -413,7 +413,17 @@ const handleSaveRejectedHistory = async (id: number) => {
             </span>
           </span>
         )}
-        {item.ActionDate && <span><b>Action Date: </b>{item.ActionDate}</span>}
+        {item.ActionDate && ( <span><b>Action Date: </b>
+    {new Date(item.ActionDate).toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).replace(',', ' at')}
+  </span>
+)}
         {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
       </li>
     );
