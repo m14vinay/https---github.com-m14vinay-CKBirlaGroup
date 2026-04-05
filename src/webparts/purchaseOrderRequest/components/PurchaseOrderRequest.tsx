@@ -487,7 +487,7 @@ const validatePO = (value: string) => {
         <ChoiceGroup
   label="PO Category"
   options={poOptions}
-  selectedKey={poOptions.find(opt => opt.text === form.PoMaster)?.key} // selectedKey ko key set karo based on text match
+  selectedKey={poOptions.find(opt => opt.text === form.PoMaster)?.key}
   onChange={(_, option) => {
     setForm(prev => ({
       ...prev,
