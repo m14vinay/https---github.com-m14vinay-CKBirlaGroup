@@ -156,7 +156,7 @@ const handleFetchById = async (id: number) => {
       <div className={statusClass} key={index}>
         <div className={styles.content}>
           <h5>{item.UserName}</h5>
-          <h6>{item.Designation}</h6>
+          <h6>{'NA'}</h6>
           <h4>{item.UserAction}</h4>
         </div>
       </div>
@@ -226,6 +226,7 @@ const handleFetchById = async (id: number) => {
       >
         <span className={styles.spanHeader} style={{fontSize:"bold"}}>{item.Designation}</span>
         <span><b>{isInitiated?"Initiator":"Approver Name:"} </b>{item.UserName}</span>
+       
         {item.UserAction && (
           <span>
             <b>Action Taken:{" "}</b>
