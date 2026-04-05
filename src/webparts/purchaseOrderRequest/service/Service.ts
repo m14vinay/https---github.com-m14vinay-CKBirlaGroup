@@ -117,6 +117,22 @@ private async getListItemType(): Promise<string> {
 
  return data.value;
 }
+// Get Total Occupied Amount
+public async getTotaloccupiedAmount (requestNo: string) :Promise<any> {
+ 
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=ProjectCode eq '${requestNo}'`;
+
+    console.log("URL:",url)  
+  const response = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+
+ const data = await response.json();
+
+ return data.value;
+}
+
   // Upload Files
 
   public async uploadFile(itemId: number, file: File): Promise<void> {

@@ -5,7 +5,7 @@ import { SPHttpClient } from '@microsoft/sp-http';
 import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
 import SharePointService from '../service/Service';
 import { PageContext } from '@microsoft/sp-page-context';
-
+import { Spinner, SpinnerSize } from '@fluentui/react';
 const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
   // State
@@ -29,15 +29,16 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     POrequestNo:'',
     CurrentStatus:''
   });
-
+  const [loading, setLoading] = React.useState(false);
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
   const [FinanceController, setApprover2ID] = React.useState<number | null>(null);
   const [AssignedID, setAssignedID] = React.useState<number | null>(null);
   const [Departmenthead, setDepartmentHead] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
-     const [attachments, setAttachments] = React.useState<any[]>([]);
-    const MAX_TOTAL_SIZE_MB = 25;
+  const [attachments, setAttachments] = React.useState<any[]>([]);
+  const[occupiedAmount,setoccupiedAmount]=React.useState(0);
+  const MAX_TOTAL_SIZE_MB = 25;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
     
 
@@ -188,6 +189,20 @@ const resetFields = () => {
   setDepartmentHead(null);
 };
 
+const handlecheckamount=async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = e.target;
+  setForm({
+    ...form,
+    [name]: value
+  });
+  if(Number(value)>(form.RemainingAmount))
+  {setForm(prev => ({
+    ...prev,
+    POAmount:0
+  }));
+    alert("Please Enter PO Amount less or equal to Remaining Amount.");
+  }
+}
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value;
 
@@ -206,15 +221,26 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
     if (result.length > 0) {
       const item = result[0];
-      
+      const OccupiedAmount=await service.getTotaloccupiedAmount(value);
+      let total = 0;
+      if(OccupiedAmount.length>0)
+      {
+        total = OccupiedAmount.reduce((sum: number, item: any) => {
+    return sum + Number(item.POAmount || 0);
+  }, 0);
+      }
+      setoccupiedAmount(total);
       // 👉 Form fields update
       setForm(prev => ({
         ...prev,
         Department: item.Department || '',
         projectTitle: item.ProjectTitle || '',
-        vendorName: item.Selectedvendor || ''
+        vendorName: item.Selectedvendor || '',
+        TotalAmount:item.TotalProjectAmount || 0,
+        OccupiedAmount:total||0,
+        RemainingAmount:item.TotalProjectAmount-total
       }));
-
+      
       // 👉 Approver API call
       const data = await service.GetApprover(item.Department);
       if (data?.Id > 0) {                
@@ -280,6 +306,7 @@ const getPOCategoryText = () => {
 //SAVE DRAFT DATA
 
   const handleSaveOrUpdate = async () => {
+    setLoading(true);
   // 🔹 Validations
   if(!form.projectCode) return alert("Project Code required");
     if(!form.POAmount) return alert("Enter POAmount");
@@ -343,12 +370,17 @@ const getPOCategoryText = () => {
     console.error(error);
     alert("Error occurred ❌");
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
 
   
 
 // Update
 const handleUpdate = async () => {
+  setLoading(true);
    if(!form.projectCode) return alert("Project Code required");
   if(!form.POAmount) return alert("Enter POAmount");
     if(!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
@@ -400,6 +432,10 @@ const handleUpdate = async () => {
     console.error(error);
     alert("Error occurred");
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
 
 
@@ -434,19 +470,19 @@ const validatePO = (value: string) => {
         <input name="VendorName" value={form.vendorName} readOnly />
 
         <label>Total Amount</label>
-        <input name="TotalAmount" value={form.TotalAmount} onChange={handleChange} />
+        <input name="TotalAmount" value={form.TotalAmount} readOnly />
 
         <label>Occupied Amount</label>
-        <input name="OccupiedAmount" value={form.OccupiedAmount} onChange={handleChange} />
+        <input name="OccupiedAmount" value={form.OccupiedAmount} readOnly />
 
         <label>Remaining Amount</label>
-        <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange} />
+        <input name="RemainingAmount" value={form.RemainingAmount} readOnly />
 
         <label>PO Amount <span className={styles.required}>*</span></label>
-        <input name="POAmount" value={form.POAmount} onChange={handleChange} />
+        <input name="POAmount" value={form.POAmount} onChange={handlecheckamount} type='number' />
 
         <label>Applicable Taxes <span className={styles.required}>*</span></label>
-        <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} />
+        <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} type='number' />
 
         <ChoiceGroup
   label="PO Category"
