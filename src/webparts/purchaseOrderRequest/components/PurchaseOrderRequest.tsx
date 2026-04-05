@@ -31,6 +31,28 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     RequestNo:''
   });
  
+const resetForm  = ()=>({
+    projectCode: '',
+    department:'',
+    projectTitle: '',
+    vendorName: '',
+    vendorNameID:'',
+    RemainingAmount: 0,
+    TotalAmount:0,
+    OccupiedAmount:0,
+    Department: '',
+    POAmount: 0,
+    ApplicableTaxes: 0,
+    AssignedTo: '',
+    PoMaster: '',
+    Comments: '',
+   files: [] as File[],
+     Attachments: [],
+    POrequestNo:'',
+    CurrentStatus:'',
+    RequestNo:''
+  });
+
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
   const [FinanceController, setApprover2ID] = React.useState<number | null>(null);
@@ -217,27 +239,24 @@ const handlecheckamount=async (e: React.ChangeEvent<HTMLInputElement>) => {
 }
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value;
-
   setForm(prev => ({
     ...prev,
     projectCode: value
   }));
-
   if (!value) {
-    resetFields();
+    resetForm();
     return;
   }
 
   try {
     const result = await service.getRequestDetails(value);
-   let total=0;
     if (result.length > 0) {
       const item = result[0];
       const OccupiedAmount = await service.getTotaloccupiedAmount(value);
       let total = 0;
       if (OccupiedAmount.length > 0) {
-        total = OccupiedAmount.reduce((sum: number, item: any) => {
-          return sum + Number(item.POAmount || 0);
+        total = OccupiedAmount.reduce((sum: number, items: any) => {
+          return sum + Number(items.POAmount || 0);
         }, 0);
       }
         if (item.Status === 'Approved') {
@@ -268,11 +287,11 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
         }
       }  
     }
-    } else {
+    else {
       alert("This request is not approved ✅");
-      resetFields();
+      resetForm();
     }
-
+    } 
   } catch (error) {
     console.error("Error fetching data:", error);
   }

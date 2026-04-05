@@ -1,13 +1,11 @@
 import * as React from 'react';
-import styles from './QuotationRequestNeiBt.module.scss';
+import styles from './quotationRequestNeiBt.module.scss';
 import type { IQuotationRequestNeiBtProps } from './IQuotationRequestNeiBtProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import { SPHttpClient } from '@microsoft/sp-http';
 import SharePointService from '../service/Service';
 import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
 
-
-//const QuotationRequestNeiBt: React.FC<IQuotationRequestNeiBtProps> = (props) => {
 
   const QuotationRequestNeiBt: React.FC<IQuotationRequestNeiBtProps> = (props) => {
 
@@ -54,17 +52,7 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
  const [AssignedID, setAssignedID] = React.useState<number | null>(null);
     const [itemId, setItemId] = React.useState<number | null>(null);
     const service = new SharePointService(props.context);
-     const [POrequestNo, setPORequestNo] = React.useState('');
-    const [POrequestNoError, setPORequestNoError] = React.useState('');
-    const [department, setDepartment] = React.useState('');
-    const [projectTitle, setProjectTitle] = React.useState('');
-      const [approver1, setApprover1] = React.useState('');
-        const [approver2, setApprover2] = React.useState('');
-        const [approver3, setApprover3] = React.useState('');
-        const [approver4, setApprover4] = React.useState('');
-        const [approver5, setApprover5] = React.useState('');
           const [ApproverOptions, setApproverOptions] = React.useState<any[]>([]);
-        const [departmentHead, setDepartmentHead] = React.useState('');
         const [attachments, setAttachments] = React.useState<any[]>([]);
     const MAX_TOTAL_SIZE_MB = 25;
     const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
@@ -358,7 +346,11 @@ const handleSaveHistory = async (id: number) => {
     if(!form.Department) return alert("Select Department Name");
     if(!form.Advancepayment) return alert("Select Advance Payemnt");
      if (!form.files || form.files.length === 0) return alert("Attach files");
-
+    const User=await service.getUserById(Number(form.Approval1Id));
+  if(User?.Id)
+  {
+  setAssignedID(User.Title);
+  }
   // 🔹 Payload (common)
   const payload = {
     ProjectTitle: form.ProjectTitle,
@@ -377,7 +369,7 @@ const handleSaveHistory = async (id: number) => {
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
-      AssignedTo: Number(form.Approval1Id),  // ✅ must be numeric ID
+      AssignedTo: AssignedID,  // ✅ must be numeric ID
   Approval1: Number(form.Approval1Id),
   Approval2: Number(form.Approval2Id ),
   Approval3: Number(form.Approval3Id ),
