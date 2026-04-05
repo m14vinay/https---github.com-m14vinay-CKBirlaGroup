@@ -25,7 +25,6 @@
   background-color: #fff;
   box-shadow: 0 3px 3px #8e8e8e;
   margin-bottom: 20px;
-
 }
 
 .searchBox h3 {
@@ -118,14 +117,17 @@
   padding: 15px 0;
   width: 60%;
 }
+
 .form .form-group {
   align-items: center;
   display: flex;
   margin-bottom: 15px;
 }
+
 .form .form-group label {
   width: 30%;
 }
+
 .form .form-group input {
   width: 70%;
 }
@@ -163,26 +165,33 @@
   color: #fff;
   padding: 5px 20px;
 }
-.form-group label {
-  display: inline-block;
-  margin-bottom: 0;
-  width: 50%;
-  flex: auto;
-}
 
-.form-group input {
-  height: 34px;
-  padding: 5px 10px;
-}
-.formGroup {
-  display:inline-grid;
-  flex-direction: column;
-  margin-bottom: 12px;
-  padding-left: 10%;
-}
 .btnGroup {
   display: flex;
   gap: 10px;
   margin-top: 15px;
   justify-content: center;
+}
+
+.modal .searchBox {
+  box-shadow: none;
+  padding-bottom: 50px;
+  width: 500px;
+}
+
+.modal .searchBox .formGroup {
+  display: flex;
+  margin-bottom: 10px;
+  padding: 3px 15px;
+}
+
+.modal .searchBox .form-group label.modalLabel {
+  display: inline-block;
+  width: 30%;
+}
+
+.modal .searchBox .form-group input.modalInput {
+  height: 34px;
+  padding: 5px 10px;
+  width: 100%;
 }

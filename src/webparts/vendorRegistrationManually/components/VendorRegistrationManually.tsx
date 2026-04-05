@@ -49,7 +49,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                     <div className="accordion" id="accordionPanelsStayOpenExample">
                       <div className={styles["accordion-item"]}>
                         <h2 className="accordion-header">
-                          <button className={styles['accordion-button']} type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                          <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
                             General Information
                           </button>
                         </h2>
@@ -138,7 +138,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                       </div>
                       <div className={styles["accordion-item"]}>
                         <h2 className="accordion-header">
-                          <button className={`${styles['accordion-button']} ${styles.collapsed}"}`} type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
                             Address of the organization from where material will be supplied/services will be provided
                           </button>
                         </h2>
@@ -179,7 +179,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                       </div>
                       <div className={styles["accordion-item"]}>
                         <h2 className="accordion-header">
-                          <button className={`${styles['accordion-button']} ${styles.collapsed}"}`} type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
                             Address of the Registered Office
                           </button>
                         </h2>
@@ -220,7 +220,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                       </div>
                       <div className={styles["accordion-item"]}>
                         <h2 className="accordion-header">
-                          <button className={`${styles['accordion-button']} ${styles.collapsed}"}`} type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="false" aria-controls="panelsStayOpen-collapseFour">
+                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="false" aria-controls="panelsStayOpen-collapseFour">
                             Constitution of Organization
                           </button>
                         </h2>
@@ -237,7 +237,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                       </div>
                       <div className={styles["accordion-item"]}>
                         <h2 className="accordion-header">
-                          <button className={`${styles['accordion-button']} ${styles.collapsed}"}`} type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFive" aria-expanded="false" aria-controls="panelsStayOpen-collapseFive">
+                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFive" aria-expanded="false" aria-controls="panelsStayOpen-collapseFive">
                             Nature of Business
                           </button>
                         </h2>
@@ -278,7 +278,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                       </div>
                       <div className={styles["accordion-item"]}>
                         <h2 className="accordion-header">
-                          <button className={`${styles['accordion-button']} ${styles.collapsed}"}`} type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSix" aria-expanded="false" aria-controls="panelsStayOpen-collapseSix">
+                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSix" aria-expanded="false" aria-controls="panelsStayOpen-collapseSix">
                             Details of Proprietor / Partners / Directors
                           </button>
                         </h2>
@@ -307,7 +307,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                       </div>
                       <div className={styles["accordion-item"]}>
                         <h2 className="accordion-header">
-                          <button className={`${styles['accordion-button']} ${styles.collapsed}"}`} type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSeven" aria-expanded="false" aria-controls="panelsStayOpen-collapseSeven">
+                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSeven" aria-expanded="false" aria-controls="panelsStayOpen-collapseSeven">
                             Conflict of interest
                           </button>
                         </h2>
@@ -324,7 +324,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                       </div>
                       <div className={styles["accordion-item"]}>
                         <h2 className="accordion-header">
-                          <button className={`${styles['accordion-button']} ${styles.collapsed}"}`} type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseEight" aria-expanded="false" aria-controls="panelsStayOpen-collapseEight">
+                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseEight" aria-expanded="false" aria-controls="panelsStayOpen-collapseEight">
                             Details of Banks Accounts
                           </button>
                         </h2>
@@ -365,7 +365,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                       </div>
                       <div className={styles["accordion-item"]}>
                         <h2 className="accordion-header">
-                          <button className={`${styles['accordion-button']} ${styles.collapsed}"}`} type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseNine" aria-expanded="false" aria-controls="panelsStayOpen-collapseNine">
+                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseNine" aria-expanded="false" aria-controls="panelsStayOpen-collapseNine">
                             Upload Documents
                           </button>
                         </h2>

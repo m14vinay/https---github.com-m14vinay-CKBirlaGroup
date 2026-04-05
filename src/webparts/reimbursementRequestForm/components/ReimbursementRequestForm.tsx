@@ -225,50 +225,47 @@ export default class ReimbursementRequestForm extends React.Component<IReimburse
             </div>
           </div>
         </div>
-        <Modal
+        <Modal 
           isOpen={this.state.isOpen}
           onDismiss={() => this.setState({ isOpen: false })}
-          isBlocking={false}>          
+          isBlocking={false} className={styles.modal}>          
           <div className={styles.searchBox}>
-          <h3>Add Reimbursement Detail</h3>
+            <h3>Add New Reimbursement Detail</h3>
             <div className={styles.formGroup}>
-              <label>Expense Type</label>
-              <input name="expenseType" value={this.state.ExpenseType}>
+              <label style={{width: '30%'}}>Expense Type</label>
+              <input style={{width: '100%'}} name="expenseType" value={this.state.ExpenseType} />
+            </div>
+            <div className={styles.formGroup}>
+              <label style={{width: '30%'}}>Select Document</label>
+              <input style={{width: '100%'}} name="selectedDocument" value={this.state.SelectedDocument} />
+            </div>
+            <div className={styles.formGroup}>
+              <label style={{width: '30%'}}>Bill Number</label>
+              <input style={{width: '100%'}} name="billNo" value={this.state.BillNo} />
+            </div>
+            <div className={styles.formGroup}>
+              <label style={{width: '30%'}}>Bill Amount</label>
+              <input style={{width: '100%'}} name="billAmount" value={this.state.BillAmount}>
               </input>
             </div>
             <div className={styles.formGroup}>
-              <label>Select Document</label>
-              <input name="selectedDocument" value={this.state.SelectedDocument}>
+              <label style={{width: '30%'}}>Bill Date</label>
+              <input style={{width: '100%'}} name="remarks" value={this.state.BillDate}>
               </input>
             </div>
             <div className={styles.formGroup}>
-              <label>Bill Number</label>
-              <input name="billNo" value={this.state.BillNo}   >
+              <label style={{width: '30%'}}>Claim Amount</label>
+              <input style={{width: '100%'}} name="claimAmount" value={this.state.ClaimAmount}   >
               </input>
             </div>
             <div className={styles.formGroup}>
-              <label>Bill Amount</label>
-              <input name="billAmount" value={this.state.BillAmount}>
+              <label style={{width: '30%'}}>Description</label>
+              <input style={{width: '100%'}} name="description" value={this.state.Description}   >
               </input>
             </div>
             <div className={styles.formGroup}>
-              <label>Bill Date</label>
-              <input name="remarks" value={this.state.BillDate}>
-              </input>
-            </div>
-            <div className={styles.formGroup}>
-              <label>Claim Amount</label>
-              <input name="claimAmount" value={this.state.ClaimAmount}   >
-              </input>
-            </div>
-            <div className={styles.formGroup}>
-              <label>Description</label>
-              <input name="description" value={this.state.Description}   >
-              </input>
-            </div>
-            <div className={styles.formGroup}>
-              <label>Supporting Available</label>
-              <Checkbox name="supportingAvailable" checked={this.state.SupportingAvailable}>
+              <label style={{width: '30%'}}>Supporting Available</label>
+              <Checkbox  name="supportingAvailable" checked={this.state.SupportingAvailable}>
               </Checkbox>
             </div>
             <div className={styles.btnGroup}>
