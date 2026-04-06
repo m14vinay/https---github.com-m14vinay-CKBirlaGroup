@@ -5,58 +5,37 @@ import { escape } from '@microsoft/sp-lodash-subset';
 import { SPHttpClient } from '@microsoft/sp-http';
 import { Checkbox, Modal, PrimaryButton } from '@fluentui/react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-interface IState {
-  RRequestNo: string;
-  ProjectTitle: string;
-  Department: string;
-  Remarks: string;
-  TotalAmount: number;
-  ExpenseType: string;
-  SelectedDocument: string;
-  BillNo: string
-  BillAmount: number;
-  BillDate: string;
-  ClaimAmount: number;
-  Description: string;
-  SupportingAvailable: boolean;
-  isOpen: boolean;
-  setIsOpen: boolean;
-}
-export default class ReimbursementRequestForm extends React.Component<IReimbursementRequestFormProps, IState> {
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
-  constructor(props: IReimbursementRequestFormProps) {
-    super(props);
-
-    this.state = {
-      RRequestNo: '',
-      ProjectTitle: '',
-      Department: '',
-      Remarks: '',
-      TotalAmount: 0,
-      ExpenseType: '',
-      SelectedDocument: '',
-      BillNo: '',
-      BillAmount: 0,
-      BillDate: '',
-      ClaimAmount: 0,
-      Description: '',
-      SupportingAvailable: false,
-      isOpen: false,
-      setIsOpen: false
-    };
-  }
-
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (props) => {
+  
+  const [form, setForm] = React.useState({
+  RRequestNo: '',
+  ProjectTitle: '',
+  Department: '',
+  Remarks: '',
+  TotalAmount: 0,
+  ExpenseType: '',
+  SelectedDocument: '',
+  BillNo: '',
+  BillAmount: 0,
+  BillDate: '',
+  ClaimAmount: 0,
+  Description: '',
+  SupportingAvailable: false,
+  });
+   const [loading, setLoading] = React.useState(false);
+   const [isOpen, setisOpen] = React.useState(false);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
+    setForm({ ...form, [name]: value });
   };
+  const getRequestDetails = async (requestNo: string) => {
 
-  private getRequestDetails = async (requestNo: string) => {
-
-    const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
+    const url = `${props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
 
     console.log("URL:", url)
-    const response = await this.props.context.spHttpClient.get(
+    const response = await props.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
     );
@@ -64,7 +43,7 @@ export default class ReimbursementRequestForm extends React.Component<IReimburse
     const data = await response.json();
 
     if (data.value.length > 0) {
-      this.setState({
+      setForm({
         RRequestNo: data.value[0].RRequestNo,
         ProjectTitle: data.value[0].ProjectTitle,
         Department: data.value[0].Department,
@@ -81,7 +60,7 @@ export default class ReimbursementRequestForm extends React.Component<IReimburse
       });
     } else {
 
-      this.setState({
+      setForm({
         RRequestNo: '',
         ProjectTitle: '',
         Department: '',
@@ -98,26 +77,21 @@ export default class ReimbursementRequestForm extends React.Component<IReimburse
       });
     }
   };
-
-  private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-
-    this.setState({ RRequestNo: value });
-
+    setForm({ ...form, RRequestNo:value});
     // optional
-    this.getRequestDetails(value);
-
+    getRequestDetails(value);
   };
+  const saveData = async () => {
 
-  private saveData = async () => {
-
-    const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
+    const url = `${props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
 
     const body = {
-      RRequestNo: this.state.RRequestNo,
+      RRequestNo: form.RRequestNo,
     };
 
-    const response = await this.props.context.spHttpClient.post(
+    const response = await props.context.spHttpClient.post(
       url, SPHttpClient.configurations.v1,
       {
         headers: {
@@ -136,28 +110,32 @@ export default class ReimbursementRequestForm extends React.Component<IReimburse
       alert("Error saving data ❌");
     }
   };
-
-
-  private handleSubmit = () => {
-    console.log("Form Data:", this.state);
+  const handleSubmit = () => {
     alert("Form Submitted");
   };
-
-  private handleAddNew = () => {
-    console.log("Form Data:", this.state);
+  const handleAddNew = () => {
     alert("Form Submitted");
   };
-  private handleSave = () => {
-    console.log("Saved Data:", this.state);
+  const handleSave = () => {
     alert("Saved");
   };
-
-  public render(): React.ReactElement<IReimbursementRequestFormProps> {
-    function setIsOpen(arg0: boolean): void {
-      throw new Error('Function not implemented.');
-    }
-
     return (
+      <section>
+        {loading && (
+                <div style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'rgba(255,255,255,0.6)',
+                  zIndex: 9999
+                }}>
+                  <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                    <Spinner label="Processing..." size={SpinnerSize.large} />
+                  </div>
+                </div>
+              )}
       <div className={styles.container}>
         <div className={styles.header}>
           <h2>Reimbursement Request Form
@@ -172,9 +150,9 @@ export default class ReimbursementRequestForm extends React.Component<IReimburse
             <div className={styles.selectDep}>
               <div className={styles.selectDepInner}>
                 <label>Select Department</label>
-                <input type='text' className="form-control" value={this.state.Department} onChange={this.handleRequestNoChange} />
+                <input type='text' className="form-control" value={form.Department} onChange={handleRequestNoChange} />
               </div>
-              <button className={styles.btnAdd} onClick={() => this.setState({ isOpen: true })}>Add New</button>
+              <button className={styles.btnAdd} onClick={() => setisOpen(true)}>Add New</button>
             </div>
             <div className={styles.info}>
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#1026e6" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
@@ -209,73 +187,74 @@ export default class ReimbursementRequestForm extends React.Component<IReimburse
             <div className={styles.form}>
               <div className={styles['form-group']}>
                 <label>Total Amount</label>
-                <input type='text' className="form-control" name="totalAmount" value={this.state.TotalAmount} />
+                <input type='text' className="form-control" name="totalAmount" value={form.TotalAmount} />
               </div>
               <div className={styles['form-group']}>
                 <label>Remarks</label>
-                <input type='text' className="form-control" name="remarks" value={this.state.Remarks} />
+                <input type='text' className="form-control" name="remarks" value={form.Remarks} />
               </div>
 
               {/* Buttons */}
               <div className={styles['btn-group']}>
-                <button className={styles.btnSubmit} onClick={this.handleSubmit}>Submit</button>
-                <button className={styles.btnSave} onClick={this.saveData}>Save</button>
+                <button className={styles.btnSubmit} onClick={handleSubmit}>Submit</button>
+                <button className={styles.btnSave} onClick={saveData}>Save</button>
                 <button className={styles.btnCancel}>Cancel</button>
               </div>
             </div>
           </div>
         </div>
         <Modal 
-          isOpen={this.state.isOpen}
-          onDismiss={() => this.setState({ isOpen: false })}
+          isOpen={isOpen}
+          onDismiss={() => setisOpen(false)}
           isBlocking={false} className={styles.modal}>          
           <div className={styles.searchBox}>
             <h3>Add New Reimbursement Detail</h3>
             <div className={styles.formGroup}>
               <label style={{width: '30%'}}>Expense Type</label>
-              <input style={{width: '100%'}} name="expenseType" value={this.state.ExpenseType} />
+              <input style={{width: '100%'}} name="expenseType" value={form.ExpenseType} />
             </div>
             <div className={styles.formGroup}>
               <label style={{width: '30%'}}>Select Document</label>
-              <input style={{width: '100%'}} name="selectedDocument" value={this.state.SelectedDocument} />
+              <input style={{width: '100%'}} name="selectedDocument" value={form.SelectedDocument} />
             </div>
             <div className={styles.formGroup}>
               <label style={{width: '30%'}}>Bill Number</label>
-              <input style={{width: '100%'}} name="billNo" value={this.state.BillNo} />
+              <input style={{width: '100%'}} name="billNo" value={form.BillNo} />
             </div>
             <div className={styles.formGroup}>
               <label style={{width: '30%'}}>Bill Amount</label>
-              <input style={{width: '100%'}} name="billAmount" value={this.state.BillAmount}>
+              <input style={{width: '100%'}} name="billAmount" value={form.BillAmount}>
               </input>
             </div>
             <div className={styles.formGroup}>
               <label style={{width: '30%'}}>Bill Date</label>
-              <input style={{width: '100%'}} name="remarks" value={this.state.BillDate}>
+              <input style={{width: '100%'}} name="remarks" value={form.BillDate}>
               </input>
             </div>
             <div className={styles.formGroup}>
               <label style={{width: '30%'}}>Claim Amount</label>
-              <input style={{width: '100%'}} name="claimAmount" value={this.state.ClaimAmount}   >
+              <input style={{width: '100%'}} name="claimAmount" value={form.ClaimAmount}>
               </input>
             </div>
             <div className={styles.formGroup}>
               <label style={{width: '30%'}}>Description</label>
-              <input style={{width: '100%'}} name="description" value={this.state.Description}   >
+              <input style={{width: '100%'}} name="description" value={form.Description}>
               </input>
             </div>
             <div className={styles.formGroup}>
               <label style={{width: '30%'}}>Supporting Available</label>
-              <Checkbox  name="supportingAvailable" checked={this.state.SupportingAvailable}>
+              <Checkbox  name="supportingAvailable" checked={form.SupportingAvailable}>
               </Checkbox>
             </div>
             <div className={styles.btnGroup}>
-              <button className={styles.btnSubmit} onClick={this.handleSubmit}>Submit</button>
-              <button className={styles.btnCancel} onClick={() => this.setState({ isOpen: false })} >Close</button>              
+              <button className={styles.btnSubmit} onClick={handleSubmit}>Submit</button>
+              <button className={styles.btnCancel} onClick={() => setisOpen(false)} >Close</button>              
             </div>
             </div>
         </Modal>
       </div>
+    </section>
     );
-  }
-}
+  };
+export default ReimbursementRequestForm;
 
