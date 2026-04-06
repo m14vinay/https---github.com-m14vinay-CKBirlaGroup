@@ -2,9 +2,9 @@ import * as React from 'react';
 import type { IVendorRegistrationManuallyProps } from './IVendorRegistrationManuallyProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import styles from './VendorRegistrationManually.module.scss';
-import 'bootstrap/dist/css/bootstrap.min.css';
+//import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+//import 'bootstrap-icons/font/bootstrap-icons.css';
 
 export default class VendorRegistrationManually extends React.Component<IVendorRegistrationManuallyProps> {
   public render(): React.ReactElement<IVendorRegistrationManuallyProps> {

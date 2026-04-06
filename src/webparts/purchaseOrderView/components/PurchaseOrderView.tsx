@@ -17,6 +17,7 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
       RemainingAmount: 0,
       Department:'',
       POAmount: 0,
+       PoMaster: '',
      ApplicableTaxes:0,
      POCategory:'',
      ProjectDescription: '',
@@ -116,7 +117,7 @@ const handleFetchById = async (id: number) => {
 
       const result = await service.getItemByRequestNo(id);
        const user = await service.getUser();
-     const historydata=await service.GetHistoryItem(id,"VMR");
+     const historydata=await service.GetHistoryItem(id,"PO");
      setHistory(historydata);
       console.log("Result:", result);
 
@@ -126,15 +127,16 @@ const handleFetchById = async (id: number) => {
       setForm(prev => ({
         ...prev,
         POrequestNo: result.POrequestNo || '',
-        projectCode: result.ProjectCode || '',
-        Department: result.Department || '',
-        projectTitle: result.ProjectTitle || '',
-        vendorName: result.VendorName || '',
-        POAmount: result.POAmount || 0,
-        ApplicableTaxes: result.ApplicableTaxes || 0,
-        ProjectDescription: result.ProjectDescription || '',
-        CurrentStatus: result.Currentstatus || '',
-        RequestNo: result.RequestNo || '',
+          projectCode: result.ProjectCode || '',
+          Department: result.Department || '',
+          projectTitle: result.ProjectTitle || '',
+          vendorName: result.VendorName || '',
+          POAmount: result.POAmount || 0,
+          POCategory: result.PoMaster || '',
+          ApplicableTaxes: result.ApplicableTaxes || 0,
+          ProjectDescription: result.ProjectDescription || '',
+          RequestNo: result.RequestNo,
+          CurrentStatus: result.CurrentStatus,
         files: null
       }));
 
@@ -221,7 +223,7 @@ const handleFetchById = async (id: number) => {
             </div>
             <div className={styles.formGroup}>
               <label>PO Category</label>
-              <input name="POCategory" value={form.POCategory} readOnly style={{backgroundColor:"lightgray"}} />
+              <input name="POCategory" value={form.PoMaster} readOnly style={{backgroundColor:"lightgray"}} />
             </div>
             <div className={styles.formGroup}>
               <label>Additional Information & Remarks</label>
@@ -290,7 +292,7 @@ const handleFetchById = async (id: number) => {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
-    }).replace(',', ' at')}
+    }).replace(',', ' AT')}
   </span>
 )}
         {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}

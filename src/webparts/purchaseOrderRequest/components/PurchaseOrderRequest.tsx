@@ -23,6 +23,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     ApplicableTaxes: 0,
     AssignedTo: '',
     PoMaster: '',
+     POCategory: '',
     Comments: '',
    files: [] as File[],
      Attachments: [],
@@ -92,21 +93,24 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       if (result.CurrentStatus==='Draft') {
       setItemId(result.Id);
 
+       const selectedOption = poOptions.find(
+    opt => opt.text === result.PoMaster
+  );
         setForm(prev => ({
           ...prev,
           
           projectCode: result.ProjectCode || '',
           Department: result.Department || '',
           projectTitle: result.ProjectTitle || '',
-          VendorName: result.VendorName || '',
+          vendorName: result.VendorName || '',
           VendorNameID: result.VendorNameID || '',
           RemainingAmount: result.RemainingAmount || '',
           TotalAmount: result.TotalAmount || '',
-          OccupiedAmount: result.OccupiedAmount || '',  
+          OccupiedAmount: result.OccupiedAmount || 0,  
           POAmount: result.POAmount || 0,
           ApplicableTaxes: result.ApplicableTaxes || 0,
           Comments: result.ProjectDescription || '',
-          PoMaster: result.PoMaster || ''         
+          POCategory: selectedOption?.text || ''        
         }));
       const data = await service.GetApprover(result.Department);
       if (data?.Id > 0) {                
@@ -542,10 +546,11 @@ const validatePO = (value: string) => {
   label="PO Category"
   options={poOptions}
   selectedKey={poOptions.find(opt => opt.text === form.PoMaster)?.key}
+   //selectedKey={form.PoMaster}
   onChange={(_, option) => {
     setForm(prev => ({
       ...prev,
-      PoMaster: option?.text || ""  // text store karo
+      PoMaster: option?.key as string // text store karo
     }));
   }}
 />
@@ -609,8 +614,8 @@ const validatePO = (value: string) => {
     </ul>
        )}
         <div className={styles.buttonGroup}>          
-          <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
-          <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
+          <button className={styles.submitBtn} onClick={handleUpdate} disabled={loading}> {loading ? "Submitting..." : "Submit"}</button>
+          <button className={styles.saveBtn} onClick={handleSaveOrUpdate}disabled={loading}> {loading ? "Saving..." : "Save"}</button>
           <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
         </div>
           </div>

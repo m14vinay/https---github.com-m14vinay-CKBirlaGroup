@@ -31,6 +31,7 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
   const service = new SharePointService(props.context);
    const [attachments, setAttachments] = React.useState<any[]>([]);
    const [History, setHistory] = React.useState<any[]>([]);
+   const [loading, setLoading] = React.useState(false);
   
  
   
@@ -134,7 +135,7 @@ const handleFetchById = async (id: number) => {
         <div className={styles['col-md-9']}>
           <div className={styles.leftPanel}>
             <div className={styles.leftPanelHeader}>
-              <h4>{form.RequestNo}</h4>
+              <h4></h4>
               <h4>Current Status:  <span className={
     form.CurrentStatus === "Approved"
       ? styles.Approved
@@ -251,7 +252,7 @@ const handleFetchById = async (id: number) => {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
-    }).replace(',', ' at')}
+    }).replace(',', ' AT')}
   </span>
 )}
         {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}

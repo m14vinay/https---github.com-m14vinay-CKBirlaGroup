@@ -37,6 +37,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   const MAX_TOTAL_SIZE_MB = 25;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
    const [attachments, setAttachments] = React.useState<any[]>([]);
+   const [loading, setLoading] = React.useState(false);
 
 
 
@@ -320,6 +321,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
   const handleSaveOrUpdate = async () => {
   // 🔹 Validations
+   setLoading(true);
   if (!form.projectCode) return alert("Project Code required");
   if (!form.vendorName) return alert("Select Vendor");
  if (
@@ -371,11 +373,16 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     console.error(error);
     alert("Error occurred ❌");
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
   
   
 // SUBMIT DATA
 const handleUpdate = async () => {
+   setLoading(true);
    if (!form.projectCode) return alert("Project Code required");
     if (!form.vendorName) return alert("Select Vendor");
     if (
@@ -425,6 +432,10 @@ const handleUpdate = async () => {
   } catch (error) {
     console.error(error);
     alert("Error occurred");
+  }
+  finally
+  {
+    setLoading(false);
   }
 };
 

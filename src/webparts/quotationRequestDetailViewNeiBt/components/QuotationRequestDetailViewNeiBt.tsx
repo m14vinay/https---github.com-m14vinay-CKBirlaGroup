@@ -96,7 +96,7 @@ const handleFetchById = async (id: number) => {
 
       const result = await service.getItemByRequestNo(id);
       const user = await service.getUser();
-     const historydata=await service.GetHistoryItem(id,"VMR");
+     const historydata=await service.GetHistoryItem(id,"QANEIBT");
      setHistory(historydata);
       console.log("Result:", result);
 
@@ -121,8 +121,8 @@ const handleFetchById = async (id: number) => {
       Department: result.Department || '',
       Advancepayment: result.Advancepayment || 0,
       ApprovalPath: result.ApprovalPath || '',
-      CurrentStatus: result.Currentstatus || '',
-        RequestNo: result.RequestNo || '',
+      CurrentStatus: result.CurrentStatus || '',
+      RequestNo: result.RequestNo || '',
       files: null,
       
       }));
@@ -135,44 +135,17 @@ const handleFetchById = async (id: number) => {
     console.error("Error:", error);
   }
 };
-
-
-  
-
-// // 🔹 Bind approval path
-//   const bindPath = async (dept: string) => {
-//     const res = await fetch(
-//       `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items?$filter=DepartmentName eq '${dept}'`,
-//       { headers: { Accept: 'application/json;odata=verbose' } }
-//     );
-//     const data = await res.json();
-//     setPaths(data.d.results);
-//   };
-
-  // 🔹 Handle change
-  
- 
-//  // 🔹 File upload
-//   const handleFile = (e: any) => {
-//     setForm({ ...form, files: Array.from(e.target.files) });
-//   };
-
-  
-    
-  
     return (
       <div className={styles.container}>
       <div className={styles.header}>
         <h4>Quotation Approval NEI BT Admin Request Details & Status</h4>
       </div>
       <div className={styles.row}>
-        {/* LEFT FORM */}
         <div className={styles['col-md-9']}>
           <div className={styles.leftPanel}>
             <div className={styles.leftPanelHeader}>
-              <h4>{form.RequestNo}</h4>
-             <h4>Current Status:  <span className={
-    form.CurrentStatus === "Approved"
+              <h4></h4>
+             <h4>Current Status:<span className={form.CurrentStatus === "Approved"
       ? styles.Approved
       : form.CurrentStatus === "Rejected"
       ? styles.Rejected
@@ -345,7 +318,7 @@ const handleFetchById = async (id: number) => {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
-    }).replace(',', ' at')}
+    }).replace(',', ' AT')}
   </span>
 )}
         {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}

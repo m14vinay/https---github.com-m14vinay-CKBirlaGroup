@@ -59,7 +59,8 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
   const MAX_TOTAL_SIZE_MB = 25;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
    const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
-  
+  const [loading, setLoading] = React.useState(false);
+     const [actionType, setActionType] = React.useState<'approve' | 'reject' | ''>('');
 
 // --- 1️⃣ Get ID from query string ---
     const getIdFromQueryString = (): number | null => {
@@ -133,22 +134,8 @@ const loadAttachments = async (id:number) => {
       Department: result.Department || '',
       Advancepayment: result.Advancepayment || 0,
       ApprovalPath: result.ApprovalPath || '',
-<<<<<<< HEAD
       RequestNo : result.RequestNo || ''
-      }));
-//   if (!result.ActionDate1 || !result.ActionDate2 || !result.ActionDate3) {
-//   setIsDisabled(false);  // enable
-// } else {
-//   setIsDisabled(true);   // disable
-// }
-    // setAssignedID(currentuser.Title);
-       
-=======
-      RequestNo : result.RequestNo || '',
-      AssignedTo:result.AssignedTo ||'',
-      ApprovalID:result.ApprovalPathID ||''
       }));       
->>>>>>> 2c54da930eaf67003a18ad4944f57fcc718a4ede
     } else {
       alert("No data found");
     }
@@ -321,19 +308,11 @@ const handleSaveHistory = async (id: number) => {
     if(!form.Department) return alert("Select Department Name");
     if(!form.Advancepayment) return alert("Select Advance Payemnt");
      if (!form.files || form.files.length === 0) return alert("Attach files");
-<<<<<<< HEAD
 const User=await service.getUserById(Number(form.Approval1Id));
   if(User?.Id)
   {
   setAssignedID(User.Title);
   }
-=======
-    const User=await service.getUserById(Number(form.ApprovalID.split('_')[0]));
-      if(User?.Id)
-      {
-      setAssignedID(User.Title);
-      }
->>>>>>> 2c54da930eaf67003a18ad4944f57fcc718a4ede
   // 🔹 Payload (common)
   const payload = {
     ProjectTitle: form.ProjectTitle,
@@ -352,21 +331,12 @@ const User=await service.getUserById(Number(form.Approval1Id));
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
-<<<<<<< HEAD
       AssignedTo: AssignedID,  // ✅ must be numeric ID
   Approval1Id: Number(form.Approval1Id),
   Approval2Id: Number(form.Approval2Id ),
   Approval3Id: Number(form.Approval3Id ),
   CurrentStatus:'Draft'
    
-=======
-      ApprovalPathID:form.ApprovalID,
-      AssignedTo: User.Title, 
-      CurrentStatus:'Draft',
-      Approval1Id:form.ApprovalID.split('_')[0],
-      Approval2Id:form.ApprovalID.split('_')[1],
-      Approval3Id:form.ApprovalID.split('_')[2]
->>>>>>> 2c54da930eaf67003a18ad4944f57fcc718a4ede
   };
 
   try {
@@ -494,10 +464,10 @@ setForm(prev => ({
           
 
           <label>Total Project Amount</label>
-          <input name="TotalProjectAmount" value={form.TotalProjectAmount }onChange={handleChange}  />
+          <input name="TotalProjectAmount" value={form.TotalProjectAmount } type='number' onChange={handleChange}  />
 
           <label>Applicable Taxes</label>
-          <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange}/>
+          <input name="ApplicableTaxes" value={form.ApplicableTaxes} type='number' onChange={handleChange}/>
         
 {/* 
           <label>Vendor 1 <span className={styles.required}>*</span></label>
@@ -526,7 +496,7 @@ setForm(prev => ({
         <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
 
           <label>Selected Quote <span className={styles.required}>*</span></label>
-          <input name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} />
+          <input name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} type='number' />
           
     
         <label>Department</label>
@@ -540,13 +510,7 @@ setForm(prev => ({
       Department: option?.key as string // safe default empty string
     }))
   }
-/>
-          {/* <label>Department</label>
-          <input name="Department" value={form.Department} onChange={handleChange}   /> */}
-       
-          {/* <label>Advance Amount <span className={styles.required}>*</span></label>
-          <input name="Advancepayment" value={form.Advancepayment} onChange={handleChange}    /> */}
-          
+/> 
           <ChoiceGroup
             label="Advance Payment"
             options={poOptions}

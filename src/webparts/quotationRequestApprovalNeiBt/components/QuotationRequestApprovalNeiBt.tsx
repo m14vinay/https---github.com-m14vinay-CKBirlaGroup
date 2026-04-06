@@ -58,7 +58,9 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     const [departmentHead, setDepartmentHead] = React.useState('');
     const [isDisabled, setIsDisabled] = useState(false);
   const [History, setHistory] = useState<any[]>([]);
-
+   const [loading, setLoading] = React.useState(false);
+       const [actionType, setActionType] = React.useState<'approve' | 'reject' | ''>('');
+  
     // --- 1️⃣ Get ID from query string ---
      const getIdFromQueryString = (): number | null => {
        const params = new URLSearchParams(window.location.search);
@@ -159,6 +161,10 @@ if (result.Approval3Id) {
       Advancepayment: result.Advancepayment || 0,
       ApprovalPath: result.ApprovalPath || '',
       RequestNo : result.RequestNo || '',
+       ActionDate1:result.ActionDate1 || '',
+          ActionDate2:result.ActionDate2 || '',
+          ActionDate3:result.ActionDate3 || '',
+
       files: null
       }));
    
@@ -193,6 +199,7 @@ const handleSaveApproveHistory = async (id: number) => {
     UserAction: 'Approved',
     ActionDate: new Date().toISOString(),
      Designation: currentuser.JobTitle, 
+      UserComment: approverComment
   };
 
   await service.createHistoryItem(payload);
@@ -208,7 +215,9 @@ const handleSaveRejectedHistory = async (id: number) => {
     UserName: currentuser.Title,
     UserAction: 'Rejected',
     ActionDate: new Date().toISOString(),
-     Designation: currentuser.JobTitle, 
+     Designation: currentuser.JobTitle,
+     UserComment: approverComment
+      
   };
 
   await service.createHistoryItem(payload);
@@ -217,6 +226,8 @@ const handleSaveRejectedHistory = async (id: number) => {
 
   const handleApprove = async () => {
   try {
+     setActionType('approve');
+      setLoading(true);
        if (!approverComment) return alert("Approver Comment required");
     if (!itemId) return;
 if(form.ActionDate1==='')
@@ -232,14 +243,14 @@ if(form.ActionDate1==='')
      {
        await service.updateItemdata2(itemId, "Approved",approverComment,AssignedID3);
        await handleSaveApproveHistory(itemId);
-       alert("✅ Second approval done");
+       alert("✅ Second level approved");
        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url); 
       return; // 🔥 stop again
     }
     else if(form.ActionDate3==='')
      {
-       await service.updateItemdata2(itemId, "Approved",approverComment,"Approved");
+       await service.updateItemdata3(itemId, "Approved",approverComment,"Approved");
        await handleSaveApproveHistory(itemId);
        alert("✅ Final approval done");
        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -253,10 +264,16 @@ if(form.ActionDate1==='')
   } catch (error) {
     console.error(error);
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
 
 const handleReject = async () => {
   try {
+     setActionType('approve');
+      setLoading(true);
     if (!approverComment) return alert("Approver Comment required");
     if (!itemId) return;
 
@@ -285,7 +302,7 @@ const handleReject = async () => {
       return; // 🔥 stop again
        
      }
-      else if(form.ActionDate2==='')
+      else if(form.ActionDate3==='')
      {
        await service.updateItemdata3(itemId, "Rejected", approverComment,"Rejected");
          await handleSaveRejectedHistory(itemId);
@@ -300,6 +317,10 @@ const handleReject = async () => {
     setApproverComment('');
   } catch (error) {
     console.error(error);
+  }
+  finally
+  {
+    setLoading(false);
   }
 };
 
@@ -395,8 +416,8 @@ const handleReject = async () => {
        <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}/>
           {/* Buttons */}
          <div className={styles.buttonGroup}>
-            <button className={styles.ApproveBtn} onClick={handleApprove}>Approve</button>
-            <button className={styles.RejectBtn} onClick={handleReject} >Reject</button>
+            <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled || loading}> {loading && actionType==='approve' ? "Approving..." : "Approve"}</button>
+                <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled  || loading}> {loading && actionType==='reject' ? "Rejecting..." : "Reject"}</button>
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
         </div>
@@ -452,7 +473,7 @@ const handleReject = async () => {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
-    }).replace(',', ' at')}
+    }).replace(',', ' AT')}
   </span>
 )}
              {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}

@@ -142,6 +142,7 @@ const handleFetchById = async (id: number) => {
     UserAction: 'Approved',
     ActionDate: new Date().toISOString(),
      Designation: currentuser.JobTitle, 
+     Usercomment: approverComment
   };
 
   await service.createHistoryItem(payload);
@@ -158,6 +159,7 @@ const handleSaveRejectedHistory = async (id: number) => {
     UserAction: 'Rejected',
     ActionDate: new Date().toISOString(),
      Designation: currentuser.JobTitle, 
+     Usercomment: approverComment
   };
 
   await service.createHistoryItem(payload);
@@ -217,27 +219,7 @@ const handleReject = async () => {
               <div className={styles.leftPanelHeader}>
              <label style={{fontWeight: "bold"}}>Vendor Mapping- {form.RequestNo}</label>
             </div>
-             <div className={styles.leftPanelStatusHeader}>
-                        {history.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-    let statusClass = styles.statusBox;
-    if (item.UserAction === "Approved") {
-      statusClass = `${styles.statusBox}`;    
-    } 
-    else if (item.UserAction === "Rejected") {
-      statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-    }
-
-    return (
-      <div className={statusClass} key={index}>
-        <div className={styles.content}>
-          <h5>{item.UserName}</h5>
-          <h6>{item.Designation}</h6>
-          <h4>{item.UserAction}</h4>
-        </div>
-      </div>
-    );
-  })}
-             </div>
+             
             <div className={styles.formGroup}>
                         <label>Project Code</label>
                       <input name="projectCode" value={form.projectCode}   readOnly style={{backgroundColor:"lightgray"}} />
@@ -340,7 +322,7 @@ const handleReject = async () => {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
-    }).replace(',', ' at')}
+    }).replace(',', ' AT')}
   </span>
 )}
         {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}

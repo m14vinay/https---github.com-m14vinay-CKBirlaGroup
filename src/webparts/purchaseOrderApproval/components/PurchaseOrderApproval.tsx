@@ -19,7 +19,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     Department: '',
     POAmount: 0,
     ApplicableTaxes: 0,
-    POCategory: '',
+    PoMaster: '',
     ProjectDescription: '',
     ApproverComment1: '',
     ApproverCommentsError: '',
@@ -53,7 +53,12 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
   const [approver5, setApprover5] = React.useState('');
   const [departmentHead, setDepartmentHead] = React.useState('');
   const [isDisabled, setIsDisabled] = useState(false);
+   const [loading, setLoading] = React.useState(false);
+   const [actionType, setActionType] = React.useState<'approve' | 'reject' | ''>('');
 const [History, setHistory] = useState<any[]>([]);
+
+
+
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -134,7 +139,7 @@ const [History, setHistory] = useState<any[]>([]);
           projectTitle: result.ProjectTitle || '',
           vendorName: result.VendorName || '',
           POAmount: result.POAmount || 0,
-          POCategory: result.PoMaster || '',
+          PoMaster: result.PoMaster || '',
           ApplicableTaxes: result.ApplicableTaxes || 0,
           ProjectDescription: result.ProjectDescription || '',
           ActionDate1:result.ActionDate1 || '',
@@ -184,22 +189,23 @@ const [History, setHistory] = useState<any[]>([]);
     UserAction: 'Approved',
     ActionDate: new Date().toISOString(),
      Designation: currentuser.JobTitle, 
+      UserComment: approverComment
   };
 
   await service.createHistoryItem(payload);
 };
-
 const handleSaveRejectedHistory = async (id: number) => {
 
   const currentuser = await service.getUser();
 
-  const payload = {
+ const payload = {
     Title: 'PO',
     FID: id,  
     UserName: currentuser.Title,
     UserAction: 'Rejected',
     ActionDate: new Date().toISOString(),
      Designation: currentuser.JobTitle, 
+      UserComment: approverComment
   };
 
   await service.createHistoryItem(payload);
@@ -208,6 +214,8 @@ const handleSaveRejectedHistory = async (id: number) => {
 
   const handleApprove = async () => {
     try {
+       setActionType('approve');
+      setLoading(true);
       if (!approverComment) return alert("Approver Comment required");
       
       if (!itemId) return;
@@ -235,10 +243,16 @@ const handleSaveRejectedHistory = async (id: number) => {
     } catch (error) {
       console.error(error);
     }
+    finally
+  {
+    setLoading(false);
+  }
   };
 
   const handleReject = async () => {
     try {
+       setActionType('reject');
+        setLoading(true);
       if (!approverComment) return alert("Approver Comment required");
       if (!itemId) return;
 
@@ -271,6 +285,10 @@ const handleSaveRejectedHistory = async (id: number) => {
     } catch (error) {
       console.error(error);
     }
+    finally
+  {
+    setLoading(false);
+  }
   };
 
 
@@ -290,27 +308,7 @@ const handleSaveRejectedHistory = async (id: number) => {
             <div className={styles.leftPanelHeader}>
               <label style={{fontWeight: "bold"}}>PO Approval Form -{form.RequestNo}</label>
             </div>
-            <div className={styles.leftPanelStatusHeader}>
-                        {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-    let statusClass = styles.statusBox;
-    if (item.UserAction === "Approved") {
-      statusClass = `${styles.statusBox}`;    
-    } 
-    else if (item.UserAction === "Rejected") {
-      statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-    }
-
-    return (
-      <div className={statusClass} key={index}>
-        <div className={styles.content}>
-          <h5>{item.UserName}</h5>
-          <h6>{item.Designation}</h6>
-          <h4>{item.UserAction}</h4>
-        </div>
-      </div>
-    );
-  })}
-             </div>
+          
             <div className={styles.formGroup}>
               <label>Project Code</label>
               <input value={form.projectCode} readOnly style={{backgroundColor:"lightgray"}}/>
@@ -337,7 +335,7 @@ const handleSaveRejectedHistory = async (id: number) => {
             </div>
             <div className={styles.formGroup}>
               <label>PO Category</label>
-              <input name="POCategory" value={form.POCategory} readOnly style={{backgroundColor:"lightgray"}}/>
+              <input name="POCategory" value={form.PoMaster} readOnly style={{backgroundColor:"lightgray"}}/>
             </div>
             <div className={styles.formGroup}>
               <label>Additional Information & Remarks</label>
@@ -367,8 +365,8 @@ const handleSaveRejectedHistory = async (id: number) => {
             {/* Buttons */}
             <div>
               <div className={styles.buttonGroup}>
-                <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled} >Approve</button>
-                <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled}>Reject</button>
+                <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled || loading}> {loading && actionType==='approve' ? "Approving..." : "Approve"}</button>
+                <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled  || loading}> {loading && actionType==='reject' ? "Rejecting..." : "Reject"}</button>
                 <button className={styles.cancelBtn}>Cancel</button>
               </div>
             </div>
@@ -421,7 +419,7 @@ const handleSaveRejectedHistory = async (id: number) => {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
-    }).replace(',', ' at')}
+    }).replace(',', ' AT')}
   </span>
 )}
         {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
