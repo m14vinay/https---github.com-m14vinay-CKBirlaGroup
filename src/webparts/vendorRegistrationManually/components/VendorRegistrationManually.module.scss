@@ -8,7 +8,6 @@
 .header {
   margin-bottom: 15px;
 }
-
 .header h2 {
   align-items: center;
   display: flex;
@@ -86,6 +85,9 @@
   box-shadow: 0 3px 3px #8e8e8e;
   margin-bottom: 20px;
 
+}
+.searchBox ol{
+  padding: 1px 0px 2px 20px;
 }
 
 .searchBox h3 {

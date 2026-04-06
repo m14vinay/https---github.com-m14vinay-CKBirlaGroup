@@ -2,8 +2,7 @@ import { SPHttpClient } from '@microsoft/sp-http';
 export default class Service {
 
   private context: any;
-  private listname="AllDocuments";
-  private VendorMaster ="Master_VendorDetails";
+  private listname="AllVendor";
 
   constructor(context: any) {
     this.context = context;
@@ -22,38 +21,27 @@ export default class Service {
   }
   // Fetch the Record
   public async getItemByTitle(
-  VendorName: string,
-  BillAmount: string,
-  Title: string,
-  BillDate: string,
-  BillNumber: string
+  parm_Title: string,
+  parm_GST: string,
+  parm_Pan: string,
+  parm_VendorCode: string,
+  parm_Tin: string
 ): Promise<any[]> {
   let filters: string[] = [];
-  if (VendorName) {
-    filters.push(`VendorName eq '${VendorName}'`);
+  if (parm_Title) {
+    filters.push(`Title eq '${parm_Title}'`);
   }
-  if (BillAmount) {
-    filters.push(`BillAmount eq ${BillAmount}`);
+  if (parm_GST) {
+    filters.push(`GST eq '${parm_GST}'`);
   }
-  if (Title) {
-    filters.push(`Title eq '${Title}'`);
+  if (parm_VendorCode) {
+    filters.push(`ID eq ${parm_VendorCode.split('_')[1]}`);
   }
-  if (BillNumber) {
-    filters.push(`BillNumber eq '${BillNumber}'`);
+  if (parm_Tin) {
+    filters.push(`Tin eq '${parm_Tin}'`);
   }
-  if (BillDate) {
-    const date = new Date(BillDate);
-    // start of day
-    const start = new Date(date);
-    start.setHours(0, 0, 0, 0);
-
-    // end of day
-    const end = new Date(date);
-    end.setHours(23, 59, 59, 999);
-
-    filters.push(
-      `BillDate ge datetime'${start.toISOString()}' and BillDate lt datetime'${end.toISOString()}'`
-    );
+  if (parm_Pan) {
+    filters.push(`Pan eq '${parm_Pan}'`);
   }
   // Combine filters
   const filterQuery = filters.length > 0 ? `$filter=${filters.join(" or ")}` : "";

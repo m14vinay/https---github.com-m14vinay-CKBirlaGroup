@@ -16,25 +16,25 @@ import {
 } from '@tanstack/react-table';
 import Table from 'react-bootstrap/Table';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Title } from 'chart.js';
 const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (props) => {
   const [form, setForm] = React.useState({
-    VendorName: '',
-    ID: '',
-    BillNumber: '',
-    BillDate: '',
-    BillAmount: '',
-    Title: ''
+    Title: '',
+    MSMERegistrationNo: '',
+    Created: '',
+    Pan: '',
+    GST: '',
+    YearofEstablishment:'',
+    Tin:'',
+    VendorCode:''
   });
-
-
   const [loading, setLoading] = React.useState(false);
-  const [vendorOptions, setVendorOptions] = React.useState<IDropdownOption[]>([]);
-  const [BillNumberOptions, setBillNumberOptions] = React.useState<IDropdownOption[]>([]);
-  const [BillDateOptions, setBillDateOptions] = React.useState<IDropdownOption[]>([]);
-  const [BillAmountOptions, setBillAmountOptions] = React.useState<IDropdownOption[]>([]);
+  const [VendorCodeOptions, setVendorCodeOptions] = React.useState<IDropdownOption[]>([]);
+  const [GSTOptions, setGSTOptions] = React.useState<IDropdownOption[]>([]);
+  const [TINOptions, setTINOptions] = React.useState<IDropdownOption[]>([]);
+  const [PANOptions, setPANOptions] = React.useState<IDropdownOption[]>([]);
   const [TitleOptions, setTitleOptions] = React.useState<IDropdownOption[]>([]);
   const service = new SharePointService(props.context);
-  const [search, setSearch] = useState("");
   const [data, _setData] = useState<any[]>(() => []);
   const [user, setUser] = useState<any>(null);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -42,35 +42,33 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
 
   const columnHelper = createColumnHelper<any>()
   const columns = [
-    columnHelper.accessor('ID', {
+    columnHelper.accessor('VendorCode', {
       header: () => <span>Vendor Code</span>
     }),    
-    columnHelper.accessor('VendorName', {
+    columnHelper.accessor('Title', {
       header: () => <span>Vendor Name</span>
     }),
-    columnHelper.accessor('Title', {
+    columnHelper.accessor('MSMERegistrationNo', {
       header: () => 'MSME Registration Number'
     }),
-    columnHelper.accessor('BillNumber', {
+    columnHelper.accessor('Pan', {
       header: 'PAN'
     }),
-    columnHelper.accessor('BillDate', {
-      header: 'GST',
+    columnHelper.accessor('GST', {
+      header: 'GST'
+    }),
+    columnHelper.accessor('Pan', {
+      header: 'PAN'
+    }),
+    columnHelper.accessor('Created', {
+      header: 'Submitted Date',
       cell: info =>
         info.getValue()
           ? new Date(info.getValue()).toLocaleDateString()
           : ""
     }),
-    columnHelper.accessor('BillAmount', {
-      header: 'Submitted Date'
-    }),
-    columnHelper.accessor('Created', {
-      header: 'Establishment Year',
-      cell: info => new Date(info.getValue()).toLocaleDateString()
-    }),
-    columnHelper.accessor(row => user?.Title, {
-      id: 'Author',
-      header: 'Approval History'
+    columnHelper.accessor('YearofEstablishment', {
+      header: 'Establishment Year'
     }),
     columnHelper.display({
       id: 'view',
@@ -110,34 +108,36 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
   };
   //Load the Master Data for Dropdown
   const loadMaster = async (userId: number) => {
+    setLoading(true);
     const data = await service.getMasterDocument(userId);
     if (data && Array.isArray(data)) {
-      const BillNumberOption = data.map((item: any) => ({
-        key: item.BillNumber,
-        text: item.BillNumber
+      const VendorCodeOptions = data.map((item: any) => ({
+        key: item.VendorCode,
+        text: item.VendorCode
       }));
-      const BillDateOption = data.map((item: any) => ({
-        key: item.BillDate ? new Date(item.BillDate).toLocaleDateString() : "",
-        text: item.BillDate ? new Date(item.BillDate).toLocaleDateString() : ""
+      const GSTOptions = data.map((item: any) => ({
+        key: item.GST,
+        text: item.GST
       }));
-      const BillAmountOption = data.map((item: any) => ({
-        key: item.BillAmount,
-        text: item.BillAmount
+      const PANOptions = data.map((item: any) => ({
+        key: item.Pan,
+        text: item.Pan
       }));
-      const VendorOption = data.map((item: any) => ({
-        key: item.VendorName,
-        text: item.VendorName
+      const TINOptions = data.map((item: any) => ({
+        key: item.Tin,
+        text: item.Tin
       }));
       const TitleOption = data.map((item: any) => ({
         key: item.Title,
         text: item.Title
       }));
-      setVendorOptions(VendorOption);
-      setBillNumberOptions(BillNumberOption);
-      setBillDateOptions(BillDateOption);
-      setBillAmountOptions(BillAmountOption);
+      setVendorCodeOptions(VendorCodeOptions);
+      setGSTOptions(GSTOptions);
       setTitleOptions(TitleOption);
+      setTINOptions(TINOptions);
+      setPANOptions(PANOptions);
     }
+    setLoading(false);
   };
   const handleAddNewDocument = () => {
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistration.aspx`;
@@ -149,16 +149,16 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
   };
   const handlesearch = async () => {
     _setData([]);
-    if (!form.VendorName && !form.BillAmount && !form.Title && !form.BillDate && !form.BillNumber) {
-      alert("Please select any one  fields to search");
+    if (!form.Title && !form.GST && !form.Pan && !form.VendorCode && !form.Tin) {
+      alert("Please select any one fields to search");
       return;
     }
-    await getDatafromListByTitle(form.VendorName, form.BillAmount, form.Title, form.BillDate, form.BillNumber);
+    await getDatafromListByTitle(form.Title, form.GST, form.Pan, form.VendorCode,form.Tin);
   };
-  const getDatafromListByTitle = async (parm_vendorname: string, parm_billamount: string, parm_title: string, parm_billdate: string, parm_billnumber: string) => {
+  const getDatafromListByTitle = async (parm_Title: string, parm_GST:string, parm_Pan: string, parm_VendorCode: string,parm_Tin:string) => {
     try {
       setLoading(true);
-      const data = await service.getItemByTitle(parm_vendorname, parm_billamount, parm_title, parm_billdate, parm_billnumber);
+      const data = await service.getItemByTitle(parm_Title, parm_GST, parm_Pan, parm_VendorCode, parm_Tin);
       if (data) {
         _setData((d) => [...d.concat(data)]);
       }
@@ -171,6 +171,22 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
     }
   };
   return (
+    <section>
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.6)',
+          zIndex: 9999
+        }}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+            <Spinner label="Processing..." size={SpinnerSize.large} />
+          </div>
+        </div>
+      )}
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>All Vendors
@@ -186,10 +202,10 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
             <div className={styles['col-md-4']}>
               <label>Vendor Name</label>
               <Dropdown
-                options={vendorOptions}
-                selectedKey={form.VendorName}
+                options={TitleOptions}
+                selectedKey={form.Title}
                 onChange={(e, option) =>
-                  setForm({ ...form, VendorName: option?.text as string, ID: option?.key as string, })
+                  setForm({ ...form, Title: option?.text as string})
                 }
               />
 
@@ -197,10 +213,10 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
             <div className={styles['col-md-4']}>
               <label>GST</label>
               <Dropdown
-                options={BillNumberOptions}
-                selectedKey={form.BillNumber}
+                options={GSTOptions}
+                selectedKey={form.GST}
                 onChange={(e, option) =>
-                  setForm({ ...form, BillNumber: option?.text as string, ID: option?.key as string, })
+                  setForm({ ...form, GST: option?.text as string})
                 }
               />
 
@@ -208,10 +224,10 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
             <div className={styles['col-md-4']}>
               <label>PAN</label>
               <Dropdown
-                options={BillAmountOptions}
-                selectedKey={form.BillAmount}
+                options={PANOptions}
+                selectedKey={form.Pan}
                 onChange={(e, option) =>
-                  setForm({ ...form, BillAmount: option?.text as string, ID: option?.key as string, })
+                  setForm({ ...form, Pan: option?.text as string})
                 }
               />
 
@@ -219,10 +235,10 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
             <div className={styles['col-md-4']}>
               <label>Vendor Code</label>
               <Dropdown
-                options={BillDateOptions}
-                selectedKey={form.BillDate}
+                options={VendorCodeOptions}
+                selectedKey={form.VendorCode}
                 onChange={(e, option) =>
-                  setForm({ ...form, BillDate: option?.text as string, ID: option?.key as string, })
+                  setForm({ ...form, VendorCode: option?.text as string})
                 }
               />
 
@@ -230,10 +246,10 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
             <div className={styles['col-md-4']}>
               <label>TIN Number</label>
               <Dropdown
-                options={TitleOptions}
-                selectedKey={form.Title}
+                options={TINOptions}
+                selectedKey={form.Tin}
                 onChange={(e, option) =>
-                  setForm({ ...form, Title: option?.text as string, ID: option?.key as string, })
+                  setForm({ ...form, Tin: option?.text as string})
                 }
               />
             </div>
@@ -359,6 +375,7 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
 
       </div>
     </div>
+    </section>
   );
 };
 export default VendorRegistrationSearch;

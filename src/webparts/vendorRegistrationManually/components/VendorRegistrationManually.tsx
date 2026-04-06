@@ -5,19 +5,450 @@ import styles from './VendorRegistrationManually.module.scss';
 //import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 //import 'bootstrap-icons/font/bootstrap-icons.css';
+//import { Spinner } from 'react-bootstrap';
+import * as XLSX from 'xlsx';
+import SharePointService from '../service/Service';
+//import { SpinnerSize } from '@fluentui/react';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
-export default class VendorRegistrationManually extends React.Component<IVendorRegistrationManuallyProps> {
-  public render(): React.ReactElement<IVendorRegistrationManuallyProps> {
-    const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      hasTeamsContext,
-      userDisplayName
-    } = this.props;
+const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (props) => {
+  const [isActiveExcel, setIsActiveExcel] = React.useState(false);
+  const [isActiveManual, setIsActiveManual] = React.useState(false);
+  const [itemId, setItemId] = React.useState<number>(0);
+ const service = new SharePointService(props.context);
+  const [attachments, setAttachments] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const MAX_TOTAL_SIZE_MB = 25;
+  const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  //  Define State
+  const [form, setForm]=React.useState({
+      Title: '',
+      YearofEstablishment: '',
+      CommencementDate: new Date(),
+      GST:'',
+      Pan: '',
+      Tin:'',
+      CentralSalesTaxNo:'',
+      ServiceTaxRegNo:'',
+      NatureofService:'',
+      MSMERegistrationNo:'',
+      ESICNo:'',
+      ExciseRegisterNo:'',
+      WorkContractTaxNo:'',
+      FullAddress:'',
+      TelephoneNo:'',
+      FaxNo:'',
+      EmailId:'',
+      ContactPerson:'',
+      RegFullAddress:'',
+      RegTelephoneNo:'',
+      RegFaxNo:'',
+      RegEmailId:'',
+      RegContactPerson:'',
+      Manufacturer:'',
+      AuthorizedAgent:'',
+      Trader:'',
+      ConsultingCompany:'',
+      Other:'',
+      ConstitutionofOrganization:'',
+      Name:'',
+      Address:'',
+      ContactNo:'',
+      Details:'',
+      BankName:'',
+      BankAddress:'',
+      NameinBankAccount:'',
+      BankAccountNo:'',
+      BankIFSCMICRCode:'',
+      CurrentStatus:'',
+      files: [] as File[],
+      UploadExcelFile:[]as File[]
+    });
+  // Get Value From Query String
+  const getIdFromQueryString = (): number | null => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('ID');
+    return id ? parseInt(id, 10) : null;
+  };
+  // Load on Mount
+  React.useEffect(() => {
+    const id = getIdFromQueryString();
+    if (id!=null) {
+      setItemId(id);
+      handleFetchById(id);
+    }
+    else{
+      setItemId(0);
+      setIsActiveExcel(true);
+    }
+  },[]);
+  // Fetch Detail by ID
+  const handleFetchById = async (id: number) => {
+    try {
+      console.log("Calling API with ID:", id);
+      const result = await service.getItemByID(id);
+      console.log("Result:", result);
+      if (result) {
+        setItemId(result.Id);
+        setForm(prev => ({
+        ...prev,
+          Title:result.Title || '',
+          YearofEstablishment: result.YearofEstablishment || '',
+      GST: result.GST || '',
+      CommencementDate: result.CommencementDate || '',
+      Pan: result.Pan || '',
+      Tin:result.Tin || '',
+      CentralSalesTaxNo:result.CentralSalesTaxNo || '',
+      ServiceTaxRegNo:result.ServiceTaxRegNo || '',
+      NatureofService:result.NatureofService || '',
+      MSMERegistrationNo:result.MSMERegistrationNo || '',
+      ESICNo:result.ESICNo || '',
+      ExciseRegisterNo:result.ExciseRegisterNo || '',
+      WorkContractTaxNo:result.WorkContractTaxNo || '',
+      FullAddress:result.FullAddress || '',
+      TelephoneNo:result.TelephoneNo || '',
+      FaxNo:result.FaxNo || '',
+      EmailId:result.EmailId || '',
+      ContactPerson:result.ContactPerson || '',
+      RegFullAddress:result.RegFullAddress || '',
+      RegTelephoneNo:result.RegTelephoneNo || '',
+      RegFaxNo:result.RegFaxNo || '',
+      RegEmailId:result.RegEmailId || '',
+      RegContactPerson:result.RegContactPerson || '',
+      Manufacturer:result.Manufacturer || '',
+      AuthorizedAgent:result.AuthorizedAgent || '',
+      Trader:result.Trader || '',
+      ConsultingCompany:result.ConsultingCompany || '',
+      Other:result.Other || '',
+      ConstitutionofOrganization:result.ConstitutionofOrganization || '',
+      Name:result.Name || '',
+      Address:result.Address || '',
+      ContactNo:result.ContactNo || '',
+      Details:result.Details || '',
+      BankName:result.BankName || '',
+      BankAddress:result.BankAddress || '',
+      NameinBankAccount:result.NameinBankAccount || '',
+      BankAccountNo:result.BankAccountNo || '',
+      BankIFSCMICRCode:result.BankIFSCMICRCode || '',
+      CurrentStatus:result.CurrentStatus || '',
+        }));
+      } else {
+        alert("No data found");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+    finally
+    {
+      setLoading(false);
+    }
+  };
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event?.target?.files;
+  if (!files) return;
+  const allowedExtensions = ['pdf', 'xlsx', 'docx'];
+  const filesArray = Array.from(files);
+  // 🔹 Check each file
+  for (let file of filesArray) {
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
+      alert(`File type not allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
+      return; // stop execution
+    }
+  }
+  // 🔹 Total size check
+  const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
+  if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
+    alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+    return;
+  }
+  // 🔹 Invalid filename check
+  const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
+  if (invalidFiles.length > 0) {
+    alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+    return;
+  }
+  // ✅ Add valid files to form state
+  setForm((prev: any) => ({
+    ...prev,
+    files: [...prev.files, ...filesArray]
+  }));
+  };
 
+  // Upload ExcelFile Check
+  const handleExcelFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event?.target?.files;
+  if (!files) return;
+  const allowedExtensions = ['xlsx'];
+  const filesArray = Array.from(files);
+  // 🔹 Check each file
+  for (let file of filesArray) {
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
+      alert(`File type not allowed: ${file.name}. Only XLSX is allowed.`);
+      return; // stop execution
+    }
+  }
+  // 🔹 Total size check
+  const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
+  if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
+    alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+    return;
+  }
+  // 🔹 Invalid filename check
+  const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
+  if (invalidFiles.length > 0) {
+    alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+    return;
+  }
+  // ✅ Add valid files to form state
+  setForm((prev: any) => ({
+    ...prev,
+    UploadExcelFile: [...prev.UploadExcelFile, ...filesArray]
+  }));
+  };
+  // Handle input change
+   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+   const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: value
+    });
+  };
+  
+  // Date Change
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: name === "CommencementDate" ? new Date(value) : value
+    });
+  };
+  const handleUpload = async () => {  
+    setIsActiveExcel(true);
+    setIsActiveManual(false);
+    setForm({...form});
+  };
+  const handleFill = async () => {
+     setIsActiveExcel(false);
+     setIsActiveManual(true);
+     setForm({...form});
+  };
+  // Button click save
+  const handleSaveManual = async () => {
+  const dateOnly  = new Date(form.CommencementDate);
+  const payload = {
+      Title: form.Title,
+      YearofEstablishment: form.YearofEstablishment,
+      CommencementDate: dateOnly,
+      GST:form.GST,
+      Pan: form.Pan,
+      Tin:form.Tin,
+      CentralSalesTaxNo:form.CentralSalesTaxNo,
+      ServiceTaxRegNo:form.ServiceTaxRegNo,
+      NatureofService:form.NatureofService,
+      MSMERegistrationNo:form.MSMERegistrationNo,
+      ESICNo:form.ESICNo,
+      ExciseRegisterNo:form.ExciseRegisterNo,
+      WorkContractTaxNo:form.WorkContractTaxNo,
+      FullAddress:form.FullAddress,
+      TelephoneNo:form.TelephoneNo,
+      FaxNo:form.FaxNo,
+      EmailId:form.EmailId,
+      ContactPerson:form.ContactPerson,
+      RegFullAddress:form.RegFullAddress,
+      RegTelephoneNo:form.RegTelephoneNo,
+      RegFaxNo:form.RegFaxNo,
+      RegEmailId:form.RegEmailId,
+      RegContactPerson:form.RegContactPerson,
+      Manufacturer:form.Manufacturer,
+      AuthorizedAgent:form.AuthorizedAgent,
+      Trader:form.Trader,
+      ConsultingCompany:form.ConsultingCompany,
+      Other:form.Other,
+      ConstitutionofOrganization:form.ConstitutionofOrganization,
+      Name:form.Name,
+      Address:form.Address,
+      ContactNo:form.ContactNo,
+      Details:form.Details,
+      BankName:form.BankName,
+      BankAddress:form.BankAddress,
+      NameinBankAccount:form.NameinBankAccount,
+      BankAccountNo:form.BankAccountNo,
+      BankIFSCMICRCode:form.BankIFSCMICRCode,
+      CurrentStatus:'Draft'
+  };
+  try {    
+      setLoading(true);      
+      if(Number(itemId)==0)
+      {
+      const res = await service.createItem(payload);
+      setItemId(res.Id); 
+      if(res.Id>0){      
+      if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(res.Id, form.files[i]);
+      }
+    }
+      alert("Data Saved Successfully✅");
+  }  
+  else{
+    alert("Data Not Saved.");
+  }
+      }
+      else{
+      const result=await service.updateItem(itemId, payload);
+      if (form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(itemId, form.files[i]);
+        }
+      }
+      alert("Data Updated Successfully ✅");
+      }
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred");
+  }
+  finally{
+    setLoading(false);
+  }
+  };
+  // Button click submit Manual
+    const handleSubmitManual = async () => {  
+    try {
+    const dateOnly  = new Date(form.CommencementDate);
+    const payload = {
+      Title: form.Title,
+      YearofEstablishment: form.YearofEstablishment,
+      CommencementDate: dateOnly,
+      GST:form.GST,
+      Pan: form.Pan,
+      Tin:form.Tin,
+      CentralSalesTaxNo:form.CentralSalesTaxNo,
+      ServiceTaxRegNo:form.ServiceTaxRegNo,
+      NatureofService:form.NatureofService,
+      MSMERegistrationNo:form.MSMERegistrationNo,
+      ESICNo:form.ESICNo,
+      ExciseRegisterNo:form.ExciseRegisterNo,
+      WorkContractTaxNo:form.WorkContractTaxNo,
+      FullAddress:form.FullAddress,
+      TelephoneNo:form.TelephoneNo,
+      FaxNo:form.FaxNo,
+      EmailId:form.EmailId,
+      ContactPerson:form.ContactPerson,
+      RegFullAddress:form.RegFullAddress,
+      RegTelephoneNo:form.RegTelephoneNo,
+      RegFaxNo:form.RegFaxNo,
+      RegEmailId:form.RegEmailId,
+      RegContactPerson:form.RegContactPerson,
+      Manufacturer:form.Manufacturer,
+      AuthorizedAgent:form.AuthorizedAgent,
+      Trader:form.Trader,
+      ConsultingCompany:form.ConsultingCompany,
+      Other:form.Other,
+      ConstitutionofOrganization:form.ConstitutionofOrganization,
+      Name:form.Name,
+      Address:form.Address,
+      ContactNo:form.ContactNo,
+      Details:form.Details,
+      BankName:form.BankName,
+      BankAddress:form.BankAddress,
+      NameinBankAccount:form.NameinBankAccount,
+      BankAccountNo:form.BankAccountNo,
+      BankIFSCMICRCode:form.BankIFSCMICRCode,
+      CurrentStatus:'Completed'
+    };
+    if (itemId) {       
+     await service.updateItem(itemId, payload);
+     if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(itemId, form.files[i]);
+      }
+    }
+    alert("Data Submitted Successfully ✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);  
+    }
+    else{
+     const res= await service.createItem(payload);
+     if(res.Id>0)
+     {
+     if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(itemId, form.files[i]);
+      }
+      alert("Data Submitted Successfully ✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);  
+     }
+    }    
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred");
+  }
+  finally
+  {
+    setLoading(false);
+  }
+  };
+   // Button click submit Upload
+  const handleSubmitUpload = async (event: any) => {  
+  try{
+  setLoading(true);
+  const file = form.UploadExcelFile?.[0];
+  
+  const data = await file.arrayBuffer();
+  const workbook = XLSX.read(data, { type: 'array' });
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+  const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  console.log(jsonData);
+  const res =await service.saveToSharePoint(jsonData);
+  if(res.Id>0)
+  {   setItemId(res.Id);  
+      if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(res.Id, form.files[i]);
+      }
+    }  
+    alert("Data Submitted Successfully ✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);  
+  }
+}
+catch (error) {
+    console.error(error);
+    alert("Error occurred");
+  }
+finally
+  {
+    setLoading(false);
+  }
+  };
+  // Button click cancel
+    const handleCancel = async () => {
+      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+      window.location.assign(url);
+  };
     return (
       <section>
+        {loading && (
+  <div style={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: 'rgba(255,255,255,0.6)',
+    zIndex: 9999
+  }}>
+    <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+      <Spinner label="Processing..." size={SpinnerSize.large} />
+    </div>
+  </div>
+)}
         <div className={styles.container}>
           <div className={styles.header}>
             <h2>New Vendor Registration
@@ -32,13 +463,13 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
                   <div className={styles.row}>
                     <div className={styles['col-md-12']}>
                       <div className={styles.btnBox}>
-                        <div className={styles.btnUpload}>
+                        <div className={styles.btnUpload} onClick={handleUpload} style={{backgroundColor:isActiveExcel?"lightblue":"grey"}}>
                           <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" className="bi bi-file-earmark-excel-fill" viewBox="0 0 16 16">
                             <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M5.884 6.68 8 9.219l2.116-2.54a.5.5 0 1 1 .768.641L8.651 10l2.233 2.68a.5.5 0 0 1-.768.64L8 10.781l-2.116 2.54a.5.5 0 0 1-.768-.641L7.349 10 5.116 7.32a.5.5 0 1 1 .768-.64" />
                           </svg>
                           <span>Upload Vendor Registration Excel</span>
                         </div>
-                        <div className={styles.btnFill}>
+                        <div className={styles.btnFill} onClick={handleFill} style={{backgroundColor:isActiveManual?"lightblue":"grey"}}>
                           <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" className="bi bi-person-lines-fill" viewBox="0 0 16 16">
                             <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z" />
                           </svg>
@@ -468,7 +899,7 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
               <div className={styles.searchBox}>
                 <h3>Templates</h3>
                 <ol>
-                  <li>Select approval path carefully.</li>
+                  <li>Vendor Registration Form_v1.0.</li>
                 </ol>
               </div>
               {/* Guidelines */}
@@ -489,4 +920,4 @@ export default class VendorRegistrationManually extends React.Component<IVendorR
       
     );
   }
-}
+
