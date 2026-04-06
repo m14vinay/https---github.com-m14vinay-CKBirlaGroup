@@ -6,13 +6,14 @@ import { SPHttpClient } from '@microsoft/sp-http';
 import { Checkbox, Modal, PrimaryButton } from '@fluentui/react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Spinner, SpinnerSize } from '@fluentui/react';
-
+import { Dropdown, IDropdownOption } from '@fluentui/react';
+import SharePointService from '../service/Service';
 const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (props) => {
   
   const [form, setForm] = React.useState({
   RRequestNo: '',
   ProjectTitle: '',
-  Department: '',
+  DepartmentName: '',
   Remarks: '',
   TotalAmount: 0,
   ExpenseType: '',
@@ -23,13 +24,29 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   ClaimAmount: 0,
   Description: '',
   SupportingAvailable: false,
+  DepartmentNameID:''
   });
    const [loading, setLoading] = React.useState(false);
    const [isOpen, setisOpen] = React.useState(false);
+   const [DepartmentOption, setDepartmentOption] = React.useState<IDropdownOption[]>([]);
+   const service = new SharePointService(props.context);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };
+  React.useEffect(() => {
+      loadMaster();
+    }, []);
+  
+    const loadMaster = async () => {
+      const data = await service.getDepartments();
+      const options = data.map((item: any) => ({
+        key: item.Id,
+        text: item.DepartmentName
+      }));
+      setDepartmentOption(options);
+    };
+  
   const getRequestDetails = async (requestNo: string) => {
 
     const url = `${props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
@@ -41,12 +58,11 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     );
 
     const data = await response.json();
-
     if (data.value.length > 0) {
       setForm({
         RRequestNo: data.value[0].RRequestNo,
         ProjectTitle: data.value[0].ProjectTitle,
-        Department: data.value[0].Department,
+        DepartmentName: data.value[0].Department,
         Remarks: data.value[0].Remarks,
         TotalAmount: data.value[0].TotalAmount,
         ExpenseType: data.value[0].ExpenseType,
@@ -56,14 +72,15 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         BillDate: data.value[0].BillDate,
         ClaimAmount: data.value[0].ClaimAmount,
         Description: data.value[0].Description,
-        SupportingAvailable: data.value[0].SupportingAvailable
+        SupportingAvailable: data.value[0].SupportingAvailable,
+        DepartmentNameID:data.value[0].Department
       });
     } else {
 
       setForm({
         RRequestNo: '',
         ProjectTitle: '',
-        Department: '',
+        DepartmentName: '',
         Remarks: '',
         TotalAmount: 0,
         ExpenseType: '',
@@ -73,7 +90,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         BillDate: '',
         ClaimAmount: 0,
         Description: '',
-        SupportingAvailable: false
+        SupportingAvailable: false,
+        DepartmentNameID:''
       });
     }
   };
@@ -150,7 +168,13 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
             <div className={styles.selectDep}>
               <div className={styles.selectDepInner}>
                 <label>Select Department</label>
-                <input type='text' className="form-control" value={form.Department} onChange={handleRequestNoChange} />
+                <Dropdown className="form-control"
+                                      options={DepartmentOption}
+                                      selectedKey={form.DepartmentNameID}
+                                      onChange={(e, option) =>
+                                        setForm({ ...form, DepartmentName: option?.text as string,DepartmentNameID: option?.key as string})
+                                      }
+                                    />
               </div>
               <button className={styles.btnAdd} onClick={() => setisOpen(true)}>Add New</button>
             </div>
@@ -158,7 +182,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#1026e6" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2" />
               </svg>
-              <p>Please</p>
+              <p>Please upload the document at document page and generate the document number.You will select the document number while adding the reimbursement details.</p>
             </div>
             <div className='row'>
               <div className='col-md-4'>
@@ -183,15 +207,14 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 </div>
               </div>
             </div>
-
             <div className={styles.form}>
               <div className={styles['form-group']}>
                 <label>Total Amount</label>
-                <input type='text' className="form-control" name="totalAmount" value={form.TotalAmount} />
+                <input type='number' className="form-control" name="TotalAmount" value={form.TotalAmount} onChange={handleChange} readOnly style={{backgroundColor:"lightgray"}} />
               </div>
               <div className={styles['form-group']}>
                 <label>Remarks</label>
-                <input type='text' className="form-control" name="remarks" value={form.Remarks} />
+                <input type='text' className="form-control" name="Remarks" value={form.Remarks} onChange={handleChange} />
               </div>
 
               {/* Buttons */}
