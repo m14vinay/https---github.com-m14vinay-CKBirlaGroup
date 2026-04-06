@@ -6,43 +6,76 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+const HomeIcon = require('../assets/Home.png');
+const FormIcon = require('../assets/Form.png');
+const ReportIcon = require('../assets/Report.png');
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default class DigiflowMenu extends React.Component<IDigiflowMenuProps> {
   public render(): React.ReactElement<IDigiflowMenuProps> {
     const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      hasTeamsContext,
-      userDisplayName
+      context
     } = this.props;
 
+    let webUrl = context.pageContext.web.absoluteUrl;
     return (
-      <section className={`${styles.digiflowMenu} ${hasTeamsContext ? styles.teams : ''}`}>
-        <Navbar expand="lg" className="bg-body-tertiary">
+      <div>
+        <Navbar expand="lg" bg='light' className="bg-body-tertiary">
           <Container>
-            <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="me-auto">
-                <Nav.Link href="#home">Home</Nav.Link>
-                <Nav.Link href="#link">Link</Nav.Link>
-                <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-                  <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-                  <NavDropdown.Item href="#action/3.2">
-                    Another action
-                  </NavDropdown.Item>
-                  <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}><span><img className={styles.iconImg} src={HomeIcon}></img></span>Dashboard</Nav.Link>
+                <NavDropdown title={
+                  <div><span><img className={styles.iconImg} src={FormIcon}></img></span>Forms</div>
+                } id="basic-nav-dropdown">
+                  <NavDropdown.Item href={webUrl + "/SitePages/Dashboard.aspx"}>Quotation Approval</NavDropdown.Item>
                   <NavDropdown.Divider />
-                  <NavDropdown.Item href="#action/3.4">
-                    Separated link
+                  <NavDropdown.Item href="#action/3.3">Vendor Mapping / New Vendor Registration</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href={webUrl + "/SitePages/Dashboard.aspx"}>PO Approval
                   </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#action/3.4">Bill Processing
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#action/3.4">IT Approval
+                  </NavDropdown.Item>
+                </NavDropdown>
+                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}><span><img className={styles.iconImg} src={HomeIcon}></img></span>Approval NEIBT</Nav.Link>
+                <NavDropdown title={
+                  <div><span><img className={styles.iconImg} src={ReportIcon}></img></span>AP Reports</div>
+                } id="basic-nav-dropdown">
+                  <NavDropdown.Item href={webUrl + "/SitePages/Dashboard.aspx"}>Summary Report</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href={webUrl + "/SitePages/Dashboard.aspx"}>Finance Report
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#action/3.3">Request History Report </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#action/3.4">Workflow History Report
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#action/3.4">Suspended Requests
+                  </NavDropdown.Item>
+                </NavDropdown>
+                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}><span><img className={styles.iconImg} src={ReportIcon}></img></span>NEIBT Admin Reports</Nav.Link>
+                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}><span><img className={styles.iconImg} src={FormIcon}></img></span>Reimbursement</Nav.Link>
+                <NavDropdown title={
+                  <div><span><img className={styles.iconImg} src={ReportIcon}></img></span>Expense Reports</div>
+                } id="basic-nav-dropdown">
+                  <NavDropdown.Item href={webUrl + "/SitePages/Dashboard.aspx"}>Summary Report</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href={webUrl + "/SitePages/Dashboard.aspx"}>Finance Report
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#action/3.3">Workflow History Report </NavDropdown.Item>
                 </NavDropdown>
               </Nav>
             </Navbar.Collapse>
           </Container>
         </Navbar>
-      </section>
+      </div>
     );
   }
 }
