@@ -233,6 +233,14 @@
           "manifest": "./src/webparts/qrDetailsStatus/QrDetailsStatusWebPart.manifest.json"
         }
       ]
+    },
+    "digiflow-menu-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/digiflowMenu/DigiflowMenuWebPart.js",
+          "manifest": "./src/webparts/digiflowMenu/DigiflowMenuWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -265,6 +273,7 @@
     "VendorRegistrationDetailWebPartStrings": "lib/webparts/vendorRegistrationDetail/loc/{locale}.js",
     "VendorRegistrationSearchWebPartStrings": "lib/webparts/vendorRegistrationSearch/loc/{locale}.js",
     "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js",
-    "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js"
+    "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js",
+    "DigiflowMenuWebPartStrings": "lib/webparts/digiflowMenu/loc/{locale}.js"
   }
 }
