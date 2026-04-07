@@ -334,6 +334,7 @@ const handleSaveHistory = async (id: number) => {
       ApprovalPath: form.ApprovalPath,
       ApprovalPathID:form.ApprovalID,
       AssignedTo: User.Title, 
+      AssignedToEmail:User.Id,
       CurrentStatus:'Draft',
       Approval1Id:form.ApprovalID.split('_')[0],
       Approval2Id:form.ApprovalID.split('_')[1],
@@ -409,6 +410,7 @@ const handleUpdate = async () => {
       CurrentStatus:'Pending',
       ApprovalPathID:form.ApprovalID,
       AssignedTo: User.Title, 
+      AssignedToEmail:User.Id,
       Approval1Id:form.ApprovalID.split('_')[0],
       Approval2Id:form.ApprovalID.split('_')[1],
       Approval3Id:form.ApprovalID.split('_')[2]

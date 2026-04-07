@@ -390,7 +390,8 @@ const handleUpdate = async () => {
     ProjectTitle: form.projectTitle,
     VendorName:  form.vendorName, 
     VendorDescription: form.vendorDescription,
-    CurrentStatus: 'Pending'
+    CurrentStatus: 'Pending',
+    AssignedToEmailId:7
   };
   try {
     if (itemId) {

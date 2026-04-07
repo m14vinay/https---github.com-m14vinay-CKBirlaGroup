@@ -48,6 +48,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
      const [approverComment2, setApproverComment2] = React.useState('');
     const [attachments, setAttachments] = React.useState<any[]>([]);
      const [AssignedID, setAssignedID] = React.useState<number | null>(null);
+     const [AssignedToEmail, setAssignedToEmail] = React.useState<number | null>(null);
     const [approver1, setApprover1] = React.useState('');
     const [approver2, setApprover2] = React.useState('');
     const [approver3, setApprover3] = React.useState('');
@@ -145,6 +146,7 @@ const handleFetchById = async (id: number) => {
       RequestNo : result.RequestNo || '',
       files: null
       }));
+      
   if (!result.ActionDate1 || !result.ActionDate2 || !result.ActionDate3) {
   setIsDisabled(false);  // enable
 } else {

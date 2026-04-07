@@ -383,6 +383,7 @@ const handleSaveHistory = async (id: number) => {
     ProjectDescription: form.Comments,
     AssignedTo: AssignedID,
     DepartmentHeadId: Number(Departmenthead),
+    AssignedToEmailId:Number(Departmenthead),
     Approver2Id: Number(FinanceController) ,
     CurrentStatus:'Draft'
   };
@@ -461,6 +462,7 @@ const handleUpdate = async () => {
     CurrentStatus:'Pending',
     AssignedTo: AssignedID,
     DepartmentHeadId: Number(Departmenthead),
+    AssignedToEmailId:Number(Departmenthead),
     Approver2Id: Number(FinanceController) ,
   };
   try {
