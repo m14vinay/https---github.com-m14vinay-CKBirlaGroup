@@ -25,9 +25,11 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps> {
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="me-auto">
-                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}><span><img className={styles.iconImg} src={HomeIcon}></img></span>Dashboard</Nav.Link>
+                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}>
+                <span><img className={styles.iconImg} src={HomeIcon}></img></span>
+                <span className={styles.menuHaeding}>Dashboard</span></Nav.Link>
                 <NavDropdown title={
-                  <div><span><img className={styles.iconImg} src={FormIcon}></img></span>Forms</div>
+                  <><span><img className={styles.iconImg} src={FormIcon}></img></span><span className={styles.menuHaeding}>Forms</span></>
                 } id="basic-nav-dropdown">
                   <NavDropdown.Item href={webUrl + "/SitePages/Dashboard.aspx"}>Quotation Approval</NavDropdown.Item>
                   <NavDropdown.Divider />
@@ -42,9 +44,11 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps> {
                   <NavDropdown.Item href="#action/3.4">IT Approval
                   </NavDropdown.Item>
                 </NavDropdown>
-                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}><span><img className={styles.iconImg} src={HomeIcon}></img></span>Approval NEIBT</Nav.Link>
+                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}>
+                <span><img className={styles.iconImg} src={HomeIcon}></img></span>
+                <span className={styles.menuHaeding}>Approval NEIBT</span></Nav.Link>
                 <NavDropdown title={
-                  <div><span><img className={styles.iconImg} src={ReportIcon}></img></span>AP Reports</div>
+                  <span><span><img className={styles.iconImg} src={ReportIcon}></img></span><span className={styles.menuHaeding}>AP Reports</span></span>
                 } id="basic-nav-dropdown">
                   <NavDropdown.Item href={webUrl + "/SitePages/Dashboard.aspx"}>Summary Report</NavDropdown.Item>
                   <NavDropdown.Divider />
@@ -59,10 +63,10 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps> {
                   <NavDropdown.Item href="#action/3.4">Suspended Requests
                   </NavDropdown.Item>
                 </NavDropdown>
-                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}><span><img className={styles.iconImg} src={ReportIcon}></img></span>NEIBT Admin Reports</Nav.Link>
-                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}><span><img className={styles.iconImg} src={FormIcon}></img></span>Reimbursement</Nav.Link>
+                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}><span><img className={styles.iconImg} src={ReportIcon}></img></span><span className={styles.menuHaeding}>NEIBT Admin Reports</span></Nav.Link>
+                <Nav.Link href={webUrl + "/SitePages/Dashboard.aspx"}><span><img className={styles.iconImg} src={FormIcon}></img></span><span className={styles.menuHaeding}>Reimbursement</span></Nav.Link>
                 <NavDropdown title={
-                  <div><span><img className={styles.iconImg} src={ReportIcon}></img></span>Expense Reports</div>
+                  <><span><img className={styles.iconImg} src={ReportIcon}></img></span><span className={styles.menuHaeding}>Expense Reports</span></>
                 } id="basic-nav-dropdown">
                   <NavDropdown.Item href={webUrl + "/SitePages/Dashboard.aspx"}>Summary Report</NavDropdown.Item>
                   <NavDropdown.Divider />
