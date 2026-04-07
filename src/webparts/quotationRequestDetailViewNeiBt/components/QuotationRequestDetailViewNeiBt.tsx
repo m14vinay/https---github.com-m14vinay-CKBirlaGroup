@@ -6,6 +6,7 @@ import { SPHttpClient } from '@microsoft/sp-http';
 import { useEffect, useState } from 'react';
 import { TextField, Dropdown, PrimaryButton, formProperties } from '@fluentui/react';
 import SharePointService from '../service/Service';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 const QuotationRequestDetailViewNeiBt: React.FC<IQuotationRequestDetailViewNeiBtProps> = (props) => {
 
@@ -39,22 +40,9 @@ const QuotationRequestDetailViewNeiBt: React.FC<IQuotationRequestDetailViewNeiBt
     const [approverComment, setApproverComment] = React.useState('');
     const [attachments, setAttachments] = React.useState<any[]>([]);
   const [History, setHistory] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(false);
       
-    // --- 1️⃣ Get ID from query string ---
-  
-  
-    // useEffect(() => {
-  //   loadDepartments();
-  // }, []);
-
-  // const loadDepartments = async () => {
-  //   const res = await fetch(
-  //     `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items`,
-  //     { headers: { Accept: 'application/json;odata=verbose' } }
-  //   );
-  //   const data = await res.json();
-  //   setDepartments(data.d.results);
-  // };
+    
 
     // --- 1️⃣ Get ID from query string ---
      const getIdFromQueryString = (): number | null => {
@@ -92,6 +80,7 @@ React.useEffect(() => {
 
 const handleFetchById = async (id: number) => {
     try {
+        setLoading(true);
       console.log("Calling API with ID:", id);
 
       const result = await service.getItemByRequestNo(id);
@@ -134,8 +123,28 @@ const handleFetchById = async (id: number) => {
   } catch (error) {
     console.error("Error:", error);
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
-    return (
+   return (
+            <section>
+              {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.6)',
+          zIndex: 9999
+        }}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+            <Spinner label="Processing..." size={SpinnerSize.large} />
+          </div>
+        </div>
+      )}
       <div className={styles.container}>
       <div className={styles.header}>
         <h4>Quotation Approval NEI BT Admin Request Details & Status</h4>
@@ -330,6 +339,7 @@ const handleFetchById = async (id: number) => {
         </div>
     </div>
     </div>
+    </section>
   );
 };
 

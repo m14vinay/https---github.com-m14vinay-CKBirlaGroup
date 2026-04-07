@@ -6,6 +6,7 @@ import { SPHttpClient } from '@microsoft/sp-http';
 import { useEffect, useState } from 'react';
 import { TextField, Dropdown, PrimaryButton, formProperties } from '@fluentui/react';
 import SharePointService from '../service/Service';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProps> = (props) => {
 
@@ -118,6 +119,7 @@ React.useEffect(() => {
 
 const handleFetchById = async (id: number) => {
     try {
+       setLoading(true);
       console.log("Calling API with ID:", id);
       const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
@@ -185,6 +187,10 @@ if (result.Approval3Id) {
   } catch (error) {
     console.error("Error:", error);
   }
+   finally
+  {
+    setLoading(false);
+  }
 };
 
 
@@ -224,9 +230,10 @@ const handleSaveRejectedHistory = async (id: number) => {
 };
 
 
+
   const handleApprove = async () => {
   try {
-     setActionType('approve');
+     //setActionType('approve');
       setLoading(true);
        if (!approverComment) return alert("Approver Comment required");
     if (!itemId) return;
@@ -272,7 +279,7 @@ if(form.ActionDate1==='')
 
 const handleReject = async () => {
   try {
-     setActionType('approve');
+     //setActionType('approve');
       setLoading(true);
     if (!approverComment) return alert("Approver Comment required");
     if (!itemId) return;
@@ -327,7 +334,23 @@ const handleReject = async () => {
   
     
   
-    return (
+   return (
+            <section>
+              {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.6)',
+          zIndex: 9999
+        }}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+            <Spinner label="Processing..." size={SpinnerSize.large} />
+          </div>
+        </div>
+      )}
       <div className={styles.container}>
         {/* LEFT FORM */}
         <div className={styles.header}>
@@ -416,8 +439,8 @@ const handleReject = async () => {
        <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}/>
           {/* Buttons */}
          <div className={styles.buttonGroup}>
-            <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled || loading}> {loading && actionType==='approve' ? "Approving..." : "Approve"}</button>
-                <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled  || loading}> {loading && actionType==='reject' ? "Rejecting..." : "Reject"}</button>
+            <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled}>Approve</button>
+                <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled}>Reject</button>
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
         </div>
@@ -485,7 +508,7 @@ const handleReject = async () => {
              </div>
           </div>
           </div>
-      
+      </section>
     );
   }
 

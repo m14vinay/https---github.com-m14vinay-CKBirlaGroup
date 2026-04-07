@@ -5,6 +5,8 @@ import styles from './VendorMappingApprovalForm.module.scss';
 import { IVendorMappingApprovalFormProps } from './IVendorMappingApprovalFormProps';
 import SharePointService from '../service/Service';
 import Service from '../service/Service';
+import { Spinner, SpinnerSize } from '@fluentui/react';
+
 
 
 const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => {
@@ -36,6 +38,9 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
    const [history, setHistory] = useState<any[]>([]);
   const [currentUser, setCurrentUser] = React.useState('');
   const [isDisabled, setIsDisabled] = useState(false);
+   const [loading, setLoading] = React.useState(false);
+  
+  
  
   
   // --- 1️⃣ Get ID from query string ---
@@ -79,7 +84,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
 //FETCH DATA-----
 const handleFetchById = async (id: number) => {
     try {
-      
+       setLoading(true);
     
       console.log("Calling API with ID:", id);
       const currentuser= await service.getUser();
@@ -128,6 +133,10 @@ const handleFetchById = async (id: number) => {
     } catch (error) {
       console.error("Error:", error);
     }
+    finally
+  {
+    setLoading(false);
+  }
   };
 
 
@@ -152,14 +161,14 @@ const handleSaveRejectedHistory = async (id: number) => {
 
   const currentuser = await service.getUser();
 
-  const payload = {
+ const payload = {
     Title: 'VMR',
     FID: id,  
     UserName: currentuser.Title,
     UserAction: 'Rejected',
     ActionDate: new Date().toISOString(),
-     Designation: currentuser.JobTitle, 
-     Usercomment: approverComment
+    Designation: currentuser.JobTitle, 
+    Usercomment: approverComment
   };
 
   await service.createHistoryItem(payload);
@@ -167,7 +176,8 @@ const handleSaveRejectedHistory = async (id: number) => {
 
   const handleApprove = async () => {
   try {
-       if (!approverComment) return alert("Approver Comment required");
+       setLoading(true);
+    if (!approverComment) return alert("Approver Comment required");
     if (!itemId) return;
 
     await service.updateItemdata(itemId, "Approved", approverComment,"Approved");
@@ -179,10 +189,15 @@ const handleSaveRejectedHistory = async (id: number) => {
   } catch (error) {
     console.error(error);
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
 
 const handleReject = async () => {
   try {
+     setLoading(true);
     if (!approverComment) return alert("Approver Comment required");
     if (!itemId) return;
 
@@ -200,6 +215,10 @@ const handleReject = async () => {
   } catch (error) {
     console.error(error);
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
 
     
@@ -207,7 +226,23 @@ const handleReject = async () => {
 
 
   // --- RENDER ---
-  return(
+  return (
+          <section>
+            {loading && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'rgba(255,255,255,0.6)',
+        zIndex: 9999
+      }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+          <Spinner label="Processing..." size={SpinnerSize.large} />
+        </div>
+      </div>
+    )}
   <div className={styles.container}>
         <div className={styles.header}>
                 <h4>Vendor Mapping Approval Form</h4>
@@ -334,6 +369,7 @@ const handleReject = async () => {
         </div>
      </div>
       </div>
+      </section>
    );
 };
 

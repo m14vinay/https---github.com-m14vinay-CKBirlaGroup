@@ -4,6 +4,7 @@ import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import styles from './VendorMappingDetails.module.scss'
 import { IVendorMappingDetailsProps } from './IVendorMappingDetailsProps';
 import SharePointService from '../service/Service';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 
 
@@ -82,6 +83,7 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
 //FETCH DATA-----
 const handleFetchById = async (id: number) => {
     try {
+      setLoading(true);
       console.log("Calling API with ID:", id);
 
       const result = await service.getItemByRequestNo(id);
@@ -117,6 +119,10 @@ const handleFetchById = async (id: number) => {
     } catch (error) {
       console.error("Error:", error);
     }
+    finally
+  {
+    setLoading(false);
+  }
   };
 
 
@@ -125,7 +131,23 @@ const handleFetchById = async (id: number) => {
 
 
   // --- RENDER ---
-  return (
+ return (
+          <section>
+            {loading && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'rgba(255,255,255,0.6)',
+        zIndex: 9999
+      }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+          <Spinner label="Processing..." size={SpinnerSize.large} />
+        </div>
+      </div>
+    )}
     <div className={styles.container}>
       <div className={styles.header}>
              <h4>Vendor Mapping Details & Status</h4>
@@ -264,6 +286,7 @@ const handleFetchById = async (id: number) => {
         </div>
     </div>
     </div>
+    </section>
   );
 };
 

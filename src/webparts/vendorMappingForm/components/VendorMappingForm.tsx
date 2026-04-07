@@ -5,6 +5,7 @@ import styles from './VendorMappingForm.module.scss';
 import { IVendorMappingFormProps } from './IVendorMappingFormProps';
 import SharePointService from '../service/Service';
 import Service from '../service/Service';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 
 const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
@@ -75,7 +76,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
      }, [itemId]);
     const handleFetchById = async (id: number) => {
     try {
-     
+     setLoading(true);
       console.log("Calling API with ID:", id);
 
       const result = await service.getItemByRequestNo(id);
@@ -104,6 +105,10 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     } catch (error) {
       console.error("Error:", error);
     }
+    finally
+  {
+    setLoading(false);
+  }
   };
 
 
@@ -443,7 +448,23 @@ const handleUpdate = async () => {
 
 
   // --- RENDER ---
-  return (
+   return (
+        <section>
+          {loading && (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      background: 'rgba(255,255,255,0.6)',
+      zIndex: 9999
+    }}>
+      <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+        <Spinner label="Processing..." size={SpinnerSize.large} />
+      </div>
+    </div>
+  )}
      <div className={styles.container}>
           <div className={styles.header}>
             <h4>Vendor Mapping Form </h4>          
@@ -572,16 +593,25 @@ const handleUpdate = async () => {
               <h6>Importance Guidelines</h6>              
             </div>
             <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
+              <li>​To find your project code, please refer to the home page and 
+                'my requests' section. Please take note that the system would not 
+                allow to create a vendor mapping or new vendor registration request 
+                unless the project code / quotation request is fully approved.</li>
+              <li>Please refer the vendor list excel on this page to choose the right vendor code and vendor name for an existing vendor. 
+                In case of any doubt or clarification please connect with Finance Department.</li>
+              <li>In case of a new vendor specify the name of vendor; Finance Department will create the vendor code.</li>
+              <li>Please take note that the vendor list on this page is refreshed every 7 days and thus if you have recently registered a new vendor and its not appearing in the list then please contact Finance Department for the same.</li>
+              <li>Attach all documents (excel form, pdf, emails, scan documents etc) before submitting the form. Once form is submitted it is non-editable. Total attachment size limit is 25 MB. 
+                It is recommended that the attachment name to not have spaces in it.</li>
+                <li>System allows only one vendor mapping request per project code. Thus if a vendor mapping request has been raised once with respect to project code then user cannot raise a new request against the same project code unless the vendor mapping request is rejected. 
+                  In all other scenarios a new project code / quotation request will have to be raised.</li>
             </ol>
           </div>
         </div>
       </div>
       </div>
       </div>
+      </section>
     
    );
 };

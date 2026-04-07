@@ -921,3 +921,4 @@ finally
     );
   }
 
+export default VendorRegistrationManually;

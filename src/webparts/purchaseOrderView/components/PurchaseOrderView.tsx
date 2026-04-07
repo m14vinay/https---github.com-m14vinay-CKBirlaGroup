@@ -4,6 +4,7 @@ import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import styles from './PurchaseOrderView.module.scss';
 import { IPurchaseOrderViewProps } from './IPurchaseOrderViewProps';
 import SharePointService from '../Service/Service';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 
 
@@ -48,6 +49,8 @@ const [approver4, setApprover4] = React.useState('');
 const [approver5, setApprover5] = React.useState('');
 const [departmentHead, setDepartmentHead] = React.useState('');
   const [History, setHistory] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  
     
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
@@ -113,6 +116,7 @@ React.useEffect(() => {
 //FETCH DATA-----
 const handleFetchById = async (id: number) => {
     try {
+       setLoading(true);
       console.log("Calling API with ID:", id);
 
       const result = await service.getItemByRequestNo(id);
@@ -149,6 +153,10 @@ const handleFetchById = async (id: number) => {
   } catch (error) {
     console.error("Error:", error);
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
 
 
@@ -158,7 +166,24 @@ const handleFetchById = async (id: number) => {
 
 
   // --- RENDER ---
-  return (
+  // --- RENDER ---
+     return (
+          <section>
+            {loading && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'rgba(255,255,255,0.6)',
+        zIndex: 9999
+      }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+          <Spinner label="Processing..." size={SpinnerSize.large} />
+        </div>
+      </div>
+    )}
     <div className={styles.container}>
       <div className={styles.header}>
         <h4>PO Approval Details & Status</h4>
@@ -304,6 +329,7 @@ const handleFetchById = async (id: number) => {
         </div>
     </div>
     </div>
+    </section>
   );
 };
 

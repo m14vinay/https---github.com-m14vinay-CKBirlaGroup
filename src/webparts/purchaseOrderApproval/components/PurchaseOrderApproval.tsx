@@ -6,6 +6,7 @@ import { IPurchaseOrderApprovalProps } from './IPurchaseOrderApprovalProps';
 import SharePointService from '../service/Service';
 import Service from '../service/Service';
 import { FabricPerformance } from '@fluentui/react';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 
 const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => {
@@ -118,6 +119,7 @@ const [History, setHistory] = useState<any[]>([]);
   //FETCH DATA-----
   const handleFetchById = async (id: number) => {
     try {
+       setLoading(true);
       console.log("Calling API with ID:", id);
        const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
@@ -174,6 +176,10 @@ const [History, setHistory] = useState<any[]>([]);
     } catch (error) {
       console.error("Error:", error);
     }
+    finally
+  {
+    setLoading(false);
+  }
   };
 
 
@@ -214,7 +220,7 @@ const handleSaveRejectedHistory = async (id: number) => {
 
   const handleApprove = async () => {
     try {
-       setActionType('approve');
+      // setActionType('approve');
       setLoading(true);
       if (!approverComment) return alert("Approver Comment required");
       
@@ -251,7 +257,7 @@ const handleSaveRejectedHistory = async (id: number) => {
 
   const handleReject = async () => {
     try {
-       setActionType('reject');
+       //setActionType('reject');
         setLoading(true);
       if (!approverComment) return alert("Approver Comment required");
       if (!itemId) return;
@@ -296,7 +302,24 @@ const handleSaveRejectedHistory = async (id: number) => {
 
 
   // --- RENDER ---
-  return (
+ // --- RENDER ---
+    return (
+         <section>
+           {loading && (
+     <div style={{
+       position: 'fixed',
+       top: 0,
+       left: 0,
+       width: '100%',
+       height: '100%',
+       background: 'rgba(255,255,255,0.6)',
+       zIndex: 9999
+     }}>
+       <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+         <Spinner label="Processing..." size={SpinnerSize.large} />
+       </div>
+     </div>
+   )}
     <div className={styles.container}>
       <div className={styles.header}>
         <h4>PO Approval Form</h4>
@@ -365,8 +388,8 @@ const handleSaveRejectedHistory = async (id: number) => {
             {/* Buttons */}
             <div>
               <div className={styles.buttonGroup}>
-                <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled || loading}> {loading && actionType==='approve' ? "Approving..." : "Approve"}</button>
-                <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled  || loading}> {loading && actionType==='reject' ? "Rejecting..." : "Reject"}</button>
+                <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled}>Approve</button>
+                <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled}>Reject</button>
                 <button className={styles.cancelBtn}>Cancel</button>
               </div>
             </div>
@@ -431,6 +454,7 @@ const handleSaveRejectedHistory = async (id: number) => {
         </div>
      </div>
       </div>
+      </section>
    );
 };
   
