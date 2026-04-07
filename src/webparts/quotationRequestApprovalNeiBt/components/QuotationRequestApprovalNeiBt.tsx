@@ -49,8 +49,13 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     const [approverComment, setApproverComment] = React.useState('');
      const [approverComment2, setApproverComment2] = React.useState('');
     const [attachments, setAttachments] = React.useState<any[]>([]);
+<<<<<<< HEAD
      const [AssignedID2, setAssignedID2] = React.useState('');
      const [AssignedID3, setAssignedID3] = React.useState('');
+=======
+     const [AssignedID, setAssignedID] = React.useState<number | null>(null);
+     const [AssignedToEmail, setAssignedToEmail] = React.useState<number | null>(null);
+>>>>>>> 826fb97d7a2a14601e1df5401f609c09592ca9c6
     const [approver1, setApprover1] = React.useState('');
     const [approver2, setApprover2] = React.useState('');
     const [approver3, setApprover3] = React.useState('');
@@ -169,9 +174,13 @@ if (result.Approval3Id) {
 
       files: null
       }));
+<<<<<<< HEAD
    
 
 
+=======
+      
+>>>>>>> 826fb97d7a2a14601e1df5401f609c09592ca9c6
   if (!result.ActionDate1 || !result.ActionDate2 || !result.ActionDate3) {
   setIsDisabled(false);  // enable
 } else {

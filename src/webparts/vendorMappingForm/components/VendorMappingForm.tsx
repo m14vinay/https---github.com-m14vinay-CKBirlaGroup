@@ -33,6 +33,8 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   const service = new SharePointService(props.context);
   const [projectTitle, setProjectTitle] = React.useState('');
   const [projectDescription, setProjectDescription] = React.useState('');
+  const[AssignedTo,setAssignedTo]=React.useState();
+  const[AssignedToEmail,setAssignedToEmail]=React.useState();
   const [requestNoError, setRequestNoError] = React.useState('');
   const [isSubmitted, setIsSubmitted] = React.useState('');
   const MAX_TOTAL_SIZE_MB = 25;
@@ -97,6 +99,11 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
 
           
         }));
+        const user = await service.getVendorApprover();
+         if (user && user.length > 0 && user[0].Id > 0) {       
+          setAssignedTo(user[0].Title);   
+          setAssignedToEmail(user[0].Id);
+         }
           
       } else {
         alert("No data found");
@@ -344,7 +351,9 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     ProjectDescription: form.projectDescription,
     VendorName: form.vendorName,
     VendorDescription: form.vendorDescription,
-    CurrentStatus: 'Draft'
+    CurrentStatus: 'Draft',
+    AssignedTo:AssignedTo,
+    AssignedToEmailId:AssignedToEmail
   };
 
   try {
@@ -402,7 +411,9 @@ const handleUpdate = async () => {
     ProjectTitle: form.projectTitle,
     VendorName:  form.vendorName, 
     VendorDescription: form.vendorDescription,
-    CurrentStatus: 'Pending'
+    CurrentStatus: 'Pending',
+    AssignedTo:AssignedTo,
+    AssignedToEmailId:AssignedToEmail
   };
   try {
     if (itemId) {

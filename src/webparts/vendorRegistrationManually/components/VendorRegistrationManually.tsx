@@ -77,12 +77,30 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
     if (id!=null) {
       setItemId(id);
       handleFetchById(id);
+      loadAttachments(id);
     }
     else{
       setItemId(0);
       setIsActiveExcel(true);
     }
   },[]);
+  // Load Attachments
+  const loadAttachments = async (id:number) => {
+      try{
+    const files = await service.getAttachments(id);
+    console.log("Attachments:", files);
+    setAttachments(files);
+      }catch(error)
+      {
+        console.error(error);
+      }
+     };
+// Delete Attachment
+const removeExistingFile = async (index: number) => {
+  const file = attachments[index];
+  await service.deleteAttachmentFromSP(file);
+  setAttachments(prev => prev.filter((_, i) => i !== index));
+};
   // Fetch Detail by ID
   const handleFetchById = async (id: number) => {
     try {

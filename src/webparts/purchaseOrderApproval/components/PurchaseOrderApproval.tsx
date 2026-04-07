@@ -47,6 +47,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
    const [approverComment2, setApproverComment2] = React.useState('');
   const [attachments, setAttachments] = React.useState<any[]>([]);
    const [AssignedID, setAssignedID] = React.useState<number | null>(null);
+   const [AssignedToEmail, setAssignedToEmail] = React.useState<number | null>(null);
   const [approver1, setApprover1] = React.useState('');
   const [approver2, setApprover2] = React.useState('');
   const [approver3, setApprover3] = React.useState('');
@@ -154,6 +155,7 @@ const [History, setHistory] = useState<any[]>([]);
         if(User?.Id)
         {
           setAssignedID(User.Title);
+          setAssignedToEmail(User.Id);
         //approver2:
         }
 

@@ -337,12 +337,22 @@ const User=await service.getUserById(Number(form.Approval1Id));
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
+<<<<<<< HEAD
       AssignedTo: AssignedID,  // ✅ must be numeric ID
   Approval1Id: Number(form.Approval1Id),
   Approval2Id: Number(form.Approval2Id ),
   Approval3Id: Number(form.Approval3Id ),
   CurrentStatus:'Draft'
    
+=======
+      ApprovalPathID:form.ApprovalID,
+      AssignedTo: User.Title, 
+      AssignedToEmail:User.Id,
+      CurrentStatus:'Draft',
+      Approval1Id:form.ApprovalID.split('_')[0],
+      Approval2Id:form.ApprovalID.split('_')[1],
+      Approval3Id:form.ApprovalID.split('_')[2]
+>>>>>>> 826fb97d7a2a14601e1df5401f609c09592ca9c6
   };
 
   try {
@@ -419,6 +429,7 @@ const handleUpdate = async () => {
       CurrentStatus:'Pending',
       ApprovalPathID:form.ApprovalID,
       AssignedTo: User.Title, 
+      AssignedToEmail:User.Id,
       Approval1Id:form.ApprovalID.split('_')[0],
       Approval2Id:form.ApprovalID.split('_')[1],
       Approval3Id:form.ApprovalID.split('_')[2]
