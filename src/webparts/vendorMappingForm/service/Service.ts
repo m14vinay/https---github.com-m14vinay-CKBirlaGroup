@@ -7,6 +7,7 @@ export default class Service {
    private FetchList ="QuotationApproval";
   private VendorList="";
     private HistoryList="History";
+    private Approver="VendorMappingApproval";
 
 
   constructor(context: any) {
@@ -24,6 +25,21 @@ export default class Service {
     );
     const data = await res.json();
     return data.value;
+  }
+
+  //Get Department Data
+  public async getVendorApprover(): Promise<any[]> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Approver}')/items?$select=Id,Title,
+Approver/Id,Approver/Title,
+&$expand=Approver`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0] : [];
   }
 
   //Get Vendor Data

@@ -114,7 +114,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
         const User=await service.getUserById(data.Departmenthead.Id);
         if(User?.Id)
         {
-          setAssignedID(User.Title);
+          setAssignedID(User.Title);          
         }
         const dataApprover = await service.GetApproverFromFinance(result.PoMaster);
         if(dataApprover?.Id)
