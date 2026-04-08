@@ -110,10 +110,10 @@ export default function MyPendingRequests() {
     const sortData = () => {
         setLoading(false);
         _setData(data1.sort((a,b) => {
-            return new Date(a.Modified) > new Date(b.Modified)?1:-1;
+            return new Date(b.Modified) > new Date(a.Modified)?1:-1;
         }));
         console.log("Data : ", data1.sort((a,b) => {
-            return new Date(a.Modified) > new Date(b.Modified)?1:-1;
+            return new Date(b.Modified) > new Date(a.Modified)?1:-1;
         }))
     }
 
