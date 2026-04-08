@@ -4,6 +4,7 @@ import type { IQuotationRequestNeiBtProps } from './IQuotationRequestNeiBtProps'
 import { escape } from '@microsoft/sp-lodash-subset';
 import { SPHttpClient } from '@microsoft/sp-http';
 import SharePointService from '../service/Service';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
 
 
@@ -59,7 +60,8 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
   const MAX_TOTAL_SIZE_MB = 25;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
    const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
-  
+  const [loading, setLoading] = React.useState(false);
+     const [actionType, setActionType] = React.useState<'approve' | 'reject' | ''>('');
 
 // --- 1️⃣ Get ID from query string ---
     const getIdFromQueryString = (): number | null => {
@@ -106,6 +108,7 @@ const loadAttachments = async (id:number) => {
 
      const handleFetchById = async (id: number) => {
     try {
+       setLoading(true);
       console.log("Calling API with ID:", id);
      const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
@@ -133,15 +136,17 @@ const loadAttachments = async (id:number) => {
       Department: result.Department || '',
       Advancepayment: result.Advancepayment || 0,
       ApprovalPath: result.ApprovalPath || '',
-      RequestNo : result.RequestNo || '',
-      AssignedTo:result.AssignedTo ||'',
-      ApprovalID:result.ApprovalPathID ||''
+      RequestNo : result.RequestNo || ''
       }));       
     } else {
       alert("No data found");
     }
   } catch (error) {
     console.error("Error:", error);
+  }
+  finally
+  {
+    setLoading(false);
   }
 };
 
@@ -300,7 +305,7 @@ const handleSaveHistory = async (id: number) => {
 
    const handleSaveOrUpdate = async () => {
   // 🔹 Validations
-  
+    setLoading(true);
     if(!form.ProjectTitle) return alert("Project Title required");
     if(!form.Vendor1) return alert("Enter Vendor1 ");
     if(!form.Quote1) return alert("Enter Quote1");
@@ -309,11 +314,11 @@ const handleSaveHistory = async (id: number) => {
     if(!form.Department) return alert("Select Department Name");
     if(!form.Advancepayment) return alert("Select Advance Payemnt");
      if (!form.files || form.files.length === 0) return alert("Attach files");
-    const User=await service.getUserById(Number(form.ApprovalID.split('_')[0]));
-      if(User?.Id)
-      {
-      setAssignedID(User.Title);
-      }
+const User=await service.getUserById(Number(form.Approval1Id));
+  if(User?.Id)
+  {
+  setAssignedID(User.Title);
+  }
   // 🔹 Payload (common)
   const payload = {
     ProjectTitle: form.ProjectTitle,
@@ -332,13 +337,12 @@ const handleSaveHistory = async (id: number) => {
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
-      ApprovalPathID:form.ApprovalID,
-      AssignedTo: User.Title, 
-      AssignedToEmail:User.Id,
-      CurrentStatus:'Draft',
-      Approval1Id:form.ApprovalID.split('_')[0],
-      Approval2Id:form.ApprovalID.split('_')[1],
-      Approval3Id:form.ApprovalID.split('_')[2]
+      AssignedTo: AssignedID,  // ✅ must be numeric ID
+  Approval1Id: Number(form.Approval1Id),
+  Approval2Id: Number(form.Approval2Id ),
+  Approval3Id: Number(form.Approval3Id ),
+  CurrentStatus:'Draft'
+   
   };
 
   try {
@@ -371,12 +375,17 @@ const handleSaveHistory = async (id: number) => {
     console.error(error);
     alert("Error occurred ❌");
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
 
   
 
 // Update
 const handleUpdate = async () => {
+   setLoading(true);
    if(!form.ProjectTitle) return alert("Project Title required");
     if(!form.Vendor1) return alert("Enter Vendor1 ");
     if(!form.Quote1) return alert("Enter Quote1");
@@ -433,6 +442,10 @@ const handleUpdate = async () => {
     console.error(error);
     alert("Error occurred");
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
 
 const handleApprovalPathChange = (option?: IDropdownOption) => {
@@ -442,9 +455,24 @@ setForm(prev => ({
   ApprovalPath: option?.text||"",
   ApprovalID:(option?.key).toString()||""
 }));
- 
 };
     return (
+            <section>
+              {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.6)',
+          zIndex: 9999
+        }}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+            <Spinner label="Processing..." size={SpinnerSize.large} />
+          </div>
+        </div>
+      )}
      <div className={styles.container}>
                <div className={styles.header}>
                  <h4>Quotation Approval Form - NEI BT Admin </h4>          
@@ -468,10 +496,10 @@ setForm(prev => ({
           
 
           <label>Total Project Amount</label>
-          <input name="TotalProjectAmount" value={form.TotalProjectAmount }onChange={handleChange}  />
+          <input name="TotalProjectAmount" value={form.TotalProjectAmount } type='number' onChange={handleChange}  />
 
           <label>Applicable Taxes</label>
-          <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange}/>
+          <input name="ApplicableTaxes" value={form.ApplicableTaxes} type='number' onChange={handleChange}/>
         
 {/* 
           <label>Vendor 1 <span className={styles.required}>*</span></label>
@@ -500,7 +528,7 @@ setForm(prev => ({
         <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
 
           <label>Selected Quote <span className={styles.required}>*</span></label>
-          <input name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} />
+          <input name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} type='number' />
           
     
         <label>Department</label>
@@ -514,13 +542,7 @@ setForm(prev => ({
       Department: option?.key as string // safe default empty string
     }))
   }
-/>
-          {/* <label>Department</label>
-          <input name="Department" value={form.Department} onChange={handleChange}   /> */}
-       
-          {/* <label>Advance Amount <span className={styles.required}>*</span></label>
-          <input name="Advancepayment" value={form.Advancepayment} onChange={handleChange}    /> */}
-          
+/> 
           <ChoiceGroup
             label="Advance Payment"
             options={poOptions}
@@ -616,15 +638,42 @@ setForm(prev => ({
               <h6>Templates</h6>              
             </div>
             <ol>
-             <li>
-      <a 
-        href="Downloads/CKBCSL_VENDOR_LIST_11.06.18.xlsx" 
-        target="_blank" 
-        rel="noopener noreferrer"
+             <p>
+     <a 
+        href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/Quotation_Approval_Form_v1.0.xlsx"
+      target="_blank"
+      rel="noopener noreferrer"
       >
-      
+     Quotation_Approval_Form_v1.0.xlsx
       </a>
-    </li>
+    </p>
+    <p>
+     <a 
+        href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/SOP_Procurement_of_Goods_Services-CKBCSL-V1.1_wef_15.09.2016.pdf"
+      target="_blank"
+      rel="noopener noreferrer"
+      >
+     SOP_Procurement_of_Goods_Services-CKBCSL-V1.1_wef_15.09.2016.pdf
+      </a>
+    </p>
+    <p>
+     <a 
+        href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/WSR5June.docx"
+      target="_blank"
+      rel="noopener noreferrer"
+      >
+        CKBirla WSR 5June.docx
+      </a>
+    </p>
+     <p>
+     <a 
+        href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/SharePointtestpage.docx"
+      target="_blank"
+      rel="noopener noreferrer"
+      >
+        SharePoint test page.docx
+      </a>
+    </p>
             </ol>
           </div>
           {/* Guidelines */}
@@ -633,17 +682,18 @@ setForm(prev => ({
               <h6>Importance Guidelines</h6>              
             </div>
             <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
+              <li>Please select approval path suitably from the options which system proposes. In case of any doubt on approval path selection please refer the policy note on this page. 
+                Please connect with Finance Deptt for any clarification.</li>
+              <li>Please take note that if you wish to create a new quotation request with reference to an earlier project, then the same can be specified in 'Project Reference' field in this form.</li>
+              <li>Attach all documents (excel form, pdf, emails, scan documents etc) before submitting the form. Once form is submitted it is non-editable. Total attachment size limit is 25 MB.</li>
+              <li>It is recommended that the attachment name to not have spaces e.g. Email_VendorA_20-Jun.pdf.</li>
             </ol>
           </div>
         </div>
       </div>
       </div>
       </div>
-    
+    </section>
    );
 };
 

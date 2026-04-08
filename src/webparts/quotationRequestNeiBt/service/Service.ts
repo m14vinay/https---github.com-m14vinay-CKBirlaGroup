@@ -76,8 +76,8 @@ export default class Service {
       SPHttpClient.configurations.v1,
       {
         headers: {
-           "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/json;odata=nometadata",
+           "Accept": "application/json;",
+          "Content-Type": "application/json;",
           "IF-MATCH": "*",
           "X-HTTP-Method": "MERGE"
           },

@@ -6,6 +6,7 @@ import { SPHttpClient } from '@microsoft/sp-http';
 import { useEffect, useState } from 'react';
 import { TextField, Dropdown, PrimaryButton, formProperties } from '@fluentui/react';
 import SharePointService from '../service/Service';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 const QuotationRequestDetailViewNeiBt: React.FC<IQuotationRequestDetailViewNeiBtProps> = (props) => {
 
@@ -39,22 +40,9 @@ const QuotationRequestDetailViewNeiBt: React.FC<IQuotationRequestDetailViewNeiBt
     const [approverComment, setApproverComment] = React.useState('');
     const [attachments, setAttachments] = React.useState<any[]>([]);
   const [History, setHistory] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(false);
       
-    // --- 1️⃣ Get ID from query string ---
-  
-  
-    // useEffect(() => {
-  //   loadDepartments();
-  // }, []);
-
-  // const loadDepartments = async () => {
-  //   const res = await fetch(
-  //     `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items`,
-  //     { headers: { Accept: 'application/json;odata=verbose' } }
-  //   );
-  //   const data = await res.json();
-  //   setDepartments(data.d.results);
-  // };
+    
 
     // --- 1️⃣ Get ID from query string ---
      const getIdFromQueryString = (): number | null => {
@@ -92,11 +80,12 @@ React.useEffect(() => {
 
 const handleFetchById = async (id: number) => {
     try {
+        setLoading(true);
       console.log("Calling API with ID:", id);
 
       const result = await service.getItemByRequestNo(id);
       const user = await service.getUser();
-     const historydata=await service.GetHistoryItem(id,"VMR");
+     const historydata=await service.GetHistoryItem(id,"QANEIBT");
      setHistory(historydata);
       console.log("Result:", result);
 
@@ -121,8 +110,8 @@ const handleFetchById = async (id: number) => {
       Department: result.Department || '',
       Advancepayment: result.Advancepayment || 0,
       ApprovalPath: result.ApprovalPath || '',
-      CurrentStatus: result.Currentstatus || '',
-        RequestNo: result.RequestNo || '',
+      CurrentStatus: result.CurrentStatus || '',
+      RequestNo: result.RequestNo || '',
       files: null,
       
       }));
@@ -134,45 +123,38 @@ const handleFetchById = async (id: number) => {
   } catch (error) {
     console.error("Error:", error);
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
-
-
-  
-
-// // 🔹 Bind approval path
-//   const bindPath = async (dept: string) => {
-//     const res = await fetch(
-//       `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMasterNEI')/items?$filter=DepartmentName eq '${dept}'`,
-//       { headers: { Accept: 'application/json;odata=verbose' } }
-//     );
-//     const data = await res.json();
-//     setPaths(data.d.results);
-//   };
-
-  // 🔹 Handle change
-  
- 
-//  // 🔹 File upload
-//   const handleFile = (e: any) => {
-//     setForm({ ...form, files: Array.from(e.target.files) });
-//   };
-
-  
-    
-  
-    return (
+   return (
+            <section>
+              {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.6)',
+          zIndex: 9999
+        }}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+            <Spinner label="Processing..." size={SpinnerSize.large} />
+          </div>
+        </div>
+      )}
       <div className={styles.container}>
       <div className={styles.header}>
         <h4>Quotation Approval NEI BT Admin Request Details & Status</h4>
       </div>
       <div className={styles.row}>
-        {/* LEFT FORM */}
         <div className={styles['col-md-9']}>
           <div className={styles.leftPanel}>
             <div className={styles.leftPanelHeader}>
-              <h4>{form.RequestNo}</h4>
-             <h4>Current Status:  <span className={
-    form.CurrentStatus === "Approved"
+              <h4></h4>
+             <h4>Current Status:<span className={form.CurrentStatus === "Approved"
       ? styles.Approved
       : form.CurrentStatus === "Rejected"
       ? styles.Rejected
@@ -337,7 +319,17 @@ const handleFetchById = async (id: number) => {
             </span>
           </span>
         )}
-        {item.ActionDate && <span><b>Action Date: </b>{item.ActionDate}</span>}
+       {item.ActionDate && ( <span><b>Action Date: </b>
+    {new Date(item.ActionDate).toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).replace(',', ' AT')}
+  </span>
+)}
         {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
       </li>
     );
@@ -347,6 +339,7 @@ const handleFetchById = async (id: number) => {
         </div>
     </div>
     </div>
+    </section>
   );
 };
 

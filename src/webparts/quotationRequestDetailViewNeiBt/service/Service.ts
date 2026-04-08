@@ -93,30 +93,7 @@ export default class Service {
 
     const item = await res.json();
    
-   if (item && item.Id) {
-    return {
-      Id: item.Id,
-      ProjectTitle: item.ProjectTitle ,
-        ProjectReffNo: item.ProjectReffNo ,
-        ProjectDescription: item.ProjectDescription ,
-        TotalProjectAmount: item.TotalProjectAmount ,
-         ApplicableTaxes: item.ApplicableTaxes ,
-          Vendor1: item.Vendor1 ,
-      Vendor2: item.Vendor2 ,
-      Vendor3: item.Vendor3 ,
-      Quote1: item.Quote1 ,
-      Quote2:item.Quote2 ,
-      Quote3: item.Quote3 ,
-      Selectedvendor: item.Selectedvendor ,
-      SelectedQuote: item.SelectedQuote ,
-      Department: item.Department ,
-      Advancepayment: item.Advancepayment,
-      ApprovalPath: item.ApprovalPath,
-      Attachments: item.AttachmentFiles || [] // 👈 important
-    };
-  }
-
-  return null;
+   return item;
 };
   
   // Upload Files

@@ -6,6 +6,7 @@ import { IPurchaseOrderApprovalProps } from './IPurchaseOrderApprovalProps';
 import SharePointService from '../service/Service';
 import Service from '../service/Service';
 import { FabricPerformance } from '@fluentui/react';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 
 const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => {
@@ -19,7 +20,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     Department: '',
     POAmount: 0,
     ApplicableTaxes: 0,
-    POCategory: '',
+    PoMaster: '',
     ProjectDescription: '',
     ApproverComment1: '',
     ApproverCommentsError: '',
@@ -54,7 +55,12 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
   const [approver5, setApprover5] = React.useState('');
   const [departmentHead, setDepartmentHead] = React.useState('');
   const [isDisabled, setIsDisabled] = useState(false);
+   const [loading, setLoading] = React.useState(false);
+   const [actionType, setActionType] = React.useState<'approve' | 'reject' | ''>('');
 const [History, setHistory] = useState<any[]>([]);
+
+
+
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -114,11 +120,12 @@ const [History, setHistory] = useState<any[]>([]);
   //FETCH DATA-----
   const handleFetchById = async (id: number) => {
     try {
+       setLoading(true);
       console.log("Calling API with ID:", id);
        const currentuser= await service.getUser();
       const result = await service.getItemByRequestNo(id);
    const User=await service.getUserById(result.Approver2Id);
-     const historydata=await service.GetHistoryItem(id,"VMR");
+     const historydata=await service.GetHistoryItem(id,"PO");
      setHistory(historydata);
    console.log("Result:", result);
 
@@ -135,7 +142,7 @@ const [History, setHistory] = useState<any[]>([]);
           projectTitle: result.ProjectTitle || '',
           vendorName: result.VendorName || '',
           POAmount: result.POAmount || 0,
-          POCategory: result.PoMaster || '',
+          PoMaster: result.PoMaster || '',
           ApplicableTaxes: result.ApplicableTaxes || 0,
           ProjectDescription: result.ProjectDescription || '',
           ActionDate1:result.ActionDate1 || '',
@@ -171,6 +178,10 @@ const [History, setHistory] = useState<any[]>([]);
     } catch (error) {
       console.error("Error:", error);
     }
+    finally
+  {
+    setLoading(false);
+  }
   };
 
 
@@ -186,22 +197,23 @@ const [History, setHistory] = useState<any[]>([]);
     UserAction: 'Approved',
     ActionDate: new Date().toISOString(),
      Designation: currentuser.JobTitle, 
+      UserComment: approverComment
   };
 
   await service.createHistoryItem(payload);
 };
-
 const handleSaveRejectedHistory = async (id: number) => {
 
   const currentuser = await service.getUser();
 
-  const payload = {
+ const payload = {
     Title: 'PO',
     FID: id,  
     UserName: currentuser.Title,
     UserAction: 'Rejected',
     ActionDate: new Date().toISOString(),
      Designation: currentuser.JobTitle, 
+      UserComment: approverComment
   };
 
   await service.createHistoryItem(payload);
@@ -210,6 +222,8 @@ const handleSaveRejectedHistory = async (id: number) => {
 
   const handleApprove = async () => {
     try {
+      // setActionType('approve');
+      setLoading(true);
       if (!approverComment) return alert("Approver Comment required");
       
       if (!itemId) return;
@@ -237,10 +251,16 @@ const handleSaveRejectedHistory = async (id: number) => {
     } catch (error) {
       console.error(error);
     }
+    finally
+  {
+    setLoading(false);
+  }
   };
 
   const handleReject = async () => {
     try {
+       //setActionType('reject');
+        setLoading(true);
       if (!approverComment) return alert("Approver Comment required");
       if (!itemId) return;
 
@@ -260,7 +280,7 @@ const handleSaveRejectedHistory = async (id: number) => {
       }
        else if(form.ActionDate2==='')
      {
-       await service.updateItemdata2(itemId, "Rejected", approverComment,'Rejected');
+       await service.updateItemdata2(itemId, "Rejected", approverComment,"Rejected");
          await handleSaveRejectedHistory(itemId);
        alert("✅ Final Rejection done");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -273,6 +293,10 @@ const handleSaveRejectedHistory = async (id: number) => {
     } catch (error) {
       console.error(error);
     }
+    finally
+  {
+    setLoading(false);
+  }
   };
 
 
@@ -280,7 +304,24 @@ const handleSaveRejectedHistory = async (id: number) => {
 
 
   // --- RENDER ---
-  return (
+ // --- RENDER ---
+    return (
+         <section>
+           {loading && (
+     <div style={{
+       position: 'fixed',
+       top: 0,
+       left: 0,
+       width: '100%',
+       height: '100%',
+       background: 'rgba(255,255,255,0.6)',
+       zIndex: 9999
+     }}>
+       <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+         <Spinner label="Processing..." size={SpinnerSize.large} />
+       </div>
+     </div>
+   )}
     <div className={styles.container}>
       <div className={styles.header}>
         <h4>PO Approval Form</h4>
@@ -292,27 +333,7 @@ const handleSaveRejectedHistory = async (id: number) => {
             <div className={styles.leftPanelHeader}>
               <label style={{fontWeight: "bold"}}>PO Approval Form -{form.RequestNo}</label>
             </div>
-            <div className={styles.leftPanelStatusHeader}>
-                        {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-    let statusClass = styles.statusBox;
-    if (item.UserAction === "Approved") {
-      statusClass = `${styles.statusBox}`;    
-    } 
-    else if (item.UserAction === "Rejected") {
-      statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-    }
-
-    return (
-      <div className={statusClass} key={index}>
-        <div className={styles.content}>
-          <h5>{item.UserName}</h5>
-          <h6>{item.Designation}</h6>
-          <h4>{item.UserAction}</h4>
-        </div>
-      </div>
-    );
-  })}
-             </div>
+          
             <div className={styles.formGroup}>
               <label>Project Code</label>
               <input value={form.projectCode} readOnly style={{backgroundColor:"lightgray"}}/>
@@ -339,7 +360,7 @@ const handleSaveRejectedHistory = async (id: number) => {
             </div>
             <div className={styles.formGroup}>
               <label>PO Category</label>
-              <input name="POCategory" value={form.POCategory} readOnly style={{backgroundColor:"lightgray"}}/>
+              <input name="POCategory" value={form.PoMaster} readOnly style={{backgroundColor:"lightgray"}}/>
             </div>
             <div className={styles.formGroup}>
               <label>Additional Information & Remarks</label>
@@ -369,7 +390,7 @@ const handleSaveRejectedHistory = async (id: number) => {
             {/* Buttons */}
             <div>
               <div className={styles.buttonGroup}>
-                <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled} >Approve</button>
+                <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled}>Approve</button>
                 <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled}>Reject</button>
                 <button className={styles.cancelBtn}>Cancel</button>
               </div>
@@ -415,7 +436,17 @@ const handleSaveRejectedHistory = async (id: number) => {
             </span>
           </span>
         )}
-        {item.ActionDate && <span><b>Action Date: </b>{item.ActionDate}</span>}
+        {item.ActionDate && ( <span><b>Action Date: </b>
+    {new Date(item.ActionDate).toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).replace(',', ' AT')}
+  </span>
+)}
         {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
       </li>
     );
@@ -425,6 +456,7 @@ const handleSaveRejectedHistory = async (id: number) => {
         </div>
      </div>
       </div>
+      </section>
    );
 };
   

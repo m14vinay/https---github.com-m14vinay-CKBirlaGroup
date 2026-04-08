@@ -118,32 +118,11 @@
   color: #fff;
   padding: 5px 15px;
 }
-.RejectBtn {
- background-color:red;
-  border: none;
-  border-radius: 5px;
-  color: #fff;
-  padding: 5px 15px;
-}
 
-.ApproveBtn {
-  background-color: #25da67;
+.btnSubmit {
+  background-color: #0078d4;
+  color: white;
   border: none;
-  border-radius: 5px;
-  color: #fff;
-  padding: 5px 15px;
-}
-
-.cancelBtn {
-  background-color:gray;
-  border: none;
-  border-radius: 5px;
-  color: #fff;
-  padding: 5px 15px;
-}
-.formGroup
-{
-  display: flex;
-  margin-bottom: 10px;
-  padding: 3px 15px;
+  padding: 8px 16px;
+  border-radius: 2px;
 }

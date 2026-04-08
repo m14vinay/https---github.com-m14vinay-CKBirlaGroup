@@ -4,6 +4,7 @@ import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import styles from './PurchaseOrderView.module.scss';
 import { IPurchaseOrderViewProps } from './IPurchaseOrderViewProps';
 import SharePointService from '../Service/Service';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 
 
@@ -17,6 +18,7 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
       RemainingAmount: 0,
       Department:'',
       POAmount: 0,
+       PoMaster: '',
      ApplicableTaxes:0,
      POCategory:'',
      ProjectDescription: '',
@@ -47,6 +49,8 @@ const [approver4, setApprover4] = React.useState('');
 const [approver5, setApprover5] = React.useState('');
 const [departmentHead, setDepartmentHead] = React.useState('');
   const [History, setHistory] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  
     
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
@@ -112,11 +116,12 @@ React.useEffect(() => {
 //FETCH DATA-----
 const handleFetchById = async (id: number) => {
     try {
+       setLoading(true);
       console.log("Calling API with ID:", id);
 
       const result = await service.getItemByRequestNo(id);
        const user = await service.getUser();
-     const historydata=await service.GetHistoryItem(id,"VMR");
+     const historydata=await service.GetHistoryItem(id,"PO");
      setHistory(historydata);
       console.log("Result:", result);
 
@@ -126,15 +131,16 @@ const handleFetchById = async (id: number) => {
       setForm(prev => ({
         ...prev,
         POrequestNo: result.POrequestNo || '',
-        projectCode: result.ProjectCode || '',
-        Department: result.Department || '',
-        projectTitle: result.ProjectTitle || '',
-        vendorName: result.VendorName || '',
-        POAmount: result.POAmount || 0,
-        ApplicableTaxes: result.ApplicableTaxes || 0,
-        ProjectDescription: result.ProjectDescription || '',
-        CurrentStatus: result.Currentstatus || '',
-        RequestNo: result.RequestNo || '',
+          projectCode: result.ProjectCode || '',
+          Department: result.Department || '',
+          projectTitle: result.ProjectTitle || '',
+          vendorName: result.VendorName || '',
+          POAmount: result.POAmount || 0,
+          POCategory: result.PoMaster || '',
+          ApplicableTaxes: result.ApplicableTaxes || 0,
+          ProjectDescription: result.ProjectDescription || '',
+          RequestNo: result.RequestNo,
+          CurrentStatus: result.CurrentStatus,
         files: null
       }));
 
@@ -147,6 +153,10 @@ const handleFetchById = async (id: number) => {
   } catch (error) {
     console.error("Error:", error);
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
 
 
@@ -156,7 +166,24 @@ const handleFetchById = async (id: number) => {
 
 
   // --- RENDER ---
-  return (
+  // --- RENDER ---
+     return (
+          <section>
+            {loading && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'rgba(255,255,255,0.6)',
+        zIndex: 9999
+      }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+          <Spinner label="Processing..." size={SpinnerSize.large} />
+        </div>
+      </div>
+    )}
     <div className={styles.container}>
       <div className={styles.header}>
         <h4>PO Approval Details & Status</h4>
@@ -221,7 +248,7 @@ const handleFetchById = async (id: number) => {
             </div>
             <div className={styles.formGroup}>
               <label>PO Category</label>
-              <input name="POCategory" value={form.POCategory} readOnly style={{backgroundColor:"lightgray"}} />
+              <input name="POCategory" value={form.PoMaster} readOnly style={{backgroundColor:"lightgray"}} />
             </div>
             <div className={styles.formGroup}>
               <label>Additional Information & Remarks</label>
@@ -282,7 +309,17 @@ const handleFetchById = async (id: number) => {
             </span>
           </span>
         )}
-        {item.ActionDate && <span><b>Action Date: </b>{item.ActionDate}</span>}
+        {item.ActionDate && ( <span><b>Action Date: </b>
+    {new Date(item.ActionDate).toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).replace(',', ' AT')}
+  </span>
+)}
         {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
       </li>
     );
@@ -292,6 +329,7 @@ const handleFetchById = async (id: number) => {
         </div>
     </div>
     </div>
+    </section>
   );
 };
 

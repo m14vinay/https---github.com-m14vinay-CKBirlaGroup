@@ -15,7 +15,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import Table from 'react-bootstrap/Table';
-import 'bootstrap/dist/css/bootstrap.min.css';
+//import 'bootstrap/dist/css/bootstrap.min.css';
 import { Title } from 'chart.js';
 const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (props) => {
   const [form, setForm] = React.useState({

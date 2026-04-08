@@ -143,23 +143,8 @@ Departmenthead/Id,Departmenthead/Title
 
     const item = await res.json();
    
-   if (item && item.Id) {
-    return {
-      Id: item.Id,
-      ProjectCode: item.ProjectCode,
-      ProjectTitle: item.ProjectTitle,
-      VendorName: item.VendorName,
-      Department: item.Department,
-       POAmount: item.POAmount,
-     ApplicableTaxes: item.ApplicableTaxes,
-    //POCategory: form.POCategory,
-    ProjectDescription: item.ProjectDescription, 
-      Attachments: item.AttachmentFiles || [] ,
-       CurrentStatus:item.CurrentStatus // 👈 important
-    };
-  }
+   return item;
 
-  return null;
 };
   
   // Upload Files
