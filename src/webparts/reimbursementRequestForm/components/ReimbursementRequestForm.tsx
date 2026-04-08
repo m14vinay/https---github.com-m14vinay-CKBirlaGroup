@@ -1,9 +1,7 @@
 import * as React from 'react';
 import styles from './ReimbursementRequestForm.module.scss';
 import type { IReimbursementRequestFormProps } from './IReimbursementRequestFormProps';
-import { escape } from '@microsoft/sp-lodash-subset';
-import { SPHttpClient } from '@microsoft/sp-http';
-import { Checkbox, Modal, PrimaryButton } from '@fluentui/react';
+import { allowScrollOnElement, Checkbox, Modal, PrimaryButton } from '@fluentui/react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import { Dropdown, IDropdownOption } from '@fluentui/react';
@@ -11,6 +9,7 @@ import SharePointService from '../service/Service';
 const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (props) => {
 
   const [form, setForm] = React.useState({
+  ID:0,  
   RRequestNo: '',
   ProjectTitle: '',
   DepartmentName: '',
@@ -20,7 +19,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   SelectedDocument: '',
   BillNo: '',
   BillAmount: 0,
-  BillDate: '',
+  BillDate: new Date(),
   ClaimAmount: 0,
   Description: '',
   DepartmentNameID:'',
@@ -34,15 +33,16 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
    const [DepartmentOption, setDepartmentOption] = React.useState<IDropdownOption[]>([]);
    const [ExpenseTypeOption, setExpenseTypeOption] = React.useState<IDropdownOption[]>([]);
    const [DocumentOption, setDocumentOption] = React.useState<IDropdownOption[]>([]);
-   const [itemId, setItemId] = React.useState<number | null>(null);
-   const [Approval1, setApproval1] = React.useState<number | null>(null);
-   const [Approval2, setApproval2] = React.useState<number | null>(null);
-   const [Approval3, setApproval3] = React.useState<number | null>(null);
-   const [Approval4, setApproval4] = React.useState<number | null>(null);
-   const [Approval5, setApproval5] = React.useState<number | null>(null);
-   const [Departmenthead, setDepartmenthead] = React.useState<number | null>(null);
+   const [itemId, setItemId] = React.useState<number | null>(0);
+   const [Approval1, setApproval1] = React.useState<number | null>(0);
+   const [Approval2, setApproval2] = React.useState<number | null>(0);
+   const [Approval3, setApproval3] = React.useState<number | null>(0);
+   const [Approval4, setApproval4] = React.useState<number | null>(0);
+   const [Approval5, setApproval5] = React.useState<number | null>(0);
+   const [Departmenthead, setDepartmenthead] = React.useState<number | null>(0);
+  const [BillAmount, setBillAmount] = React.useState<number | null>(0);
    const [Expenseform, setExpenseForm] = React.useState<{
-  expenses: { Description: string; BillAmount: number; Billdate: string,BillNmber:string,DocumentName:string,ClaimAmount:number,ExpenseType:string }[];
+  expenses: {Id:Number,Description: string; BillAmount: number; BillDate: Date,BillNmber:string,DocumentName:string,ClaimAmount:number,ExpenseType:string}[];
 }>({
   expenses: []
 });
@@ -52,30 +52,39 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     //Get ID from query string ---
     const getIdFromQueryString = (): number | null => {
       const params = new URLSearchParams(window.location.search);
-      const id = params.get('ID');
+      const id = params.get('RequestId');
       return id ? parseInt(id, 10) : null;
     };
     // Get Data After Selection the Document
-   const handleDocumentChange = async (option?: IDropdownOption) => {
+ const handleDocumentChange = async (option?: IDropdownOption) => {
   if (!option) return;
-  setForm({
-    ...form,
-    DocumentName: option.text as string,
-    DocumentID: option.key as string
-  });
   const data = await service.getDocumentDetailsID(Number(option.key));
   console.log(data);
+  setBillAmount(data[0].BillAmount);
   setForm({
     ...form,
     BillAmount:data[0].BillAmount,
     BillNo:data[0].BillNumber,
-    BillDate:data[0].BillDate
+    BillDate:data[0].BillDate,
+    DocumentName: option.text,
+    DocumentID: option.key as string
   });
 };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
+  };
+  const handleClaimAmountChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    if(Number(BillAmount)<Number(value))
+    {
+    setForm({ ...form, [name]: 0 });
+    alert("Claim amount must be less then bill amount.");
+    }
+    else{
+      setForm({ ...form, [name]: value });
+    }    
   };
   React.useEffect(() => {
       setLoading(true);
@@ -121,23 +130,21 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     const data = await service.getItemByRequestNo(requestNo);
    if (data.CurrentStatus==='Draft') {
       setItemId(data.Id);
-        setForm(prev => ({
-          ...prev,          
+        setForm({
+          ...form,          
         RRequestNo: data.value[0].RRequestNo,
-        ProjectTitle: data.value[0].ProjectTitle,
         DepartmentName: data.value[0].Department,
         Remarks: data.value[0].Remarks,
-        TotalAmount: data.value[0].TotalAmount,
-        ExpenseType: data.value[0].ExpenseType,
-        DocumentName: data.value[0].SelectedDocument,
-        BillNo: data.value[0].BillNo,
-        BillAmount: data.value[0].BillAmount,
-        BillDate: data.value[0].BillDate,
-        ClaimAmount: data.value[0].ClaimAmount,
-        Description: data.value[0].Description,
-        SupportingAvailable: data.value[0].SupportingAvailable,
-        DepartmentNameID:data.value[0].Department
-        }));
+        TotalAmount: data.value[0].TotalClaimAmount
+        });
+      const Expensedata = await service.getItemByExpenseData(requestNo);
+      if(Expensedata.Id>0)
+      {
+        setExpenseForm({
+    ...Expenseform,
+    expenses: [...Expenseform.expenses, Expensedata]
+  });
+      }
     } else {
 
       setForm({
@@ -150,31 +157,39 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         SelectedDocument: '',
         BillNo: '',
         BillAmount: 0,
-        BillDate: '',
+        BillDate: new Date(),
         ClaimAmount: 0,
         Description: '',
         DepartmentNameID:'',
         ExpenseID:'',
         ExpenseName:'',
         DocumentName:'',
-        DocumentID:''
+        DocumentID:'',
+        ID:0,
       });
     }
   };
+  // AddExpensewithID
+  const addExpense = (newExpense: any) => {
+  setExpenseForm(prev => {
+    return {
+      ...prev,
+      expenses: [...prev.expenses, newExpense]
+    };
+  });
+};
   const handleExpenseSubmit = () => {
     const newExpense = {
+    Id:0,
     Description: form.Description,
     BillAmount: form.BillAmount,
-    Billdate: form.BillDate,
+    BillDate: form.BillDate,
     BillNmber:form.BillNo,
     DocumentName:form.DocumentName,
     ClaimAmount:form.ClaimAmount,
     ExpenseType:form.ExpenseName
   };
-  setExpenseForm({
-    ...Expenseform,
-    expenses: [...Expenseform.expenses, newExpense]
-  });
+  addExpense(newExpense);
   setForm(prev => ({
         ...prev,
         TotalAmount:Number(form.TotalAmount)+Number(newExpense.ClaimAmount)
@@ -192,16 +207,209 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
            setApproval5(dataApprover.Approval5?.Id || null);
            setDepartmenthead(dataApprover.Departmenthead?.Id || null);
       }
+       // 🔹 Payload (common)
+  const payload = {               
+        TotalClaimAmount: form.TotalAmount,        
+        Remarks: form.Remarks,
+        DepartmentName: form.DepartmentName,
+        CurrentStatus:'Pending',
+        AssignedToEmailId:Number(Departmenthead) ,
+        DepartmentHeadId: Number(Departmenthead),
+        FIApporver:Number(Approval1),
+        FIApporverEmailId:Number(Approval2),
+        ComplianceHeadEmailId:Number(Approval3),
+        CFOEmailId:Number(Approval4)
   };
-  const handleSave = () => {
-    alert("Saved");
+  try {
+    if (!itemId) {
+      // 🔹 CREATE
+      const res = await service.createItem(payload);
+      if(res.Id>0)
+      {
+      setItemId(res.Id); // store ID for future updates  
+      console.log(res.Id);
+      await service.updateItem(res.Id, {
+          RequestNo: `REM-${res.Id}`
+        });
+        if (res.Id > 0 && Expenseform.expenses.length > 0) {
+        for (let i = 0; i < Expenseform.expenses.length; i++) {
+          const Expensepayload = {               
+        ExpanseType: Expenseform.expenses[i].ExpenseType,     
+        BillNo: Expenseform.expenses[i].BillNmber,
+        BillAmount:Expenseform.expenses[i].BillAmount,
+        BillDate:new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
+        Description:Expenseform.expenses[i].Description,
+        SupportedAttachment:'Y',      
+        ReimursementLookupId:Number(itemId)
   };
-  const removeExpense = (index: number) => {
-  const updatedExpenses = Expenseform.expenses.filter((_, i) => i !== index);
+          const res = await service.createExpenseItem(Expensepayload);
+          if(res.Id>0)
+          { alert("Data Submitted Successfully ✅");
+            console.log("Successfully Transaction Saved:-" + itemId);
+          }
+      }
+    }
+  }
+    } else {
+      // 🔹 UPDATE
+      await service.updateItem(itemId, payload);
+      if (itemId > 0 && Expenseform.expenses.length > 0) {
+        for (let i = 0; i < Expenseform.expenses.length; i++) {
+        const Expensepayload = {               
+        ExpanseType: Expenseform.expenses[i].ExpenseType,     
+        BillNo: Expenseform.expenses[i].BillNmber,
+        BillAmount:Expenseform.expenses[i].BillAmount,
+        BillDate:new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
+        Description:Expenseform.expenses[i].Description,
+        SupportedAttachment:'Y',      
+        ReimursementLookupId:Number(itemId)
+        };
+          const res = await service.updateExpenseItem(Number(Expenseform.expenses[i].Id),Expensepayload);
+      }
+    }
+      alert("Data Submitted Successfully ✅");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred ❌");
+  }
+  finally
+  {
+    setLoading(false);
+  }
+  };
+  const handleSave = async() => {
+   // 🔹 Payload (common)
+  const payload = {               
+        TotalClaimAmount: form.TotalAmount,        
+        Remarks: form.Remarks,
+        DepartmentName: form.DepartmentName,
+        CurrentStatus:'Draft'
+  };
+  try {
+    setLoading(true);
+    if (!itemId) {
+      // 🔹 CREATE
+      const res = await service.createItem(payload);
+      if(res.Id>0)
+      {
+      setItemId(res.Id); // store ID for future updates   
+     const Updateres  = await service.updateItem(res.Id, {
+          RequestNo: `REM-${res.Id}`
+        });
+        if (res.Id > 0 && Expenseform.expenses.length > 0) {
+        for (let i = 0; i < Expenseform.expenses.length; i++) {
+          const Expensepayload = {               
+        ExpanseType: Expenseform.expenses[i].ExpenseType,     
+        BillNo: Expenseform.expenses[i].BillNmber,
+        BillAmount:Expenseform.expenses[i].BillAmount,
+        BillDate:new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
+        Description:Expenseform.expenses[i].Description,
+        ClaimAmount:Expenseform.expenses[i].ClaimAmount,
+        SupportedAttachment:'Y',      
+        ReimursementLookupId:Number(res.Id)};
+        const Expenseres = await service.createExpenseItem(Expensepayload);
+        if(Expenseres.Id>0)
+        {            
+          const Expensedata = await service.getItemByExpenseData(Number(res.Id));
+          if(Expensedata.value[0].Id>0)
+              {
+               setExpenseForm({
+    ...Expenseform,
+    expenses: Expensedata.value[0]
+  });           
+              }
+            alert("Data Saved Successfully ✅");
+            console.log("Successfully Transaction Saved:-" + Expenseres.ID);
+        }
+      }
+    }
+  }
+    } else {
+      // 🔹 UPDATE
+      await service.updateItem(itemId, payload);
+      if (itemId > 0 && Expenseform.expenses.length > 0) {
+        for (let i = 0; i < Expenseform.expenses.length; i++) {
+        const Expensepayload = {               
+        ExpanseType: Expenseform.expenses[i].ExpenseType,     
+        BillNo: Expenseform.expenses[i].BillNmber,
+        BillAmount:Expenseform.expenses[i].BillAmount,
+        BillDate:new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
+        Description:Expenseform.expenses[i].Description,
+        ClaimAmount:Expenseform.expenses[i].ClaimAmount,
+        SupportedAttachment:'Y',      
+        ReimursementLookupId:itemId
+        };
+        if(Number(Expenseform.expenses[i].Id)>0)
+        {
+          const res = await service.updateExpenseItem(Number(Expenseform.expenses[i].Id),Expensepayload);
+        }
+        else{
+            const res = await service.createExpenseItem(Expensepayload);           
+        }
+      }
+      const Expensedata = await service.getItemByExpenseData(Number(itemId));
+          if(Expensedata.value[0].Id>0)
+              {
+             setExpenseForm({
+    ...Expenseform,
+    expenses: Expensedata.value[0]
+  });  
+        }
+      alert("Data Updated Successfully ✅");
+    }      
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred ❌");
+  }
+  finally
+  {
+    setLoading(false);
+  }
+  };
+  // Add New Expense
+  const handleAddNew = () => {
+    setLoading(true);
+    setForm(
+      prev => ({
+        ...prev,       
+        ExpenseType: '',
+        SelectedDocument: '',
+        BillNo: '',
+        BillDate:new Date(),
+        BillAmount: 0,
+        ClaimAmount: 0,
+        Description: '',
+        ExpenseID:'',
+        ExpenseName:'',
+        DocumentName:'',
+        DocumentID:''
+      }));
+      setisOpen(true);
+    setLoading(false);
+  };
+  const removeExpense = async (index: number) => {
+  const updatedExpenses = Expenseform.expenses.filter((_, i) => i !== index);  
+  if(Number(Expenseform.expenses[index].Id)>0)
+  {
+  const datadelete=await service.deleteExpense(Number(Expenseform.expenses[index].Id))
+  if(datadelete)
+  {
+   alert("Item deleted successfully.");
+  }
+}
+else
+{
+setForm(prev => ({
+        ...prev,
+        TotalAmount:Number(form.TotalAmount)-Number(Expenseform.expenses[index].ClaimAmount)
+      }));
   setExpenseForm({
     ...Expenseform,
     expenses: updatedExpenses
-  });
+  });  
+}
 };
     return (
       <section>
@@ -233,7 +441,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
             <div className={styles.selectDep}>
               <div className={styles.selectDepInner}>
                 <label>Select Department</label>
-                <Dropdown className="form-control" style={{borderStyle:"none"}}
+                <Dropdown className="form-control"
                                       options={DepartmentOption}
                                       selectedKey={form.DepartmentNameID}
                                       onChange={(e, option) =>
@@ -241,7 +449,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                                       }
                                     />
               </div>
-              <button className={styles.btnAdd} onClick={() => setisOpen(true)}>Add New</button>
+              <button className={styles.btnAdd} onClick={handleAddNew}>Add New</button>
             </div>
             <div className={styles.info}>
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#1026e6" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
@@ -259,12 +467,30 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
           <label>{exp.ExpenseType}</label>
         </p>
         <p>
-          <label>Amount: </label>
+          <label>Bill Number: </label>
+          <label>{exp.BillNmber}</label>
+        </p>
+        <p>
+          <label>Bill Amount: </label>
           <label>{exp.BillAmount}</label>
         </p>
         <p>
-          <label>Date: </label>
-          <label>{exp.Billdate}</label>
+          <label>Bill Date: </label>
+          <label>{exp.BillDate
+                ? new Date(exp.BillDate).toISOString().split('T')[0]
+                : ''}</label>
+        </p>
+        <p>
+          <label>Claim Amount: </label>
+          <label>{exp.ClaimAmount}</label>
+        </p>
+        <p>
+          <label>Description: </label>
+          <label>{exp.Description}</label>
+        </p>
+        <p>
+          <label>Document: </label>
+          <label>{exp.DocumentName}</label>
         </p>
         <p className={styles.btnPara}>
           <button
@@ -316,7 +542,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               <label style={{width: '30%'}}>Select Document</label>
               <Dropdown className="form-control" style={{width: '100%'}}
                                       options={DocumentOption}
-                                      selectedKey={form.DepartmentNameID}
+                                      selectedKey={form.DocumentID}
                                       onChange={(e, option) => handleDocumentChange(option) }
                                     />
             </div>
@@ -331,12 +557,14 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
             </div>
             <div className={styles.formGroup}>
               <label style={{width: '30%'}}>Bill Date</label>
-              <input className="form-control" style={{width: '100%',backgroundColor:"lightgray"}} name="BillDate" value={form.BillDate} readOnly>
+              <input className="form-control" style={{width: '100%',backgroundColor:"lightgray"}} name="BillDate" value={form.BillDate
+                ? new Date(form.BillDate).toISOString().split('T')[0]
+                : ''} readOnly>
               </input>
             </div>
             <div className={styles.formGroup}>
               <label style={{width: '30%'}}>Claim Amount</label>
-              <input className="form-control" style={{width: '100%'}} name="ClaimAmount" value={form.ClaimAmount} onChange={handleChange}>
+              <input className="form-control" type='number' style={{width: '100%'}} name="ClaimAmount" value={form.ClaimAmount} onChange={handleClaimAmountChange}>
               </input>
             </div>
             <div className={styles.formGroup}>

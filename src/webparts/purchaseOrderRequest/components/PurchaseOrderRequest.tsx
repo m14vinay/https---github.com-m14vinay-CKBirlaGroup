@@ -487,6 +487,20 @@ const handleUpdate = async () => {
       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url);  
     }
+    else      
+      {
+     const res = await service.createItem(payload);
+      setItemId(res.Id); // store ID for future updates
+      if (res.Id > 0 && form.files.length > 0) {
+        for (let i = 0; i < form.files.length; i++) {
+          await service.uploadFile(res.Id, form.files[i]);           
+      }
+    }
+      alert("Data Saved Successfully ✅");
+      await service.updateItem(res.Id, {
+          RequestNo: `CKBCSL/25-26/IV/Finance/${res.Id}`
+        });
+      }
   } catch (error) {
     console.error(error);
     alert("Error occurred");

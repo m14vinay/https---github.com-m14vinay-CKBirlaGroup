@@ -2,12 +2,12 @@ import { SPHttpClient } from '@microsoft/sp-http';
 export default class Service {
 
   private context: any;
-  private listname="Remb_ExpanseMaster";
+  private listname="ReimburseExpenseMaster";
   private Departmentmaster ="DepartmentMaster";
   private ExpenseMaster="ReimburseExpenseType";
   private VendorList="AllVendor";
   private Document="AllDocuments";
-  private Remb_ExpanseTransaction="Remb_ExpanseTransaction";
+  private ReimburseExpenseTransaction="ReimburseExpenseTransaction";
   constructor(context: any) {
     this.context = context;
   }
@@ -98,20 +98,32 @@ Departmenthead/Id,Departmenthead/Title
   // Save the Record
   public async createItem(data: any): Promise<any> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;
-    const body = {
-      __metadata: { type: "SP.Data.VendorMappingListItem" },
-      ...data
-    };
+     const response = await this.context.spHttpClient.post(
+      url,
+     SPHttpClient.configurations.v1,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        }
+    );
+    return response.json();
+  }
+
+  public async createExpenseItem(data: any): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items`;
     const response = await this.context.spHttpClient.post(
       url,
-      SPHttpClient.configurations.v1,
-      {
-        headers: {
-          "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/json;odata=nometadata"
-        },
-        body: JSON.stringify(body)
-      }
+     SPHttpClient.configurations.v1,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        }
     );
     return response.json();
   }
@@ -133,6 +145,25 @@ Departmenthead/Id,Departmenthead/Title
         body: JSON.stringify(data)
       }
     );
+    return data;
+  }
+   public async updateExpenseItem(id: number, data: any): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items(${id})`;
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;odata=nometadata",
+          "Content-Type": "application/json;odata=nometadata",
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "MERGE"
+        },
+        body: JSON.stringify(data)
+      }
+    );
+    return data;
   }
   // Get Current User
   public async getUser(): Promise<any> {
@@ -157,13 +188,23 @@ Departmenthead/Id,Departmenthead/Title
     const data = await res.json();
     return data.value.length > 0 ? data.value[0] : null;
   }
-  // Upload Files
+  public async getItemByExpenseData(ID: number): Promise<any> {
 
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$filter=ReimursementLookup eq ${ID}`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+    return data.value.length > 0 ? data : null;
+  }
+  // Upload Files
   public async uploadFile(itemId: number, file: File): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
 
     const buffer = await file.arrayBuffer();
-
     await this.context.spHttpClient.post(
       url,
       SPHttpClient.configurations.v1,
@@ -175,4 +216,24 @@ Departmenthead/Id,Departmenthead/Title
       }
     );
   }
+  // Delete by ID
+  public async deleteExpense(ID: number): Promise<boolean> {
+  try {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items(${ID})`;
+    const res = await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "IF-MATCH": "*",              // required
+          "X-HTTP-Method": "DELETE"     // delete method
+        }
+      }
+    );
+    return res.ok; // true if deleted
+  } catch (error) {
+    console.error("Delete failed:", error);
+    return false;
+  }
+}
 }
