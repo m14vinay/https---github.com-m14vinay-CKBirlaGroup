@@ -11,4 +11,5 @@ export interface IOuotationApprovalFormProps {
   siteUrl: string;
   spHttpClient: SPHttpClient;
   listName: string;
+  context: any; // You can replace 'any' with the specific type if you have it
 }

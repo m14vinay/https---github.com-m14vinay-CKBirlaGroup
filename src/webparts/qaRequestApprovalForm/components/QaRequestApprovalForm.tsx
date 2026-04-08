@@ -11,28 +11,31 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
   const [data, setData] = useState<any>(null);
   const [statusMsg, setStatusMsg] = useState("");
   const [comment, setComment] = useState("");
+  const [history, setHistory] = useState<any[]>([]);
+  const [isActionDone, setIsActionDone] = useState(false);
 
   const params = new URLSearchParams(window.location.search);
   const rawItemId = params.get("id");
   const itemId = rawItemId ? Number(rawItemId) : null;
-  const isReadOnly = data?.Status === "Approved" || data?.Status === "Rejected";
+  const isReadOnly =
+  isActionDone ||
+  data?.Status === "Approved" ||
+  data?.Status === "Rejected";
 
   // ================= FETCH DATA =================
   const fetchData = async () => {
     try {
-      if (!itemId) {
-        setStatusMsg('❌ Invalid item ID');
-        return;
-      }
+      if (!itemId) return;
 
-      const res = await props.spHttpClient.get(
-        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles`,
-        SPHttpClient.configurations.v1
-      );
+const res = await props.spHttpClient.get(
+  `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles`,
+  SPHttpClient.configurations.v1
+);
 
-      const result = await res.json();
-      setData(result);
-      setComment(result.ApproverComment1 || "");
+const result = await res.json();
+
+setData(result);
+setComment(result.ApproverComment1 || "");
 
       const poRes = await props.spHttpClient.get(
         `${props.siteUrl}/_api/web/lists/getbytitle('PurchaseOrderDetails')/items?$filter=QuotationIdId eq ${itemId}`,
@@ -42,28 +45,41 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
       const poData = await poRes.json();
       setPoItems(poData.value || []);
 
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setStatusMsg("❌ Error loading data");
     } finally {
       setLoading(false);
     }
   };
 
-  // ================= UPDATE STATUS =================
+  // ================= FETCH HISTORY =================
+  const fetchHistory = async () => {
+    try {
+      if (!itemId) return;
+
+      const res = await props.spHttpClient.get(
+        `${props.siteUrl}/_api/web/lists/getbytitle('History')/items?$filter=FID eq ${itemId}&$orderby=Created asc`,
+        SPHttpClient.configurations.v1
+      );
+
+      const result = await res.json();
+      setHistory(result.value || []);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ================= UPDATE =================
   const updateStatus = async (status: string) => {
     try {
-      if (!itemId) {
-        setStatusMsg('❌ Invalid item ID');
-        return;
-      }
-
       if (!comment.trim()) {
-        setStatusMsg("❌ Please enter comment");
+        setStatusMsg("❌ Enter comment");
+        setIsActionDone(true);
         return;
       }
 
-      const res = await props.spHttpClient.post(
+      await props.spHttpClient.post(
         `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
         SPHttpClient.configurations.v1,
         {
@@ -74,207 +90,218 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
             'X-HTTP-Method': 'MERGE'
           },
           body: JSON.stringify({
-            Status: String(status),   // - force string
-            ApproverComment1: String(comment)
+            Status: status,
+            ApproverComment1: comment
           })
         }
       );
 
-      if (!res.ok) {
-        const error = await res.text();
-        console.log("SP ERROR FULL:", error);
-        setStatusMsg(error); // temporarily show real error
-        return;
-      }
-
-      setStatusMsg(`✅ ${status} successfully`);
-      setData((prev: any) => prev ? { ...prev, Status: status, ApproverComment1: comment } : prev);
+      setStatusMsg(`✅ ${status} done`);
+      fetchHistory();
 
     } catch (err: any) {
-      setStatusMsg("❌ " + err.message);
+      setStatusMsg(err.message);
     }
   };
 
   useEffect(() => {
     fetchData();
+    fetchHistory();
   }, []);
 
   if (loading) return <div>Loading...</div>;
   if (!data) return <div>No data</div>;
 
-  // ONLY UPDATED JSX PART (rest same rahega)
+  // ================= UI =================
 
   return (
-    <div className={styles.container}>
+  <div className={styles.container}>
 
-      <div className={styles.heading}>
-        Quotation Request Approval Form
-      </div>
+    <div className={styles.mainLayout}>
 
-      {/* Project Title */}
-      <div className={styles.formRow}>
-        <label className={styles.label}>
-          Project Title <span className={styles.required}>*</span>
-        </label>
-        <input className={styles.input} value={data.ProjectTitle || ""} disabled />
-      </div>
+      {/* ================= LEFT ================= */}
+      <div>
 
-      {/* Project Reference Number */}
-      <div className={styles.formRow}>
-        <label className={styles.label}>Project Reference Number</label>
-        <input className={styles.input} value={data.ProjectReffNo || ""} disabled />
-      </div>
+        <div className={styles.heading}>Quotation Request Approval Form</div>
 
-      {/* Description */}
-      <div className={styles.formRow}>
-        <label className={styles.label}>
-          Project Description & Advance Payment Details <span className={styles.required}>*</span>
-        </label>
-        <input className={styles.input} value={data.ProjectDescription || ""} disabled />
-      </div>
-
-      {/* Amount */}
-      <div className={styles.formRow}>
-        <label className={styles.label}>Total Project Amount</label>
-        <div className={styles.twoCol}>
-          <input className={styles.input} value={data.TotalProjectAmount || ""} disabled />
-          <span className={styles.inlineLabel}>Applicable Taxes</span>
-          <input className={styles.input} value={data.ApplicableTaxes || ""} disabled />
-        </div>
-      </div>
-
-      {/* Vendors */}
-      {[1, 2, 3].map(i => (
-        <div key={i} className={styles.formRow}>
+        {/* Project Title */}
+        <div className={styles.formRow}>
           <label className={styles.label}>
-            Vendor {i} <span className={styles.required}>*</span>
+            Project Title <span className={styles.required}>*</span>
           </label>
+          <input className={styles.input} value={data.ProjectTitle || ""} disabled />
+        </div>
+
+        {/* Project Ref (NO *) */}
+        <div className={styles.formRow}>
+          <label className={styles.label}>Project Reference Number</label>
+          <input className={styles.input} value={data.ProjectReffNo || ""} disabled />
+        </div>
+
+        {/* Description */}
+        <div className={styles.formRow}>
+          <label className={styles.label}>
+            Project Description <span className={styles.required}>*</span>
+          </label>
+          <input className={styles.input} value={data.ProjectDescription || ""} disabled />
+        </div>
+
+        {/* Total Amount (NO *) */}
+        <div className={styles.formRow}>
+          <label className={styles.label}>Total Project Amount</label>
+
           <div className={styles.twoCol}>
-            <input className={styles.input} value={data[`Vendor${i}`] || ""} disabled />
-            <span className={styles.inlineLabel}>
-              Quote {i} <span className={styles.required}>*</span>
-            </span>
-            <input className={styles.input} value={data[`Quote${i}`] || ""} disabled />
+            <input className={styles.input} value={data.TotalProjectAmount || ""} disabled />
+            <span className={styles.inlineLabel}>Applicable Taxes</span>
+            <input className={styles.input} value={data.ApplicableTaxes || ""} disabled />
           </div>
         </div>
-      ))}
 
-      {/* Selected Vendor */}
-      <div className={styles.formRow}>
-        <label className={styles.label}>
-          Select Vendor <span className={styles.required}>*</span>
-        </label>
-        <input className={styles.input} value={data.Selectedvendor || ""} disabled />
-      </div>
+        {/* Vendors */}
+        {[1, 2, 3].map(i => (
+          <div key={i} className={styles.formRow}>
+            <label className={styles.label}>
+              Vendor {i} {i === 1 && <span className={styles.required}>*</span>}
+            </label>
 
-      {/* Selected Quote */}
-      <div className={styles.formRow}>
-        <label className={styles.label}>
-          Selected Quote <span className={styles.required}>*</span>
-        </label>
-        <input className={styles.input} value={data.SelectedQuote || ""} disabled />
-      </div>
+            <div className={styles.twoCol}>
+              <input className={styles.input} value={data[`Vendor${i}`] || ""} disabled />
+              <span className={styles.inlineLabel}>Quote {i}</span>
+              <input className={styles.input} value={data[`Quote${i}`] || ""} disabled />
+            </div>
+          </div>
+        ))}
 
-      {/* Department */}
-      <div className={styles.formRow}>
-        <label className={styles.label}>
-          Department <span className={styles.required}>*</span>
-        </label>
-        <input className={styles.input} value={data.Department || ""} disabled />
-      </div>
+        {/* Select Vendor */}
+        <div className={styles.formRow}>
+          <label className={styles.label}>
+            Select Vendor <span className={styles.required}>*</span>
+          </label>
+          <input className={styles.input} value={data.Selectedvendor || ""} disabled />
+        </div>
 
-      {/* Advance Payment */}
-      <div className={styles.formRow}>
-        <label className={styles.label}>
-          Advance Payment <span className={styles.required}>*</span>
-        </label>
-        <input className={styles.input} value={data.AdvancePayment || ""} disabled />
-      </div>
+        {/* Selected Quote */}
+        <div className={styles.formRow}>
+          <label className={styles.label}>
+            Selected Quote <span className={styles.required}>*</span>
+          </label>
+          <input className={styles.input} value={data.SelectedQuote || ""} disabled />
+        </div>
 
-      {/* Approval Path */}
-      <div className={styles.formRow}>
-        <label className={styles.label}>
-          Approval Path <span className={styles.required}>*</span>
-        </label>
-        <input className={styles.input} value={data.ApprovalPath || ""} disabled />
-      </div>
+        {/* Department */}
+        <div className={styles.formRow}>
+          <label className={styles.label}>
+            Department <span className={styles.required}>*</span>
+          </label>
+          <input className={styles.input} value={data.Department || ""} disabled />
+        </div>
 
-      {/* Attach Documents */}
-      <div className={styles.formRow}>
-        <label className={styles.label}>
-          Attach Documents <span className={styles.required}>*</span>
-        </label>
-        <div className={styles.field}>
-          {data.AttachmentFiles?.length > 0 ? (
-            data.AttachmentFiles.map((f: any) => (
+        {/* Advance */}
+        <div className={styles.formRow}>
+          <label className={styles.label}>
+            Advance Payment <span className={styles.required}>*</span>
+          </label>
+          <input className={styles.input} value={data.Advancepayment || ""} disabled />
+        </div>
+
+        {/* Approval Path */}
+        <div className={styles.formRow}>
+          <label className={styles.label}>
+            Approval Path <span className={styles.required}>*</span>
+          </label>
+          <input className={styles.input} value={data.ApprovalPath || ""} disabled />
+        </div>
+
+        {/* Attachments */}
+        <div className={styles.formRow}>
+          <label className={styles.label}>
+            Attach Documents <span className={styles.required}>*</span>
+          </label>
+
+          <div>
+            {data.AttachmentFiles?.map((f: any) => (
               <div key={f.FileName}>
-                <a href={f.ServerRelativeUrl} target="_blank" rel="noreferrer">
+                <a href={f.ServerRelativeUrl} target="_blank">
                   {f.FileName}
                 </a>
               </div>
-            ))
-          ) : (
-            <span>No documents attached</span>
-          )}
-        </div>
-      </div>
-
-      {/* PO Table */}
-      <div className={styles.poSection}>
-        <div className={styles.poHeader}>
-          Purchase Order Details: <span className={styles.required}>*</span>
-        </div>
-
-        <div className={styles.poTable}>
-          <div className={styles.poRowHeader}>
-            <div>Description of Goods / Services</div>
-            <div>Quantity</div>
-            <div>Rate</div>
-            <div>Amount</div>
+            ))}
           </div>
+        </div>
 
-          {poItems.map((item, i) => (
-            <div key={i} className={styles.poRow}>
-              <input className={styles.input} value={item.Description || ""} disabled />
-              <input className={styles.input} value={item.Quantity || ""} disabled />
-              <input className={styles.input} value={item.Rate || ""} disabled />
-              <input className={styles.input} value={item.Amount || ""} disabled />
+        {/* ================= PO ================= */}
+        <div className={styles.poSection}>
+          <div className={styles.poHeader}>Purchase Order Details</div>
+
+          <div className={styles.poTable}>
+            <div className={styles.poRowHeader}>
+              <div>Description of Goods / Services</div>
+              <div>Quantity</div>
+              <div>Rate</div>
+              <div>Amount</div>
             </div>
-          ))}
+
+            {poItems.map((item, i) => (
+              <div key={i} className={styles.poRow}>
+                <input className={styles.input} value={item.Description} disabled />
+                <input className={styles.input} value={item.Quantity} disabled />
+                <input className={styles.input} value={item.Rate} disabled />
+                <input className={styles.input} value={item.Amount} disabled />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* COMMENT */}
-      <div className={styles.formRow}>
-        <label className={styles.label}>
-          Approver Comments <span className={styles.required}>*</span>
-        </label>
-        <textarea
-          className={`${styles.textarea} ${styles.commentBox}`}
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          disabled={isReadOnly}
-        />
-      </div>
+        {/* Comment */}
+        <div className={styles.formRow}>
+          <label className={styles.label}>
+            Approver Comments <span className={styles.required}>*</span>
+          </label>
 
-
-      {/* BUTTONS */}
-      <div className={styles.buttonContainer}>
-        <button className={styles.approveBtn} onClick={() => updateStatus("Approved")} disabled={isReadOnly}>Approve</button>
-        <button className={styles.rejectBtn} onClick={() => updateStatus("Rejected")} disabled={isReadOnly}>Reject</button>
-        <button className={styles.backBtn} onClick={() => window.history.back()}>Back</button>
-      </div>
-
-      {/* STATUS MESSAGE */}
-      {statusMsg && (
-        <div style={{
-          marginTop: "15px",
-          fontWeight: "600",
-          color: statusMsg.includes("❌") ? "red" : "green"
-        }}>
-          {statusMsg}
+         <textarea
+  className={styles.textarea}
+  value={comment}
+  onChange={(e) => setComment(e.target.value)}
+  disabled={isReadOnly}
+  style={{
+    backgroundColor: isReadOnly ? "#f3f2f1" : "white",
+    cursor: isReadOnly ? "not-allowed" : "text"
+  }}
+/>
         </div>
-      )}
+
+        {/* Buttons */}
+        <div className={styles.buttonContainer}>
+          <button className={styles.approveBtn} onClick={() => updateStatus("Approved")}>
+            Approve
+          </button>
+          <button className={styles.rejectBtn} onClick={() => updateStatus("Rejected")}>
+            Reject
+          </button>
+          <button className={styles.backBtn} onClick={() => window.history.back()}>
+            Back
+          </button>
+        </div>
+
+      </div>
+
+      {/* ================= RIGHT ================= */}
+      <div className={styles.rightTimeline}>
+        <h3>Timeline</h3>
+
+        {history.map((item, index) => (
+          <div key={index} style={{ marginBottom: 15 }}>
+            <b>{item.Title}</b>
+            <div>{item.Status}</div>
+            <div>{item.ApproverName}</div>
+            <div>{new Date(item.Created).toLocaleString()}</div>
+          </div>
+        ))}
+
+      </div>
+
     </div>
-  );
+
+  </div>
+);
 };

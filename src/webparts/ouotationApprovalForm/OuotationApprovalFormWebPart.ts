@@ -9,7 +9,7 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
 import * as strings from 'OuotationApprovalFormWebPartStrings';
-import { OuotationApprovalForm } from './components/OuotationApprovalForm';
+import OuotationApprovalForm  from './components/OuotationApprovalForm';
 import { IOuotationApprovalFormProps } from './components/IOuotationApprovalFormProps';
 
 export interface IOuotationApprovalFormWebPartProps {
@@ -23,9 +23,9 @@ export default class OuotationApprovalFormWebPart extends BaseClientSideWebPart<
 
   public render(): void {
 
-    const element: React.ReactElement<IOuotationApprovalFormProps> = React.createElement(
-      OuotationApprovalForm,
-      {
+    const element = React.createElement(
+  OuotationApprovalForm,
+  {
         description: this.properties.description,
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
@@ -35,11 +35,12 @@ export default class OuotationApprovalFormWebPart extends BaseClientSideWebPart<
         // 🔥 IMPORTANT (Added)
         siteUrl: this.context.pageContext.web.absoluteUrl,
         spHttpClient: this.context.spHttpClient,
-        listName: 'Quotation Approval'
+        listName: 'Quotation Approval',
+        context: this.context
       }
     );
 
-    ReactDom.render(element, this.domElement);
+   ReactDom.render(element, this.domElement);
   }
 
   protected onInit(): Promise<void> {

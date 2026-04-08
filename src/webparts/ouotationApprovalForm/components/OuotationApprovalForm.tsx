@@ -1,748 +1,733 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { ChoiceGroup, IChoiceGroupOption } from '@fluentui/react';
 import styles from './OuotationApprovalForm.module.scss';
-import { IOuotationApprovalFormProps } from './IOuotationApprovalFormProps';
-import { SPHttpClient } from '@microsoft/sp-http';
+import type { IOuotationApprovalFormProps } from './IOuotationApprovalFormProps';
+import SharePointService from './Services/Service';
 
-export const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => {
-  const initialFormData = {
-    ProjectTitle: '',
-    ProjectReffNo: '',
-    ProjectDescription: '',
-    TotalProjectAmount: '',
-    ApplicableTaxes: '',
-    Vendor1: '',
-    Quote1: '',
-    Vendor2: '',
-    Quote2: '',
-    Vendor3: '',
-    Quote3: '',
-    Selectedvendor: '',
-    SelectedQuote: '',
-    Department: '',
-    Advancepayment: '',
-    ApprovalPath: '',
-    selectedFile: null as File | null
+type TFormState = {
+  ID: number;
+  ProjectTitle: string;
+  ProjectReffNo: string;
+  ProjectDescription: string;
+  TotalProjectAmount: string;
+  ApplicableTaxes: string;
+  Vendor1: string;
+  Vendor2: string;
+  Vendor3: string;
+  Quote1: string;
+  Quote2: string;
+  Quote3: string;
+  Selectedvendor: string;
+  SelectedQuote: string;
+  Department: string;
+  DepartmentHead: string;
+  Advancepayment: string;
+  ApprovalPath: string;
+  ApprovalID: string;
+  RequestNo: string;
+  files: File[];
+};
+
+type TPurchaseOrderRow = {
+  description: string;
+  quantity: string;
+  rate: string;
+  amount: string;
+};
+
+type TDepartmentOption = {
+  key: string;
+  text: string;
+};
+
+const INITIAL_FORM: TFormState = {
+  ID: 0,
+  ProjectTitle: '',
+  ProjectReffNo: '',
+  ProjectDescription: '',
+  TotalProjectAmount: '',
+  ApplicableTaxes: '',
+  Vendor1: '',
+  Vendor2: '',
+  Vendor3: '',
+  Quote1: '',
+  Quote2: '',
+  Quote3: '',
+  Selectedvendor: '',
+  SelectedQuote: '',
+  Department: '',
+  DepartmentHead: '',
+  Advancepayment: '',
+  ApprovalPath: '',
+  ApprovalID: '',
+  RequestNo: '',
+  files: []
+};
+
+const MAX_TOTAL_SIZE_MB = 25;
+const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/;
+const INITIAL_PO_ROW: TPurchaseOrderRow = {
+  description: '',
+  quantity: '',
+  rate: '',
+  amount: ''
+};
+
+const normalizeDepartmentValue = (value: string): string => value.trim();
+const getDepartmentOptionKey = (value: string): string => normalizeDepartmentValue(value).toLowerCase();
+
+const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => {
+  const service = React.useMemo(() => new SharePointService(props.context), [props.context]);
+
+  const [form, setForm] = React.useState<TFormState>(INITIAL_FORM);
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const [attachments, setAttachments] = React.useState<any[]>([]);
+  const [departmentOptions, setDepartmentOptions] = React.useState<TDepartmentOption[]>([]);
+  const [poItems, setPoItems] = React.useState<TPurchaseOrderRow[]>([INITIAL_PO_ROW]);
+  const [statusMessage, setStatusMessage] = React.useState('');
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  const poOptions: IChoiceGroupOption[] = [
+    { key: 'Yes', text: 'Yes' },
+    { key: 'No', text: 'No' }
+  ];
+
+  const getIdFromQueryString = (): number | null => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('ID') || params.get('id');
+    return id ? parseInt(id, 10) : null;
   };
 
-  const [itemId, setItemId] = useState<number | null>(null);
-  const [formData, setFormData] = useState(initialFormData);
-  const [statusMessage, setStatusMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // NNN add 
-  const [poItems, setPoItems] = useState<any[]>([
-    { description: '', quantity: '', rate: '', amount: '' }
-  ]);
-
-  const [departments, setDepartments] = useState<
-    Array<{ Id: number; DepartmentName: string }>
-  >([]);
-  const [errors, setErrors] = useState<{
-    ProjectTitle?: string;
-    ProjectDescription?: string;
-    Vendor1?: string;
-    Quote1?: string;
-    Selectedvendor?: string;
-    SelectedQuote?: string;
-    Advancepayment?: string;
-    ApprovalPath?: string;
-    Department?: string;   //  ADD THIS
-  }>({});
-
-
-  // 🔹 Handle change
-  const onFieldChange = (e: any) => {
-    const { name, value } = e.target;
-
-    const updatedData = { ...formData, [name]: value };
-
-    setFormData(updatedData);
-
-    // Save in browser (refresh ke baad bhi data rahega)
-    const { selectedFile, ...persistData } = updatedData;
-    localStorage.setItem('draftFormData', JSON.stringify(persistData));
+  const setField = (name: keyof TFormState, value: string | File[]): void => {
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-
-  // -NNN PURCHASE ORDER FUNCTIONS
-
-  const addRow = () => {
-    setPoItems([
-      ...poItems,
-      { description: '', quantity: '', rate: '', amount: '' }
-    ]);
-  };
-
-  const deleteRow = (index: number) => {
-    const updated = [...poItems];
-    updated.splice(index, 1);
-    setPoItems(updated);
-  };
-
-  const handlePOChange = (index: number, field: string, value: any) => {
-    const updated = [...poItems];
-    updated[index][field] = value;
-
-    if (field === "quantity" || field === "rate") {
-      const qty = Number(updated[index].quantity) || 0;
-      const rate = Number(updated[index].rate) || 0;
-      updated[index].amount = qty * rate;
+  const loadAttachments = React.useCallback(async (id: number) => {
+    try {
+      const files = await service.getAttachments(id);
+      setAttachments(files || []);
+    } catch (error) {
+      console.error('Attachment load failed:', error);
     }
+  }, [service]);
 
-    setPoItems(updated);
-  };
-
-  // 🔹 File
-  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-
-      const file = event.target.files[0];
-
-      // 25 MB limit (25 * 1024 * 1024 bytes)
-      const maxSize = 25 * 1024 * 1024;
-
-      if (file.size > maxSize) {
-        alert("File size should not exceed 25 MB");
-
-        // ❌ clear file input
-        event.target.value = '';
+  const loadPurchaseOrderDetails = React.useCallback(async (id: number) => {
+    try {
+      const items = await service.getPurchaseOrderDetails(id);
+      if (!items || items.length === 0) {
+        setPoItems([INITIAL_PO_ROW]);
         return;
       }
 
-      //valid file
-      setFormData(prev => ({
-        ...prev,
-        selectedFile: file
-      }));
+      setPoItems(items.map((item: any) => ({
+        description: item.Description || item.Title || '',
+        quantity: String(item.Quantity || ''),
+        rate: String(item.Rate || ''),
+        amount: String(item.Amount || '')
+      })));
+    } catch (error) {
+      console.error('Purchase order details load failed:', error);
     }
-  };
+  }, [service]);
 
-  // 🔹 Parse number
-  const parseNumber = (value: string): number => {
-    return value ? Number(value) : 0;
-  };
-
-  const savePurchaseOrderDetails = async (parentId: number) => {
-    for (let index = 0; index < poItems.length; index++) {
-      const item = poItems[index];
-
-      // 🔥 Skip empty rows
-      if (!item.description || !item.description.trim()) continue;
-
-      const poBody = {
-        Title: item.description.trim(),
-        Description: item.description.trim(),
-        Quantity: parseNumber(item.quantity),
-        Rate: parseNumber(item.rate),
-        Amount: parseNumber(item.amount),
-
-        // 🔥 Lookup field (VERY IMPORTANT)
-        QuotationIdId: parentId
-      };
-
-      try {
-        await props.spHttpClient.post(
-          `${props.siteUrl}/_api/web/lists/getbytitle('PurchaseOrderDetails')/items`,
-          SPHttpClient.configurations.v1,
-          {
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(poBody)
-          }
-        );
-      } catch (error) {
-        console.error("PO item save failed:", item);
+  const loadDraftById = React.useCallback(async (id: number) => {
+    try {
+      const result = await service.getItemByRequestNo(id);
+      if (!result) {
+        return;
       }
-    }
-  };
 
-  // 🔹 Load departments
-  useEffect(() => {
+      setItemId(result.Id);
+      setForm((prev) => ({
+        ...prev,
+        ID: result.Id || 0,
+        ProjectTitle: result.ProjectTitle || '',
+        ProjectReffNo: result.ProjectReffNo || '',
+        ProjectDescription: result.ProjectDescription || '',
+        TotalProjectAmount: String(result.TotalProjectAmount || ''),
+        ApplicableTaxes: String(result.ApplicableTaxes || ''),
+        Vendor1: result.Vendor1 || '',
+        Vendor2: result.Vendor2 || '',
+        Vendor3: result.Vendor3 || '',
+        Quote1: String(result.Quote1 || ''),
+        Quote2: String(result.Quote2 || ''),
+        Quote3: String(result.Quote3 || ''),
+        Selectedvendor: result.Selectedvendor || '',
+        SelectedQuote: String(result.SelectedQuote || ''),
+        Department: result.Department || '',
+        //DepartmentHead: result.DepartmentHead || '',
+        Advancepayment: result.Advancepayment || '',
+        ApprovalPath: result.ApprovalPath || '',
+        ApprovalID: result.ApprovalID || '',
+        RequestNo: result.RequestNo || '',
+        files: []
+      }));
+
+      await loadAttachments(result.Id);
+      await loadPurchaseOrderDetails(result.Id);
+    } catch (error) {
+      console.error('Draft load failed:', error);
+      setStatusMessage('Unable to load the saved request.');
+    }
+  }, [loadAttachments, loadPurchaseOrderDetails, service]);
+
+  React.useEffect(() => {
+    const id = getIdFromQueryString();
+    if (id) {
+      loadDraftById(id).catch(() => undefined);
+    }
+  }, [loadDraftById]);
+
+  React.useEffect(() => {
+
     const loadDepartments = async () => {
       try {
-        const res = await props.spHttpClient.get(
-          `${props.siteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?$select=Id,DepartmentName&$top=5000`,
-          SPHttpClient.configurations.v1,
-          {
-            headers: { 'Accept': 'application/json;odata.metadata=none' }
-          }
-        );
+        const data = await service.getDepartments();
+        const departmentOptionItems: TDepartmentOption[] = [];
+        const seenDepartmentKeys: { [key: string]: boolean } = {};
 
-        const data = await res.json();
-        setDepartments(data.value || []);
-      } catch (err) {
-        console.error(err);
+        data.forEach((item: any) => {
+          const departmentName = normalizeDepartmentValue(
+            String(item.DepartmentName || item.Title || '')
+          );
+          const optionKey = getDepartmentOptionKey(departmentName);
+
+          if (!departmentName || seenDepartmentKeys[optionKey]) {
+            return;
+          }
+
+          seenDepartmentKeys[optionKey] = true;
+          departmentOptionItems.push({
+            key: optionKey,
+            text: departmentName
+          });
+        });
+
+        setDepartmentOptions(departmentOptionItems);
+        if (departmentOptionItems.length === 0) {
+          setStatusMessage('No department values found in DepartmentMaster.');
+        } else {
+          setStatusMessage('');
+        }
+
+      } catch (error) {
+        console.error('Department load failed:', error);
+        setDepartmentOptions([]);
+        setStatusMessage('Department list not loaded. Please check DepartmentMaster.');
       }
     };
+    loadDepartments().catch(() => undefined);
+  }, [service]);
 
-    loadDepartments();
-  }, []);
-
-  useEffect(() => {
-
-    const savedData = localStorage.getItem('draftFormData');
-    const savedItemId = localStorage.getItem('draftItemId');
-
-    if (savedData) {
-      const parsed = JSON.parse(savedData);
-      const { Status, isSubmitting: savedSubmitting, selectedFile, ...parsedData } = parsed;
-
-      setFormData(prev => ({
-        ...prev,
-        ...parsedData
-      }));
-    }
-
-    if (savedItemId) {
-      setItemId(Number(savedItemId));
-    }
-
-  }, []);
-
-  const validateForm = () => {
-    const newErrors: any = {};
-
-    if (!formData.ProjectTitle) newErrors.ProjectTitle = 'Required';
-    if (!formData.ProjectDescription) newErrors.ProjectDescription = 'Required';
-    if (!formData.Vendor1) newErrors.Vendor1 = 'Required';
-    if (!formData.Quote1) newErrors.Quote1 = 'Required';
-    if (!formData.Selectedvendor) newErrors.Selectedvendor = 'Required';
-    if (!formData.SelectedQuote) newErrors.SelectedQuote = 'Required';
-    if (!formData.Advancepayment) newErrors.Advancepayment = 'Required';
-    if (!formData.ApprovalPath) newErrors.ApprovalPath = 'Required';
-    if (!formData.Department) newErrors.Department = 'Required';
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
-  // 🔹 Submit
-  const submitToList = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
 
-    if (!validateForm()) return;
+  const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event?.target?.files;
+    if (!files) {
+      return;
+    }
 
-    setIsSubmitting(true);
+    const filesArray = Array.from(files);
+    const allowedExtensions = ['pdf', 'xlsx', 'docx'];
+
+    for (const file of filesArray) {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
+        setStatusMessage(`File type not allowed: ${file.name}`);
+        return;
+      }
+    }
+
+    const totalSizeBytes = [...form.files, ...filesArray].reduce((acc, file) => acc + file.size, 0);
+    if (totalSizeBytes / (1024 * 1024) > MAX_TOTAL_SIZE_MB) {
+      setStatusMessage(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+      return;
+    }
+
+    const invalidFiles = filesArray.filter((file) => INVALID_FILENAME_REGEX.test(file.name));
+    if (invalidFiles.length > 0) {
+      setStatusMessage(`Invalid file names: ${invalidFiles.map((file) => file.name).join(', ')}`);
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      files: [...prev.files, ...filesArray]
+    }));
+    setStatusMessage('');
+  };
+
+  const removeFile = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      files: prev.files.filter((_, i) => i !== index)
+    }));
+  };
+
+  const removeExistingFile = async (index: number) => {
+    try {
+      const file = attachments[index];
+      await service.deleteAttachmentFromSP(file);
+      setAttachments((prev) => prev.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error('Attachment delete failed:', error);
+      setStatusMessage('Unable to delete attachment.');
+    }
+  };
+
+  const addPurchaseOrderRow = () => {
+    setPoItems((prev) => [...prev, { ...INITIAL_PO_ROW }]);
+  };
+
+  const removePurchaseOrderRow = (index: number) => {
+    setPoItems((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      return updated.length > 0 ? updated : [{ ...INITIAL_PO_ROW }];
+    });
+  };
+
+  const handlePurchaseOrderChange = (index: number, field: keyof TPurchaseOrderRow, value: string) => {
+    setPoItems((prev) => {
+      const updated = [...prev];
+      const row = { ...updated[index], [field]: value };
+
+      if (field === 'quantity' || field === 'rate') {
+        const quantity = Number(field === 'quantity' ? value : row.quantity) || 0;
+        const rate = Number(field === 'rate' ? value : row.rate) || 0;
+        row.amount = quantity && rate ? String(quantity * rate) : '';
+      }
+
+      updated[index] = row;
+      return updated;
+    });
+  };
+
+  const handleSaveHistory = async (id: number, userAction: string) => {
+    const currentUser = await service.getUser();
+    await service.createHistoryItem({
+      Title: 'QA',
+      FID: id,
+      UserName: currentUser.Title,
+      UserAction: userAction,
+      ActionDate: new Date().toISOString(),
+      Designation: 'Request Initiator'
+    });
+  };
+
+  const validateDraft = (): string | null => {
+    if (!form.ProjectTitle.trim()) return 'Project Title required';
+    if (!form.Vendor1.trim()) return 'Vendor 1 required';
+    if (!form.Quote1.trim()) return 'Quote 1 required';
+    if (!form.Selectedvendor.trim()) return 'Selected Vendor required';
+    if (!form.SelectedQuote.trim()) return 'Selected Quote required';
+    if (!form.Department) return 'Select Department';
+    if (!form.Advancepayment) return 'Select Advance Payment';
+    //if (!form.Selectedvendor.trim()) return 'Approval Path required';
+    if (!poItems.some((item) => item.description.trim())) return 'Enter at least one purchase order detail';
+    return null;
+  };
+
+  const buildPayload = (currentStatus: 'Draft' | 'Pending') => {
+    return {
+      Title: form.ProjectTitle,
+      ProjectTitle: form.ProjectTitle,
+      ProjectReffNo: form.ProjectReffNo,
+      ProjectDescription: form.ProjectDescription,
+      TotalProjectAmount: form.TotalProjectAmount,
+      ApplicableTaxes: form.ApplicableTaxes,
+      Vendor1: form.Vendor1,
+      Vendor2: form.Vendor2,
+      Vendor3: form.Vendor3,
+      Quote1: form.Quote1,
+      Quote2: form.Quote2,
+      Quote3: form.Quote3,
+      Selectedvendor: form.Selectedvendor,
+      SelectedQuote: form.SelectedQuote,
+      Department: form.Department,
+      Advancepayment: form.Advancepayment,
+      ApprovalPath: form.ApprovalPath,
+      CurrentStatus: currentStatus
+    };
+  };
+
+  const uploadPendingFiles = async (currentId: number) => {
+    for (const file of form.files) {
+      try {
+        await service.uploadFile(currentId, file);
+      } catch (error) {
+        console.error(`File upload failed for ${file.name}:`, error);
+      }
+    }
+  };
+  //Purchase Order:
+  const savePurchaseOrderDetails = async (quotationId: number): Promise<void> => {
+    await service.deletePurchaseOrderDetailsByQuotationId(quotationId);
+
+    for (const item of poItems) {
+      if (!item.description.trim()) {
+        continue;
+      }
+
+      await service.createPurchaseOrderDetail({
+        Title: item.description.trim(),
+        Description: item.description.trim(),
+        Quantity: Number(item.quantity || 0),
+        Rate: Number(item.rate || 0),
+        Amount: Number(item.amount || 0),
+        QuotationIdId: quotationId
+      });
+    }
+  };
+// Main function to handle both save and submit - creates or updates item, manages attachments and purchase order details
+const persistForm = async (currentStatus: 'Draft' | 'Pending'): Promise<number> => {
+
+  const payload = buildPayload(currentStatus);
+  let currentId = itemId;
+
+  // ✅ CREATE only once
+  if (!currentId) {
+
+    const res = await service.createItem(payload);
+
+    if (!res?.Id) throw new Error('Item not created');
+
+    currentId = Number(res.Id);
+    setItemId(currentId);
+
+    await service.updateItem(currentId, {
+      RequestNo: `PRJ-${currentId}`
+    });
+
+  } 
+  // ✅ UPDATE always
+  else {
+
+    await service.updateItem(currentId, payload);
+
+  }
+
+ // IMPORTANT: Only update PO in Draft
+if (currentStatus === 'Draft') {
+  await savePurchaseOrderDetails(currentId);
+}
+
+  // ❌ DO NOT touch PO during submit (avoid duplication)
+
+  await uploadPendingFiles(currentId);
+  await loadAttachments(currentId);
+  await loadPurchaseOrderDetails(currentId);
+
+  setForm((prev) => ({
+    ...prev,
+    ID: currentId || 0,
+    RequestNo: `PRJ-${currentId}`,
+    files: []
+  }));
+
+  return currentId;
+};
+
+  const handleSaveOrUpdate = async () => {
+    const validationError = validateDraft();
+    if (validationError) {
+      setStatusMessage(validationError);
+      return;
+    }
+
+    setIsSaving(true);
+    setStatusMessage('Saving draft...');
+
+    try {
+      const currentId = await persistForm('Draft');
+      try {
+        await handleSaveHistory(currentId, 'Draft Saved');
+      } catch (historyError) {
+        console.error('History save failed:', historyError);
+      }
+      setStatusMessage(`Draft saved in list. Request No: PRJ-${currentId}`);
+    } catch (error: any) {
+      console.error('SAVE ERROR:', error);
+      setStatusMessage(error?.message || 'Error while saving draft');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handle form submission - validate, save as pending, then redirect to home page
+  const handleSubmit = async () => {
+    const validationError = validateDraft();
+    if (validationError) {
+      setStatusMessage(validationError);
+      return;
+    }
+
+    setIsSaving(true);
     setStatusMessage('Submitting...');
 
     try {
-      let currentId = itemId;
-
-      // 🔥 CREATE ITEM IF NOT EXISTS
-      if (!currentId) {
-        const draftResponse = await props.spHttpClient.post(
-          `${props.siteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items`,
-          SPHttpClient.configurations.v1,
-          {
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ Title: formData.ProjectTitle })
-          }
-        );
-
-        const draftData = await draftResponse.json();
-        currentId = draftData.Id;
-        setItemId(currentId);
+      const currentId = await persistForm('Pending');
+      try {
+        await handleSaveHistory(currentId, 'Submitted');
+      } catch (historyError) {
+        console.error('History save failed:', historyError);
       }
 
-      if (!currentId) {
-        throw new Error('Unable to determine QuotationApproval item ID.');
-      }
-
-      // 🔥 UPDATE MAIN ITEM
-      const body: any = {
-        ProjectTitle: formData.ProjectTitle,
-        ProjectReffNo: formData.ProjectReffNo,
-        ProjectDescription: formData.ProjectDescription,
-        TotalProjectAmount: parseNumber(formData.TotalProjectAmount),
-        ApplicableTaxes: parseNumber(formData.ApplicableTaxes),
-        Vendor1: formData.Vendor1,
-        Quote1: formData.Quote1,
-        Vendor2: formData.Vendor2,
-        Quote2: formData.Quote2,
-        Vendor3: formData.Vendor3,
-        Quote3: formData.Quote3,
-        SelectedQuote: formData.SelectedQuote,
-        Selectedvendor: formData.Selectedvendor,
-        Department: formData.Department,
-        Advancepayment: formData.Advancepayment,
-        ApprovalPath: formData.ApprovalPath,
-        Status: "Submitted"
-      };
-
-      await props.spHttpClient.post(
-        `${props.siteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items(${currentId})`,
-        SPHttpClient.configurations.v1,
-        {
-          headers: {
-            'IF-MATCH': '*',
-            'X-HTTP-Method': 'MERGE',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        }
-      );
-
-      // 🔥 SAVE PO ITEMS
-      await savePurchaseOrderDetails(currentId);
-
-      // 🔥 ATTACHMENT
-      if (formData.selectedFile) {
-        const buffer = await formData.selectedFile.arrayBuffer();
-
-        await props.spHttpClient.post(
-          `${props.siteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items(${currentId})/AttachmentFiles/add(FileName='${formData.selectedFile.name}')`,
-          SPHttpClient.configurations.v1,
-          {
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/octet-stream'
-            },
-            body: buffer
-          }
-        );
-      }
-
-      // 🔥 RESET
-      localStorage.removeItem('draftFormData');
-      localStorage.removeItem('draftItemId');
-
-      setFormData(initialFormData);
-      setStatusMessage('✅ Submitted successfully!');
-      setIsSubmitting(false);
-
-      setItemId(null);
-      setPoItems([{ description: '', quantity: '', rate: '', amount: '' }]);
-
+      setStatusMessage('Submitted successfully');
+      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
     } catch (error: any) {
-      console.error(error);
-      setStatusMessage(`❌ Error: ${error.message}`);
-      setIsSubmitting(false);
+      console.error('SUBMIT ERROR:', error);
+      setStatusMessage(error?.message || 'Error while submitting');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-
-  // 🔹 Save Draft
-  const saveDraft = async () => {
-
-    const body: any = {
-      Title: formData.ProjectTitle,
-      ProjectTitle: formData.ProjectTitle,
-      ProjectReffNo: formData.ProjectReffNo,
-      ProjectDescription: formData.ProjectDescription,
-      TotalProjectAmount: parseNumber(formData.TotalProjectAmount),
-      ApplicableTaxes: parseNumber(formData.ApplicableTaxes),
-      Vendor1: formData.Vendor1,
-      Quote1: formData.Quote1,
-      Selectedvendor: formData.Selectedvendor,
-      SelectedQuote: formData.SelectedQuote,
-      Department: formData.Department,
-      Advancepayment: formData.Advancepayment,
-      ApprovalPath: formData.ApprovalPath,
-      Status: "Draft"
-    };
-
-    try {
-
-      if (itemId) {
-        //  UPDATE EXISTING
-        await props.spHttpClient.post(
-          `${props.siteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items(${itemId})`,
-          SPHttpClient.configurations.v1,
-          {
-            headers: {
-              'IF-MATCH': '*',
-              'X-HTTP-Method': 'MERGE',
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-          }
-        );
-
-        localStorage.setItem('draftItemId', String(itemId));
-        await savePurchaseOrderDetails(itemId);
-        alert("Draft Updated ✅");
-
-      } else {
-        //  CREATE NEW DRAFT
-        const response = await props.spHttpClient.post(
-          `${props.siteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items`,
-          SPHttpClient.configurations.v1,
-          {
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-          }
-        );
-
-        const data = await response.json();
-
-        setItemId(data.Id);   //  SAVE ID
-        localStorage.setItem('draftItemId', String(data.Id));
-        await savePurchaseOrderDetails(data.Id);
-
-        alert("Draft Saved ✅");
-      }
-
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  // 🔹 Cancel
   const handleCancel = () => {
-    setFormData({
-      ProjectTitle: '',
-      ProjectReffNo: '',
-      ProjectDescription: '',
-      TotalProjectAmount: '',
-      ApplicableTaxes: '',
-      Vendor1: '',
-      Quote1: '',
-      Vendor2: '',
-      Quote2: '',
-      Vendor3: '',
-      Quote3: '',
-      Selectedvendor: '',
-      SelectedQuote: '',
-      Department: '',
-      Advancepayment: '',
-      ApprovalPath: '',
-      selectedFile: null
-    });
-    setStatusMessage('');
-    setIsSubmitting(false);
-    setItemId(null);
-    setPoItems([{ description: '', quantity: '', rate: '', amount: '' }]);
-    localStorage.removeItem('draftFormData');
-    localStorage.removeItem('draftItemId');
+    window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
   };
 
   return (
-    <section className={styles.quotationApprovalForm}>
+    <div className={styles.container}>
+      <div className={styles.poHeader}>
+        <h4>Quotation Approval Form</h4>
+      </div>
 
-      <h2>Quotation Approval Form</h2>
       {statusMessage && (
-        <div
-          className={`${styles.statusMessage} ${statusMessage.startsWith('❌') ? styles.errorStatus : styles.successStatus}`}
-        >
+        <div style={{ marginBottom: '12px', color: statusMessage.toLowerCase().indexOf('error') !== -1 ? '#a80000' : '#107c10' }}>
           {statusMessage}
         </div>
       )}
 
-      <form onSubmit={submitToList}>
+      <div className={styles.row}>
+        <div className={styles.colMd9}>
+          <div className={styles.leftPanel}>
+            <label>Project Title <span className={styles.required}>*</span></label>
+            <input name="ProjectTitle" value={form.ProjectTitle} onChange={handleChange} />
 
-        {/* Project Title */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>
-            Project Title <span className="required">*</span>
-          </label>
-          <div className={styles.field}>
-            <input
-              name="ProjectTitle"
-              value={formData.ProjectTitle}
-              onChange={onFieldChange}
-            />
-          </div>
-        </div>
+            <label>Project Reference Number</label>
+            <input name="ProjectReffNo" value={form.ProjectReffNo} onChange={handleChange} />
 
-        {/* Project Ref */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>Project Reference Number</label>
-          <div className={styles.field}>
-            <input
-              name="ProjectReffNo"
-              value={formData.ProjectReffNo}
-              onChange={onFieldChange}
-            />
-          </div>
-        </div>
+            <label>Project Description & Advance Payment Details<span className={styles.required}>*</span></label>
+            <input name="ProjectDescription" value={form.ProjectDescription} onChange={handleChange} />
 
-        {/* Description */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>
-            Project Description <span className="required">*</span>
-          </label>
-          <div className={styles.field}>
-            <input
-              type="text"
-              name="ProjectDescription"
-              value={formData.ProjectDescription}
-              onChange={onFieldChange}
-            />
-          </div>
-        </div>
 
-        {/* Amount + Taxes */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>Total Project Amount</label>
 
-          <div className={styles.field}>
-            <div className={styles.twoCol}>
+            <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Total Project Amount</label>
+                <input
+                  type="number"
+                  name="TotalProjectAmount"
+                  value={form.TotalProjectAmount}
+                  onChange={(e) => {
+                    const value = e.target.value;
 
-              <input
-                type="number"
-                name="TotalProjectAmount"
-                value={formData.TotalProjectAmount}
-                onChange={onFieldChange}
-              />
+                    setForm((prev) => {
+                      let approvalPath = prev.ApprovalPath;
 
-              <span className={styles.inlineLabel}>Applicable Tax</span>
+                      if (Number(value) >= 10000) {
+                        approvalPath = "DigiFlow Test1 > DigiFlow Test2 > DigiFlow Test3";
+                      } else {
+                        approvalPath = "DigiFlow Test1"; // optional: clear if less than 10000
+                      }
 
-              <input
-                type="number"
-                name="ApplicableTaxes"
-                value={formData.ApplicableTaxes}
-                onChange={onFieldChange}
-              />
+                      return {
+                        ...prev,
+                        TotalProjectAmount: value,
+                        ApprovalPath: approvalPath
+                      };
+                    });
+                  }}
+                />
+              </div>
 
+
+              <div className={styles.fieldBlock}>
+                <label>Applicable Taxes</label>
+                <input type="number" name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} />
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Vendor 1 */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>
-            Vendor 1 <span className="required">*</span>
-          </label>
-          <div className={styles.field}>
-            <div className={styles.twoCol}>
-
-              <input
-                name="Vendor1"
-                value={formData.Vendor1}
-                onChange={onFieldChange}
-              />
-
-              <span className={styles.inlineLabel}>
-                Quote 1 <span className={styles.required}>*</span>
-              </span>
-
-              <input
-                name="Quote1"
-                value={formData.Quote1}
-                onChange={onFieldChange}
-              />
-
+            <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Vendor 1 <span className={styles.required}>*</span></label>
+                <input name="Vendor1" value={form.Vendor1} onChange={handleChange} />
+              </div>
+              <div className={styles.fieldBlock}>
+                <label>Quote 1 <span className={styles.required}>*</span></label>
+                <input type="number" name="Quote1" value={form.Quote1} onChange={handleChange} />
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Vendor 2 */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>Vendor 2</label>
-          <div className={styles.field}>
-            <div className={styles.twoCol}>
-              <input name="Vendor2" value={formData.Vendor2} onChange={onFieldChange} />
-
-              <span className={styles.inlineLabel}>Quote 2</span>
-
-              <input name="Quote2" value={formData.Quote2} onChange={onFieldChange} />
+            <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Vendor 2</label>
+                <input name="Vendor2" value={form.Vendor2} onChange={handleChange} />
+              </div>
+              <div className={styles.fieldBlock}>
+                <label>Quote 2</label>
+                <input type="number" name="Quote2" value={form.Quote2} onChange={handleChange} />
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Vendor 3 */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>Vendor 3</label>
-          <div className={styles.field}>
-            <div className={styles.twoCol}>
-              <input name="Vendor3" value={formData.Vendor3} onChange={onFieldChange} />
-
-              <span className={styles.inlineLabel}>Quote 3</span>
-
-              <input name="Quote3" value={formData.Quote3} onChange={onFieldChange} />
+            <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Vendor 3</label>
+                <input name="Vendor3" value={form.Vendor3} onChange={handleChange} />
+              </div>
+              <div className={styles.fieldBlock}>
+                <label>Quote 3</label>
+                <input type="number" name="Quote3" value={form.Quote3} onChange={handleChange} />
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Selected Vendor */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>
-            Selected Vendor <span className="required">*</span>
-          </label>
-          <div className={styles.field}>
-            <input
-              name="Selectedvendor"
-              value={formData.Selectedvendor}
-              onChange={onFieldChange}
-            />
-          </div>
-        </div>
+            <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Selected Vendor <span className={styles.required}>*</span></label>
+                <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
+              </div>
+              <div className={styles.fieldBlock}>
+                <label>Selected Quote <span className={styles.required}>*</span></label>
+                <input type="number" name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} />
+              </div>
+            </div>
 
-        {/* Selected Quote */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>
-            Selected Quote <span className="required">*</span>
-          </label>
-          <div className={styles.field}>
-            <input
-              name="SelectedQuote"
-              value={formData.SelectedQuote}
-              onChange={onFieldChange}
-            />
-          </div>
-        </div>
-
-        {/* Department */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>
-            Department <span className="required">*</span>
-          </label>
-          <div className={styles.field}>
+            <label>Department <span className={styles.required}>*</span></label>
             <select
-              name="Department"
-              value={formData.Department}
-              onChange={onFieldChange}
+              value={form.Department || ''}
+              onChange={(e) => {
+                setForm((prev) => ({
+                  ...prev,
+                  Department: e.target.value
+                }));
+              }}
             >
-              <option value="">Select department</option>
-              {departments.map((dept) => (
-                <option key={dept.Id} value={dept.DepartmentName}>
-                  {dept.DepartmentName}
+              <option value="">Select Department</option>
+              {departmentOptions.map((option) => (
+                <option key={option.key} value={option.key}>
+                  {option.text}
                 </option>
               ))}
             </select>
-          </div>
-        </div>
 
-        {/* Advance Payment */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>
-            Advance Payment <span className="required">*</span>
-          </label>
-          <div className={styles.field}>
-            <label>
-              <input
-                type="radio"
-                name="Advancepayment"
-                value="Yes"
-                checked={formData.Advancepayment === 'Yes'}
-                onChange={onFieldChange}
-              /> Yes
-            </label>
-
-            <label style={{ marginLeft: '20px' }}>
-              <input
-                type="radio"
-                name="Advancepayment"
-                value="No"
-                checked={formData.Advancepayment === 'No'}
-                onChange={onFieldChange}
-              /> No
-            </label>
-          </div>
-        </div>
-
-        {/* Approval Path */}
-
-        <div className={`${styles.formRow} ${styles.fullWidth}`}>
-          <div className={styles.label}>
-            Approval Path <span className={styles.required}>*</span>
-          </div>
-          <div className={styles.field}>
-            <input
-              className={styles.input}   /* 🔥 change here */
-              name="ApprovalPath"
-              value={formData.ApprovalPath}
-              onChange={onFieldChange}
-              
+            <ChoiceGroup
+            
+              label="Advance Payment"
+              options={poOptions}
+              selectedKey={form.Advancepayment || undefined}
+              onChange={(_e, option) => setField('Advancepayment', option?.text || '')}
             />
-          </div>
-        </div>
+            {form.RequestNo && (
+              <>
+                <label>Request No</label>
+                <input value={form.RequestNo} readOnly />
+              </>
+            )}
 
-        {/* File Upload */}
-        <div className={styles.formRow}>
-          <label className={styles.label}>
-            Attach Documents <span className="required">*</span>
-          </label>
-          <div className={styles.field}>
-            <input type="file" onChange={onFileChange} />
-          </div>
-        </div>
+            <label>Approval Path<span className={styles.required}>*</span></label>
+            <input value={form.ApprovalPath} readOnly />
+            <label>Attachments <span className={styles.required}>*</span></label>
+            <input type="file" multiple onChange={handleFileChange} />
 
-        {/* - PURCHASE ORDER SECTION */}
-        <div className={styles.poSection}>
+            {attachments.length > 0 && (
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {attachments.map((file, index) => (
+                  <li key={index}>
+                    <span onClick={() => removeExistingFile(index)}>x</span>
+                    <a href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+                      {file.FileName}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
 
-          <div className={styles.poHeader}>
-            <span>Purchase Order Details <span className={styles.required}>*</span> :</span>
+            {form.files.length > 0 && (
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {form.files.map((file, index) => (
+                  <li key={`${file.name}-${index}`}>
+                    <span onClick={() => removeFile(index)}>x</span>
+                    <span>{file.name}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
 
-            <button
-              type="button"
-              className={styles.addBtn}
-              onClick={addRow}
-            >
-              Add New
-            </button>
-          </div>
+            <div className={styles.poSection}>
+              <div className={styles.poSectionHeader}>
+                <label>Purchase Order Details <span className={styles.required}>*</span> :</label>
+                <button type="button" className={styles.poAddBtn} onClick={addPurchaseOrderRow} disabled={isSaving}>
+                  Add New
+                </button>
+              </div>
 
-          <div className={styles.poTable}>
+              <div className={styles.poTable}>
+                <div className={styles.poRowHeader}>
+                  <div>Description of Goods / Services</div>
+                  <div>Quantity</div>
+                  <div>Rate</div>
+                  <div>Amount</div>
+                  <div />
+                </div>
 
-            {/* Header */}
-            <div className={styles.poRowHeader}>
-              <div>Description</div>
-              <div>Qty</div>
-              <div>Rate</div>
-              <div>Amount</div>
-              <div>Action</div>
+                {poItems.map((item, index) => (
+                  <div key={index} className={styles.poRow}>
+                    <input
+                      value={item.description}
+                      onChange={(e) => handlePurchaseOrderChange(index, 'description', e.target.value)}
+                    />
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) => handlePurchaseOrderChange(index, 'quantity', e.target.value)}
+                    />
+                    <input
+                      type="number"
+                      value={item.rate}
+                      onChange={(e) => handlePurchaseOrderChange(index, 'rate', e.target.value)}
+                    />
+                    <input value={item.amount} readOnly />
+                    <button type="button" className={styles.poDeleteBtn} onClick={() => removePurchaseOrderRow(index)}>
+                      x
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Rows */}
-            {poItems.map((row, index) => (
-              <div key={index} className={styles.poRow}>
-
-                <input
-                  value={row.description}
-                  onChange={(e) =>
-                    handlePOChange(index, "description", e.target.value)
-                  }
-                />
-
-                <input
-                  type="number"
-                  value={row.quantity}
-                  onChange={(e) =>
-                    handlePOChange(index, "quantity", e.target.value)
-                  }
-                />
-
-                <input
-                  type="number"
-                  value={row.rate}
-                  onChange={(e) =>
-                    handlePOChange(index, "rate", e.target.value)
-                  }
-                />
-
-                <input value={row.amount} readOnly />
-
-                <button
-                  type="button"
-                  className={styles.deleteBtn}
-                  onClick={() => deleteRow(index)}
-                >
-                  ✕
-                </button>
-
-              </div>
-            ))}
+            <div className={styles.buttonRow}>
+              <button type="button" className={styles.submitBtn} onClick={handleSubmit} disabled={isSaving}>Submit</button>
+              <button type="button" className={styles.saveBtn} onClick={handleSaveOrUpdate} disabled={isSaving}>Save</button>
+              <button type="button" className={styles.cancelBtn} onClick={handleCancel} disabled={isSaving}>Cancel</button>
+            </div>
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className={styles.buttonRow}>
-          <button type="submit" className={styles.submitBtn}>Submit</button>
-          <button type="button" className={styles.saveBtn} onClick={saveDraft}>Save</button>
-          <button type="button" className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
+        <div>
+          <div style={{ padding: '16px' }}>
+            <div>
+              <h6>Templates</h6>
+              <ol>
+                <li>Quotation request template</li>
+              </ol>
+            </div>
+            <div>
+              <h6>Important Guidelines</h6>
+              <ol>
+                <li>Select approval path carefully.</li>
+                <li>Use project reference if needed.</li>
+                <li>Attach all documents, max 25 MB total.</li>
+                <li>Avoid special characters in file names.</li>
+              </ol>
+            </div>
+          </div>
         </div>
-      </form>
-    </section>
+      </div>
+    </div>
   );
 };
+
+export default OuotationApprovalForm;
