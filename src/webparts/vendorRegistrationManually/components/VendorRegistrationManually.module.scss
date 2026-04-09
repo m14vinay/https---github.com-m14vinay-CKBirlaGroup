@@ -118,11 +118,10 @@
   color: #fff;
   padding: 5px 15px;
 }
-
-.btnSubmit {
-  background-color: #0078d4;
-  color: white;
+.RejectBtn {
+ background-color:red;
   border: none;
+<<<<<<< HEAD
   padding: 8px 16px;
   border-radius: 2px;
 }
@@ -141,3 +140,31 @@
 .inputError {
   border: 1px solid red;
 }
+=======
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 15px;
+}
+
+.ApproveBtn {
+  background-color: #25da67;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 15px;
+}
+
+.cancelBtn {
+  background-color:gray;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 15px;
+}
+.formGroup
+{
+  display: flex;
+  margin-bottom: 10px;
+  padding: 3px 15px;
+}
+>>>>>>> 8779439e50a40b40fee146d976abddf316aa23b3
