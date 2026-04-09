@@ -34,12 +34,6 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   const [ExpenseTypeOption, setExpenseTypeOption] = React.useState<IDropdownOption[]>([]);
   const [DocumentOption, setDocumentOption] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(0);
-  const [Approval1, setApproval1] = React.useState<number | null>(0);
-  const [Approval2, setApproval2] = React.useState<number | null>(0);
-  const [Approval3, setApproval3] = React.useState<number | null>(0);
-  const [Approval4, setApproval4] = React.useState<number | null>(0);
-  const [Approval5, setApproval5] = React.useState<number | null>(0);
-  const [Departmenthead, setDepartmenthead] = React.useState<number | null>(0);
   const [BillAmount, setBillAmount] = React.useState<number | null>(0);
   const [Expenseform, setExpenseForm] = React.useState<{
     expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string }[];
@@ -48,7 +42,10 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   });
   const [User, setUser] = React.useState<any>(null);
   const service = new SharePointService(props.context);
-
+const handleCancel = () => {
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+  window.location.assign(url);
+};
   //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -57,6 +54,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   };
   // Get Data After Selection the Document
   const handleDocumentChange = async (option?: IDropdownOption) => {
+    setLoading(true);
     if (!option) return;
     const data = await service.getDocumentDetailsID(Number(option.key));
     console.log(data);
@@ -69,6 +67,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       DocumentName: option.text,
       DocumentID: option.key as string
     });
+    setLoading(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -198,27 +197,24 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     setisOpen(false);
   };
   const handleSubmit = async () => {
+    setLoading(true);
+    const currentuser = await service.getUser();
     const dataApprover = await service.GetApprover(form.DepartmentName);
-    if (dataApprover?.Id) {
-      setApproval1(dataApprover.Approval1?.Id || null);
-      setApproval2(dataApprover.Approval2?.Id || null);
-      setApproval3(dataApprover.Approval3?.Id || null);
-      setApproval4(dataApprover.Approval4?.Id || null);
-      setApproval5(dataApprover.Approval5?.Id || null);
-      setDepartmenthead(dataApprover.Departmenthead?.Id || null);
-    }
+    const dataApproverFI = await service.GetApproverReimbursement("FI");
+    const dataApproverCompliance = await service.GetApproverReimbursement("ComplianceHead");
+    const dataApproverCFO = await service.GetApproverReimbursement("CFO");
     // 🔹 Payload (common)
     const payload = {
       TotalClaimAmount: form.TotalAmount,
       Remarks: form.Remarks,
       DepartmentName: form.DepartmentName,
       CurrentStatus: 'Pending',
-      AssignedToEmailId: Number(Departmenthead),
-      DepartmentHead: Number(Departmenthead),
-      FIApporver: Number(Approval1),
-      FIApporverEmailId: Number(Approval2),
-      ComplianceHeadEmailId: Number(Approval3),
-      CFOEmailId: Number(Approval4)
+      AssignedToEmailId: Number(dataApprover.Departmenthead?.Id || 0),
+      DepartmentHead: dataApprover.Departmenthead?.Title.toString() || "",
+      FIApporver: dataApproverFI.ApproverName?.Title.toString() || "",
+      FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
+      ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
+      CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0)
     };
     try {
       if (Expenseform.expenses.length > 0) {
@@ -240,14 +236,23 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                   BillDate: new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
                   Description: Expenseform.expenses[i].Description,
                   SupportedAttachment: 'Y',
+                  ClaimAmount: Expenseform.expenses[i].ClaimAmount,
                   DocumentName: Expenseform.expenses[i].DocumentName,
-                  ReimursementLookupId: Number(itemId)
+                  ReimursementLookupId: Number(res.Id)
                 };
-                const res = await service.createExpenseItem(Expensepayload);
-                if (res.Id > 0) {
-                  InsertHistory(itemId);
+                const resExpense = await service.createExpenseItem(Expensepayload);
+                if (resExpense.Id > 0) {
+                  const payload = {
+                    Title: 'REM',
+                    FID: Number(res.Id),
+                    UserName: currentuser.Title,
+                    UserAction: 'Request Initiator',
+                    ActionDate: new Date().toISOString(),
+                    Designation: 'Request Initiator',
+                  };
+                  await service.createHistoryItem(payload);
                   alert("Data Submitted Successfully ✅");
-                  console.log("Successfully Transaction Saved:-" + itemId);
+                  console.log("Successfully Transaction Saved:-" + resExpense.Id);
                   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
                   window.location.assign(url);
                 }
@@ -266,6 +271,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                   BillAmount: Expenseform.expenses[i].BillAmount,
                   BillDate: new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
                   Description: Expenseform.expenses[i].Description,
+                  ClaimAmount: Expenseform.expenses[i].ClaimAmount,
                   SupportedAttachment: 'Y',
                   DocumentName: Expenseform.expenses[i].DocumentName,
                   ReimursementLookupId: Number(itemId)
@@ -273,7 +279,15 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 const res = await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);
               }
             }
-            InsertHistory(itemId);
+            const payload = {
+              Title: 'REM',
+              FID: itemId,
+              UserName: currentuser.Title,
+              UserAction: 'Request Initiator',
+              ActionDate: new Date().toISOString(),
+              Designation: 'Request Initiator',
+            };
+            await service.createHistoryItem(payload);
             alert("Data Submitted Successfully ✅");
             const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
             window.location.assign(url);
@@ -291,18 +305,6 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       setLoading(false);
     }
   };
-  const InsertHistory = async (FID: any) => {
-    const currentuser = await service.getUser();
-    const payload = {
-      Title: 'REM',
-      FID: FID,
-      UserName: currentuser.Title,
-      UserAction: 'Request Initiator',
-      ActionDate: new Date().toISOString(),
-      Designation: 'Request Initiator',
-    };
-    await service.createHistoryItem(payload);
-  }
   const handleSave = async () => {
     // 🔹 Payload (common)
     const payload = {
@@ -566,7 +568,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               <div className={styles['btn-group']}>
                 <button className={styles.btnSubmit} onClick={handleSubmit}>Submit</button>
                 <button className={styles.btnSave} onClick={handleSave}>Save</button>
-                <button className={styles.btnCancel}>Cancel</button>
+                <button className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
               </div>
             </div>
           </div>

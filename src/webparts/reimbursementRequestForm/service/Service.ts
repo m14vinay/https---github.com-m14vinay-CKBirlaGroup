@@ -2,17 +2,35 @@ import { SPHttpClient } from '@microsoft/sp-http';
 export default class Service {
 
   private context: any;
-  private listname="ReimburseExpenseMaster";
-  private Departmentmaster ="DepartmentMaster";
-  private ExpenseMaster="ReimburseExpenseType";
-  private VendorList="AllVendor";
-  private Document="AllDocuments";
-  private ReimburseExpenseTransaction="ReimburseExpenseTransaction";
-  private HistoryList="History";
+  private listname = "ReimburseExpenseMaster";
+  private Departmentmaster = "DepartmentMaster";
+  private ExpenseMaster = "ReimburseExpenseType";
+  private VendorList = "AllVendor";
+  private Document = "AllDocuments";
+  private ReimburseExpenseTransaction = "ReimburseExpenseTransaction";
+  private HistoryList = "History";
+  private ReimbursementApproverMaster="ReimbursementApproverMaster";
   constructor(context: any) {
     this.context = context;
   }
-  
+
+  //GetApprover
+  public async GetApproverReimbursement(ApproverType: string): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimbursementApproverMaster}')/items
+?$select=Id,Title,ApproverType,
+ApproverName/Id,ApproverName/Title
+&$expand=ApproverName
+&$filter=ApproverType eq '${ApproverType}'`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0] : null;
+  }
   //GetApprover
   public async GetApprover(DepartmentName: string): Promise<any> {
 
@@ -36,7 +54,7 @@ Departmenthead/Id,Departmenthead/Title
     return data.value.length > 0 ? data.value[0] : null;
   }
   // Get DocumentbyID
-  public async getDocumentbyID(UserID:number): Promise<any[]> {
+  public async getDocumentbyID(UserID: number): Promise<any[]> {
 
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Document}')/items?$top=5000&$select=*&$filter=AuthorId eq ${UserID}`;
 
@@ -47,7 +65,7 @@ Departmenthead/Id,Departmenthead/Title
     const data = await res.json();
     return data.value;
   }
-  public async getDocumentDetailsID(Id:number): Promise<any[]> {
+  public async getDocumentDetailsID(Id: number): Promise<any[]> {
 
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Document}')/items?$top=5000&$select=*&$filter=Id eq ${Id}`;
 
@@ -99,16 +117,16 @@ Departmenthead/Id,Departmenthead/Title
   // Save the Record
   public async createItem(data: any): Promise<any> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;
-     const response = await this.context.spHttpClient.post(
+    const response = await this.context.spHttpClient.post(
       url,
-     SPHttpClient.configurations.v1,
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        }
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      }
     );
     return response.json();
   }
@@ -117,14 +135,14 @@ Departmenthead/Id,Departmenthead/Title
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items`;
     const response = await this.context.spHttpClient.post(
       url,
-     SPHttpClient.configurations.v1,
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        }
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      }
     );
     return response.json();
   }
@@ -148,7 +166,7 @@ Departmenthead/Id,Departmenthead/Title
     );
     return data;
   }
-   public async updateExpenseItem(id: number, data: any): Promise<void> {
+  public async updateExpenseItem(id: number, data: any): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items(${id})`;
 
     await this.context.spHttpClient.post(
@@ -219,38 +237,38 @@ Departmenthead/Id,Departmenthead/Title
   }
   // Delete by ID
   public async deleteExpense(ID: number): Promise<boolean> {
-  try {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items(${ID})`;
-    const res = await this.context.spHttpClient.post(
+    try {
+      const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items(${ID})`;
+      const res = await this.context.spHttpClient.post(
+        url,
+        SPHttpClient.configurations.v1,
+        {
+          headers: {
+            "IF-MATCH": "*",              // required
+            "X-HTTP-Method": "DELETE"     // delete method
+          }
+        }
+      );
+      return res.ok; // true if deleted
+    } catch (error) {
+      console.error("Delete failed:", error);
+      return false;
+    }
+  }
+  // Save the Hitory Record
+  public async createHistoryItem(data: any): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items`;
+    const response = await this.context.spHttpClient.post(
       url,
       SPHttpClient.configurations.v1,
       {
         headers: {
-          "IF-MATCH": "*",              // required
-          "X-HTTP-Method": "DELETE"     // delete method
-        }
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
       }
     );
-    return res.ok; // true if deleted
-  } catch (error) {
-    console.error("Delete failed:", error);
-    return false;
+    return response.json();
   }
-}
-// Save the Hitory Record
-      public async createHistoryItem(data: any): Promise<any> {        
-        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items`;   
-        const response = await this.context.spHttpClient.post(
-          url,
-         SPHttpClient.configurations.v1,
-            {
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(data)
-            }
-        );
-        return response.json();
-      }
 }
