@@ -34,7 +34,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
 
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
-  const [itemId, setItemId] = React.useState<number | null>(null);
+    const [itemId, setItemId] = React.useState<number | null>(null);
   const [FinanceController, setApprover2ID] = React.useState<number | null>(null);
   const [AssignedID, setAssignedID] = React.useState<number | null>(null);
   const [Departmenthead, setDepartmentHead] = React.useState<number | null>(null);
@@ -50,7 +50,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   // --- 1️⃣ Get ID from query string ---
     const getIdFromQueryString = (): number | null => {
       const params = new URLSearchParams(window.location.search);
-      const id = params.get('ID');
+      const id = params.get('RequestId');
       return id ? parseInt(id, 10) : null;
     };
   
@@ -242,7 +242,7 @@ const handlecheckamount=async (e: React.ChangeEvent<HTMLInputElement>) => {
   }
 }
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
+  const value = e.target.value.toUpperCase();
   setForm(prev => ({
     ...prev,
     projectCode: value
@@ -371,11 +371,6 @@ const handleSaveHistory = async (id: number) => {
   return alert("Attach files");
 }
 
-       const dataApprover = await service.GetApproverFromFinance(form.PoMaster);
-        if(dataApprover?.Id)
-        {
-          setApprover2ID(dataApprover.FinanceController?.Id || null);
-        }
   // 🔹 Payload (common)
   const payload = {
     ProjectCode: form.projectCode,
@@ -389,10 +384,6 @@ const handleSaveHistory = async (id: number) => {
     ApplicableTaxes: form.ApplicableTaxes,
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
-    AssignedTo: AssignedID,
-    DepartmentHeadId: Number(Departmenthead),
-    AssignedToEmailId:Number(Departmenthead),
-    Approver2Id: Number(FinanceController) ,
     CurrentStatus:'Draft'
   };
 
@@ -437,6 +428,7 @@ const handleSaveHistory = async (id: number) => {
 
 // Update
 const handleUpdate = async () => {
+  try {
   setLoading(true);
    if(!form.projectCode) return alert("Project Code required");
   if(!form.POAmount) return alert("Enter POAmount");
@@ -451,8 +443,10 @@ const handleUpdate = async () => {
         const dataApprover = await service.GetApproverFromFinance(form.PoMaster);
         if(dataApprover?.Id)
         {
+          //const item = dataApprover?.FinanceController?.Id;
           setApprover2ID(dataApprover.FinanceController?.Id || null);
         }
+       
   const payload = {
     Title:"Testing",
     ProjectCode: form.projectCode,
@@ -463,7 +457,6 @@ const handleUpdate = async () => {
     RemainingAmount: Number(form.RemainingAmount),
     Department: form.Department,
     POAmount: form.POAmount,
-
     ApplicableTaxes: form.ApplicableTaxes,
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
@@ -471,37 +464,41 @@ const handleUpdate = async () => {
     AssignedTo: AssignedID,
     DepartmentHeadId: Number(Departmenthead),
     AssignedToEmailId:Number(Departmenthead),
-    Approver2Id: Number(FinanceController) ,
+    Approver2Id: dataApprover?.FinanceController?.Id
   };
-  try {
-    if (itemId) {
-      // 🔥 UPDATE
+  
+    if (itemId) {       
      await service.updateItem(itemId, payload);
-    await handleSaveHistory(itemId);
+     await handleSaveHistory(itemId);
      if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(itemId, form.files[i]);
       }
     }
+    alert("Data Submitted Successfully ✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);  
+    }
+    else{
+     const res= await service.createItem(payload);
+      setItemId(res.Id);
+     await handleSaveHistory(res.Id);
+     if(res.Id>0)
+     {
+     if (res.Id > 0 && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(res.Id , form.files[i]);
+      }
       alert("Data Submitted Successfully ✅");    
-      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
-     window.location.assign(url);  
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);  
+     }
+    }    
     }
-    else      
-      {
-     const res = await service.createItem(payload);
-      setItemId(res.Id); // store ID for future updates
-      if (res.Id > 0 && form.files.length > 0) {
-        for (let i = 0; i < form.files.length; i++) {
-          await service.uploadFile(res.Id, form.files[i]);           
-      }
-    }
-      alert("Data Saved Successfully ✅");
-      await service.updateItem(res.Id, {
-          RequestNo: `CKBCSL/25-26/IV/Finance/${res.Id}`
-        });
-      }
-  } catch (error) {
+
+  }
+       
+   catch (error) {
     console.error(error);
     alert("Error occurred");
   }
@@ -586,7 +583,7 @@ const validatePO = (value: string) => {
   onChange={(_, option) => {
     setForm(prev => ({
       ...prev,
-      PoMaster: option?.key as string // text store karo
+      PoMaster: option?.text || "" // text store karo
     }));
   }}
 />
@@ -650,8 +647,8 @@ const validatePO = (value: string) => {
     </ul>
        )}
         <div className={styles.buttonGroup}>          
-          <button className={styles.submitBtn} onClick={handleUpdate} disabled={loading}> {loading ? "Submitting..." : "Submit"}</button>
-          <button className={styles.saveBtn} onClick={handleSaveOrUpdate}disabled={loading}> {loading ? "Saving..." : "Save"}</button>
+          <button className={styles.submitBtn} onClick={handleUpdate}  >Submit</button>
+          <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
           <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
         </div>
           </div>

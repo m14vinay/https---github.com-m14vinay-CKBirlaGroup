@@ -29,7 +29,8 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     });
 
   const [requestNo, setRequestNo] = React.useState('');
-  const [itemId, setItemId] = React.useState<number | null>(null);
+  //const [itemId, setItemId] = React.useState<number>(0);
+   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
   const [projectTitle, setProjectTitle] = React.useState('');
   const [projectDescription, setProjectDescription] = React.useState('');
@@ -47,7 +48,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   // --- 1️⃣ Get ID from query string ---
     const getIdFromQueryString = (): number | null => {
       const params = new URLSearchParams(window.location.search);
-      const id = params.get('ID');
+      const id = params.get('RequestId');
       return id ? parseInt(id, 10) : null;
     };
   
@@ -253,8 +254,10 @@ await service.deleteAttachmentFromSP(file);
 // };
 
 
+ //const user = await service.getVendorApprover();
+
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
+  const value = e.target.value.toUpperCase();
 
   // ✅ form me update karo
   setForm(prev => ({
@@ -333,6 +336,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
   const handleSaveOrUpdate = async () => {
   // 🔹 Validations
+  try {
    setLoading(true);
   if (!form.projectCode) return alert("Project Code required");
   if (!form.vendorName) return alert("Select Vendor");
@@ -342,6 +346,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 ) {
   return alert("Attach files");
 }
+ 
 
   // 🔹 Payload (common)
   const payload = {
@@ -356,15 +361,15 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     AssignedToEmailId:AssignedToEmail
   };
 
-  try {
+  
     if (!itemId) {
       // 🔹 CREATE
       const res = await service.createItem(payload);
-               // store ID for future updates
-  
-      if (res.Id > 0 && form.files.length > 0) {
-        for (let i = 0; i < form.files.length; i++) {
-          await service.uploadFile(res.Id, form.files[i]);
+        setItemId(res.Id);
+               // store ID for future update
+       if (res.Id > 0 && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(res.Id , form.files[i]);
         }
       }
       alert("Data Saved Successfully ✅");
@@ -376,9 +381,9 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
       // 🔹 UPDATE
       await service.updateItem(itemId, payload);
      
-      if (form.files.length > 0) {
-        for (let i = 0; i < form.files.length; i++) {
-          await service.uploadFile(itemId, form.files[i]);
+       if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(itemId, form.files[i]);
         }
       }
       alert("Data Updated Successfully ✅");
@@ -397,6 +402,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 // SUBMIT DATA
 const handleUpdate = async () => {
    setLoading(true);
+    try {
    if (!form.projectCode) return alert("Project Code required");
     if (!form.vendorName) return alert("Select Vendor");
     if (
@@ -405,47 +411,54 @@ const handleUpdate = async () => {
 ) {
   return alert("Attach files");
 }
-  const payload = {
+ const users = await service.getVendorApprover();
+const item = users?.Approver?.Id;
+
+ const useremail = await service.getUserById(item);
+        
+ const payload = {
     ProjectCode: form.projectCode,
      ProjectDescription: form.projectDescription,
     ProjectTitle: form.projectTitle,
     VendorName:  form.vendorName, 
     VendorDescription: form.vendorDescription,
     CurrentStatus: 'Pending',
-    AssignedTo:AssignedTo,
-    AssignedToEmailId:AssignedToEmail
+    AssignedTo:useremail.Title,
+    AssignedToEmailId: item
   };
-  try {
-    if (itemId) {
-      //  UPDATE
+
+  if (itemId) {       
      await service.updateItem(itemId, payload);
-      await handleSaveHistory(itemId);
-    if (form.files && form.files.length > 0) {
+     await handleSaveHistory(itemId);
+     if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(itemId, form.files[i]);
       }
     }
-   
-      alert("Data Submitted Successfully ✅");  
-      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
-     window.location.assign(url);     
-       // Reset form
-  // setForm({
-  //   projectCode: '',
-  //   projectTitle: '',
-  //   projectDescription: '',
-  //   vendorName: '',
-  //   vendorDescription: '',
-  //   files: [] as File[]
-  // });
-  // setRequestNo('');
-  // setProjectTitle('');
-  // setProjectDescription('');
-  // setItemId(null);
-  //setIsSubmitted(true); // freeze inputs
-};
-    
-  } catch (error) {
+    alert("Data Submitted Successfully ✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);  
+    }
+    else{
+     const res= await service.createItem(payload);
+      setItemId(res.Id);
+     await handleSaveHistory(res.Id);
+     if(res.Id>0)
+     {
+     if (res.Id > 0 && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(res.Id , form.files[i]);
+      }
+      alert("Data Submitted Successfully ✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);  
+     }
+    }    
+    }
+
+  }
+       
+   catch (error) {
     console.error(error);
     alert("Error occurred");
   }
@@ -587,15 +600,24 @@ const handleUpdate = async () => {
               <h6>Templates</h6>              
             </div>
             <ol>
-             <li>
-      <a 
-        href="Downloads/CKBCSL_VENDOR_LIST_11.06.18.xlsx" 
-        target="_blank" 
-        rel="noopener noreferrer"
+             <p>
+     <a 
+        href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/CKBCSL_VENDOR_LIST_11.06.18.xlsx"
+      target="_blank"
+      rel="noopener noreferrer"
       >
-      
+     CKBCSL_VENDOR_LIST_11.06.18.xlsx
       </a>
-    </li>
+    </p>
+    <p>
+     <a 
+        href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/Vendor_Registration_Form_v1.0.xlsx"
+      target="_blank"
+      rel="noopener noreferrer"
+      >
+     Vendor_Registration_Form_v1.0.xlsx
+      </a>
+    </p>
             </ol>
           </div>
           {/* Guidelines */}

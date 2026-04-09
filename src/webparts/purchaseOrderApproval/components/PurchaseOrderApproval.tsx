@@ -36,6 +36,8 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     DepartmentHead: '',
     CurrentStatus: '',
     Approver2Id: '',
+    ApproverToEmail: '',
+    Approver2EmailId: 0,
     RequestNo: ''
 
   });
@@ -64,7 +66,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('ID');
+    const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
 
@@ -148,6 +150,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
             ActionDate1: result.ActionDate1 || '',
             ActionDate2: result.ActionDate2 || '',
             approver2: User?.Title || '',
+            Approver2EmailId: result.Approver2Id,
             RequestNo: result.RequestNo,
             files: null
           }));
@@ -158,23 +161,12 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
             //approver2:
           }
 
-          if (!result.ActionDate1 || !result.ActionDate2) {
-            setIsDisabled(false);  // enable
-          } else {
-            setIsDisabled(true);   // disable
-          }
-
-
-
-
         } else {
-          alert("No data found");
+          alert("❌ This action has already taken.Please wait for queue");
         }
-
-      } else {
-        alert("❌ This action has already taken.Please wait for queue");
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error:", error);
     }
     finally {
@@ -226,7 +218,15 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
 
       if (!itemId) return;
       if (form.ActionDate1 === '') {
-        await service.updateItemdata(itemId, "Approved", approverComment, form.approver2 || '');
+        await service.updateItemdata(itemId, "Approved", approverComment, form.Approver2EmailId, form.approver2 || '');
+        await handleSaveApproveHistory(itemId);
+        alert("✅ First level approved");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+        window.location.assign(url);
+        return;
+      }
+      else if (form.ActionDate2 === '') {
+        await service.updateItemdata2(itemId, "Approved", approverComment, 'Approved');
         await handleSaveApproveHistory(itemId);
         alert("✅ First level approved");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -264,7 +264,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
         return;
       }
       if (form.ActionDate1 === '') {
-        await service.updateItemdata(itemId, "Rejected", approverComment, "Rejected");
+        await service.updateItemdata(itemId, "Rejected", approverComment, form.Approver2EmailId, "Rejected",);
         await handleSaveRejectedHistory(itemId);
         alert("✅ First level Rejected successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -290,13 +290,6 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
       setLoading(false);
     }
   };
-
-
-
-
-
-  // --- RENDER ---
-  // --- RENDER ---
   return (
     <section>
       {loading && (
@@ -451,7 +444,4 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     </section>
   );
 };
-
-
-
 export default PurchaseOrderApproval;

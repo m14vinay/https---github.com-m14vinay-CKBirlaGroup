@@ -87,7 +87,7 @@ private async getListItemType(): Promise<string> {
   }
 
  // Update the Record (Submit)
-  public async updateItemdata(id: number,status:string, comments: string,Assigned:string): Promise<void> {
+  public async updateItemdata(id: number,status:string, comments: string,AssignedToEmail:number,Assigned:string,): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
     await this.context.spHttpClient.post(
@@ -104,7 +104,9 @@ private async getListItemType(): Promise<string> {
         CurrentStatus: status,
          ApproverComment1: comments,
          ActionDate1: new Date().toISOString(),
+         AssignedToEmailId: AssignedToEmail,
          AssignedTo: Assigned
+        
          //Approver2:approver2Name
          
          //Actiondate2: new Date().toISOString()

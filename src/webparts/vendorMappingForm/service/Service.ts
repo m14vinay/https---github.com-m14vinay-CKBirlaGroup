@@ -28,18 +28,19 @@ export default class Service {
   }
 
   //Get Department Data
-  public async getVendorApprover(): Promise<any[]> {
+  public async getVendorApprover(): Promise<any> {
 
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Approver}')/items?$select=Id,Title,
-Approver/Id,Approver/Title,
-&$expand=Approver`;
+Approver/Id,Approver/Title&$expand=Approver`;
 
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
     );
     const data = await res.json();
-    return data.value.length > 0 ? data.value[0] : [];
+
+  return data.value?.[0] || null; 
+    //return data.value.length > 0 ? data.value[0] : [];
   }
 
   //Get Vendor Data
@@ -55,6 +56,18 @@ Approver/Id,Approver/Title,
     return data.value;
   }
 
+
+  public async getUserById(userId: number): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getuserbyid(${userId})`;
+    const response = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+  const user = await response.json();
+  return user;
+  }
   // Save the Record
   public async createItem(data: any): Promise<any> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;
@@ -81,8 +94,8 @@ Approver/Id,Approver/Title,
       SPHttpClient.configurations.v1,
       {
         headers: {
-          "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/json;odata=nometadata",
+          "Accept": "application/json;",
+          "Content-Type": "application/json;",
           "IF-MATCH": "*",
           "X-HTTP-Method": "MERGE"
         },
@@ -136,11 +149,7 @@ Approver/Id,Approver/Title,
 
   public async uploadFile(itemId: number, file: File): Promise<void> {
     // 🔹 Allowed file extensions
-  
-
-  
-    
-    
+   
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
 
     const buffer = await file.arrayBuffer();

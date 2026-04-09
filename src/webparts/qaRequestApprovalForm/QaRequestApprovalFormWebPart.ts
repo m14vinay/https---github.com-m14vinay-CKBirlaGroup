@@ -10,7 +10,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
 import * as strings from 'QaRequestApprovalFormWebPartStrings';
 import {QaRequestApprovalForm} from './components/QaRequestApprovalForm';
-import styles from './components/QaRequestApprovalForm.module.scss';
+import'./components/QaRequestApprovalForm.module.scss';
 import { IQaRequestApprovalFormProps } from './components/IQaRequestApprovalFormProps';
 
 export interface IQaRequestApprovalFormWebPartProps {
@@ -115,10 +115,10 @@ export default class QaRequestApprovalFormWebPart extends BaseClientSideWebPart<
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
   }
-//protected dataVersion: Version = Version.parse('1.0');
-protected get dataVersion(): Version {
-  return Version.parse('1.0');
-}
+protected dataVersion: Version = Version.parse('1.0');
+// protected get dataVersion(): Version {
+//   return Version.parse('1.0');
+// }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
