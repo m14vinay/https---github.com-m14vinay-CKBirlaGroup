@@ -2,20 +2,18 @@ import * as React from 'react';
 import type { IVendorRegistrationManuallyProps } from './IVendorRegistrationManuallyProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import styles from './VendorRegistrationManually.module.scss';
-//import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-//import 'bootstrap-icons/font/bootstrap-icons.css';
-//import { Spinner } from 'react-bootstrap';
-import * as XLSX from 'xlsx';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import SharePointService from '../service/Service';
-//import { SpinnerSize } from '@fluentui/react';
 import { Spinner, SpinnerSize } from '@fluentui/react';
+import * as XLSX from 'xlsx';
 
 const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (props) => {
   const [isActiveExcel, setIsActiveExcel] = React.useState(false);
   const [isActiveManual, setIsActiveManual] = React.useState(false);
   const [itemId, setItemId] = React.useState<number>(0);
- const service = new SharePointService(props.context);
+  const service = new SharePointService(props.context);
   const [attachments, setAttachments] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
   const MAX_TOTAL_SIZE_MB = 25;
@@ -495,420 +493,571 @@ finally
                         </div>
                       </div>
                     </div>
-                    <div className="accordion" id="accordionPanelsStayOpenExample">
-                      <div className={styles["accordion-item"]}>
-                        <h2 className="accordion-header">
-                          <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
-                            General Information
-                          </button>
-                        </h2>
-                        <div id="panelsStayOpen-collapseOne" className="accordion-collapse collapse show">
-                          <div className={styles["accordion-body"]}>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Name of the Vendor</label>
-                                <input className='form-control' type='text' />
+                    <div id="Manual" style={{display:isActiveManual?'block':'none'}}>
+                      <div className="accordion" id="accordionPanelsStayOpenExample">
+                        <div className={styles["accordion-item"]}>
+                          <h2 className="accordion-header">
+                            <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                              General Information
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseOne" className="accordion-collapse collapse show">
+                            <div className={styles["accordion-body"]}>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Name of the Vendor</label>
+                                  <input style={{width: '100%'}} name='Title' value={form.Title} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Year of Establishment</label>
+                                  <input style={{width: '100%'}} name='YearofEstablishment' value={form.YearofEstablishment} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Date of Commencement of Business</label>
+                                  <input style={{width: '100%'}} 
+                                  name="CommencementDate"
+            type="date"
+            value={
+              form.CommencementDate
+                ? new Date(form.CommencementDate).toISOString().split('T')[0]
+                : ''
+            }
+            onChange={handleDateChange} className='form-control' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>GST</label>
+                                  <input style={{width: '100%'}} name='GST' value={form.GST} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>PAN</label>
+                                  <input style={{width: '100%'}} name='Pan' value={form.Pan} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>TIN</label>
+                                  <input style={{width: '100%'}} name='Tin' value={form.Tin} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Central Sales Tax No.</label>
+                                  <input style={{width: '100%'}} name='CentralSalesTaxNo' value={form.CentralSalesTaxNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Service Tax Regd No.</label>
+                                  <input style={{width: '100%'}} name='ServiceTaxRegNo' value={form.ServiceTaxRegNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Nature of Services/Goods</label>
+                                  <input style={{width: '100%'}} name='NatureofService' value={form.NatureofService} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>MSME Registration No.</label>
+                                  <input style={{width: '100%'}} name='MSMERegistrationNo' value={form.MSMERegistrationNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>ESIC No.</label>
+                                  <input style={{width: '100%'}} name='ESICNo' value={form.ESICNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Excise Registration No.</label>
+                                  <input style={{width: '100%'}} name='ExciseRegisterNo' value={form.ExciseRegisterNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Work Contract Tax No</label>
+                                  <input style={{width: '100%'}} name='WorkContractTaxNo' value={form.WorkContractTaxNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
                               </div>
                             </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Year of Establishment</label>
-                                <input className='form-control' type='text' />
+                          </div>
+                        </div>
+                        <div className={styles["accordion-item"]}>
+                          <h2 className="accordion-header">
+                            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+                              Address of the organization from where material will be supplied/services will be provided
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseTwo" className="accordion-collapse collapse">
+                            <div className={styles["accordion-body"]}>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Full Address</label>
+                                  <input style={{width: '100%'}} name='FullAddress' value={form.FullAddress} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Telephone No.</label>
+                                  <input style={{width: '100%'}} name='TelephoneNo' value={form.TelephoneNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Fax No.</label>
+                                  <input style={{width: '100%'}} name='FaxNo' value={form.FaxNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Email ID</label>
+                                  <input style={{width: '100%'}} name='EmailId' value={form.EmailId} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Contacted Person</label>
+                                  <input style={{width: '100%'}} name='ContactPerson' value={form.ContactPerson} onChange={handleChange} className='form-control' type='text' />
+                                </div>
                               </div>
                             </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Date of Commencement of Business</label>
-                                <input className='form-control' type='text' />
+                          </div>
+                        </div>
+                        <div className={styles["accordion-item"]}>
+                          <h2 className="accordion-header">
+                            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+                              Address of the Registered Office
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseThree" className="accordion-collapse collapse">
+                            <div className={styles["accordion-body"]}>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Registered Full Address</label>
+                                  <input style={{width: '100%'}} name='RegFullAddress' value={form.RegFullAddress} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Registered Telephone No.</label>
+                                  <input style={{width: '100%'}} name='RegTelephoneNo' value={form.RegTelephoneNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Registered Fax No.</label>
+                                  <input style={{width: '100%'}} name='RegFaxNo' value={form.RegFaxNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Registered Email ID</label>
+                                  <input style={{width: '100%'}} name='RegEmailId' value={form.RegEmailId} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Registered Contacted Person</label>
+                                  <input style={{width: '100%'}} name='RegContactPerson' value={form.RegContactPerson} onChange={handleChange} className='form-control' type='text' />
+                                </div>
                               </div>
                             </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>GST</label>
-                                <input className='form-control' type='text' />
+                          </div>
+                        </div>
+                        <div className={styles["accordion-item"]}>
+                          <h2 className="accordion-header">
+                            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="false" aria-controls="panelsStayOpen-collapseFour">
+                              Constitution of Organization
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseFour" className="accordion-collapse collapse">
+                            <div className={styles["accordion-body"]}>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Whether Proprietary or Partnership firm or Pvt. Ltd. Or Public Ltd.</label>
+                                  <input style={{width: '100%'}} name='ConstitutionofOrganization' value={form.ConstitutionofOrganization} onChange={handleChange} className='form-control' type='text' />
+                                </div>
                               </div>
                             </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>PAN</label>
-                                <input className='form-control' type='text' />
+                          </div>
+                        </div>
+                        <div className={styles["accordion-item"]}>
+                          <h2 className="accordion-header">
+                            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFive" aria-expanded="false" aria-controls="panelsStayOpen-collapseFive">
+                              Nature of Business
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseFive" className="accordion-collapse collapse">
+                            <div className={styles["accordion-body"]}>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Manufacturer</label>
+                                  <input style={{width: '100%'}} name='Manufacturer' value={form.Manufacturer} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Authorized Agent</label>
+                                  <input style={{width: '100%'}} name='AuthorizedAgent' value={form.AuthorizedAgent} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Trader</label>
+                                  <input style={{width: '100%'}} name='Trader' value={form.Trader} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Consulting</label>
+                                  <input style={{width: '100%'}} name='ConsultingCompany' value={form.ConsultingCompany} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Other(Specify)</label>
+                                  <input style={{width: '100%'}} name='Other' value={form.Other} onChange={handleChange} className='form-control' type='text' />
+                                </div>
                               </div>
                             </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>TIN</label>
-                                <input className='form-control' type='text' />
+                          </div>
+                        </div>
+                        <div className={styles["accordion-item"]}>
+                          <h2 className="accordion-header">
+                            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSix" aria-expanded="false" aria-controls="panelsStayOpen-collapseSix">
+                              Details of Proprietor / Partners / Directors
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseSix" className="accordion-collapse collapse">
+                            <div className={styles["accordion-body"]}>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Name</label>
+                                  <input style={{width: '100%'}} name='Name' value={form.Name} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Address</label>
+                                  <input style={{width: '100%'}} name='Address' value={form.Address} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Contact No.</label>
+                                  <input style={{width: '100%'}} name='ContactNo' value={form.ContactNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
                               </div>
                             </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Central Sales Tax No.</label>
-                                <input className='form-control' type='text' />
+                          </div>
+                        </div>
+                        <div className={styles["accordion-item"]}>
+                          <h2 className="accordion-header">
+                            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSeven" aria-expanded="false" aria-controls="panelsStayOpen-collapseSeven">
+                              Conflict of interest
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseSeven" className="accordion-collapse collapse">
+                            <div className={styles["accordion-body"]}>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Details (if any)</label>
+                                  <input style={{width: '100%'}} name='Details' value={form.Details} onChange={handleChange} className='form-control' type='text' />
+                                </div>
                               </div>
                             </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Service Tax Regd No.</label>
-                                <input className='form-control' type='text' />
+                          </div>
+                        </div>
+                        <div className={styles["accordion-item"]}>
+                          <h2 className="accordion-header">
+                            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseEight" aria-expanded="false" aria-controls="panelsStayOpen-collapseEight">
+                              Details of Banks Accounts
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseEight" className="accordion-collapse collapse">
+                            <div className={styles["accordion-body"]}>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Bank Name</label>
+                                  <input style={{width: '100%'}} name='BankName' value={form.BankName} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Branch Address</label>
+                                  <input style={{width: '100%'}} name='BankAddress' value={form.BankAddress} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}> 
+                                  <label style={{width: '50%'}}>Name as appearing in account</label>
+                                  <input style={{width: '100%'}} name='NameinBankAccount' value={form.NameinBankAccount} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Bank Account No.</label>
+                                  <input style={{width: '100%'}} name='BankAccountNo' value={form.BankAccountNo} onChange={handleChange} className='form-control' type='text' />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Bank IFSC/MICR code</label>
+                                  <input style={{width: '100%'}} name='BankIFSCMICRCode' value={form.BankIFSCMICRCode} onChange={handleChange} className='form-control' type='text' />
+                                </div>
                               </div>
                             </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Nature of Services/Goods</label>
-                                <input className='form-control' type='text' />
-                              </div>
+                          </div>
+                        </div>
+                        <div className={styles["accordion-item"]}>
+                          <h2 className="accordion-header">
+                            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTen" aria-expanded="false" aria-controls="panelsStayOpen-collapseTen">
+                              Uploaded Documents
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseTen" className="accordion-collapse collapse">
+                            <div className={styles["accordion-body"]}>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  {attachments?.length > 0 && (
+                                                      <ul style={{ listStyle: "none", padding: 0 }}>
+                                                        {attachments.map((file, index) => (
+                                                          <li
+                                                            key={index}
+                                                            style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                                                          >
+                                                            {/* ❌ Remove Button */}
+                                                            <span
+                                                              style={{
+                                                                color: "red",
+                                                                cursor: "pointer",
+                                                                fontWeight: "bold"
+                                                              }}
+                                                              onClick={() => removeExistingFile(index)}
+                                                            >
+                                                              ✕
+                                                            </span>
+
+                                                            {/* 📄 File Link */}
+                                                            <a
+                                                              href={file.ServerRelativeUrl}                                                            
+                                                              rel="noopener noreferrer"
+                                                            >
+                                                              {file.FileName}
+                                                            </a>
+                                                          </li>
+                                                        ))}
+                                                      </ul>
+                                      )}
+                                </div>
+                              </div>                              
                             </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>MSME Registration No.</label>
-                                <input className='form-control' type='text' />
+                          </div>
+                        </div>
+                        <div className={styles["accordion-item"]}>
+                          <h2 className="accordion-header">
+                            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseNine" aria-expanded="false" aria-controls="panelsStayOpen-collapseNine">
+                              Upload Documents
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseNine" className="accordion-collapse collapse">
+                            <div className={styles["accordion-body"]}>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Partnership Deed or Memorandum of Article of Association</label>
+                                  <input style={{width: '100%'}} name="filesDeedManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
                               </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>ESIC No.</label>
-                                <input className='form-control' type='text' />
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>MSME Registration Certificate</label>
+                                  <input style={{width: '100%'}} name="filesMSMEManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
                               </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Excise Registration No.</label>
-                                <input className='form-control' type='text' />
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Factory License</label>
+                                  <input style={{width: '100%'}} name="filesLicenseManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
                               </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Work Contract Tax No</label>
-                                <input className='form-control' type='text' />
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>ISO 9001 Certificates</label>
+                                  <input style={{width: '100%'}} name="filesISOManual" type="file" multiple onChange={handleFileChange}  />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Bank IFSC/MICR code</label>
+                                  <input style={{width: '100%'}} name="filesIFSCManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Copy of Pan</label>
+                                  <input style={{width: '100%'}} name="filesPanManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Service Tax Registration</label>
+                                  <input style={{width: '100%'}} name="filesServiceManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>VAT/CST Registration</label>
+                                  <input style={{width: '100%'}} name="filesVATManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Telephone and Electricity Bill</label>
+                                  <input style={{width: '100%'}} name="filesTelephonManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Name and Address of All Partners/ Directors</label>
+                                  <input style={{width: '100%'}} name="filesNameManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Cancelled cheque</label>
+                                  <input style={{width: '100%'}} name="filesCancelManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Registration Certificate with any other authority (if required)</label>
+                                  <input style={{width: '100%'}} name="filesRegCertManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Any other document (as per the nature of the transaction/vendor)</label>
+                                  <input style={{width: '100%'}} name="filesOtherManual" type="file" multiple onChange={handleFileChange} />
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                      <div className={styles["accordion-item"]}>
-                        <h2 className="accordion-header">
-                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
-                            Address of the organization from where material will be supplied/services will be provided
-                          </button>
-                        </h2>
-                        <div id="panelsStayOpen-collapseTwo" className="accordion-collapse collapse">
-                          <div className={styles["accordion-body"]}>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Full Address</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Telephone No.</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Fax No.</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Email ID</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Contacted Person</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles["accordion-item"]}>
-                        <h2 className="accordion-header">
-                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
-                            Address of the Registered Office
-                          </button>
-                        </h2>
-                        <div id="panelsStayOpen-collapseThree" className="accordion-collapse collapse">
-                          <div className={styles["accordion-body"]}>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Registered Full Address</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Registered Telephone No.</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Registered Fax No.</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Registered Email ID</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Registered Contacted Person</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles["accordion-item"]}>
-                        <h2 className="accordion-header">
-                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="false" aria-controls="panelsStayOpen-collapseFour">
-                            Constitution of Organization
-                          </button>
-                        </h2>
-                        <div id="panelsStayOpen-collapseFour" className="accordion-collapse collapse">
-                          <div className={styles["accordion-body"]}>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Whether Proprietary or Partnership firm or Pvt. Ltd. Or Public Ltd.</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles["accordion-item"]}>
-                        <h2 className="accordion-header">
-                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFive" aria-expanded="false" aria-controls="panelsStayOpen-collapseFive">
-                            Nature of Business
-                          </button>
-                        </h2>
-                        <div id="panelsStayOpen-collapseFive" className="accordion-collapse collapse">
-                          <div className={styles["accordion-body"]}>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Manufacturer</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Authorized Agent</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Trader</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Consulting</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Other(Specify)</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles["accordion-item"]}>
-                        <h2 className="accordion-header">
-                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSix" aria-expanded="false" aria-controls="panelsStayOpen-collapseSix">
-                            Details of Proprietor / Partners / Directors
-                          </button>
-                        </h2>
-                        <div id="panelsStayOpen-collapseSix" className="accordion-collapse collapse">
-                          <div className={styles["accordion-body"]}>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Name</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Address</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Contact No.</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles["accordion-item"]}>
-                        <h2 className="accordion-header">
-                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSeven" aria-expanded="false" aria-controls="panelsStayOpen-collapseSeven">
-                            Conflict of interest
-                          </button>
-                        </h2>
-                        <div id="panelsStayOpen-collapseSeven" className="accordion-collapse collapse">
-                          <div className={styles["accordion-body"]}>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Details (if any)</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles["accordion-item"]}>
-                        <h2 className="accordion-header">
-                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseEight" aria-expanded="false" aria-controls="panelsStayOpen-collapseEight">
-                            Details of Banks Accounts
-                          </button>
-                        </h2>
-                        <div id="panelsStayOpen-collapseEight" className="accordion-collapse collapse">
-                          <div className={styles["accordion-body"]}>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Bank Name</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Branch Address</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Name as appearing in account</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Bank Account No.</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Bank IFSC/MICR code</label>
-                                <input className='form-control' type='text' />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles["accordion-item"]}>
-                        <h2 className="accordion-header">
-                          <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseNine" aria-expanded="false" aria-controls="panelsStayOpen-collapseNine">
-                            Upload Documents
-                          </button>
-                        </h2>
-                        <div id="panelsStayOpen-collapseNine" className="accordion-collapse collapse">
-                          <div className={styles["accordion-body"]}>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                              <div className={styles["form-group" as keyof typeof styles]}>
-                                <label>Partnership Deed or Memorandum of Article of Association</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>MSME Registration Certificate</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Factory License</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>ISO 9001 Certificates</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Bank IFSC/MICR code</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Copy of Pan</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Service Tax Registration</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>VAT/CST Registration</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                           <div className="form-group">
-                                <label>Telephone and Electricity Bill</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                              <div className="form-group">
-                                <label>Name and Address of All Partners/ Directors</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                            <div className="form-group">
-                                <label>Cancelled cheque</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                          <div className="form-group">
-                                <label>Registration Certificate with any other authority (if required)</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                            <div className={styles['col-md-12']}>
-                             <div className="form-group">
-                                <label>Any other document (as per the nature of the transaction/vendor)</label>
-                                <input name="files" type="file" multiple />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                      <div className={styles['btn-group']}>
+                        <button className={styles.ApproveBtn} onClick={handleSubmitManual}>Submit</button>&nbsp;
+                        <button className={styles.ApproveBtn} onClick={handleSaveManual}>Save</button>&nbsp;
+                        <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
                       </div>
                     </div>
-                  </div>
-                  <div className={styles['btn-group']}>
-                    <button className={styles.btnSubmit}>Submit</button>&nbsp;
-                    <button className={styles.btnSubmit}>Save</button>&nbsp;
-                    {/* <button className={styles.btnCancel}>Cancel</button> */}
-                  </div>
+                    <div id="Excel" style={{display:isActiveExcel?'block':'none'}}>
+                         <div className={styles["accordion-item"]}>
+                          <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Upload Vendor Registration Form</label>
+                                  <input style={{width: '100%'}} name="UploadExcelFile" accept=".xlsx, .xls" type="file" multiple onChange={handleExcelFileChange} />
+                                </div>
+                          </div>
+                          <div className={styles['col-md-12']}>
+                            <h3>Upload Documents</h3>
+                          </div>                         
+                            <div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Partnership Deed or Memorandum of Article of Association</label>
+                                  <input style={{width: '100%'}} name="filesDeedExcel" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>MSME Registration Certificate</label>
+                                  <input style={{width: '100%'}} name="filesMSMEExcel" type="file" multiple onChange={handleFileChange}  />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Factory License</label>
+                                  <input style={{width: '100%'}} name="filesLicenseExcel" type="file" multiple onChange={handleFileChange}  />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>ISO 9001 Certificates</label>
+                                  <input style={{width: '100%'}} name="filesISOExcel" type="file" multiple onChange={handleFileChange}  />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Bank IFSC/MICR code</label>
+                                  <input style={{width: '100%'}} name="filesIFSCExcel" type="file" multiple onChange={handleFileChange}  />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Copy of Pan</label>
+                                  <input style={{width: '100%'}} name="filesPanExcel" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Service Tax Registration</label>
+                                  <input style={{width: '100%'}} name="filesServiceExcel" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>VAT/CST Registration</label>
+                                  <input style={{width: '100%'}} name="filesVATExcel" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Telephone and Electricity Bill</label>
+                                  <input style={{width: '100%'}} name="filesTelephoneExcel" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Name and Address of All Partners/ Directors</label>
+                                  <input style={{width: '100%'}} name="filesNameExcel" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Cancelled cheque</label>
+                                  <input style={{width: '100%'}} name="filesCancelExcel" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Registration Certificate with any other authority (if required)</label>
+                                  <input style={{width: '100%'}} name="filesRegCerExcel" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                              <div className={styles['col-md-12']}>
+                                <div className={styles["formGroup"]}>
+                                  <label style={{width: '50%'}}>Any other document (as per the nature of the transaction/vendor)</label>
+                                  <input style={{width: '100%'}} name="filesOtherExcel" type="file" multiple onChange={handleFileChange} />
+                                </div>
+                              </div>
+                            </div>                          
+                        </div>
+                        <div className={styles['btn-group']}>
+                        <button className={styles.ApproveBtn} onClick={handleSubmitUpload}>Submit</button>&nbsp;
+                        <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
+                      </div>
+                    </div>
+                  </div>                  
                 </div>
               </div>
             </div>
@@ -933,10 +1082,7 @@ finally
             </div>
           </div>
         </div>
-        </div>
-        </section>
-      
+      </section>
     );
-  }
-
+};
 export default VendorRegistrationManually;

@@ -8,6 +8,7 @@ export default class Service {
   private VendorList="AllVendor";
   private Document="AllDocuments";
   private ReimburseExpenseTransaction="ReimburseExpenseTransaction";
+  private HistoryList="History";
   constructor(context: any) {
     this.context = context;
   }
@@ -236,4 +237,20 @@ Departmenthead/Id,Departmenthead/Title
     return false;
   }
 }
+// Save the Hitory Record
+      public async createHistoryItem(data: any): Promise<any> {        
+        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items`;   
+        const response = await this.context.spHttpClient.post(
+          url,
+         SPHttpClient.configurations.v1,
+            {
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            }
+        );
+        return response.json();
+      }
 }
