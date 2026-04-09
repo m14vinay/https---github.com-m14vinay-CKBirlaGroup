@@ -479,7 +479,6 @@ const handleUpdate = async () => {
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
     window.location.assign(url);  
     }
-<<<<<<< HEAD
     else{
      const res= await service.createItem(payload);
       setItemId(res.Id);
@@ -500,23 +499,6 @@ const handleUpdate = async () => {
   }
        
    catch (error) {
-=======
-    else      
-      {
-     const res = await service.createItem(payload);
-      setItemId(res.Id); // store ID for future updates
-      if (res.Id > 0 && form.files.length > 0) {
-        for (let i = 0; i < form.files.length; i++) {
-          await service.uploadFile(res.Id, form.files[i]);           
-      }
-    }
-      alert("Data Saved Successfully ✅");
-      await service.updateItem(res.Id, {
-          RequestNo: `CKBCSL/25-26/IV/Finance/${res.Id}`
-        });
-      }
-  } catch (error) {
->>>>>>> 8779439e50a40b40fee146d976abddf316aa23b3
     console.error(error);
     alert("Error occurred");
   }
