@@ -39,7 +39,7 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('ID');
+    const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
 

@@ -40,7 +40,11 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     ActionDate2:'',
      ActionDate3:'',
     DepartmentHead: '',
-    RequestNo:''
+    RequestNo:'',
+    Approver2EmailId:0,
+    Approver3EmailId:0,
+    ApproverTwoId:0
+    
    
   });
 
@@ -65,7 +69,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     // --- 1️⃣ Get ID from query string ---
      const getIdFromQueryString = (): number | null => {
        const params = new URLSearchParams(window.location.search);
-       const id = params.get('ID');
+       const id = params.get('RequestId');
        return id ? parseInt(id, 10) : null;
      };
    
@@ -166,6 +170,10 @@ if (result.Approval3Id) {
        ActionDate1:result.ActionDate1 || '',
           ActionDate2:result.ActionDate2 || '',
           ActionDate3:result.ActionDate3 || '',
+            Approver2EmailId: result.Approval2Id,
+          Approver3EmailId: result.Approval3Id,
+           ApproverTwoId: result.Approval2Id,
+
 
       files: null
       }));
@@ -239,7 +247,11 @@ const handleSaveRejectedHistory = async (id: number) => {
     if (!itemId) return;
 if(form.ActionDate1==='')
      {
-      await service.updateItemdata(itemId, "Approved", approverComment,AssignedID2);
+      // const User=form.ApproverTwoId;
+      // const user2 = await service.getUserById(User);
+      // const Approve2=user2?.Title;
+      
+      await service.updateItemdata(itemId, "Approved", approverComment,AssignedID2,form.Approver2EmailId);
         await handleSaveApproveHistory(itemId);
         alert("✅ First level approved");
  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -248,7 +260,7 @@ if(form.ActionDate1==='')
      }
      else if(form.ActionDate2==='')
      {
-       await service.updateItemdata2(itemId, "Approved",approverComment,AssignedID3);
+       await service.updateItemdata2(itemId, "Approved",approverComment,AssignedID3,form.Approver3EmailId);
        await handleSaveApproveHistory(itemId);
        alert("✅ Second level approved");
        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -291,7 +303,7 @@ const handleReject = async () => {
 
    if(form.ActionDate1==='')
       {
-      await service.updateItemdata(itemId, "Rejected", approverComment,"Rejected");
+      await service.updateItemdata(itemId, "Rejected", approverComment,"Rejected",form.Approver2EmailId);
         await handleSaveRejectedHistory(itemId);
         alert("✅ First level Rejected successfully");
          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
@@ -301,7 +313,7 @@ const handleReject = async () => {
       }
        else if(form.ActionDate2==='')
      {
-       await service.updateItemdata2(itemId, "Rejected", approverComment,'Rejected');
+       await service.updateItemdata2(itemId, "Rejected", approverComment,'Rejected',form.Approver3EmailId);
          await handleSaveRejectedHistory(itemId);
         alert("✅ Second level Rejected successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;

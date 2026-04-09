@@ -8,6 +8,7 @@ export default class Service {
   private VendorList="";
   private FinanceController="FinanceController";
   private HistoryList="History";
+   private Approver="VendorMappingApproval";
   constructor(context: any) {
     this.context = context;
   }
@@ -51,7 +52,6 @@ private async getListItemType(): Promise<string> {
 }
   // Save the Record
   public async createItem(data: any): Promise<any> {
-    const itemType = await this.getListItemType();
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;   
     const response = await this.context.spHttpClient.post(
       url,
@@ -238,6 +238,19 @@ FinanceController/Id,FinanceController/Title
 
     const data = await res.json();
     return data.value.length > 0 ? data.value[0] : null;
+  }
+
+  public async getVendorApprover(): Promise<any[]> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Approver}')/items?$select=Id,Title,
+Approver/Id,Approver/Title&$expand=Approver`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0] : [];
   }
   
   public async getUser(): Promise<any> {

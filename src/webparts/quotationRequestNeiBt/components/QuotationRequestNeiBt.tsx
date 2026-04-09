@@ -66,7 +66,7 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
 // --- 1️⃣ Get ID from query string ---
     const getIdFromQueryString = (): number | null => {
       const params = new URLSearchParams(window.location.search);
-      const id = params.get('ID');
+      const id = params.get('RequestId');
       return id ? parseInt(id, 10) : null;
     };
   
@@ -118,8 +118,8 @@ const loadAttachments = async (id:number) => {
          if (result.CurrentStatus==='Draft') {
       setItemId(result.Id);
 
-        setForm(prev => ({
-          ...prev,
+       setForm(prev => ({
+        ...prev,
         ProjectTitle: result.ProjectTitle || '',
         ProjectReffNo: result. ProjectReffNo || '',
         ProjectDescription: result.ProjectDescription || '',
@@ -128,15 +128,18 @@ const loadAttachments = async (id:number) => {
           Vendor1: result.Vendor1 || '',
       Vendor2: result.Vendor2 || '',
       Vendor3: result.Vendor3 || '',
-      Quote1: result.Quote1 || 0,
-      Quote2:result.Quote2 || 0,
-      Quote3: result.Quote3 || 0,
+      Quote1: result.Quote1 || '',
+      Quote2:result.Quote2 || '',
+      Quote3: result.Quote3 || '',
       Selectedvendor: result.Selectedvendor || '',
       SelectedQuote: result.SelectedQuote || '',
       Department: result.Department || '',
       Advancepayment: result.Advancepayment || 0,
       ApprovalPath: result.ApprovalPath || '',
-      RequestNo : result.RequestNo || ''
+      CurrentStatus: result.CurrentStatus || '',
+      RequestNo: result.RequestNo || '',
+     
+      
       }));       
     } else {
       alert("No data found");
@@ -305,6 +308,7 @@ const handleSaveHistory = async (id: number) => {
 
    const handleSaveOrUpdate = async () => {
   // 🔹 Validations
+  try {
     setLoading(true);
     if(!form.ProjectTitle) return alert("Project Title required");
     if(!form.Vendor1) return alert("Enter Vendor1 ");
@@ -337,36 +341,38 @@ const User=await service.getUserById(Number(form.Approval1Id));
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
-      AssignedTo: AssignedID,  // ✅ must be numeric ID
-  Approval1Id: Number(form.Approval1Id),
-  Approval2Id: Number(form.Approval2Id ),
-  Approval3Id: Number(form.Approval3Id ),
+  //     AssignedTo: AssignedID,  // ✅ must be numeric ID
+  // Approval1Id: Number(form.Approval1Id),
+  // Approval2Id: Number(form.Approval2Id ),
+  // Approval3Id: Number(form.Approval3Id ),
+  // AssignedToEmailId:Number(form.Approval1Id),
   CurrentStatus:'Draft'
    
   };
 
-  try {
-    if (!itemId) {
+  
+     if (!itemId) {
       // 🔹 CREATE
       const res = await service.createItem(payload);
-      setItemId(res.Id); // store ID for future updates
-
-      if (res.Id > 0 && form.files.length > 0) {
-        for (let i = 0; i < form.files.length; i++) {
-          await service.uploadFile(res.Id, form.files[i]);
+        setItemId(res.Id);
+               // store ID for future update
+       if (res.Id > 0 && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(res.Id , form.files[i]);
         }
       }
       alert("Data Saved Successfully ✅");
        await service.updateItem(res.Id, {
-          RequestNo: `NEI-${res.Id}`
-        });
+       RequestNo: `VMR-${res.Id}`
+  });
+
     } else {
       // 🔹 UPDATE
       await service.updateItem(itemId, payload);
-
-      if (form.files.length > 0) {
-        for (let i = 0; i < form.files.length; i++) {
-          await service.uploadFile(itemId, form.files[i]);
+     
+       if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(itemId, form.files[i]);
         }
       }
       alert("Data Updated Successfully ✅");
@@ -380,11 +386,11 @@ const User=await service.getUserById(Number(form.Approval1Id));
     setLoading(false);
   }
 };
-
   
 
 // Update
 const handleUpdate = async () => {
+  try {
    setLoading(true);
    if(!form.ProjectTitle) return alert("Project Title required");
     if(!form.Vendor1) return alert("Enter Vendor1 ");
@@ -403,8 +409,8 @@ const handleUpdate = async () => {
     ProjectTitle: form.ProjectTitle,
     ProjectReffNo: form.ProjectReffNo,
      ProjectDescription: form.ProjectDescription,
-     //TotalProjectAmount:form.TotalProjectAmount,
-     //ApplicableTaxes: form.ApplicableTaxes,
+     TotalProjectAmount:form.TotalProjectAmount,
+     ApplicableTaxes: form.ApplicableTaxes,
      Vendor1:form.Vendor1,
      Vendor2:form.Vendor2,
       Vendor3: form.Vendor3,
@@ -419,26 +425,44 @@ const handleUpdate = async () => {
       CurrentStatus:'Pending',
       ApprovalPathID:form.ApprovalID,
       AssignedTo: User.Title, 
-      AssignedToEmail:User.Id,
+      AssignedToEmailId:User.Id,
       Approval1Id:form.ApprovalID.split('_')[0],
       Approval2Id:form.ApprovalID.split('_')[1],
       Approval3Id:form.ApprovalID.split('_')[2]
   };
-  try {
-    if (itemId) {
-      // 🔥 UPDATE
+  
+    if (itemId) {       
      await service.updateItem(itemId, payload);
-        await handleSaveHistory(itemId);
+     await handleSaveHistory(itemId);
      if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(itemId, form.files[i]);
       }
     }
-      alert("Data Submitted Successfully ✅");    
-      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
-     window.location.assign(url);  
+    alert("Data Submitted Successfully ✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);  
     }
-  } catch (error) {
+    else{
+     const res= await service.createItem(payload);
+      setItemId(res.Id);
+     await handleSaveHistory(res.Id);
+     if(res.Id>0)
+     {
+     if (res.Id > 0 && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(res.Id , form.files[i]);
+      }
+      alert("Data Submitted Successfully ✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);  
+     }
+    }    
+    }
+
+  }
+       
+   catch (error) {
     console.error(error);
     alert("Error occurred");
   }

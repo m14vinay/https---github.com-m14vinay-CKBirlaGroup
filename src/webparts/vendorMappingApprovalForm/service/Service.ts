@@ -184,22 +184,22 @@ export default class Service {
     return data;
   }
   // Save the Hitory Record
-    public async createHistoryItem(data: any): Promise<any> {
-      const itemType = await this.getListItemType();
-      const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items`;   
-      const response = await this.context.spHttpClient.post(
-        url,
-       SPHttpClient.configurations.v1,
-          {
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-          }
-      );
-      return response.json();
-    }
+   public async createHistoryItem(data: any): Promise<any> {
+         const itemType = await this.getListItemType();
+         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items`;   
+         const response = await this.context.spHttpClient.post(
+           url,
+          SPHttpClient.configurations.v1,
+             {
+               headers: {
+                 'Accept': 'application/json',
+                 'Content-Type': 'application/json'
+               },
+               body: JSON.stringify(data)
+             }
+         );
+         return response.json();
+       }
     // Get the History Record
     public async GetHistoryItem(ID:Number,FormCode:string): Promise<any> {
       const itemType = await this.getListItemType();

@@ -5,10 +5,8 @@ import styles from './VendorRegistrationManually.module.scss';
 //import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 //import 'bootstrap-icons/font/bootstrap-icons.css';
-//import { Spinner } from 'react-bootstrap';
 import * as XLSX from 'xlsx';
 import SharePointService from '../service/Service';
-//import { SpinnerSize } from '@fluentui/react';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 
 const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (props) => {
@@ -415,6 +413,12 @@ const removeExistingFile = async (index: number) => {
   const handleSubmitUpload = async (event: any) => {  
   try{
   setLoading(true);
+   if (
+  (!form.files || form.files.length === 0) &&
+  (!attachments || attachments.length === 0)
+) {
+  return alert("Attach files");
+}
   const file = form.UploadExcelFile?.[0];
   
   const data = await file.arrayBuffer();
@@ -560,7 +564,7 @@ finally
                             </div>
                             <div className={styles['col-md-12']}>
                            <div className="form-group">
-                                <label>MSME Registration No.</label>
+                                <label>MSME Registration No. </label>
                                 <input className='form-control' type='text' />
                               </div>
                             </div>
@@ -823,37 +827,39 @@ finally
                             <div className={styles['col-md-12']}>
                            <div className="form-group">
                               <div className={styles["form-group" as keyof typeof styles]}>
-                                <label>Partnership Deed or Memorandum of Article of Association</label>
+                                <label>Partnership Deed or Memorandum of Article of Association
+                                  <span className={styles.required}>*</span>
+                                </label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
                            <div className="form-group">
-                                <label>MSME Registration Certificate</label>
+                                <label>MSME Registration Certificate <span className={styles.required}>*</span></label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
                            <div className="form-group">
-                                <label>Factory License</label>
+                                <label>Factory License <span className={styles.required}>*</span></label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
                            <div className="form-group">
-                                <label>ISO 9001 Certificates</label>
+                                <label>ISO 9001 Certificates </label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
                            <div className="form-group">
-                                <label>Bank IFSC/MICR code</label>
+                                <label>Bank IFSC/MICR code </label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
                            <div className="form-group">
-                                <label>Copy of Pan</label>
+                                <label>Copy of Pan <span className={styles.required}>*</span></label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
@@ -865,7 +871,7 @@ finally
                             </div>
                             <div className={styles['col-md-12']}>
                            <div className="form-group">
-                                <label>VAT/CST Registration</label>
+                                <label>VAT/CST Registration <span className={styles.required}>*</span></label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
@@ -877,25 +883,25 @@ finally
                             </div>
                             <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                <label>Name and Address of All Partners/ Directors</label>
+                                <label>Name and Address of All Partners/ Directors <span className={styles.required}>*</span></label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
                             <div className="form-group">
-                                <label>Cancelled cheque</label>
+                                <label>Cancelled cheque <span className={styles.required}>*</span></label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
                           <div className="form-group">
-                                <label>Registration Certificate with any other authority (if required)</label>
+                                <label>Registration Certificate with any other authority (if required) <span className={styles.required}>*</span></label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>
                             <div className={styles['col-md-12']}>
                              <div className="form-group">
-                                <label>Any other document (as per the nature of the transaction/vendor)</label>
+                                <label>Any other document (as per the nature of the transaction/vendor) <span className={styles.required}>*</span></label>
                                 <input name="files" type="file" multiple />
                               </div>
                             </div>

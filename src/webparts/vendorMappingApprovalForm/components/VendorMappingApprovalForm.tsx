@@ -25,7 +25,8 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
       AuthorId:'',
      Created:'',
      Actiondate1:'',
-     ApproverComment: ''
+     ApproverComment: '',
+     AssignedToEmail:''
     
   });
 
@@ -46,7 +47,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('ID');
+    const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
 
@@ -92,9 +93,6 @@ const handleFetchById = async (id: number) => {
      const historydata=await service.GetHistoryItem(id,"VMR");
      setHistory(historydata);
     console.log("Result:", result);
-      
-    
-
       if (result.AssignedTo === currentuser.Title) {
 
       if (result.CurrentStatus === 'Pending' || result.CurrentStatus === 'Approved') {
@@ -114,6 +112,8 @@ const handleFetchById = async (id: number) => {
           Created:(result.Created),
           Actiondate1: (result.Actiondate1),
           ApproverComment:result.ApproverComment || '',
+          AssignedToEmail:result.AssignedToEmail || '',
+
           files: null
         }));
        
@@ -140,7 +140,8 @@ const handleFetchById = async (id: number) => {
   };
 
 
-   const handleSaveApproveHistory = async (id: number) => {
+   
+const handleSaveApproveHistory = async (id: number) => {
 
   const currentuser = await service.getUser();
 
@@ -150,12 +151,13 @@ const handleFetchById = async (id: number) => {
     UserName: currentuser.Title,
     UserAction: 'Approved',
     ActionDate: new Date().toISOString(),
-     Designation: currentuser.JobTitle, 
-     Usercomment: approverComment
+    // Designation: currentuser.JobTitle, 
+      UserComment: approverComment
   };
 
   await service.createHistoryItem(payload);
 };
+
 
 const handleSaveRejectedHistory = async (id: number) => {
 
@@ -167,7 +169,7 @@ const handleSaveRejectedHistory = async (id: number) => {
     UserName: currentuser.Title,
     UserAction: 'Rejected',
     ActionDate: new Date().toISOString(),
-    Designation: currentuser.JobTitle, 
+    //Designation: currentuser.JobTitle, 
     Usercomment: approverComment
   };
 
@@ -179,13 +181,11 @@ const handleSaveRejectedHistory = async (id: number) => {
        setLoading(true);
     if (!approverComment) return alert("Approver Comment required");
     if (!itemId) return;
-
     await service.updateItemdata(itemId, "Approved", approverComment,"Approved");
      await handleSaveApproveHistory(itemId);
     alert("✅ Approved successfully");
      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
      window.location.assign(url);  
-    //setApproverComment('');
   } catch (error) {
     console.error(error);
   }

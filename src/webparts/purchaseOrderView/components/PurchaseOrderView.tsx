@@ -55,7 +55,7 @@ const [departmentHead, setDepartmentHead] = React.useState('');
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('ID');
+    const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
 
@@ -136,7 +136,7 @@ const handleFetchById = async (id: number) => {
           projectTitle: result.ProjectTitle || '',
           vendorName: result.VendorName || '',
           POAmount: result.POAmount || 0,
-          POCategory: result.PoMaster || '',
+         PoMaster: result.PoMaster || '',
           ApplicableTaxes: result.ApplicableTaxes || 0,
           ProjectDescription: result.ProjectDescription || '',
           RequestNo: result.RequestNo,

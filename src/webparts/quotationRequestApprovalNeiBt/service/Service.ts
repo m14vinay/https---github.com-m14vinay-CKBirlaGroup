@@ -83,7 +83,7 @@ private FinanceController="FinanceController";
   // }
 
  //Update the Record (Submit)
-  public async updateItemdata(id: number,status:string, comments: string,Assigned:string): Promise<void> {
+  public async updateItemdata(id: number,status:string, comments: string,Assigned:string,AssignedToEmail:number): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
     await this.context.spHttpClient.post(
@@ -100,7 +100,8 @@ private FinanceController="FinanceController";
         CurrentStatus: status,
          ApproverComment1: comments,
          ActionDate1: new Date().toISOString(),
-         AssignedTo: Assigned
+         AssignedTo: Assigned,
+          AssignedToEmailId: AssignedToEmail
          //Approver2:approver2Name
          
          //Actiondate2: new Date().toISOString()
@@ -112,7 +113,7 @@ private FinanceController="FinanceController";
 
 
 
-  public async updateItemdata2(id: number,status:string, comments: string,Assigned:string): Promise<void> {
+  public async updateItemdata2(id: number,status:string, comments: string,Assigned:string,AssignedToEmail:number): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
     await this.context.spHttpClient.post(
@@ -129,7 +130,8 @@ private FinanceController="FinanceController";
         CurrentStatus: status,
          ApproverComment2: comments,
          ActionDate2: new Date().toISOString(),
-         AssignedTo: Assigned
+         AssignedTo: Assigned,
+          AssignedToEmailId: AssignedToEmail
          
      })
       }
