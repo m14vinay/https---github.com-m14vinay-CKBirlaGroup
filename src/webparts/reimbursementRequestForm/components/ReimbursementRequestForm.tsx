@@ -218,7 +218,8 @@ const handleCancel = () => {
       FIApporver: dataApproverFI.ApproverName?.Title.toString() || "",
       FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
       ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
-      CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0)
+      CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
+      AssignedTo:dataApprover.Departmenthead?.Title.toString() || ""
     };
     try {
       if (Expenseform.expenses.length > 0) {
