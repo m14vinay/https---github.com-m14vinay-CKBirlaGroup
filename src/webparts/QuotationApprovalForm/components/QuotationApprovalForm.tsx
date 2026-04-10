@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ChoiceGroup, IChoiceGroupOption } from '@fluentui/react';
-import styles from './OuotationApprovalForm.module.scss';
-import type { IOuotationApprovalFormProps } from './IOuotationApprovalFormProps';
+import styles from './QuotationApprovalForm.module.scss';
+import type { IQuotationApprovalFormProps } from './IQuotationApprovalFormProps';
 import SharePointService from './Services/Service';
 
 type TFormState = {
@@ -40,6 +40,7 @@ type TDepartmentOption = {
   text: string;
 };
 
+
 const INITIAL_FORM: TFormState = {
   ID: 0,
   ProjectTitle: '',
@@ -74,11 +75,11 @@ const INITIAL_PO_ROW: TPurchaseOrderRow = {
 };
 
 const normalizeDepartmentValue = (value: string): string => value.trim();
-const getDepartmentOptionKey = (value: string): string => normalizeDepartmentValue(value).toLowerCase();
 
-const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => {
+const QuotationApprovalForm: React.FC<IQuotationApprovalFormProps> = (props) => {
+  // SharePoint service for item, attachment, PO detail, and history operations.
   const service = React.useMemo(() => new SharePointService(props.context), [props.context]);
-
+  const [currentStep, setCurrentStep] = React.useState<number>(1);
   const [form, setForm] = React.useState<TFormState>(INITIAL_FORM);
   const [itemId, setItemId] = React.useState<number | null>(null);
   const [attachments, setAttachments] = React.useState<any[]>([]);
@@ -86,12 +87,15 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
   const [poItems, setPoItems] = React.useState<TPurchaseOrderRow[]>([INITIAL_PO_ROW]);
   const [statusMessage, setStatusMessage] = React.useState('');
   const [isSaving, setIsSaving] = React.useState(false);
-
+  const [approverOptions, setApproverOptions] = React.useState<string[]>([]);
+  // Track the selected approver for amounts > 200,000
+  const [selectedApprover, setSelectedApprover] = React.useState<string>('');
   const poOptions: IChoiceGroupOption[] = [
     { key: 'Yes', text: 'Yes' },
     { key: 'No', text: 'No' }
   ];
 
+  // Query-string helper used to reload a draft by item ID.
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('ID') || params.get('id');
@@ -102,6 +106,7 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Load attachments already stored against the current item.
   const loadAttachments = React.useCallback(async (id: number) => {
     try {
       const files = await service.getAttachments(id);
@@ -111,6 +116,7 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     }
   }, [service]);
 
+  // Load purchase order detail rows already stored against the current item.
   const loadPurchaseOrderDetails = React.useCallback(async (id: number) => {
     try {
       const items = await service.getPurchaseOrderDetails(id);
@@ -130,6 +136,7 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     }
   }, [service]);
 
+  // Load a saved draft when the form opens with an item ID.
   const loadDraftById = React.useCallback(async (id: number) => {
     try {
       const result = await service.getItemByRequestNo(id);
@@ -138,6 +145,7 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
       }
 
       setItemId(result.Id);
+      setCurrentStep(result.CurrentStep || 1);
       setForm((prev) => ({
         ...prev,
         ID: result.Id || 0,
@@ -171,6 +179,7 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     }
   }, [loadAttachments, loadPurchaseOrderDetails, service]);
 
+  // Initialize the screen when a draft ID is present in the URL.
   React.useEffect(() => {
     const id = getIdFromQueryString();
     if (id) {
@@ -179,51 +188,124 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
   }, [loadDraftById]);
 
   React.useEffect(() => {
-
     const loadDepartments = async () => {
-      try {
-        const data = await service.getDepartments();
-        const departmentOptionItems: TDepartmentOption[] = [];
-        const seenDepartmentKeys: { [key: string]: boolean } = {};
+      const res = await service.getAllDepartments();
 
-        data.forEach((item: any) => {
-          const departmentName = normalizeDepartmentValue(
-            String(item.DepartmentName || item.Title || '')
-          );
-          const optionKey = getDepartmentOptionKey(departmentName);
-
-          if (!departmentName || seenDepartmentKeys[optionKey]) {
-            return;
-          }
-
-          seenDepartmentKeys[optionKey] = true;
-          departmentOptionItems.push({
-            key: optionKey,
-            text: departmentName
-          });
-        });
-
-        setDepartmentOptions(departmentOptionItems);
-        if (departmentOptionItems.length === 0) {
-          setStatusMessage('No department values found in DepartmentMaster.');
-        } else {
-          setStatusMessage('');
-        }
-
-      } catch (error) {
-        console.error('Department load failed:', error);
-        setDepartmentOptions([]);
-        setStatusMessage('Department list not loaded. Please check DepartmentMaster.');
-      }
+      setDepartmentOptions(
+        res.map((item: any) => ({
+          key: item.DepartmentName,
+          text: item.DepartmentName
+        }))
+      );
     };
-    loadDepartments().catch(() => undefined);
+
+    loadDepartments();
   }, [service]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  // Load department options for the dropdown on initial render.
+const handleDepartmentChange = React.useCallback(async (departmentValue: string) => {
 
+  const dept = departmentValue.trim();
+
+  setForm((prev) => ({
+    ...prev,
+    Department: dept,
+    DepartmentHead: '',
+    ApprovalPath: ''
+  }));
+
+  setApproverOptions([]);
+  setSelectedApprover('');
+
+  if (!dept) return;
+
+  try {
+    const data = await service.getApproversByDepartment(dept);
+
+    if (!data) {
+      setStatusMessage(`No approvers found in DepartmentMaster for ${dept}`);
+      return;
+    }
+
+    const departmentHead = data.Departmenthead?.Title || '';
+    const approval1 = data.Approval1?.Title || '';
+    const approval2 = data.Approval2?.Title || '';
+
+    const amount = Number(form.TotalProjectAmount || 0);
+
+    // ================= CONDITION 1 =================
+    if (amount <= 200000) {
+      setForm((prev) => ({
+        ...prev,
+        DepartmentHead: departmentHead,
+        ApprovalPath: departmentHead
+      }));
+      return;
+    }
+
+    // ================= CONDITION 2 =================
+    if (amount > 200000 && dept.toLowerCase() === "branding") {
+
+      const approvers = [approval1, approval2].filter(Boolean);
+
+      setForm((prev) => ({
+        ...prev,
+        DepartmentHead: departmentHead,
+        ApprovalPath: departmentHead
+      }));
+
+      setApproverOptions(approvers); // dropdown show
+      return;
+    }
+
+    // ================= CONDITION 3 =================
+    if (amount > 200000 && dept.toLowerCase() !== "branding") {
+
+      const fullPath = [departmentHead, approval1, approval2]
+        .filter(Boolean)
+        .join(" > ");
+
+      setForm((prev) => ({
+        ...prev,
+        DepartmentHead: departmentHead,
+        ApprovalPath: fullPath
+      }));
+
+      return;
+    }
+
+  } catch (error) {
+    console.error(error);
+    setStatusMessage('Error fetching approvers');
+  }
+
+}, [service, form.TotalProjectAmount]);
+
+const handleApproverSelect = (value: string) => {
+
+  setSelectedApprover(value);
+
+  setForm((prev) => ({
+    ...prev,
+    ApprovalPath: prev.DepartmentHead + ' > ' + value
+  }));
+
+};
+
+
+  // Update simple text and number inputs.
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = e.target;
+
+  setForm((prev) => ({ ...prev, [name]: value }));
+  // IMPORTANT: Amount change hone par logic dobara run hoga
+  if (name === "TotalProjectAmount" && form.Department) {
+setTimeout(() => {
+  handleDepartmentChange(form.Department);
+}, 0);  }
+};
+
+  // Validate selected files before staging them for upload.
   const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
     const files = event?.target?.files;
     if (!files) {
@@ -260,6 +342,7 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     setStatusMessage('');
   };
 
+  // Remove a staged local file.
   const removeFile = (index: number) => {
     setForm((prev) => ({
       ...prev,
@@ -267,6 +350,7 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     }));
   };
 
+  // Delete an attachment that already exists in SharePoint.
   const removeExistingFile = async (index: number) => {
     try {
       const file = attachments[index];
@@ -278,10 +362,12 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     }
   };
 
+  // Add a blank purchase order row.
   const addPurchaseOrderRow = () => {
     setPoItems((prev) => [...prev, { ...INITIAL_PO_ROW }]);
   };
 
+  // Remove one purchase order row while keeping at least one visible.
   const removePurchaseOrderRow = (index: number) => {
     setPoItems((prev) => {
       const updated = prev.filter((_, i) => i !== index);
@@ -289,6 +375,7 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     });
   };
 
+  // Update PO row values and recalculate amount from quantity x rate.
   const handlePurchaseOrderChange = (index: number, field: keyof TPurchaseOrderRow, value: string) => {
     setPoItems((prev) => {
       const updated = [...prev];
@@ -305,6 +392,7 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     });
   };
 
+  // Write a history record for draft/save actions.
   const handleSaveHistory = async (id: number, userAction: string) => {
     const currentUser = await service.getUser();
     await service.createHistoryItem({
@@ -317,6 +405,7 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     });
   };
 
+  // Validate the minimum required data before save or submit.
   const validateDraft = (): string | null => {
     if (!form.ProjectTitle.trim()) return 'Project Title required';
     if (!form.Vendor1.trim()) return 'Vendor 1 required';
@@ -325,11 +414,14 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     if (!form.SelectedQuote.trim()) return 'Selected Quote required';
     if (!form.Department) return 'Select Department';
     if (!form.Advancepayment) return 'Select Advance Payment';
-    //if (!form.Selectedvendor.trim()) return 'Approval Path required';
+    if (Number(form.TotalProjectAmount) > 200000 && !selectedApprover) {
+      return 'Select Approver';
+    }
     if (!poItems.some((item) => item.description.trim())) return 'Enter at least one purchase order detail';
     return null;
   };
 
+  // Build the payload for the main SharePoint item.
   const buildPayload = (currentStatus: 'Draft' | 'Pending') => {
     return {
       Title: form.ProjectTitle,
@@ -353,6 +445,7 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
     };
   };
 
+  // Upload any files that were added during this edit session.
   const uploadPendingFiles = async (currentId: number) => {
     for (const file of form.files) {
       try {
@@ -362,7 +455,8 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
       }
     }
   };
-  //Purchase Order:
+
+  // Replace stored PO rows with the current in-memory rows.
   const savePurchaseOrderDetails = async (quotationId: number): Promise<void> => {
     await service.deletePurchaseOrderDetailsByQuotationId(quotationId);
 
@@ -381,55 +475,59 @@ const OuotationApprovalForm: React.FC<IOuotationApprovalFormProps> = (props) => 
       });
     }
   };
-// Main function to handle both save and submit - creates or updates item, manages attachments and purchase order details
-const persistForm = async (currentStatus: 'Draft' | 'Pending'): Promise<number> => {
+  // Create or update the main item, then refresh related data.
+  const persistForm = async (currentStatus: 'Draft' | 'Pending'): Promise<number> => {
 
-  const payload = buildPayload(currentStatus);
-  let currentId = itemId;
+    const payload = buildPayload(currentStatus);
+    const existingId = itemId;
+    let finalId: number;
 
-  // ✅ CREATE only once
-  if (!currentId) {
+    // ✅ CREATE only once
+    if (!existingId) {
 
-    const res = await service.createItem(payload);
+      const res = await service.createItem(payload);
 
-    if (!res?.Id) throw new Error('Item not created');
+      if (!res?.Id) throw new Error('Item not created');
 
-    currentId = Number(res.Id);
-    setItemId(currentId);
+      // eslint-disable-next-line require-atomic-updates
+      finalId = Number(res.Id);
+      setItemId(finalId);
 
-    await service.updateItem(currentId, {
-      RequestNo: `PRJ-${currentId}`
-    });
+      await service.updateItem(finalId, {
+        RequestNo: `PRJ-${finalId}`
+      });
 
-  } 
-  // ✅ UPDATE always
-  else {
+    }
+    // ✅ UPDATE always
+    else {
 
-    await service.updateItem(currentId, payload);
+      finalId = existingId;
+      await service.updateItem(finalId, payload);
 
-  }
+    }
 
- // IMPORTANT: Only update PO in Draft
-if (currentStatus === 'Draft') {
-  await savePurchaseOrderDetails(currentId);
-}
+    // IMPORTANT: Only update PO in Draft
+    if (currentStatus === 'Draft') {
+      await savePurchaseOrderDetails(finalId);
+    }
 
-  // ❌ DO NOT touch PO during submit (avoid duplication)
+    // ❌ DO NOT touch PO during submit (avoid duplication)
 
-  await uploadPendingFiles(currentId);
-  await loadAttachments(currentId);
-  await loadPurchaseOrderDetails(currentId);
+    await uploadPendingFiles(finalId);
+    await loadAttachments(finalId);
+    await loadPurchaseOrderDetails(finalId);
 
-  setForm((prev) => ({
-    ...prev,
-    ID: currentId || 0,
-    RequestNo: `PRJ-${currentId}`,
-    files: []
-  }));
+    setForm((prev) => ({
+      ...prev,
+      ID: finalId,
+      RequestNo: `PRJ-${finalId}`,
+      files: []
+    }));
 
-  return currentId;
-};
+    return finalId;
+  };
 
+  // Save the form as a draft.
   const handleSaveOrUpdate = async () => {
     const validationError = validateDraft();
     if (validationError) {
@@ -442,12 +540,9 @@ if (currentStatus === 'Draft') {
 
     try {
       const currentId = await persistForm('Draft');
-      try {
-        await handleSaveHistory(currentId, 'Draft Saved');
-      } catch (historyError) {
-        console.error('History save failed:', historyError);
-      }
-      setStatusMessage(`Draft saved in list. Request No: PRJ-${currentId}`);
+      const successMessage = `Save Successfully. Request No: PRJ-${currentId}`;
+      setStatusMessage(successMessage);
+      window.alert(successMessage);
     } catch (error: any) {
       console.error('SAVE ERROR:', error);
       setStatusMessage(error?.message || 'Error while saving draft');
@@ -456,7 +551,7 @@ if (currentStatus === 'Draft') {
     }
   };
 
-  // Handle form submission - validate, save as pending, then redirect to home page
+  // Submit the form into the workflow.
   const handleSubmit = async () => {
     const validationError = validateDraft();
     if (validationError) {
@@ -475,7 +570,9 @@ if (currentStatus === 'Draft') {
         console.error('History save failed:', historyError);
       }
 
-      setStatusMessage('Submitted successfully');
+      const successMessage = 'Submitted Successfully';
+      setStatusMessage(successMessage);
+      window.alert(successMessage);
       window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
     } catch (error: any) {
       console.error('SUBMIT ERROR:', error);
@@ -485,12 +582,15 @@ if (currentStatus === 'Draft') {
     }
   };
 
+  // Return to the dashboard without saving.
   const handleCancel = () => {
     window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
   };
 
+  // Render the complete quotation approval form.
   return (
     <div className={styles.container}>
+      {/* Header section */}
       <div className={styles.poHeader}>
         <h4>Quotation Approval Form</h4>
       </div>
@@ -504,6 +604,7 @@ if (currentStatus === 'Draft') {
       <div className={styles.row}>
         <div className={styles.colMd9}>
           <div className={styles.leftPanel}>
+            {/* Project details section */}
             <label>Project Title <span className={styles.required}>*</span></label>
             <input name="ProjectTitle" value={form.ProjectTitle} onChange={handleChange} />
 
@@ -513,8 +614,6 @@ if (currentStatus === 'Draft') {
             <label>Project Description & Advance Payment Details<span className={styles.required}>*</span></label>
             <input name="ProjectDescription" value={form.ProjectDescription} onChange={handleChange} />
 
-
-
             <div className={styles.twoColumnRow}>
               <div className={styles.fieldBlock}>
                 <label>Total Project Amount</label>
@@ -522,25 +621,7 @@ if (currentStatus === 'Draft') {
                   type="number"
                   name="TotalProjectAmount"
                   value={form.TotalProjectAmount}
-                  onChange={(e) => {
-                    const value = e.target.value;
-
-                    setForm((prev) => {
-                      let approvalPath = prev.ApprovalPath;
-
-                      if (Number(value) >= 10000) {
-                        approvalPath = "DigiFlow Test1 > DigiFlow Test2 > DigiFlow Test3";
-                      } else {
-                        approvalPath = "DigiFlow Test1"; // optional: clear if less than 10000
-                      }
-
-                      return {
-                        ...prev,
-                        TotalProjectAmount: value,
-                        ApprovalPath: approvalPath
-                      };
-                    });
-                  }}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -551,6 +632,7 @@ if (currentStatus === 'Draft') {
               </div>
             </div>
 
+            {/* Vendor and quotation section */}
             <div className={styles.twoColumnRow}>
               <div className={styles.fieldBlock}>
                 <label>Vendor 1 <span className={styles.required}>*</span></label>
@@ -595,26 +677,38 @@ if (currentStatus === 'Draft') {
               </div>
             </div>
 
+            {/* Department and approval section */}
             <label>Department <span className={styles.required}>*</span></label>
             <select
               value={form.Department || ''}
-              onChange={(e) => {
-                setForm((prev) => ({
-                  ...prev,
-                  Department: e.target.value
-                }));
-              }}
+              onChange={(e) => { handleDepartmentChange(e.target.value).catch(() => undefined); }}
             >
               <option value="">Select Department</option>
               {departmentOptions.map((option) => (
-                <option key={option.key} value={option.key}>
+                <option key={option.key} value={option.text}>
                   {option.text}
                 </option>
               ))}
             </select>
 
+            {Number(form.TotalProjectAmount || 0) > 200000 && approverOptions.length > 0 && (
+  <>
+    <label>Select Approver <span className={styles.required}>*</span></label>
+    <select
+      value={selectedApprover}
+      onChange={(e) => handleApproverSelect(e.target.value)}
+    >
+      <option value="">Select Approver</option>
+      {approverOptions.map((opt, i) => (
+        <option key={i} value={opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
+  </>
+)}
+
             <ChoiceGroup
-            
               label="Advance Payment"
               options={poOptions}
               selectedKey={form.Advancepayment || undefined}
@@ -629,6 +723,8 @@ if (currentStatus === 'Draft') {
 
             <label>Approval Path<span className={styles.required}>*</span></label>
             <input value={form.ApprovalPath} readOnly />
+
+            {/* Attachments section */}
             <label>Attachments <span className={styles.required}>*</span></label>
             <input type="file" multiple onChange={handleFileChange} />
 
@@ -656,6 +752,7 @@ if (currentStatus === 'Draft') {
               </ul>
             )}
 
+            {/* Purchase order section */}
             <div className={styles.poSection}>
               <div className={styles.poSectionHeader}>
                 <label>Purchase Order Details <span className={styles.required}>*</span> :</label>
@@ -698,6 +795,7 @@ if (currentStatus === 'Draft') {
               </div>
             </div>
 
+            {/* Action buttons section */}
             <div className={styles.buttonRow}>
               <button type="button" className={styles.submitBtn} onClick={handleSubmit} disabled={isSaving}>Submit</button>
               <button type="button" className={styles.saveBtn} onClick={handleSaveOrUpdate} disabled={isSaving}>Save</button>
@@ -706,6 +804,7 @@ if (currentStatus === 'Draft') {
           </div>
         </div>
 
+        {/* Reference information section */}
         <div>
           <div style={{ padding: '16px' }}>
             <div>
@@ -726,8 +825,9 @@ if (currentStatus === 'Draft') {
           </div>
         </div>
       </div>
+
     </div>
   );
 };
 
-export default OuotationApprovalForm;
+export default QuotationApprovalForm;

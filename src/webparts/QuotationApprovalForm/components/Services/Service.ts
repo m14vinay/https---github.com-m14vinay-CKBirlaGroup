@@ -1,12 +1,10 @@
 import { SPHttpClient } from '@microsoft/sp-http';
+
 export default class Service {
     private context: any;
-    private listname = "QuotationApproval";
-    private purchaseOrderDetailsList = "PurchaseOrderDetails";
-    private Departmentmaster = "DepartmentMaster";
-    //private DepartmentmasterNEBT = "DepartmentMasterNEI";
-    private HistoryList = "History";
-    private VendorList = "";
+    private listname = 'QuotationApproval';
+    private purchaseOrderDetailsList = 'PurchaseOrderDetails';
+    private HistoryList = 'History';
 
     constructor(context: any) {
         this.context = context;
@@ -21,63 +19,15 @@ export default class Service {
         throw new Error(errorText || fallbackMessage);
     }
 
-  private getJsonHeaders(extraHeaders?: { [key: string]: string }): { [key: string]: string } {
-  return {
-    'Accept': 'application/json;odata.metadata=minimal',
-    'Content-Type': 'application/json;odata.metadata=minimal',
-    ...extraHeaders
-  };
-}
-
-    public async getDepartmentData(department: string) {
-        const dept = department.trim().toLowerCase();
-
-        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items
-  ?$select=*,Approval1/Id,Approval1/Title,Approval2/Id,Approval2/Title,Approval3/Id,Approval3/Title
-  &$expand=Approval1,Approval2,Approval3
-  &$filter=tolower(DepartmentName) eq '${dept}'`;
-
-        const response = await this.context.spHttpClient.get(
-            url,
-            SPHttpClient.configurations.v1,
-            {
-                headers: this.getJsonHeaders()
-            }
-        );
-
-        const data = await response.json();
-        return data.value;
-    }
-    //Get Department Data
-    public async getDepartments(): Promise<any[]> {
-
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Departmentmaster}')/items`;
-
-    const res = await this.context.spHttpClient.get(
-      url,
-      SPHttpClient.configurations.v1
-    );
-    const data = await res.json();
-    return data.value;
-  }
-
-    //Get Vendor Data
-    public async getVendor(): Promise<any[]> {
-
-        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.VendorList}')/items`;
-
-        const res = await this.context.spHttpClient.get(
-            url,
-            SPHttpClient.configurations.v1,
-            {
-                headers: this.getJsonHeaders()
-            }
-        );
-        const data = await res.json();
-        return data.value;
+    private getJsonHeaders(extraHeaders?: { [key: string]: string }): { [key: string]: string } {
+        return {
+            'Accept': 'application/json;odata.metadata=minimal',
+            'Content-Type': 'application/json;odata.metadata=minimal',
+            ...extraHeaders
+        };
     }
 
-    // Save the Record
+    // Create the main quotation item.
     public async createItem(data: any): Promise<any> {
         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;
         const response = await this.context.spHttpClient.post(
@@ -87,8 +37,10 @@ export default class Service {
                 headers: this.getJsonHeaders({
                     'Content-Type': 'application/json;odata=nometadata'
                 }),
-                body: JSON.stringify(data)
-            }
+body: JSON.stringify({
+  ...data,
+  CurrentStep: 1 
+})            }
         );
         await this.throwIfNotOk(response as unknown as Response, 'Create item failed');
         return response.json();
@@ -145,7 +97,7 @@ export default class Service {
         return response.json();
     }
 
-    // Update the Record (Submit)
+    // Update the main quotation item.
     public async updateItem(ID: number, data: any): Promise<void> {
         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})`;
 
@@ -164,8 +116,8 @@ export default class Service {
         await this.throwIfNotOk(response as unknown as Response, 'Update item failed');
     }
 
-    // Fetch the Record
-    public async getItemByRequestNo(ID: Number): Promise<any> {
+    // Load one quotation item by list ID.
+    public async getItemByRequestNo(ID: number): Promise<any> {
 
         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})?$expand=AttachmentFiles`;
         const res = await this.context.spHttpClient.get(
@@ -182,8 +134,7 @@ export default class Service {
 
     }
 
-    // Upload Files
-
+    // Upload a new attachment to the quotation item.
     public async uploadFile(itemId: number, file: File): Promise<void> {
         const encodedFileName = encodeURIComponent(file.name);
         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${encodedFileName}')`;
@@ -201,7 +152,7 @@ export default class Service {
 
         await this.throwIfNotOk(response as unknown as Response, 'Upload file failed');
     }
-    // Fetch the Files from List
+    // Load attachments linked to the quotation item.
     public async getAttachments(itemId: number): Promise<any[]> {
 
         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
@@ -216,10 +167,10 @@ export default class Service {
 
         const data = await res.json();
 
-        return data.value; // array of attachments
+        return data.value || [];
     }
 
-    //Atatchments Delete
+    // Delete an existing attachment from SharePoint.
     public async deleteAttachmentFromSP(file: any): Promise<void> {
 
         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getfilebyserverrelativeurl('${file.ServerRelativeUrl}')`;
@@ -234,45 +185,9 @@ export default class Service {
                 })
             }
         );
-
-    };
-    ///Get User Details by ID
-    public async getUserById(userId: number): Promise<any> {
-
-        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getuserbyid(${userId})`;
-        const response = await this.context.spHttpClient.get(
-            url,
-            SPHttpClient.configurations.v1,
-            {
-                headers: this.getJsonHeaders()
-            }
-        );
-
-        const user = await response.json();
-        return user;
     }
 
-    public async getDepartmentApprovers(department: string): Promise<any[]> {
-
-        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Departmentmaster}')/items
-?$select=DepartmentName,Advancepayment,
-Approval1/Id,Approval1/Title,
-Approval2/Id,Approval2/Title,
-Approval3/Id,Approval3/Title
-&$expand=Approval1,Approval2,Approval3
-&$filter=tolower(DepartmentName) eq '${department.trim().toLowerCase()}'`;
-        const res = await this.context.spHttpClient.get(
-            url,
-            SPHttpClient.configurations.v1,
-            {
-                headers: this.getJsonHeaders()
-            }
-        );
-
-        const data = await res.json();
-
-        return data.value || [];
-    }
+    // Load the current SharePoint user.
     public async getUser(): Promise<any> {
         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
         const res = await this.context.spHttpClient.get(
@@ -285,7 +200,7 @@ Approval3/Id,Approval3/Title
         const data = await res.json();
         return data;
     }
-    // Save the Hitory Record
+    // Create one workflow history entry.
     public async createHistoryItem(data: any): Promise<any> {
         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items`;
         const response = await this.context.spHttpClient.post(
@@ -301,33 +216,32 @@ Approval3/Id,Approval3/Title
         await this.throwIfNotOk(response as unknown as Response, 'Create history failed');
         return response.json();
     }
-    // Get the History Record
-    public async GetHistoryItem(ID: Number, FormCode: string): Promise<any> {
-        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${ID} and Title eq '${FormCode}'`;
-        console.log("URL:", url)
-        const response = await this.context.spHttpClient.get(
-            url,
-            SPHttpClient.configurations.v1,
-            {
-                headers: this.getJsonHeaders()
-            }
-        );
-        const data = await response.json();
-        return data.value;
-    }
-    private async getListItemType(): Promise<string> {
-        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')?$select=ListItemEntityTypeFullName`;
 
-        const res = await this.context.spHttpClient.get(
-            url,
-            SPHttpClient.configurations.v1,
-            {
-                headers: this.getJsonHeaders()
-            }
-        );
+    // Load approvers for the given department from DepartmentMaster list.
+public async getApproversByDepartment(department: string): Promise<any> {
 
-        const data = await res.json();
-        return data.ListItemEntityTypeFullName;
-    }
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?$select=DepartmentName,Departmenthead/Title,Approval1/Title,Approval2/Title,Approval3/Title,Approval4/Title&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4&$filter=DepartmentName eq '${department}'`;
 
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+
+  const data = await res.json();
+  return data.value?.[0];
+}
+
+    // Load all departments from DepartmentMaster list for dropdown options.
+ public async getAllDepartments(): Promise<any[]> {
+
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?$select=DepartmentName,ActiveDepartment&$filter=ActiveDepartment eq 1`;
+
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+
+  const data = await res.json();
+  return data.value || [];
+}
 }

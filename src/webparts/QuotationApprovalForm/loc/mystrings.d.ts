@@ -1,4 +1,4 @@
-declare interface IOuotationApprovalFormWebPartStrings {
+declare interface IQuotationApprovalFormWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
   DescriptionFieldLabel: string;
@@ -13,7 +13,7 @@ declare interface IOuotationApprovalFormWebPartStrings {
   UnknownEnvironment: string;
 }
 
-declare module 'OuotationApprovalFormWebPartStrings' {
-  const strings: IOuotationApprovalFormWebPartStrings;
+declare module 'QuotationApprovalFormWebPartStrings' {
+  const strings: IQuotationApprovalFormWebPartStrings;
   export = strings;
 }

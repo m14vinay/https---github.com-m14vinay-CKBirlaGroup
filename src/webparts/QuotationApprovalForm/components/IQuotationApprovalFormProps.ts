@@ -1,6 +1,6 @@
 import { SPHttpClient } from '@microsoft/sp-http';
 
-export interface IOuotationApprovalFormProps {
+export interface IQuotationApprovalFormProps {
   description: string;
   isDarkTheme: boolean;
   environmentMessage: string;

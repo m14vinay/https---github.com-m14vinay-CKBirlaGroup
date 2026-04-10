@@ -8,10 +8,29 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
   const [data, setData] = useState<any>(null);
   const [poItems, setPoItems] = useState<any[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const params = new URLSearchParams(window.location.search);
   const itemId = Number(params.get('id'));
+
+  // Fetch history data for timeline
+  const fetchHistory = async () => {
+    try {
+      const res = await props.spHttpClient.get(
+        `${props.siteUrl}/_api/web/lists/getbytitle('History')/items?$filter=FID eq ${itemId}&$orderby=Created asc`,
+        SPHttpClient.configurations.v1
+      );
+
+      const data = await res.json();
+      console.log("History:", data);
+
+      setHistory(data.value || []);
+    } catch (err) {
+      console.error("History error:", err);
+      setHistory([]);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -37,13 +56,17 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
+  // Load data on mount
   useEffect(() => {
-    fetchData();
+    const loadAll = async () => {
+      await fetchData();
+      await fetchHistory();
+      setLoading(false);
+    };
+    loadAll();
   }, []);
 
   if (loading) return <div>Loading...</div>;
@@ -56,19 +79,6 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
     .map((item: string) => item.replace(/^\s*\d+\.\s*/, '').trim())
     .filter((item: string) => item);
 
-  const departmentApproverName = data.DepartmentHead || approvalNames[0] || 'Unique Kumar';
-  const managementApprovers = [
-    {
-      name: approvalNames[1] || 'Sonu Soni',
-      role: 'Management 1',
-      status: 'Pending'
-    },
-    {
-      name: approvalNames[2] || 'Madhavan H',
-      role: 'Management 2',
-      status: 'Pending'
-    }
-  ];
 
   return (
     <div className={styles.container}>
@@ -90,24 +100,40 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
             </div>
           </div>
 
-          <div className={styles.approverFlow}>
-            <div className={styles.departmentStep}>
-              <div className={styles.approverName}>{departmentApproverName}</div>
-              <div className={styles.approverRole}>Department Head</div>
-              <div className={styles.approverStatus}>Approved</div>
-            </div>
+<div className={styles.approverFlow}>
 
-            <div className={styles.managementColumn}>
-              {managementApprovers.map((approver, index) => (
-                <div key={`${approver.name}-${index}`} className={styles.managementStep}>
-                  <div className={styles.approverName}>{approver.name}</div>
-                  <div className={styles.approverRole}>{approver.role}</div>
-                  <div className={styles.approverStatus}>{approver.status}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+  {/* GREEN (Approved) */}
+  {(history || [])
+    .filter(item => {
+      const a = (item.UserAction || "").toLowerCase();
+      return a.includes("approved") || a.includes("submit");
+    })
+    .slice(0, 1) // only first approved
+    .map((item, i) => (
+      <div key={i} className={styles.departmentStep}>
+        <div className={styles.approverName}>{item.UserName}</div>
+        <div className={styles.approverRole}>{item.Designation}</div>
+        <div className={styles.approverStatus}>Approved</div>
+      </div>
+    ))}
 
+  {/* YELLOW (Pending stacked) */}
+  <div className={styles.managementColumn}>
+    {(history || [])
+      .filter(item => {
+        const a = (item.UserAction || "").toLowerCase();
+        return !a.includes("approved") && !a.includes("submit");
+      })
+      .map((item, i) => (
+        <div key={i} className={styles.managementStep}>
+          <div className={styles.approverName}>{item.UserName}</div>
+          <div className={styles.approverRole}>{item.Designation}</div>
+          <div className={styles.approverStatus}>Pending</div>
+        </div>
+      ))}
+  </div>
+
+</div>
           {/* Project Title */}
           <div className={styles.formRow}>
             <label className={styles.label}>Project Title <span className={styles.required}>*</span></label>
@@ -239,20 +265,28 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
           <div className={styles.timelineTitle}>Timeline</div>
 
-          <div className={styles.timelineItem}>
-            <strong>Request Initiated</strong>
-            <div>Status: Pending</div>
-          </div>
+          {(history || []).map((item, i) => {
 
-          <div className={styles.timelineItem}>
-            <strong>Department Head</strong>
-            <div>Status: Approved</div>
-          </div>
+            const action = (item.UserAction || "").toLowerCase();
 
-          <div className={styles.timelineItem}>
-            <strong>Management</strong>
-            <div>Status: Pending</div>
-          </div>
+            const status =
+              action.includes("approved") || action.includes("submit")
+                ? "Approved"
+                : action.includes("reject")
+                  ? "Rejected"
+                  : "Pending";
+
+            return (
+              <div
+                key={i}
+                className={`${styles.timelineItem} ${status === "Rejected" ? styles.rejected : ""
+                  }`}
+              >
+                <strong>{item.Designation}</strong>
+                <div>Status: {status}</div>
+              </div>
+            );
+          })}
 
         </div>
 

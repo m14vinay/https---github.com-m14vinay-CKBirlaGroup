@@ -8,15 +8,15 @@ import {
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
-import * as strings from 'OuotationApprovalFormWebPartStrings';
-import OuotationApprovalForm  from './components/OuotationApprovalForm';
-import { IOuotationApprovalFormProps } from './components/IOuotationApprovalFormProps';
+import * as strings from 'QuotationApprovalFormWebPartStrings';
+import QuotationApprovalForm from './components/QuotationApprovalForm';
+import { IQuotationApprovalFormProps } from './components/IQuotationApprovalFormProps';
 
-export interface IOuotationApprovalFormWebPartProps {
+export interface IQuotationApprovalFormWebPartProps {
   description: string;
 }
 
-export default class OuotationApprovalFormWebPart extends BaseClientSideWebPart<IOuotationApprovalFormWebPartProps> {
+export default class QuotationApprovalFormWebPart extends BaseClientSideWebPart<IQuotationApprovalFormWebPartProps> {
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
@@ -24,7 +24,7 @@ export default class OuotationApprovalFormWebPart extends BaseClientSideWebPart<
   public render(): void {
 
     const element = React.createElement(
-  OuotationApprovalForm,
+  QuotationApprovalForm,
   {
         description: this.properties.description,
         isDarkTheme: this._isDarkTheme,
@@ -116,7 +116,9 @@ export default class OuotationApprovalFormWebPart extends BaseClientSideWebPart<
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
-  protected  getdataVersion: Version = Version.parse('1.0');
+  protected get dataVersion(): Version {
+    return Version.parse('1.0');
+  }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
