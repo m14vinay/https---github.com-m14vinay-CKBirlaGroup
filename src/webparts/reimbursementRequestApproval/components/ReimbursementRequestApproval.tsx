@@ -225,14 +225,14 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
       )}
       <div className={styles.container}>
         <div className={styles.header}>
-          <h2>Reimbursement Request Details & Status
-            <span>Digiflow / Reimbursement Request Form / Request Details</span>
+          <h2>Reimbursement Request Approval Form
+            <span>Digiflow / Reimbursement Request Form / Request Approval</span>
           </h2>
         </div>
         <div className={styles.row}>
           <div className={styles['col-md-9']}>
             <div className={styles.leftPanelHeader}>
-              <h4>{form.RequestNo}</h4>
+              <h4>Reimbursement Request Approval- <b>{form.RequestNo}</b></h4>
               <h4>Current Status:  <span className={
                 form.CurrentStatus === "Approved"
                   ? styles.Approved

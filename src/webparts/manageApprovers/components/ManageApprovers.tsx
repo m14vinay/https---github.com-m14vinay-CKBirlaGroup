@@ -1,12 +1,12 @@
 import * as React from 'react';
-import styles from './ReimbursementRequestForm.module.scss';
-import type { IReimbursementRequestFormProps } from './IReimbursementRequestFormProps';
+import styles from './ManageApprovers.module.scss';
+import type { IManageApproversProps } from './IManageApproversProps';
 import { allowScrollOnElement, Checkbox, Modal, PrimaryButton } from '@fluentui/react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import { Dropdown, IDropdownOption } from '@fluentui/react';
-import SharePointService from '../service/Service';
-const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (props) => {
+import SharePointService from '../service/service';
+const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
 
   const [form, setForm] = React.useState({
     ID: 0,
@@ -641,5 +641,5 @@ const handleCancel = () => {
     </section>
   );
 };
-export default ReimbursementRequestForm;
+export default ManageApprovers;
 
