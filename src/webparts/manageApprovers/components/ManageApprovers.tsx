@@ -88,7 +88,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       setLoading(false);
     }
   };
-   const handlePOSubmit = async () => {
+  const handlePOSubmit = async () => {
     if (form.ID <= 0) {
       alert("Please select a Approver");
       return false;
@@ -111,7 +111,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       setLoading(false);
     }
   };
-   const handleBPSubmit = async () => {
+  const handleBPSubmit = async () => {
     if (form.ID <= 0) {
       alert("Please select a Approver");
       return false;
@@ -134,7 +134,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       setLoading(false);
     }
   };
-   const handleQASubmit = async () => {
+  const handleQASubmit = async () => {
     if (form.ID <= 0) {
       alert("Please select a Approver");
       return false;
@@ -157,7 +157,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       setLoading(false);
     }
   };
-   const handleQANEISubmit = async () => {
+  const handleQANEISubmit = async () => {
     if (form.ID <= 0) {
       alert("Please select a Approver");
       return false;
@@ -180,7 +180,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       setLoading(false);
     }
   };
-   const handleREIMDSubmit = async () => {
+  const handleREIMDSubmit = async () => {
     if (form.ID <= 0) {
       alert("Please select a Approver");
       return false;
@@ -203,7 +203,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       setLoading(false);
     }
   };
-   const handleREIMFSubmit = async () => {
+  const handleREIMFSubmit = async () => {
     if (form.ID <= 0) {
       alert("Please select a Approver");
       return false;
@@ -228,10 +228,9 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
   };
   const onUserChange = async (items: any[]) => {
     if (items.length > 0) {
-      const UserID=await service.getUserByLogOnName(items[0].id);
-      if(UserID!=null)
-      {
-      setSelectedUserId(Number(UserID));
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setSelectedUserId(Number(UserID));
       }
     } else {
       setSelectedUserId(null);
@@ -412,15 +411,21 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setIsActiveREIMF(false);
     setIsActiveBPNEI(false);
     const setDynamicColumns = [
-      columnHelper.accessor('DepartmentName', {
-        header: "Department Name"
-      }),
+      columnHelper.accessor((row) => row.DepartmentName ?? "N/A",
+        {
+          id: "DepartmentName",
+          header: "Department Name"
+        }),
       columnHelper.accessor('FinanceController.Title', {
         header: "Finance Controller Name"
       }),
-      columnHelper.accessor('Billing2ndApprover.Title', {
-        header: "Billing2 and Approver"
-      }),
+      columnHelper.accessor(
+        (row) => row.Billing2ndApprover?.Title ?? "N/A",
+        {
+          id: "Billing2ndApprover",
+          header: "Billing2 and Approver"
+        }
+      ),
       columnHelper.display({
         id: 'edit',
         header: 'Action',
