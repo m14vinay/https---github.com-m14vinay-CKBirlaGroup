@@ -1,645 +1,800 @@
 import * as React from 'react';
 import styles from './ManageApprovers.module.scss';
-import type { IManageApproversProps } from './IManageApproversProps';
-import { allowScrollOnElement, Checkbox, Modal, PrimaryButton } from '@fluentui/react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { Spinner, SpinnerSize } from '@fluentui/react';
-import { Dropdown, IDropdownOption } from '@fluentui/react';
+import { IManageApproversProps } from './IManageApproversProps';
+import { Dropdown, Icon, IDropdownOption, Label } from '@fluentui/react';
 import SharePointService from '../service/service';
+import { Spinner, SpinnerSize } from '@fluentui/react';
+import { useEffect, useState } from 'react';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  flexRender,
+  useReactTable,
+} from '@tanstack/react-table';
+import Table from 'react-bootstrap/Table';
+import 'bootstrap/dist/css/bootstrap.min.css';
 const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
-
-  const [form, setForm] = React.useState({
-    ID: 0,
-    RequestNo: '',
-    ProjectTitle: '',
-    DepartmentName: '',
-    Remarks: '',
-    TotalAmount: 0,
-    ExpenseType: '',
-    SelectedDocument: '',
-    BillNo: '',
-    BillAmount: 0,
-    BillDate: new Date(),
-    ClaimAmount: 0,
-    Description: '',
-    DepartmentNameID: '',
-    ExpenseName: '',
-    ExpenseID: '',
-    DocumentName: '',
-    DocumentID: ''
-  });
   const [loading, setLoading] = React.useState(false);
-  const [isOpen, setisOpen] = React.useState(false);
-  const [DepartmentOption, setDepartmentOption] = React.useState<IDropdownOption[]>([]);
-  const [ExpenseTypeOption, setExpenseTypeOption] = React.useState<IDropdownOption[]>([]);
-  const [DocumentOption, setDocumentOption] = React.useState<IDropdownOption[]>([]);
-  const [itemId, setItemId] = React.useState<number | null>(0);
-  const [BillAmount, setBillAmount] = React.useState<number | null>(0);
-  const [Expenseform, setExpenseForm] = React.useState<{
-    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string }[];
-  }>({
-    expenses: []
-  });
-  const [User, setUser] = React.useState<any>(null);
   const service = new SharePointService(props.context);
-const handleCancel = () => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
-  window.location.assign(url);
+  const [data, _setData] = useState<any[]>(() => []);
+  const [user, setUser] = useState<any>(null);
+  const [isActiveQA, setIsActiveQA] = React.useState(false);
+  const [isActivePO, setIsActivePO] = React.useState(false);
+  const [isActiveVM, setIsActiveVM] = React.useState(false);
+  const [isActiveBP, setIsActiveBP] = React.useState(false);
+  const [isActiveREIMD, setIsActiveREIMD] = React.useState(false);
+  const [isActiveREIMF, setIsActiveREIMF] = React.useState(false);
+  const [isActiveNEI, setIsActiveBPNEI] = React.useState(false);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [sorting, setSorting] = useState<any>([]);
+  const [Label, setLabel] = useState("");
+  const columnHelper = createColumnHelper<any>();
+  const [columns, setColumns] = React.useState<any[]>([]);
+
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    state: {
+      globalFilter,
+      sorting,
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    onSortingChange: setSorting,
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+  });
+  const [selectedUserId, setSelectedUserId] = React.useState<number | null>(null);
+  const [form, setForm] = React.useState({
+    ApproverId: 0,
+    ApproverName: '',
+    ID: 0,
+    ApproverEMail: ''
+  });
+  const handleCancel = () => {
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    window.location.assign(url);
+  };
+  const handleSubmit = async() => {
+    if (form.ID<=0) {
+      alert("Please select a Approver");
+      return false;
+    }
+    setLoading(true);
+  try {
+    const payload = {
+      ApproverId: selectedUserId,
+      ID: form.ID
+    };
+    await service.updateItem(form.ID,payload,'VendorMappingApproval');
+    alert("Updated Successfully.");
+  }
+  catch (error) {
+    console.error(error);
+    alert("Error occurred ❌");
+  }
+  finally {
+    setLoading(false);
+  }
 };
-  //Get ID from query string ---
-  const getIdFromQueryString = (): number | null => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('RequestID');
-    return id ? parseInt(id, 10) : null;
-  };
-  // Get Data After Selection the Document
-  const handleDocumentChange = async (option?: IDropdownOption) => {
-    setLoading(true);
-    if (!option) return;
-    const data = await service.getDocumentDetailsID(Number(option.key));
-    console.log(data);
-    setBillAmount(data[0].BillAmount);
-    setForm({
-      ...form,
-      BillAmount: data[0].BillAmount,
-      BillNo: data[0].BillNumber,
-      BillDate: data[0].BillDate,
-      DocumentName: option.text,
-      DocumentID: option.key as string
-    });
-    setLoading(false);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
-  const handleClaimAmountChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    if (Number(BillAmount) < Number(value)) {
-      setForm({ ...form, [name]: 0 });
-      alert("Claim amount must be less then bill amount.");
-    }
-    else {
-      setForm({ ...form, [name]: value });
-    }
-  };
-  React.useEffect(() => {
-    setLoading(true);
-    loadMaster();
-    const id = getIdFromQueryString();
-    if (id != null) {
-      getRequestDetails(id);
-    }
-    setLoading(false);
-  }, []);
-  // Load Master Data
-  const loadMaster = async () => {
-    const data = await service.getDepartments();
-    const options = data.map((item: any) => ({
-      key: item.DepartmentName,
-      text: item.DepartmentName
+const onUserChange = (items: any[]) => {
+  if (items.length > 0) {
+    setSelectedUserId(items[0].id);
+  } else {
+    setSelectedUserId(null);
+  }
+};
+// Load data
+React.useEffect(() => {
+  getUser();
+  _setData(data);
+  setColumns(columns);
+  handleQuotation();
+  console.log("Web URL:", props.context?.pageContext?.web?.absoluteUrl);
+}, []);
+// Load the User Details
+const getUser = async () => {
+  const data = await service.getUser();
+  if (data.Id > 0) {
+    setUser(data);
+  }
+};
+const handleEdit = (rowData: any) => {
+  console.log("Edit clicked:", rowData);
+  setForm(prev => ({
+    ...prev,
+    ApproverId: rowData.Approver?.Id,
+    ApproverName: rowData.Approver?.Title,
+    ID: rowData.Id,
+    ApproverEMail: rowData.Approver?.EMail
+  }));
+};
+const handleQuotation = async () => {
+  _setData([]);
+  setLabel('Quotation Approval');
+  setIsActiveQA(true);
+  setIsActiveBP(false);
+  setIsActivePO(false);
+  setIsActiveVM(false);
+  setIsActiveREIMD(false);
+  setIsActiveREIMF(false);
+  setIsActiveBPNEI(false);
+  const setDynamicColumns = [
+     columnHelper.accessor('DepartmentName', {
+      header: "Department Name"
+    }),
+    columnHelper.accessor('Departmenthead.Title', {
+      header: "Department Head"
+    }),
+    columnHelper.accessor('Approval1.Title', {
+      header: "Approval 1"
+    }),
+    columnHelper.accessor('Approval2.Title', {
+      header: "Approval 2"
+    }),
+    columnHelper.accessor('Approval3.Title', {
+      header: "Approval 3"
+    }),
+    columnHelper.display({
+      id: 'edit',
+      header: 'Action',
+      cell: (info) => (
+        <button
+          onClick={() => handleEdit(info.row.original)}
+          style={{
+            padding: '5px 10px',
+            backgroundColor: 'green',
+            color: '#fff',
+            border: 'none',
+            cursor: 'pointer',
+            borderRadius:'10px'
+          }}
+        >
+          View
+        </button>
+      )
+    })
+  ]
+  setColumns(setDynamicColumns);
+  await getDatafromListByTitle('DepartmentMaster','Quotation Approval');
+};
+const handleVendor = async () => {
+  _setData([]);
+  setLabel('Vendor Mapping');
+  setIsActiveQA(false);
+  setIsActiveBP(false);
+  setIsActivePO(false);
+  setIsActiveVM(true);
+  setIsActiveREIMD(false);
+  setIsActiveREIMF(false);
+  setIsActiveBPNEI(false);
+  const setDynamicColumns = [
+    columnHelper.accessor('Approver.Id', {
+      header: "Approver ID"
+    }),
+    columnHelper.accessor('Approver.Title', {
+      header: "Approver Name"
+    }),
+     columnHelper.accessor('Approver.EMail', {
+      header: "Approver Email"
+    }),
+    columnHelper.display({
+      id: 'edit',
+      header: 'Action',
+      cell: (info) => (
+        <button
+          onClick={() => handleEdit(info.row.original)}
+          style={{
+            padding: '5px 10px',
+            backgroundColor: 'green',
+            color: '#fff',
+            border: 'none',
+            cursor: 'pointer',
+            borderRadius:'10px'
+          }}
+        >
+          View
+        </button>
+      )
+    })
+  ]
+  setColumns(setDynamicColumns);
+  await getDatafromListByTitle('VendorMappingApproval','Vendor Mapping');
+};
+const handlePO = async () => {
+  _setData([]);
+  setLabel('PO Approval');
+  setIsActiveQA(false);
+  setIsActiveBP(false);
+  setIsActivePO(true);
+  setIsActiveVM(false);
+  setIsActiveREIMD(false);
+  setIsActiveREIMF(false);
+  setIsActiveBPNEI(false);
+  const setDynamicColumns = [
+     columnHelper.accessor('DepartmentName', {
+      header: "Department Name"
+    }),
+    columnHelper.accessor('FinanceController.Id', {
+      header: "Finance Controller ID"
+    }),
+    columnHelper.accessor('FinanceController.Title', {
+      header: "Finance Controller Name"
+    }),
+    columnHelper.accessor('FinanceController.EMail', {
+      header: "Finance Controller Email"
+    }),
+    columnHelper.display({
+      id: 'edit',
+      header: 'Action',
+      cell: (info) => (
+        <button
+          onClick={() => handleEdit(info.row.original)}
+          style={{
+            padding: '5px 10px',
+            backgroundColor: 'green',
+            color: '#fff',
+            border: 'none',
+            cursor: 'pointer',
+            borderRadius:'10px'
+          }}
+        >
+          View
+        </button>
+      )
+    })
+  ]
+  setColumns(setDynamicColumns);
+  await getDatafromListByTitle('FinanceController','PO Approval');
+};
+const handleBill = async () => {
+  _setData([]);
+  setLabel('Bill Processing');
+  setIsActiveQA(false);
+  setIsActiveBP(true);
+  setIsActivePO(false);
+  setIsActiveVM(false);
+  setIsActiveREIMD(false);
+  setIsActiveREIMF(false);
+  setIsActiveBPNEI(false);
+  const setDynamicColumns = [
+    columnHelper.accessor('DepartmentName', {
+      header: "Department Name"
+    }),
+    columnHelper.accessor('FinanceController.Title', {
+      header: "Finance Controller Name"
+    }),
+    columnHelper.accessor('Billing2ndApprover.Title', {
+      header: "Billing2 and Approver"
+    }),
+    columnHelper.display({
+      id: 'edit',
+      header: 'Action',
+      cell: (info) => (
+        <button
+          onClick={() => handleEdit(info.row.original)}
+          style={{
+            padding: '5px 10px',
+            backgroundColor: 'green',
+            color: '#fff',
+            border: 'none',
+            cursor: 'pointer',
+            borderRadius:'10px'
+          }}
+        >
+          View
+        </button>
+      )
+    })
+  ]
+  setColumns(setDynamicColumns);
+  await getDatafromListByTitle('FinanceController','Bill Processing');
+};
+const handleREIMF = async () => {
+  _setData([]);
+  setLabel('Reimbursement Finance Master');
+  setIsActiveQA(false);
+  setIsActiveBP(false);
+  setIsActivePO(false);
+  setIsActiveVM(false);
+  setIsActiveREIMF(true);
+  setIsActiveREIMD(false);
+  setIsActiveBPNEI(false);
+  const setDynamicColumns = [
+    columnHelper.accessor('ApproverType', {
+      header: "Approver Type"
+    }),
+    columnHelper.accessor('ApproverName.Id', {
+      header: "Approver ID"
+    }),
+    columnHelper.accessor('ApproverName.Title', {
+      header: "ApproverName Name"
+    }),
+    columnHelper.accessor('ApproverName.EMail', {
+      header: "ApproverName Email"
+    }),
+    columnHelper.display({
+      id: 'edit',
+      header: 'Action',
+      cell: (info) => (
+        <button
+          onClick={() => handleEdit(info.row.original)}
+          style={{
+            padding: '5px 10px',
+            backgroundColor: 'green',
+            color: '#fff',
+            border: 'none',
+            cursor: 'pointer',
+            borderRadius:'10px'
+          }}
+        >
+          View
+        </button>
+      )
+    })
+  ]
+  setColumns(setDynamicColumns);
+  await getDatafromListByTitle('ReimbursementApproverMaster','Reimbursement Finance Master');
+};
+const handleREIMD = async () => {
+  _setData([]);
+  setLabel('Reimbursement Department Master');
+  setIsActiveQA(false);
+  setIsActiveBP(false);
+  setIsActivePO(false);
+  setIsActiveVM(false);
+  setIsActiveREIMF(false);
+  setIsActiveREIMD(true);
+  setIsActiveBPNEI(false);
+  const setDynamicColumns = [
+    columnHelper.accessor('DepartmentName', {
+      header: "Department Name"
+    }),
+    columnHelper.accessor('DepartmentHead.Id', {
+      header: "Department Head Id"
+    }),
+    columnHelper.accessor('DepartmentHead.Title', {
+      header: "Department Head Name"
+    }),
+    columnHelper.accessor('DepartmentHead.EMail', {
+      header: "Department Head Email"
+    }),
+    columnHelper.display({
+      id: 'edit',
+      header: 'Action',
+      cell: (info) => (
+        <button
+          onClick={() => handleEdit(info.row.original)}
+          style={{
+            padding: '5px 10px',
+            backgroundColor: 'green',
+            color: '#fff',
+            border: 'none',
+            cursor: 'pointer',
+            borderRadius:'10px'
+          }}
+        >
+          View
+        </button>
+      )
+    })
+  ]
+  setColumns(setDynamicColumns);
+  await getDatafromListByTitle('ReimburseDepartmentMaster','Reimbursement Department Master');
+};
+const handleNEIBT = async () => {
+  _setData([]);
+  setLabel('Quotation Approval NEI BT');
+  setIsActiveQA(false);
+  setIsActiveBP(false);
+  setIsActivePO(false);
+  setIsActiveVM(false);
+  setIsActiveREIMD(false);
+  setIsActiveREIMF(false);
+  setIsActiveBPNEI(true);
+  const setDynamicColumns = [
+    columnHelper.accessor('DepartmentName', {
+      header: "DepartmentName"
+    }),
+    columnHelper.accessor('Departmenthead.Title', {
+      header: "Department Head"
+    }),
+    columnHelper.accessor('Approval1.Title', {
+      header: "Approval 1"
+    }),
+    columnHelper.accessor('Approval2.Title', {
+      header: "Approval 2"
+    }),
+    columnHelper.accessor('Approval3.Title', {
+      header: "Approval 3"
+    }),
+    columnHelper.display({
+      id: 'edit',
+      header: 'Action',
+      cell: (info) => (
+        <button
+          onClick={() => handleEdit(info.row.original)}
+          style={{
+            padding: '5px 10px',
+            backgroundColor: 'green',
+            color: '#fff',
+            border: 'none',
+            cursor: 'pointer',
+            borderRadius:'10px'
+          }}
+        >
+          View
+        </button>
+      )
+    })
+  ]
+  setColumns(setDynamicColumns);
+  await getDatafromListByTitle('DepartmentMasterNEI','Quotation Approval NEI BT');
+};
+const getVisibleColumns = () => {
+  return table
+    .getVisibleLeafColumns()
+    .map(col => ({
+      id: col.id,
+      header:
+        typeof col.columnDef.header === "function"
+          ? col.columnDef.header // if JSX/function
+          : col.columnDef.header
     }));
-    setDepartmentOption(options);
-
-    const Expensedata = await service.getExpense();
-    const Expenseoptions = Expensedata.map((item: any) => ({
-      key: item.Id,
-      text: item.Title
-    }));
-    setExpenseTypeOption(Expenseoptions);
-    const userData = await service.getUser();
-    if (userData.Id > 0) {
-      setUser(userData.Id);
-      const Documentdata = await service.getDocumentbyID(userData.Id);
-      if (Documentdata.length > 0) {
-        const Documentoptions = Documentdata.map((item: any) => ({
-          key: item.Id,
-          text: item.Title
-        }));
-        setDocumentOption(Documentoptions);
-      }
-    }
-  };
-
-  const getRequestDetails = async (requestNo: number) => {
-    const data = await service.getItemByRequestNo(requestNo);
-    if (data.CurrentStatus === 'Draft') {
-      setItemId(data.Id);
-      setForm({
-        ...form,
-        RequestNo: data.RequestNo,
-        DepartmentName: data.DepartmentName,
-        DepartmentNameID: data.DepartmentName,
-        Remarks: data.Remarks,
-        TotalAmount: data.TotalClaimAmount
-      });
-      const Expensedata = await service.getItemByExpenseData(requestNo);
-      if (Expensedata.value.length > 0) {
-        for (let i = 0; i < Expensedata.value.length; i++) {
-          {
-            setExpenseForm({
-              ...Expenseform,
-              expenses: [...Expenseform.expenses, Expensedata.value[i]]
-            });
-          }
-        }
-      }
-    } else {
-
-      setForm({
-        RequestNo: '',
-        ProjectTitle: '',
-        DepartmentName: '',
-        Remarks: '',
-        TotalAmount: 0,
-        ExpenseType: '',
-        SelectedDocument: '',
-        BillNo: '',
-        BillAmount: 0,
-        BillDate: new Date(),
-        ClaimAmount: 0,
-        Description: '',
-        DepartmentNameID: '',
-        ExpenseID: '',
-        ExpenseName: '',
-        DocumentName: '',
-        DocumentID: '',
-        ID: 0,
-      });
-    }
-  };
-  // AddExpensewithID
-  const addExpense = (newExpense: any) => {
-    setExpenseForm(prev => {
-      return {
-        ...prev,
-        expenses: [...prev.expenses, newExpense]
-      };
-    });
-  };
-  const handleExpenseSubmit = () => {
-    const newExpense = {
-      Id: 0,
-      Description: form.Description,
-      BillAmount: form.BillAmount,
-      BillDate: form.BillDate,
-      BillNo: form.BillNo,
-      DocumentName: form.DocumentName,
-      ClaimAmount: form.ClaimAmount,
-      ExpanseType: form.ExpenseName
-    };
-    addExpense(newExpense);
-    setForm(prev => ({
-      ...prev,
-      TotalAmount: Number(form.TotalAmount) + Number(newExpense.ClaimAmount)
-    }));
-    setisOpen(false);
-  };
-  const handleSubmit = async () => {
-    if (!form.DepartmentName) {
-    alert("Please select a Department");
-    return false;
-    }
+};
+const getVisibleRows = () => {
+  return table.getFilteredRowModel().rows;
+};
+const getDatafromListByTitle = async (listname: string, FormType:string) => {
+  try {
     setLoading(true);
-    const currentuser = await service.getUser();
-    const dataApprover = await service.GetApprover(form.DepartmentName);
-    const dataApproverFI = await service.GetApproverReimbursement("FI");
-    const dataApproverCompliance = await service.GetApproverReimbursement("ComplianceHead");
-    const dataApproverCFO = await service.GetApproverReimbursement("CFO");
-    // 🔹 Payload (common)
-    const payload = {
-      TotalClaimAmount: form.TotalAmount,
-      Remarks: form.Remarks,
-      DepartmentName: form.DepartmentName,
-      CurrentStatus: 'Pending',
-      AssignedToEmailId: Number(dataApprover.Departmenthead?.Id || 0),
-      DepartmentHead: dataApprover.Departmenthead?.Title.toString() || "",
-      FIApporver: dataApproverFI.ApproverName?.Title.toString() || "",
-      FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
-      ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
-      CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0)
-    };
-    try {
-      if (Expenseform.expenses.length > 0) {
-        if (!itemId) {
-          // 🔹 CREATE
-          const res = await service.createItem(payload);
-          if (res.Id > 0) {
-            setItemId(res.Id); // store ID for future updates  
-            console.log(res.Id);
-            await service.updateItem(res.Id, {
-              RequestNo: `REM-${res.Id}`
-            });
-            if (res.Id > 0 && Expenseform.expenses.length > 0) {
-              for (let i = 0; i < Expenseform.expenses.length; i++) {
-                const Expensepayload = {
-                  ExpanseType: Expenseform.expenses[i].ExpanseType,
-                  BillNo: Expenseform.expenses[i].BillNo,
-                  BillAmount: Expenseform.expenses[i].BillAmount,
-                  BillDate: new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
-                  Description: Expenseform.expenses[i].Description,
-                  SupportedAttachment: 'Y',
-                  ClaimAmount: Expenseform.expenses[i].ClaimAmount,
-                  DocumentName: Expenseform.expenses[i].DocumentName,
-                  ReimursementLookupId: Number(res.Id)
-                };
-                const resExpense = await service.createExpenseItem(Expensepayload);
-                if (resExpense.Id > 0) {
-                  const payload = {
-                    Title: 'REM',
-                    FID: Number(res.Id),
-                    UserName: currentuser.Title,
-                    UserAction: 'Request Initiator',
-                    ActionDate: new Date().toISOString(),
-                    Designation: 'Request Initiator',
-                  };
-                  await service.createHistoryItem(payload);
-                  alert("Data Submitted Successfully ✅");
-                  console.log("Successfully Transaction Saved:-" + resExpense.Id);
-                  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-                  window.location.assign(url);
-                }
-              }
-            }
-          }
-        } else {
-          // 🔹 UPDATE
-          const submitdata = await service.updateItem(itemId, payload);
-          if (1) {
-            if (itemId > 0 && Expenseform.expenses.length > 0) {
-              for (let i = 0; i < Expenseform.expenses.length; i++) {
-                const Expensepayload = {
-                  ExpanseType: Expenseform.expenses[i].ExpanseType,
-                  BillNo: Expenseform.expenses[i].BillNo,
-                  BillAmount: Expenseform.expenses[i].BillAmount,
-                  BillDate: new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
-                  Description: Expenseform.expenses[i].Description,
-                  ClaimAmount: Expenseform.expenses[i].ClaimAmount,
-                  SupportedAttachment: 'Y',
-                  DocumentName: Expenseform.expenses[i].DocumentName,
-                  ReimursementLookupId: Number(itemId)
-                };
-                const res = await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);
-              }
-            }
-            const payload = {
-              Title: 'REM',
-              FID: itemId,
-              UserName: currentuser.Title,
-              UserAction: 'Request Initiator',
-              ActionDate: new Date().toISOString(),
-              Designation: 'Request Initiator',
-            };
-            await service.createHistoryItem(payload);
-            alert("Data Submitted Successfully ✅");
-            const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-            window.location.assign(url);
-          }
-        }
-      }
-      else {
-        alert("Please select expenses before Submitting");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Error occurred ❌");
+    const data = await service.getItemByTitle(listname,FormType);
+    if (data) {
+      _setData((d) => [...d.concat(data)]);
     }
-    finally {
-      setLoading(false);
-    }
-  };
-  const handleSave = async () => {
-    if (!form.DepartmentName) {
-    alert("Please select a Department");
-    return false;
-    }
-    // 🔹 Payload (common)
-    const payload = {
-      TotalClaimAmount: form.TotalAmount,
-      Remarks: form.Remarks,
-      DepartmentName: form.DepartmentName,
-      CurrentStatus: 'Draft'
-    };
-    try {
-      setLoading(true);
-      if (Expenseform.expenses.length > 0) {
-        if (!itemId) {
-          // 🔹 CREATE
-          const res = await service.createItem(payload);
-          if (res.Id > 0) {
-            setItemId(res.Id); // store ID for future updates   
-            const Updateres = await service.updateItem(res.Id, {
-              RequestNo: `REM-${res.Id}`
-            });
-            if (res.Id > 0 && Expenseform.expenses.length > 0) {
-              for (let i = 0; i < Expenseform.expenses.length; i++) {
-                const Expensepayload = {
-                  ExpanseType: Expenseform.expenses[i].ExpanseType,
-                  BillNo: Expenseform.expenses[i].BillNo,
-                  BillAmount: Expenseform.expenses[i].BillAmount,
-                  BillDate: new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
-                  Description: Expenseform.expenses[i].Description,
-                  ClaimAmount: Expenseform.expenses[i].ClaimAmount,
-                  SupportedAttachment: 'Y',
-                  DocumentName: Expenseform.expenses[i].DocumentName,
-                  ReimursementLookupId: Number(res.Id)
-                };
-                const Expenseres = await service.createExpenseItem(Expensepayload);
-                if (Expenseres.Id > 0) {
-                  console.log("Successfully Transaction Saved:-" + Expenseres.ID);
-                }
-              }
-              setExpenseForm({
-                ...Expenseform,
-                expenses: []
-              });
-              const Expensedata = await service.getItemByExpenseData(Number(res.Id));
-              if (Expensedata.value[0].Id > 0) {
-                setExpenseForm({
-                  ...Expenseform,
-                  expenses: Expensedata.value
-                });
-                alert("Data Saved Successfully ✅");
-              }
-            }
-          }
-        } else {
-          // 🔹 UPDATE
-          await service.updateItem(itemId, payload);
-          if (itemId > 0 && Expenseform.expenses.length > 0) {
-            for (let i = 0; i < Expenseform.expenses.length; i++) {
-              const Expensepayload = {
-                ExpanseType: Expenseform.expenses[i].ExpanseType,
-                BillNo: Expenseform.expenses[i].BillNo,
-                BillAmount: Expenseform.expenses[i].BillAmount,
-                BillDate: new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
-                Description: Expenseform.expenses[i].Description,
-                ClaimAmount: Expenseform.expenses[i].ClaimAmount,
-                SupportedAttachment: 'Y',
-                DocumentName: Expenseform.expenses[i].DocumentName,
-                ReimursementLookupId: itemId
-              };
-              if (Number(Expenseform.expenses[i].Id) > 0) {
-                const res = await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);
-              }
-              else {
-                const res = await service.createExpenseItem(Expensepayload);
-              }
-            }
-            const Expensedata = await service.getItemByExpenseData(Number(itemId));
-            setExpenseForm({
-              ...Expenseform,
-              expenses: []
-            });
-            if (Expensedata.value[0].Id > 0) {
-              setExpenseForm({
-                ...Expenseform,
-                expenses: Expensedata.value
-              });
-            }
-            alert("Data Updated Successfully ✅");
-          }
-        }
-
-      }
-      else {
-        alert("Please select expense before save.");
-      }
-    }
-    catch (error) {
-      console.error(error);
-      alert("Error occurred ❌");
-    }
-    finally {
-      setLoading(false);
-    }
-  };
-  // Add New Expense
-  const handleAddNew = () => {
-    setLoading(true);
-    setForm(
-      prev => ({
-        ...prev,
-        ExpenseType: '',
-        SelectedDocument: '',
-        BillNo: '',
-        BillDate: new Date(),
-        BillAmount: 0,
-        ClaimAmount: 0,
-        Description: '',
-        ExpenseID: '',
-        ExpenseName: '',
-        DocumentName: '',
-        DocumentID: ''
-      }));
-    setisOpen(true);
+  } catch (error) {
+    console.error(error);
+    alert("Error occurred");
+  }
+  finally {
     setLoading(false);
-  };
-  const removeExpense = async (index: number) => {
-    const updatedExpenses = Expenseform.expenses.filter((_, i) => i !== index);
-    if (Number(Expenseform.expenses[index].Id) > 0) {
-      const datadelete = await service.deleteExpense(Number(Expenseform.expenses[index].Id))
-      if (datadelete) {
-        alert("Item deleted successfully.");
-        const Expensedata = await service.getItemByExpenseData(Number(itemId));
-        setExpenseForm({
-          ...Expenseform,
-          expenses: []
-        });
-        if (Expensedata.value[0].Id > 0) {
-          setExpenseForm({
-            ...Expenseform,
-            expenses: Expensedata.value
-          });
-          setForm(prev => ({
-            ...prev,
-            TotalAmount: Number(form.TotalAmount) - Number(Expenseform.expenses[index].ClaimAmount)
-          }));
-        }
-      }
-    }
-    else {
-      setForm(prev => ({
-        ...prev,
-        TotalAmount: Number(form.TotalAmount) - Number(Expenseform.expenses[index].ClaimAmount)
-      }));
-      setExpenseForm({
-        ...Expenseform,
-        expenses: updatedExpenses
-      });
-    }
-  };
-  return (
-    <section>
-      {loading && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: 'rgba(255,255,255,0.6)',
-          zIndex: 9999
-        }}>
-          <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
-            <Spinner label="Processing..." size={SpinnerSize.large} />
-          </div>
+  }
+};
+return (
+  <section>
+    {loading && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'rgba(255,255,255,0.6)',
+        zIndex: 9999
+      }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+          <Spinner label="Processing..." size={SpinnerSize.large} />
         </div>
-      )}
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <h2>Reimbursement Request Form
-            <span>Digiflow / Reimbursement Request Form</span>
-          </h2>
-        </div>
-        <div className={styles.searchBox}>
-          <h3>Reimbursement Request Form
-          </h3>
-          <div className={styles.content}>
-            <div className={styles.selectDep}>
-              <div className={styles.selectDepInner}>
-                <label>Select Department</label>
-                <Dropdown className="form-control"
-                  options={DepartmentOption}
-                  selectedKey={form.DepartmentNameID}
-                  onChange={(e, option) =>
-                    setForm({ ...form, DepartmentName: option?.text as string, DepartmentNameID: option?.key as string })
-                  }
-                />
-              </div>
-              <button className={styles.btnAdd} onClick={handleAddNew}>Add New</button>
-            </div>
-            <div className={styles.info}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#1026e6" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
-                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2" />
-              </svg>
-              <p>Please upload the document at document page and generate the document number.You will select the document number while adding the reimbursement details.</p>
-            </div>
-            <div className='row'>
-              {Expenseform.expenses.map((exp: any, index: number) => (
-                <div className="col-md-4" key={index}>
-                  <div className={styles.remBox}>
-                    <h3>Reimbursement Details</h3>
-                    <p>
-                      <label>Expense Type: </label>
-                      <label>{exp.ExpanseType}</label>
-                    </p>
-                    <p>
-                      <label>Bill Number: </label>
-                      <label>{exp.BillNo}</label>
-                    </p>
-                    <p>
-                      <label>Bill Amount: </label>
-                      <label>{exp.BillAmount}</label>
-                    </p>
-                    <p>
-                      <label>Bill Date: </label>
-                      <label>{exp.BillDate
-                        ? new Date(exp.BillDate).toISOString().split('T')[0]
-                        : ''}</label>
-                    </p>
-                    <p>
-                      <label>Claim Amount: </label>
-                      <label>{exp.ClaimAmount}</label>
-                    </p>
-                    <p>
-                      <label>Description: </label>
-                      <label>{exp.Description}</label>
-                    </p>
-                    <p>
-                      <label>Document: </label>
-                      <label>{exp.DocumentName}</label>
-                    </p>
-                    <p className={styles.btnPara}>
-                      <button
-                        className={styles.btnRemove}
-                        onClick={() => removeExpense(index)}>
-                        Remove
-                      </button>
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className={styles.form}>
-              <div className={styles['form-group']}>
-                <label>Total Amount</label>
-                <input type='number' className="form-control" name="TotalAmount" value={form.TotalAmount} readOnly style={{ backgroundColor: "lightgray" }} />
-              </div>
-              <div className={styles['form-group']}>
-                <label>Remarks</label>
-                <input type='text' className="form-control" name="Remarks" value={form.Remarks} onChange={handleChange} />
-              </div>
-
-              {/* Buttons */}
-              <div className={styles['btn-group']}>
-                <button className={styles.btnSubmit} onClick={handleSubmit}>Submit</button>
-                <button className={styles.btnSave} onClick={handleSave}>Save</button>
-                <button className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <Modal
-          isOpen={isOpen}
-          onDismiss={() => setisOpen(false)}
-          isBlocking={false} className={styles.modal}>
-          <div className={styles.searchBox}>
-            <h3>Add New Reimbursement Detail</h3>
-            <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Expense Type</label>
-              <Dropdown className="form-control" style={{ width: '100%' }}
-                options={ExpenseTypeOption}
-                selectedKey={form.ExpenseID}
-                onChange={(e, option) =>
-                  setForm({ ...form, ExpenseName: option?.text as string, ExpenseID: option?.key as string })
-                }
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Select Document</label>
-              <Dropdown className="form-control" style={{ width: '100%' }}
-                options={DocumentOption}
-                selectedKey={form.DocumentID}
-                onChange={(e, option) => handleDocumentChange(option)}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Bill Number</label>
-              <input className="form-control" style={{ width: '100%', backgroundColor: "lightgray" }} name="BillNo" value={form.BillNo} readOnly />
-            </div>
-            <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Bill Amount</label>
-              <input className="form-control" style={{ width: '100%', backgroundColor: "lightgray" }} name="BillAmount" value={form.BillAmount} readOnly>
-              </input>
-            </div>
-            <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Bill Date</label>
-              <input className="form-control" style={{ width: '100%', backgroundColor: "lightgray" }} name="BillDate" value={form.BillDate
-                ? new Date(form.BillDate).toISOString().split('T')[0]
-                : ''} readOnly>
-              </input>
-            </div>
-            <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Claim Amount</label>
-              <input className="form-control" type='number' style={{ width: '100%' }} name="ClaimAmount" value={form.ClaimAmount} onChange={handleClaimAmountChange}>
-              </input>
-            </div>
-            <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Description</label>
-              <input className="form-control" style={{ width: '100%' }} name="Description" value={form.Description} onChange={handleChange}>
-              </input>
-            </div>
-            <div className={styles.btnGroup}>
-              <button className={styles.btnSubmit} onClick={handleExpenseSubmit}>Submit</button>
-              <button className={styles.btnCancel} onClick={() => setisOpen(false)} >Close</button>
-            </div>
-          </div>
-        </Modal>
       </div>
-    </section>
-  );
+    )}
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2>Manage Approver
+          <span>Digiflow / Manage Approver</span>
+        </h2>
+      </div>
+      <div className={styles.searchBox}>
+        <div className={styles.container}>
+          <div className={styles.row}>
+            <div className={styles['col-md-3']}>
+              <button className={styles.btnSearch} style={{ width: "100%", backgroundColor: isActiveQA ? "red" : "grey" }} onClick={handleQuotation}>Quotation</button>
+            </div>
+            <div className={styles['col-md-3']}>
+              <button className={styles.btnSearch} style={{ width: "100%", backgroundColor: isActiveNEI ? "red" : "grey" }} onClick={handleNEIBT}>Quotation NEIBT</button>
+            </div>
+            <div className={styles['col-md-3']}>
+              <button className={styles.btnSearch} style={{ width: "100%", backgroundColor: isActiveREIMD ? "red" : "grey" }} onClick={handleREIMD}>REIM Dept. Master</button>
+            </div>
+            <div className={styles['col-md-3']}>
+              <button className={styles.btnSearch} style={{ width: "100%", backgroundColor: isActiveREIMF ? "red" : "grey" }} onClick={handleREIMF}>REIM Fin. Master</button>
+            </div>
+            <div className={styles['col-md-3']}>
+              <button className={styles.btnSearch} style={{ width: "100%", backgroundColor: isActiveVM ? "red" : "grey" }} onClick={handleVendor}>Vendor</button>
+            </div>
+            <div className={styles['col-md-3']} >
+              <button className={styles.btnSearch} style={{ width: "100%", backgroundColor: isActivePO ? "red" : "grey" }} onClick={handlePO}>Purchase Order</button>
+            </div>
+            <div className={styles['col-md-3']}>
+              <button className={styles.btnSearch} style={{ width: "100%", backgroundColor: isActiveBP ? "red" : "grey" }} onClick={handleBill}>Bill Processing</button>
+            </div>
+            <div style={{ paddingBottom: "5%" }}></div>
+          </div>
+        </div>
+      </div>
+      <div className="p-2">
+        <div>
+          <span style={{ display: "inline-block" }}>{Label}</span>
+          <input
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Search..."
+            style={{ marginBottom: "10px", padding: "5px", float: "right" }}
+          />
+        </div>
+        <Table striped bordered hover>
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    onClick={header.column.getToggleSortingHandler()}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    {{
+                      asc: <Icon iconName='ChevronUpMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
+                      desc: <Icon iconName='ChevronDownMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
+                    }[header.column.getIsSorted() as string] ?? null}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+
+        {/* 📄 Pagination */}
+        <div className="flex items-center gap-2">
+          <span>
+            Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
+            {table.getRowCount().toLocaleString()} Rows
+          </span>
+          <div style={{ float: "right" }} className="flex items-center gap-2">
+            <label>
+              Go to page:
+            </label>
+            <label>
+              <input
+                type="number"
+                min="1"
+                max={table.getPageCount()}
+                defaultValue={table.getState().pagination.pageIndex + 1}
+                onChange={(e) => {
+                  const page = e.target.value ? Number(e.target.value) - 1 : 0
+                  table.setPageIndex(page)
+                }}
+                className="border p-1 rounded w-16"
+              />
+            </label>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.firstPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {'<<'}
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {'<'}
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {'>'}
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.lastPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {'>>'}
+            </button>
+            <span>Page size</span>
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => {
+                table.setPageSize(Number(e.target.value))
+              }}
+            >
+              {[10, 20, 30, 40, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className='row' id='vendor' style={{paddingTop:"2%",display: isActiveVM ? "block" : "none",alignSelf:"center" }}>          
+            <div className={styles['form-control']}>
+              <label>Approver</label>
+              <PeoplePicker
+                key={[form.ApproverEMail].join(",")}
+                context={props.context.pageContext.web.absoluteUrl as any}
+                titleText="Select Approver"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                ensureUser={true}
+                principalTypes={[PrincipalType.User,PrincipalType.SharePointGroup,PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.ApproverEMail]}
+                onChange={onUserChange}
+              />
+            </div>
+            {/* Buttons */}
+            <div className={styles['btn-group']}>
+              <button name='vendorbtnsubmit' className={styles.btnSubmit} onClick={handleSubmit}>Update</button>&nbsp;
+              <button name='vendorbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        <div className='row' id='Quotation' style={{paddingTop:"2%",display: isActiveQA ? "block" : "none",alignSelf:"center" }}>          
+            <div className={styles['form-control']}>
+              <label>Approver</label>
+              <PeoplePicker
+                key={[form.ApproverEMail].join(",")}
+                context={props.context.pageContext.web.absoluteUrl as any}
+                titleText="Select Approver"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                ensureUser={true}
+                principalTypes={[PrincipalType.User,PrincipalType.SharePointGroup,PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.ApproverEMail]}
+                onChange={onUserChange}
+              />
+            </div>
+            {/* Buttons */}
+            <div className={styles['btn-group']}>
+              <button name='QAbtnsubmit' className={styles.btnSubmit} onClick={handleSubmit}>Update</button>&nbsp;
+              <button name='QAbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        <div className='row' id='QuotationNEI' style={{paddingTop:"2%",display: isActiveNEI ? "block" : "none",alignSelf:"center" }}>          
+            <div className={styles['form-control']}>
+              <label>Approver</label>
+              <PeoplePicker
+                key={[form.ApproverEMail].join(",")}
+                context={props.context.pageContext.web.absoluteUrl as any}
+                titleText="Select Approver"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                ensureUser={true}
+                principalTypes={[PrincipalType.User,PrincipalType.SharePointGroup,PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.ApproverEMail]}
+                onChange={onUserChange}
+              />
+            </div>
+            {/* Buttons */}
+            <div className={styles['btn-group']}>
+              <button name='NEIbtnsubmit' className={styles.btnSubmit} onClick={handleSubmit}>Update</button>&nbsp;
+              <button name='NEIbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        <div className='row' id='ReimbursementD' style={{paddingTop:"2%",display: isActiveREIMD ? "block" : "none",alignSelf:"center" }}>          
+            <div className={styles['form-control']}>
+              <label>Approver</label>
+              <PeoplePicker
+                key={[form.ApproverEMail].join(",")}
+                context={props.context.pageContext.web.absoluteUrl as any}
+                titleText="Select Approver"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                ensureUser={true}
+                principalTypes={[PrincipalType.User,PrincipalType.SharePointGroup,PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.ApproverEMail]}
+                onChange={onUserChange}
+              />
+            </div>
+            {/* Buttons */}
+            <div className={styles['btn-group']}>
+              <button name='Reimbtnsubmit' className={styles.btnSubmit} onClick={handleSubmit}>Update</button>&nbsp;
+              <button name='ReimbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        <div className='row' id='ReimbursementF' style={{paddingTop:"2%",display: isActiveREIMF ? "block" : "none",alignSelf:"center" }}>          
+            <div className={styles['form-control']}>
+              <label>Approver</label>
+              <PeoplePicker
+                key={[form.ApproverEMail].join(",")}
+                context={props.context.pageContext.web.absoluteUrl as any}
+                titleText="Select Approver"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                ensureUser={true}
+                principalTypes={[PrincipalType.User,PrincipalType.SharePointGroup,PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.ApproverEMail]}
+                onChange={onUserChange}
+              />
+            </div>
+            {/* Buttons */}
+            <div className={styles['btn-group']}>
+              <button name='Reimbtnsubmit' className={styles.btnSubmit} onClick={handleSubmit}>Update</button>&nbsp;
+              <button name='ReimbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        <div className='row' id='BillProcessing' style={{paddingTop:"2%",display: isActiveBP ? "block" : "none",alignSelf:"center" }}>          
+            <div className={styles['form-control']}>
+              <label>Approver</label>
+              <PeoplePicker
+                key={[form.ApproverEMail].join(",")}
+                context={props.context.pageContext.web.absoluteUrl as any}
+                titleText="Select Approver"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                ensureUser={true}
+                principalTypes={[PrincipalType.User,PrincipalType.SharePointGroup,PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.ApproverEMail]}
+                onChange={onUserChange}
+              />
+            </div>
+            {/* Buttons */}
+            <div className={styles['btn-group']}>
+              <button name='BPbtnsubmit' className={styles.btnSubmit} onClick={handleSubmit}>Update</button>&nbsp;
+              <button name='BPbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        <div className='row' id='PurchaseOrder' style={{paddingTop:"2%",display: isActivePO ? "block" : "none",alignSelf:"center" }}>          
+            <div className={styles['form-control']}>
+              <label>Approver</label>
+              <PeoplePicker
+                key={[form.ApproverEMail].join(",")}
+                context={props.context.pageContext.web.absoluteUrl as any}
+                titleText="Select Approver"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                ensureUser={true}
+                principalTypes={[PrincipalType.User,PrincipalType.SharePointGroup,PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.ApproverEMail]}
+                onChange={onUserChange}
+              />
+            </div>
+            {/* Buttons */}
+            <div className={styles['btn-group']}>
+              <button name='PObtnsubmit' className={styles.btnSubmit} onClick={handleSubmit}>Update</button>&nbsp;
+              <button name='PObtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+);
 };
 export default ManageApprovers;
-

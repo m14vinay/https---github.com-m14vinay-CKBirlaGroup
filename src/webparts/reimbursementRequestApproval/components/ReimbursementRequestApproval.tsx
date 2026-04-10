@@ -31,10 +31,15 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
     ActionDate2: '',
     ActionDate3: '',
     ActionDate4: '',
+    FIApproverEmailId: 0,
+    ComplianceHeadEmailId: 0,
+    CFOEmailId: 0
   });
   const [loading, setLoading] = React.useState(false);
   const [History, setHistory] = React.useState<any[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
+  const [AssignedID, setAssignedID] = React.useState<number | null>(null);
+  const [AssignedToEmail, setAssignedToEmail] = React.useState<number | null>(null);
   const [Expenseform, setExpenseForm] = React.useState<{
     expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string }[];
   }>({
@@ -46,6 +51,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
   const handleCancel = () => {
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);
+  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
   };
   //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
@@ -68,84 +77,193 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
     const data = await service.getItemByRequestNo(requestNo);
     if (data.Id > 0) {
       setItemId(requestNo);
-      setForm({
-        ...form,
-        RequestNo: data.RequestNo,
-        DepartmentName: data.DepartmentName,
-        Remarks: data.Remarks,
-        TotalAmount: data.TotalClaimAmount,
-        CurrentStatus: data.CurrentStatus
-      });
-      const Expensedata = await service.getItemByExpenseData(requestNo);
-      if (Expensedata.value.length > 0) {
-        for (let i = 0; i < Expensedata.value.length; i++) {
-          {
-            setExpenseForm({
-              ...Expenseform,
-              expenses: [...Expenseform.expenses, Expensedata.value[i]]
-            });
+      if (data.AssignedTo === currentuser.Title) {
+        if (data.CurrentStatus === 'Pending' || data.CurrentStatus === 'Approved') {
+          setItemId(data.Id);
+          setForm({
+            ...form,
+            RequestNo: data.RequestNo,
+            DepartmentName: data.DepartmentName || '',
+            Remarks: data.Remarks || '',
+            TotalAmount: data.TotalClaimAmount || 0,
+            CurrentStatus: data.CurrentStatus,
+            ActionDate1: data.ActionDate1 || '',
+            ActionDate2: data.ActionDate2 || '',
+            ActionDate3: data.ActionDate3 || '',
+            ActionDate4: data.ActionDate4 || '',
+            FIApproverEmailId: data.FIApproverEmailId || 0,
+            ComplianceHeadEmailId: data.ComplianceHeadEmailId || 0,
+            CFOEmailId: data.CFOEmailId || 0
+
+          });
+          if (User?.Id) {
+            setAssignedID(User.Title);
+            setAssignedToEmail(User.Id);
           }
+          const Expensedata = await service.getItemByExpenseData(requestNo);
+          if (Expensedata.value.length > 0) {
+            for (let i = 0; i < Expensedata.value.length; i++) {
+              {
+                setExpenseForm({
+                  ...Expenseform,
+                  expenses: [...Expenseform.expenses, Expensedata.value[i]]
+                });
+              }
+            }
+          }
+          const historydata = await service.GetHistoryItem(requestNo, "REM");
+          setHistory(historydata);
+        } else {
+          setForm({
+            RequestNo: '',
+            ProjectTitle: '',
+            DepartmentName: '',
+            Remarks: '',
+            TotalAmount: 0,
+            ExpenseType: '',
+            SelectedDocument: '',
+            BillNo: '',
+            BillAmount: 0,
+            BillDate: new Date(),
+            ClaimAmount: 0,
+            Description: '',
+            DepartmentNameID: '',
+            ExpenseID: '',
+            ExpenseName: '',
+            DocumentName: '',
+            DocumentID: '',
+            ID: 0,
+            CurrentStatus: '',
+            Comments: '',
+            ActionDate1: '',
+            ActionDate2: '',
+            ActionDate3: '',
+            ActionDate4: '',
+            FIApproverEmailId: 0,
+            ComplianceHeadEmailId: 0,
+            CFOEmailId: 0
+          });
+          alert("Record is already Rejected.");
+          return;
         }
       }
-      const historydata = await service.GetHistoryItem(requestNo, "REM");
-      setHistory(historydata);
-    } else {
-      setForm({
-        RequestNo: '',
-        ProjectTitle: '',
-        DepartmentName: '',
-        Remarks: '',
-        TotalAmount: 0,
-        ExpenseType: '',
-        SelectedDocument: '',
-        BillNo: '',
-        BillAmount: 0,
-        BillDate: new Date(),
-        ClaimAmount: 0,
-        Description: '',
-        DepartmentNameID: '',
-        ExpenseID: '',
-        ExpenseName: '',
-        DocumentName: '',
-        DocumentID: '',
-        ID: 0,
-        CurrentStatus: '',
-        Comments: '',
-        ActionDate1: '',
-        ActionDate2: '',
-        ActionDate3: '',
-        ActionDate4: ''
-      });
-    }
-  };
-  const handleApprove = async () => {
-    try {
-      // setActionType('approve');
-      setLoading(true);
-      if (!Comment) return alert("Approver Comment required");
-      const payload = {
-        Comments: form.Comments,
-        CurrentStatus: 'Approved',
-        Actiondate1:new Date()
-      };
-      if (!itemId) return;
-      if (form.ActionDate1 === '') {
-        await service.updateItem(itemId,payload);
-        await handleSaveApproveHistory(itemId, form.Comments, 'Approved');
-        alert("✅ First level approved");
+      else {
+        alert("Please Wait for you queue.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
-        return;
       }
-      else if (form.ActionDate2 === '') {
-        await service.updateItem(itemId,payload);
-        await handleSaveApproveHistory(itemId, form.Comments, 'Approved');
-        alert("✅ Final approval done");
-        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dasboard.aspx`;
-        window.location.assign(url);
-        return; // 🔥 stop again
+    };
+  }
+  const handleApprove = async () => {
+    try {
+      setLoading(true);
+      if (!form.Comments) return alert("Comment is required.");
+      let payload = {};
+      if (!itemId) return;
+      if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
+        if (form.ActionDate1 == '') {
+          payload = {
+            ApproverComment1: form.Comments,
+            CurrentStatus: 'Approved',
+            ActionDate1: new Date().toISOString(),
+            AssignedTo: 'Approved',
+            AssignedToEmailId: 0
+          };
+        }
       }
-      setComment('');
+      else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
+        if (form.ActionDate1 == '') {
+          const UserApproval2 = await service.getUserById(form.FIApproverEmailId);
+          payload = {
+            ApproverComment1: form.Comments,
+            CurrentStatus: 'Approved',
+            ActionDate1: new Date().toISOString(),
+            AssignedTo: Number(UserApproval2?.Title),
+            AssignedToEmailId: Number(UserApproval2?.Id)
+          };
+        }
+        else if (form.ActionDate2 == '') {
+          const UserApproval3 = await service.getUserById(form.CFOEmailId);
+          payload = {
+            ApproverComment2: form.Comments,
+            CurrentStatus: 'Approved',
+            ActionDate2: new Date().toISOString(),
+            AssignedTo: Number(UserApproval3?.Title),
+            AssignedToEmailId: Number(UserApproval3?.Id)
+          };
+        }
+        else if (form.ActionDate3 == '') {
+          const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
+          payload = {
+            ApproverComment3: form.Comments,
+            CurrentStatus: 'Approved',
+            ActionDate3: new Date().toISOString(),
+            AssignedTo: Number(UserApproval4?.Title),
+            AssignedToEmailId: Number(UserApproval4?.Id)
+          };
+        }
+        else if (form.ActionDate4 == '') {
+          payload = {
+            ApproverComment4: form.Comments,
+            CurrentStatus: 'Approved',
+            ActionDate4: new Date().toISOString(),
+            AssignedTo: 'Approved',
+            AssignedToEmailId:0
+          };
+        }
+      }
+      else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
+        if (form.ActionDate1 == '') {
+          const UserApproval2 = await service.getUserById(form.FIApproverEmailId);
+          payload = {
+            ApproverComment1: form.Comments,
+            CurrentStatus: 'Approved',
+            ActionDate1: new Date().toISOString(),
+            AssignedTo: Number(UserApproval2?.Title),
+            AssignedToEmailId: Number(UserApproval2?.Id)
+          };
+        }
+        else if (form.ActionDate2 == '') {
+          const UserApproval3 = await service.getUserById(form.ComplianceHeadEmailId);
+          payload = {
+            ApproverComment2: form.Comments,
+            CurrentStatus: 'Approved',
+            ActionDate2: new Date().toISOString(),
+            AssignedTo: Number(UserApproval3?.Title),
+            AssignedToEmailId: Number(UserApproval3?.Id)
+          };
+        }
+        else if (form.ActionDate3 == '') {
+          const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
+          payload = {
+            ApproverComment4: form.Comments,
+            CurrentStatus: 'Approved',
+            ActionDate3: new Date().toISOString(),
+            AssignedTo: Number(UserApproval4?.Title),
+            AssignedToEmailId: Number(UserApproval4?.Id)
+          };
+        }
+        else if (form.ActionDate4 == '') {
+          payload = {
+            ApproverComment4: form.Comments,
+            CurrentStatus: 'Approved',
+            ActionDate4: new Date().toISOString(),
+            AssignedTo: 'Approved',
+            AssignedToEmailId: 0
+          };
+        }
+      }
+      if (payload != '') {
+        const updatedData = await service.updateItem(itemId, payload);
+        if (updatedData.length > 0) {
+          await handleSaveApproveHistory(itemId, form.Comments, 'Approved');
+          alert("Approved Successfully.");
+          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+          window.location.assign(url);
+          setComment('');
+          return;
+        }
+      }
     } catch (error) {
       console.error(error);
     }
@@ -169,36 +287,113 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
   const handleReject = async () => {
     try {
       setLoading(true);
-      if (!Comment) return alert("Approver Comment required");
+      if (!Comment) return alert("Comment is required.");
+      let payload = {};
       if (!itemId) return;
-
-      if (!Comment) {
-        alert("Comment is required for rejection ❗");
-        return;
+      if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
+        if (form.ActionDate1 == '') {
+          payload = {
+            ApproverComment1: form.Comments,
+            CurrentStatus: 'Rejected',
+            ActionDate1: new Date().toISOString(),
+            AssignedTo: 'Rejected',
+            AssignedToEmailId: 0
+          };
+        }
       }
-      const payload = {
-        Comments: form.Comments,
-        CurrentStatus: 'Rejected',
-        Actiondate1:new Date()
-      };
-      if (form.ActionDate1 === '') {
-        await service.updateItem(itemId,payload);
-        await handleSaveApproveHistory(itemId, form.Comments, 'Rejected');
-        alert("✅ First level Rejected successfully");
-        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-        window.location.assign(url);
-        return;
+      else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
+        if (form.ActionDate1 == '') {
+          const UserApproval2 = await service.getUserById(form.FIApproverEmailId);
+          payload = {
+            ApproverComment1: form.Comments,
+            CurrentStatus: 'Rejected',
+            ActionDate1: new Date().toISOString(),
+            AssignedTo: Number(UserApproval2?.Title),
+            AssignedToEmailId: Number(UserApproval2?.Id)
+          };
+        }
+        else if (form.ActionDate2 == '') {
+          const UserApproval3 = await service.getUserById(form.CFOEmailId);
+          payload = {
+            ApproverComment2: form.Comments,
+            CurrentStatus: 'Rejected',
+            ActionDate2: new Date().toISOString(),
+            AssignedTo: Number(UserApproval3?.Title),
+            AssignedToEmailId: Number(UserApproval3?.Id)
+          };
+        }
+        else if (form.ActionDate3 == '') {
+          const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
+          payload = {
+            ApproverComment3: form.Comments,
+            CurrentStatus: 'Rejected',
+            ActionDate3: new Date().toISOString(),
+            AssignedTo: Number(UserApproval4?.Title),
+            AssignedToEmailId: Number(UserApproval4?.Id)
+          };
+        }
+        else if (form.ActionDate4 == '') {
+          payload = {
+            ApproverComment4: form.Comments,
+            CurrentStatus: 'Rejected',
+            ActionDate4: new Date().toISOString(),
+            AssignedTo: 'Rejected',
+            AssignedToEmailId: 0
+          };
+        }
       }
-      else if (form.ActionDate2 === '') {
-        await service.updateItem(itemId,payload);
-        await handleSaveApproveHistory(itemId, form.Comments, 'Rejected');
-        alert("✅ Final Rejection done");
-        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-        window.location.assign(url);
-        return; // 🔥 stop again
+      else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
+        if (form.ActionDate1 == '') {
+          const UserApproval2 = await service.getUserById(form.FIApproverEmailId);
+          payload = {
+            ApproverComment1: form.Comments,
+            CurrentStatus: 'Rejected',
+            ActionDate1: new Date().toISOString(),
+            AssignedTo: Number(UserApproval2?.Title),
+            AssignedToEmailId: Number(UserApproval2?.Id)
+          };
+        }
+        else if (form.ActionDate2 == '') {
+          const UserApproval3 = await service.getUserById(form.ComplianceHeadEmailId);
+          payload = {
+            ApproverComment2: form.Comments,
+            CurrentStatus: 'Rejected',
+            ActionDate2: new Date().toISOString(),
+            AssignedTo: Number(UserApproval3?.Title),
+            AssignedToEmailId: Number(UserApproval3?.Id)
+          };
+        }
+        else if (form.ActionDate3 == '') {
+          const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
+          payload = {
+            ApproverComment3: form.Comments,
+            CurrentStatus: 'Rejected',
+            ActionDate3: new Date().toISOString(),
+            AssignedTo: Number(UserApproval4?.Title),
+            AssignedToEmailId: Number(UserApproval4?.Id)
+          };
+        }
+        else if (form.ActionDate4 == '') {
+          payload = {
+            ApproverComment4: form.Comments,
+            CurrentStatus: 'Rejected',
+            ActionDate4: new Date().toISOString(),
+            AssignedTo: 'Rejected',
+            AssignedToEmailId: 0
+          };
+        }
       }
-      alert("❌ Rejected successfully");
-      setComment('');
+      if (payload != '') {
+        const updatedData = await service.updateItem(itemId, payload);
+        if (updatedData.length > 0) {
+          await handleSaveApproveHistory(itemId, form.Comments, 'Rejected');
+          alert("Rejected Successfully.");
+          setComment('');
+          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+          window.location.assign(url);
+          return;
+        }
+      }
     } catch (error) {
       console.error(error);
     }
@@ -319,7 +514,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                 </div>
                 <div className={styles['form-group']}>
                   <label>Comments</label>
-                  <input type='text' className="form-control" name="Comments" value={form.Comments} />
+                  <input type='text' className="form-control" name="Comments" value={form.Comments} onChange={handleChange} />
                 </div>
                 {/* Buttons */}
                 <div className={styles['btn-group']}>
@@ -391,6 +586,6 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
       </div>
     </section>
   );
-};
+}
 export default ReimbursementRequestApproval;
 

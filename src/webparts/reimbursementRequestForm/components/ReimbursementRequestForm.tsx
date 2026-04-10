@@ -42,10 +42,10 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   });
   const [User, setUser] = React.useState<any>(null);
   const service = new SharePointService(props.context);
-const handleCancel = () => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
-  window.location.assign(url);
-};
+  const handleCancel = () => {
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);
+  };
   //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -198,8 +198,8 @@ const handleCancel = () => {
   };
   const handleSubmit = async () => {
     if (!form.DepartmentName) {
-    alert("Please select a Department");
-    return false;
+      alert("Please select a Department");
+      return false;
     }
     setLoading(true);
     const currentuser = await service.getUser();
@@ -208,19 +208,48 @@ const handleCancel = () => {
     const dataApproverCompliance = await service.GetApproverReimbursement("ComplianceHead");
     const dataApproverCFO = await service.GetApproverReimbursement("CFO");
     // 🔹 Payload (common)
-    const payload = {
-      TotalClaimAmount: form.TotalAmount,
-      Remarks: form.Remarks,
-      DepartmentName: form.DepartmentName,
-      CurrentStatus: 'Pending',
-      AssignedToEmailId: Number(dataApprover.Departmenthead?.Id || 0),
-      DepartmentHead: dataApprover.Departmenthead?.Title.toString() || "",
-      FIApporver: dataApproverFI.ApproverName?.Title.toString() || "",
-      FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
-      ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
-      CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
-      AssignedTo:dataApprover.Departmenthead?.Title.toString() || ""
-    };
+    let payload = {};
+    if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
+      payload = {
+        TotalClaimAmount: form.TotalAmount,
+        Remarks: form.Remarks,
+        DepartmentName: form.DepartmentName,
+        CurrentStatus: 'Pending',
+        AssignedToEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
+        AssignedTo: dataApproverFI.ApproverName?.Title.toString() || "",
+        DepartmentHead: dataApproverFI.ApproverName?.Title.toString() || "",
+      };
+    }
+    else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
+      payload = {
+        TotalClaimAmount: form.TotalAmount,
+        Remarks: form.Remarks,
+        DepartmentName: form.DepartmentName,
+        CurrentStatus: 'Pending',
+        AssignedToEmailId: Number(dataApprover.Departmenthead?.Id || 0),
+        DepartmentHead: dataApprover.Departmenthead?.Title.toString() || "",
+        FIApporver: dataApproverFI.ApproverName?.Title.toString() || "",
+        FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
+        ComplianceHeadEmailId: 0,
+        CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
+        AssignedTo: dataApprover.Departmenthead?.Title.toString() || ""
+      }
+    }
+    else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') &&form.TotalAmount > 100000) {      
+        payload = {
+        TotalClaimAmount: form.TotalAmount,
+        Remarks: form.Remarks,
+        DepartmentName: form.DepartmentName,
+        CurrentStatus: 'Pending',
+        AssignedToEmailId: Number(dataApprover.Departmenthead?.Id || 0),
+        DepartmentHead: dataApprover.Departmenthead?.Title.toString() || "",
+        FIApporver: dataApproverFI.ApproverName?.Title.toString() || "",
+        FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
+        ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
+        CFOEmailId: 0,
+        AssignedTo: dataApprover.Departmenthead?.Title.toString() || ""
+      }
+    }
     try {
       if (Expenseform.expenses.length > 0) {
         if (!itemId) {
@@ -312,8 +341,8 @@ const handleCancel = () => {
   };
   const handleSave = async () => {
     if (!form.DepartmentName) {
-    alert("Please select a Department");
-    return false;
+      alert("Please select a Department");
+      return false;
     }
     // 🔹 Payload (common)
     const payload = {

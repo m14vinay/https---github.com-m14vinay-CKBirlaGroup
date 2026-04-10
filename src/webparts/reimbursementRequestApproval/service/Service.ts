@@ -3,13 +3,8 @@ export default class Service {
 
   private context: any;
   private listname = "ReimburseExpenseMaster";
-  private Departmentmaster = "DepartmentMaster";
-  private ExpenseMaster = "ReimburseExpenseType";
-  private VendorList = "AllVendor";
-  private Document = "AllDocuments";
   private ReimburseExpenseTransaction = "ReimburseExpenseTransaction";
   private HistoryList = "History";
-  private ReimbursementApproverMaster="ReimbursementApproverMaster";
   constructor(context: any) {
     this.context = context;
   }
@@ -72,9 +67,9 @@ export default class Service {
     return data.value.length > 0 ? data : null;
   }
   // Update Approved and Reject
-  public async updateItem(id: number, data: any): Promise<void> {
+  public async updateItem(id: number, data: any): Promise<any[]> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
-    await this.context.spHttpClient.post(
+   const response= await this.context.spHttpClient.post(
       url,
       SPHttpClient.configurations.v1,
       {
@@ -87,7 +82,7 @@ export default class Service {
         body: JSON.stringify(data)
       }
     );
-    return data;
+    return response.json();
   }
   // Create History
   public async createHistoryItem(data: any): Promise<any> {

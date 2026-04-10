@@ -3,7 +3,7 @@ export default class Service {
 
   private context: any;
   private listname = "ReimburseExpenseMaster";
-  private Departmentmaster = "DepartmentMaster";
+  private Departmentmaster = "ReimburseDepartmentMaster";
   private ExpenseMaster = "ReimburseExpenseType";
   private VendorList = "AllVendor";
   private Document = "AllDocuments";
@@ -36,13 +36,8 @@ ApproverName/Id,ApproverName/Title
 
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Departmentmaster}')/items
 ?$select=Id,Title,
-Approval1/Id,Approval1/Title,
-Approval2/Id,Approval2/Title,
-Approval3/Id,Approval3/Title,
-Approval4/Id,Approval4/Title,
-Approval5/Id,Approval5/Title,
-Departmenthead/Id,Departmenthead/Title
-&$expand=Approval1,Approval2,Approval3,Approval4,Approval5,Departmenthead
+DepartmentHead/Id,DepartmentHead/Title
+&$expand=DepartmentHead
 &$filter=DepartmentName eq '${DepartmentName}'`;
 
     const res = await this.context.spHttpClient.get(

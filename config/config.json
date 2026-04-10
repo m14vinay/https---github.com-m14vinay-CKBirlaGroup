@@ -265,6 +265,7 @@
     "VendorRegistrationSearchWebPartStrings": "lib/webparts/vendorRegistrationSearch/loc/{locale}.js",
     "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js",
     "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js",
-    "ManageApproversWebPartStrings": "lib/webparts/manageApprovers/loc/{locale}.js"
+    "ManageApproversWebPartStrings": "lib/webparts/manageApprovers/loc/{locale}.js",
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
   }
 }
