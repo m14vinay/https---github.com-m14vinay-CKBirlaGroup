@@ -235,7 +235,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         AssignedTo: dataApprover.Departmenthead?.Title.toString() || ""
       }
     }
-    else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') &&form.TotalAmount > 100000) {      
+    else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') &&form.TotalAmount < 100000) {      
         payload = {
         TotalClaimAmount: form.TotalAmount,
         Remarks: form.Remarks,
