@@ -29,7 +29,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
   const [isActiveBP, setIsActiveBP] = React.useState(false);
   const [isActiveREIMD, setIsActiveREIMD] = React.useState(false);
   const [isActiveREIMF, setIsActiveREIMF] = React.useState(false);
-  const [isActiveNEI, setIsActiveBPNEI] = React.useState(false);
+  const [isActiveNEI, setIsActiveNEI] = React.useState(false);
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<any>([]);
   const [Label, setLabel] = useState("");
@@ -54,12 +54,31 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
   });
+  const [selectedRowId, setSelectedRowId] = React.useState<number | null>(null);
+  const [isSelected, setisSelected] = React.useState<number | null>(null);
   const [selectedUserId, setSelectedUserId] = React.useState<number | null>(null);
+  const [selectedApprover1Id, setselectedApprover1Id] = React.useState<number | null>(null);
+  const [selectedApprover2Id, setselectedApprover2Id] = React.useState<number | null>(null);
+  const [selectedApprover3Id, setselectedApprover3Id] = React.useState<number | null>(null);
+  const [selectedApprover4Id, setselectedApprover4Id] = React.useState<number | null>(null);
+  const [selectedApprover5Id, setselectedApprover5Id] = React.useState<number | null>(null);
   const [form, setForm] = React.useState({
+    ID: 0,
     ApproverId: 0,
     ApproverName: '',
-    ID: 0,
-    ApproverEMail: ''
+    ApproverEMail: '',
+    Approver1Id: 0,
+    Approver1Name: '',
+    Approver1EMail: '',
+    Approver2Id: 0,
+    Approver2Name: '',
+    Approver2EMail: '',
+    Approver3Id: 0,
+    Approver3Name: '',
+    Approver3EMail: '',
+    Approver4Id: 0,
+    Approver4Name: '',
+    Approver4EMail: ''
   });
   const handleCancel = () => {
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -73,12 +92,18 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setLoading(true);
     try {
       const payload = {
-        ApproverId: selectedUserId,
+        ApproverId: selectedUserId==null?form.ApproverId:selectedUserId,
         ID: form.ID
       };
       await service.updateItem(form.ID, payload, 'VendorMappingApproval');
       alert("Updated Successfully.");
       handleVendor();
+      setSelectedUserId(null);
+      setselectedApprover1Id(null);
+      setselectedApprover2Id(null);
+      setselectedApprover3Id(null);
+      setselectedApprover4Id(null);
+      setselectedApprover5Id(null);
     }
     catch (error) {
       console.error(error);
@@ -96,12 +121,18 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setLoading(true);
     try {
       const payload = {
-        ApproverId: selectedUserId,
+        FinanceControllerId: selectedUserId,
         ID: form.ID
       };
-      await service.updateItem(form.ID, payload, 'VendorMappingApproval');
+      await service.updateItem(form.ID, payload, 'FinanceController');
       alert("Updated Successfully.");
-      handleVendor();
+      handlePO();
+      setSelectedUserId(null);
+      setselectedApprover1Id(null);
+      setselectedApprover2Id(null);
+      setselectedApprover3Id(null);
+      setselectedApprover4Id(null);
+      setselectedApprover5Id(null);
     }
     catch (error) {
       console.error(error);
@@ -119,12 +150,19 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setLoading(true);
     try {
       const payload = {
-        ApproverId: selectedUserId,
+        FinanceControllerId: selectedUserId==null?form.ApproverId:selectedUserId,
+        Billing2ndApproverId:selectedApprover1Id==null?form.Approver1Id:selectedApprover1Id,
         ID: form.ID
       };
-      await service.updateItem(form.ID, payload, 'VendorMappingApproval');
+      await service.updateItem(form.ID, payload, 'FinanceController');
       alert("Updated Successfully.");
-      handleVendor();
+      handleBill();
+      setSelectedUserId(null);
+      setselectedApprover1Id(null);
+      setselectedApprover2Id(null);
+      setselectedApprover3Id(null);
+      setselectedApprover4Id(null);
+      setselectedApprover5Id(null);
     }
     catch (error) {
       console.error(error);
@@ -142,12 +180,21 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setLoading(true);
     try {
       const payload = {
-        ApproverId: selectedUserId,
-        ID: form.ID
+        ID: form.ID,
+        DepartmentheadId: selectedUserId==null?form.ApproverId:selectedUserId,
+        Approval1Id: selectedApprover1Id==null?form.Approver1Id:selectedApprover1Id,
+        Approval2Id: selectedApprover2Id==null?form.Approver2Id:selectedApprover2Id,
+        Approval3Id: selectedApprover3Id==null?form.Approver3Id:selectedApprover3Id
       };
-      await service.updateItem(form.ID, payload, 'VendorMappingApproval');
+      await service.updateItem(form.ID, payload, 'DepartmentMaster');
       alert("Updated Successfully.");
-      handleVendor();
+      handleQuotation();
+      setSelectedUserId(null);
+      setselectedApprover1Id(null);
+      setselectedApprover2Id(null);
+      setselectedApprover3Id(null);
+      setselectedApprover4Id(null);
+      setselectedApprover5Id(null);
     }
     catch (error) {
       console.error(error);
@@ -165,12 +212,21 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setLoading(true);
     try {
       const payload = {
-        ApproverId: selectedUserId,
-        ID: form.ID
+        ID: form.ID,
+        DepartmentheadId: selectedUserId==null?form.ApproverId:selectedUserId,
+        Approval1Id: selectedApprover1Id==null?form.Approver1Id:selectedApprover1Id,
+        Approval2Id: selectedApprover2Id==null?form.Approver2Id:selectedApprover2Id,
+        Approval3Id: selectedApprover3Id==null?form.Approver3Id:selectedApprover3Id
       };
-      await service.updateItem(form.ID, payload, 'VendorMappingApproval');
+      await service.updateItem(form.ID, payload, 'DepartmentMasterNEI');
       alert("Updated Successfully.");
-      handleVendor();
+      handleNEIBT();
+      setSelectedUserId(null);
+      setselectedApprover1Id(null);
+      setselectedApprover2Id(null);
+      setselectedApprover3Id(null);
+      setselectedApprover4Id(null);
+      setselectedApprover5Id(null);
     }
     catch (error) {
       console.error(error);
@@ -188,12 +244,18 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setLoading(true);
     try {
       const payload = {
-        ApproverId: selectedUserId,
+        DepartmentHeadId: selectedUserId==null?form.ApproverId:selectedUserId,
         ID: form.ID
       };
-      await service.updateItem(form.ID, payload, 'VendorMappingApproval');
+      await service.updateItem(form.ID, payload, 'ReimburseDepartmentMaster');
       alert("Updated Successfully.");
-      handleVendor();
+      handleREIMD();
+      setSelectedUserId(null);
+      setselectedApprover1Id(null);
+      setselectedApprover2Id(null);
+      setselectedApprover3Id(null);
+      setselectedApprover4Id(null);
+      setselectedApprover5Id(null);
     }
     catch (error) {
       console.error(error);
@@ -211,12 +273,18 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setLoading(true);
     try {
       const payload = {
-        ApproverId: selectedUserId,
+        ApproverNameId: selectedUserId==null?form.ApproverId:selectedUserId,
         ID: form.ID
       };
-      await service.updateItem(form.ID, payload, 'VendorMappingApproval');
+      await service.updateItem(form.ID, payload, 'ReimbursementApproverMaster');
       alert("Updated Successfully.");
-      handleVendor();
+      handleREIMF()
+      setSelectedUserId(null);
+      setselectedApprover1Id(null);
+      setselectedApprover2Id(null);
+      setselectedApprover3Id(null);
+      setselectedApprover4Id(null);
+      setselectedApprover5Id(null);
     }
     catch (error) {
       console.error(error);
@@ -226,7 +294,158 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       setLoading(false);
     }
   };
-  const onUserChange = async (items: any[]) => {
+  // Vendor Change
+  const onUserVendorChange = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setSelectedUserId(Number(UserID));
+      }
+    } else {
+      setSelectedUserId(null);
+    }
+    console.log(items);
+  };
+  // Quotataion Change
+  const onUserQuotationDepartmentHeadChange = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setSelectedUserId(Number(UserID));
+      }
+    } else {
+      setSelectedUserId(null);
+    }
+    console.log(items);
+  };
+  const onUserQuotationApprover1Change = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setselectedApprover1Id(Number(UserID));
+      }
+    } else {
+      setselectedApprover1Id(null);
+    }
+    console.log(items);
+  };
+  const onUserQuotationApprover2Change = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setselectedApprover2Id(Number(UserID));
+      }
+    } else {
+      setselectedApprover2Id(null);
+    }
+    console.log(items);
+  };
+  const onUserQuotationApprover3Change = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setselectedApprover3Id(Number(UserID));
+      }
+    } else {
+      setselectedApprover3Id(null);
+    }
+    console.log(items);
+  };
+  // PO Change
+  const onUserPOChange = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setSelectedUserId(Number(UserID));
+      }
+    } else {
+      setSelectedUserId(null);
+    }
+    console.log(items);
+  };
+  // Quotation NEI Change
+  const onUserQuotationNEIDepartmentHeadChange = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setSelectedUserId(Number(UserID));
+      }
+    } else {
+      setSelectedUserId(null);
+    }
+    console.log(items);
+  };
+  const onUserQuotationNEIApprover1Change = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setselectedApprover1Id(Number(UserID));
+      }
+    } else {
+      setselectedApprover1Id(null);
+    }
+    console.log(items);
+  };
+  const onUserQuotationNEIApprover2Change = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setselectedApprover2Id(Number(UserID));
+      }
+    } else {
+      setselectedApprover2Id(null);
+    }
+    console.log(items);
+  };
+  const onUserQuotationNEIApprover3Change = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setselectedApprover3Id(Number(UserID));
+      }
+    } else {
+      setselectedApprover3Id(null);
+    }
+    console.log(items);
+  };
+  // Bill Processing
+  const onUserBPFinanceChange = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setSelectedUserId(Number(UserID));
+      }
+    } else {
+      setSelectedUserId(null);
+    }
+    console.log(items);
+  };
+  //Bill Processing Billing
+  const onUserBPBillingChange = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setselectedApprover1Id(Number(UserID));
+      }
+    } else {
+      setselectedApprover1Id(null);
+    }
+    console.log(items);
+  };
+  //REIMD
+  const onUserREIMDChange = async (items: any[]) => {
+    if (items.length > 0) {
+      const UserID = await service.getUserByLogOnName(items[0].id);
+      if (UserID != null) {
+        setSelectedUserId(Number(UserID));
+      }
+    } else {
+      setSelectedUserId(null);
+    }
+    console.log(items);
+  };
+  //REIMF
+  const onUserREIMFChange = async (items: any[]) => {
     if (items.length > 0) {
       const UserID = await service.getUserByLogOnName(items[0].id);
       if (UserID != null) {
@@ -252,7 +471,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       setUser(data);
     }
   };
-  const handleEdit = (rowData: any) => {
+  const handleVendorEdit = (rowData: any) => {
     console.log("Edit clicked:", rowData);
     setForm(prev => ({
       ...prev,
@@ -262,16 +481,98 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       ApproverEMail: rowData.Approver?.EMail
     }));
   };
+  const handleQuotationEdit = (rowData: any) => {
+    console.log("Edit clicked:", rowData);
+    setForm(prev => ({
+      ...prev,
+      ID: rowData.Id,
+      ApproverId: rowData.Departmenthead?.Id,
+      ApproverName: rowData.Departmenthead?.Title,
+      ApproverEMail: rowData.Departmenthead?.EMail,
+      Approver1Id: rowData.Approval1?.Id,
+      Approver1Name: rowData.Approval1?.Title,
+      Approver1EMail: rowData.Approval1?.EMail,
+      Approver2Id: rowData.Approval2?.Id,
+      Approver2Name: rowData.Approval2?.Title,
+      Approver2EMail: rowData.Approval2?.EMail,
+      Approver3Id: rowData.Approval3?.Id,
+      Approver3Name: rowData.Approval3?.Title,
+      Approver3EMail: rowData.Approval3?.EMail
+    }));
+  };
+  const handleNEIEdit = (rowData: any) => {
+    console.log("Edit clicked:", rowData);
+    setForm(prev => ({
+      ...prev,
+      ID: rowData.Id,
+      ApproverId: rowData.Departmenthead?.Id,
+      ApproverName: rowData.Departmenthead?.Title,
+      ApproverEMail: rowData.Departmenthead?.EMail,
+      Approver1Id: rowData.Approval1?.Id,
+      Approver1Name: rowData.Approval1?.Title,
+      Approver1EMail: rowData.Approval1?.EMail,
+      Approver2Id: rowData.Approval2?.Id,
+      Approver2Name: rowData.Approval2?.Title,
+      Approver2EMail: rowData.Approval2?.EMail,
+      Approver3Id: rowData.Approval3?.Id,
+      Approver3Name: rowData.Approval3?.Title,
+      Approver3EMail: rowData.Approval3?.EMail
+    }));
+  };
+  const handleBPEdit = (rowData: any) => {
+    console.log("Edit clicked:", rowData);
+    setForm(prev => ({
+      ...prev,
+      ID: rowData.Id,
+      ApproverId: rowData.FinanceController?.Id,
+      ApproverName: rowData.FinanceController?.Title,
+      ApproverEMail: rowData.FinanceController?.EMail,
+      Approver1Id: rowData.Billing2ndApprover?.Id,
+      Approver1Name: rowData.Billing2ndApprover?.Title,
+      Approver1EMail: rowData.Billing2ndApprover?.EMail
+    }));
+  };
+  const handleREIMDEdit = (rowData: any) => {
+    console.log("Edit clicked:", rowData);
+    setForm(prev => ({
+      ...prev,
+      ApproverId: rowData.DepartmentHead?.Id,
+      ApproverName: rowData.DepartmentHead?.Title,
+      ID: rowData.Id,
+      ApproverEMail: rowData.DepartmentHead?.EMail
+    }));
+  };
+  const handleREIMFEdit = (rowData: any) => {
+    console.log("Edit clicked:", rowData);
+    setForm(prev => ({
+      ...prev,
+      ApproverId: rowData.ApproverName?.Id,
+      ApproverName: rowData.ApproverName?.Title,
+      ID: rowData.Id,
+      ApproverEMail: rowData.ApproverName?.EMail
+    }));
+  };
+  const handlePOEdit = (rowData: any) => {
+    console.log("Edit clicked:", rowData);
+    setForm(prev => ({
+      ...prev,
+      ID: rowData.Id,
+      ApproverId: rowData.FinanceController?.Id,
+      ApproverName: rowData.FinanceController?.Title,
+      ApproverEMail: rowData.FinanceController?.EMail
+    }));
+  };
   const handleQuotation = async () => {
     _setData([]);
     setLabel('Quotation Approval');
+    setisSelected(null);
     setIsActiveQA(true);
     setIsActiveBP(false);
     setIsActivePO(false);
     setIsActiveVM(false);
     setIsActiveREIMD(false);
     setIsActiveREIMF(false);
-    setIsActiveBPNEI(false);
+    setIsActiveNEI(false);
     const setDynamicColumns = [
       columnHelper.accessor('DepartmentName', {
         header: "Department Name"
@@ -291,21 +592,27 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       columnHelper.display({
         id: 'edit',
         header: 'Action',
-        cell: (info) => (
-          <button
-            onClick={() => handleEdit(info.row.original)}
-            style={{
-              padding: '5px 10px',
-              backgroundColor: 'green',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-              borderRadius: '10px'
-            }}
-          >
-            View
-          </button>
-        )
+        cell: (info) => {
+          const isSelected = selectedRowId === info.row.original.Id;
+          return (
+            <button
+              onClick={() => {
+                setSelectedRowId(info.row.original.Id);
+                handleQuotationEdit(info.row.original);
+              }}
+              style={{
+                padding: '5px 10px',
+                backgroundColor: isActiveQA && isSelected ? 'blue' : 'green',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '10px'
+              }}
+            >
+              View
+            </button>
+          );
+        }
       })
     ]
     setColumns(setDynamicColumns);
@@ -314,13 +621,14 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
   const handleVendor = async () => {
     _setData([]);
     setLabel('Vendor Mapping');
+    setisSelected(null);
     setIsActiveQA(false);
     setIsActiveBP(false);
     setIsActivePO(false);
     setIsActiveVM(true);
     setIsActiveREIMD(false);
     setIsActiveREIMF(false);
-    setIsActiveBPNEI(false);
+    setIsActiveNEI(false);
     const setDynamicColumns = [
       columnHelper.accessor('Approver.Id', {
         header: "Approver ID"
@@ -334,21 +642,27 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       columnHelper.display({
         id: 'edit',
         header: 'Action',
-        cell: (info) => (
-          <button
-            onClick={() => handleEdit(info.row.original)}
-            style={{
-              padding: '5px 10px',
-              backgroundColor: 'green',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-              borderRadius: '10px'
-            }}
-          >
-            View
-          </button>
-        )
+        cell: (info) => {
+          const isSelected = selectedRowId === info.row.original.Id;
+          return (
+            <button
+              onClick={() => {
+                setSelectedRowId(info.row.original.Id);
+                handleVendorEdit(info.row.original);
+              }}
+              style={{
+                padding: '5px 10px',
+                backgroundColor: isActiveVM && isSelected ? 'blue' : 'green',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '10px'
+              }}
+            >
+              View
+            </button>
+          );
+        }
       })
     ]
     setColumns(setDynamicColumns);
@@ -357,13 +671,14 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
   const handlePO = async () => {
     _setData([]);
     setLabel('PO Approval');
+    setisSelected(null);
     setIsActiveQA(false);
     setIsActiveBP(false);
     setIsActivePO(true);
     setIsActiveVM(false);
     setIsActiveREIMD(false);
     setIsActiveREIMF(false);
-    setIsActiveBPNEI(false);
+    setIsActiveNEI(false);
     const setDynamicColumns = [
       columnHelper.accessor('DepartmentName', {
         header: "Department Name"
@@ -380,21 +695,27 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       columnHelper.display({
         id: 'edit',
         header: 'Action',
-        cell: (info) => (
-          <button
-            onClick={() => handleEdit(info.row.original)}
-            style={{
-              padding: '5px 10px',
-              backgroundColor: 'green',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-              borderRadius: '10px'
-            }}
-          >
-            View
-          </button>
-        )
+        cell: (info) => {
+          const isSelected = selectedRowId === info.row.original.Id;
+          return (
+            <button
+              onClick={() => {
+                setSelectedRowId(info.row.original.Id);
+                handlePOEdit(info.row.original);
+              }}
+              style={{
+                padding: '5px 10px',
+                backgroundColor: isActivePO && isSelected ? 'blue' : 'green',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '10px'
+              }}
+            >
+              View
+            </button>
+          );
+        }
       })
     ]
     setColumns(setDynamicColumns);
@@ -403,13 +724,14 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
   const handleBill = async () => {
     _setData([]);
     setLabel('Bill Processing');
+    setisSelected(null);
     setIsActiveQA(false);
     setIsActiveBP(true);
     setIsActivePO(false);
     setIsActiveVM(false);
     setIsActiveREIMD(false);
     setIsActiveREIMF(false);
-    setIsActiveBPNEI(false);
+    setIsActiveNEI(false);
     const setDynamicColumns = [
       columnHelper.accessor((row) => row.DepartmentName ?? "N/A",
         {
@@ -429,21 +751,27 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       columnHelper.display({
         id: 'edit',
         header: 'Action',
-        cell: (info) => (
-          <button
-            onClick={() => handleEdit(info.row.original)}
-            style={{
-              padding: '5px 10px',
-              backgroundColor: 'green',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-              borderRadius: '10px'
-            }}
-          >
-            View
-          </button>
-        )
+        cell: (info) => {
+          const isSelected = selectedRowId === info.row.original.Id;
+          return (
+            <button
+              onClick={() => {
+                setSelectedRowId(info.row.original.Id);
+                handleBPEdit(info.row.original);
+              }}
+              style={{
+                padding: '5px 10px',
+                backgroundColor: isActiveBP && isSelected ? 'blue' : 'green',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '10px'
+              }}
+            >
+              View
+            </button>
+          );
+        }
       })
     ]
     setColumns(setDynamicColumns);
@@ -452,13 +780,14 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
   const handleREIMF = async () => {
     _setData([]);
     setLabel('Reimbursement Finance Master');
+    setisSelected(null);
     setIsActiveQA(false);
     setIsActiveBP(false);
     setIsActivePO(false);
     setIsActiveVM(false);
     setIsActiveREIMF(true);
     setIsActiveREIMD(false);
-    setIsActiveBPNEI(false);
+    setIsActiveNEI(false);
     const setDynamicColumns = [
       columnHelper.accessor('ApproverType', {
         header: "Approver Type"
@@ -467,29 +796,35 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
         header: "Approver ID"
       }),
       columnHelper.accessor('ApproverName.Title', {
-        header: "ApproverName Name"
+        header: "Approver Name"
       }),
       columnHelper.accessor('ApproverName.EMail', {
-        header: "ApproverName Email"
+        header: "Approver Email"
       }),
       columnHelper.display({
         id: 'edit',
         header: 'Action',
-        cell: (info) => (
-          <button
-            onClick={() => handleEdit(info.row.original)}
-            style={{
-              padding: '5px 10px',
-              backgroundColor: 'green',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-              borderRadius: '10px'
-            }}
-          >
-            View
-          </button>
-        )
+        cell: (info) => {
+          const isSelected = selectedRowId === info.row.original.Id;
+          return (
+            <button
+              onClick={() => {
+                setSelectedRowId(info.row.original.Id);
+                handleREIMFEdit(info.row.original);
+              }}
+              style={{
+                padding: '5px 10px',
+                backgroundColor: isActiveREIMF && isSelected ? 'blue' : 'green',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '10px'
+              }}
+            >
+              View
+            </button>
+          );
+        }
       })
     ]
     setColumns(setDynamicColumns);
@@ -498,13 +833,14 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
   const handleREIMD = async () => {
     _setData([]);
     setLabel('Reimbursement Department Master');
+    setisSelected(null);
     setIsActiveQA(false);
     setIsActiveBP(false);
     setIsActivePO(false);
     setIsActiveVM(false);
     setIsActiveREIMF(false);
     setIsActiveREIMD(true);
-    setIsActiveBPNEI(false);
+    setIsActiveNEI(false);
     const setDynamicColumns = [
       columnHelper.accessor('DepartmentName', {
         header: "Department Name"
@@ -521,21 +857,27 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       columnHelper.display({
         id: 'edit',
         header: 'Action',
-        cell: (info) => (
-          <button
-            onClick={() => handleEdit(info.row.original)}
-            style={{
-              padding: '5px 10px',
-              backgroundColor: 'green',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-              borderRadius: '10px'
-            }}
-          >
-            View
-          </button>
-        )
+        cell: (info) => {
+          const isSelected = selectedRowId === info.row.original.Id;
+          return (
+            <button
+              onClick={() => {
+                setSelectedRowId(info.row.original.Id);
+                handleREIMDEdit(info.row.original);
+              }}
+              style={{
+                padding: '5px 10px',
+                backgroundColor: isActiveREIMD && isSelected ? 'blue' : 'green',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '10px'
+              }}
+            >
+              View
+            </button>
+          );
+        }
       })
     ]
     setColumns(setDynamicColumns);
@@ -544,13 +886,14 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
   const handleNEIBT = async () => {
     _setData([]);
     setLabel('Quotation Approval NEI BT');
+    setisSelected(null);
     setIsActiveQA(false);
     setIsActiveBP(false);
     setIsActivePO(false);
     setIsActiveVM(false);
     setIsActiveREIMD(false);
     setIsActiveREIMF(false);
-    setIsActiveBPNEI(true);
+    setIsActiveNEI(true);
     const setDynamicColumns = [
       columnHelper.accessor('DepartmentName', {
         header: "DepartmentName"
@@ -570,21 +913,27 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
       columnHelper.display({
         id: 'edit',
         header: 'Action',
-        cell: (info) => (
-          <button
-            onClick={() => handleEdit(info.row.original)}
-            style={{
-              padding: '5px 10px',
-              backgroundColor: 'green',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-              borderRadius: '10px'
-            }}
-          >
-            View
-          </button>
-        )
+        cell: (info) => {
+          const isSelected = selectedRowId === info.row.original.Id;
+          return (
+            <button
+              onClick={() => {
+                setSelectedRowId(info.row.original.Id);
+                handleNEIEdit(info.row.original);
+              }}
+              style={{
+                padding: '5px 10px',
+                backgroundColor: isActiveNEI && isSelected ? 'blue' : 'green',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '10px'
+              }}
+            >
+              View
+            </button>
+          );
+        }
       })
     ]
     setColumns(setDynamicColumns);
@@ -784,10 +1133,9 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
           </div>
           <div className='row' id='vendor' style={{ paddingTop: "2%", display: isActiveVM ? "block" : "none", alignSelf: "center" }}>
             <div className={styles['form-control']}>
-              <label>Approver</label>
               <PeoplePicker
                 context={peoplePickerContext}
-                titleText="People Picker"
+                titleText="Approver"
                 personSelectionLimit={1}
                 showtooltip={true}
                 required={true}
@@ -796,7 +1144,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
                 principalTypes={[PrincipalType.User]}
                 resolveDelay={1000}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserChange}
+                onChange={onUserVendorChange}
               />
             </div>
             {/* Buttons */}
@@ -807,19 +1155,63 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
           </div>
           <div className='row' id='Quotation' style={{ paddingTop: "2%", display: isActiveQA ? "block" : "none", alignSelf: "center" }}>
             <div className={styles['form-control']}>
-              <label>Approver</label>
-              <PeoplePicker
-                key={[form.ApproverEMail].join(",")}
-                context={props.context.pageContext.web.absoluteUrl as any}
-                titleText="Select Approver"
+              <PeoplePicker                
+                context={peoplePickerContext}
+                titleText="Department Head"
                 personSelectionLimit={1}
                 showtooltip={true}
                 required={true}
                 disabled={false}
-                ensureUser={true}
+                searchTextLimit={2}      
+                resolveDelay={1000}          
                 principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserChange}
+                onChange={onUserQuotationDepartmentHeadChange}
+              />             
+            </div>
+            <div className={styles['form-control']}>
+              <PeoplePicker                
+                context={peoplePickerContext}
+                titleText="Approver 1"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.Approver1EMail]}
+                onChange={onUserQuotationApprover1Change}
+              />
+            </div>
+            <div className={styles['form-control']}>
+              <PeoplePicker                
+                context={peoplePickerContext}
+                titleText="Approver 2"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.Approver2EMail]}
+                onChange={onUserQuotationApprover2Change}
+              />
+            </div>
+            <div className={styles['form-control']}>
+              <PeoplePicker               
+                context={peoplePickerContext}
+                titleText="Approver 3"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.Approver3EMail]}
+                onChange={onUserQuotationApprover3Change}
               />
             </div>
             {/* Buttons */}
@@ -829,89 +1221,146 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
             </div>
           </div>
           <div className='row' id='QuotationNEI' style={{ paddingTop: "2%", display: isActiveNEI ? "block" : "none", alignSelf: "center" }}>
-            <div className={styles['form-control']}>
-              <label>Approver</label>
-              <PeoplePicker
-                key={[form.ApproverEMail].join(",")}
-                context={props.context.pageContext.web.absoluteUrl as any}
-                titleText="Select Approver"
+          <div className={styles['form-control']}>
+              <PeoplePicker                
+                context={peoplePickerContext}
+                titleText="Department Head"
                 personSelectionLimit={1}
                 showtooltip={true}
                 required={true}
                 disabled={false}
-                ensureUser={true}
+                searchTextLimit={2}      
+                resolveDelay={1000}          
                 principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserChange}
+                onChange={onUserQuotationNEIDepartmentHeadChange}
+              />             
+            </div>
+            <div className={styles['form-control']}>
+              <PeoplePicker                
+                context={peoplePickerContext}
+                titleText="Approver 1"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.Approver1EMail]}
+                onChange={onUserQuotationNEIApprover1Change}
+              />
+            </div>
+            <div className={styles['form-control']}>
+              <PeoplePicker                
+                context={peoplePickerContext}
+                titleText="Approver 2"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.Approver2EMail]}
+                onChange={onUserQuotationNEIApprover2Change}
+              />
+            </div>
+            <div className={styles['form-control']}>
+              <PeoplePicker               
+                context={peoplePickerContext}
+                titleText="Approver 3"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.Approver3EMail]}
+                onChange={onUserQuotationNEIApprover3Change}
               />
             </div>
             {/* Buttons */}
             <div className={styles['btn-group']}>
-              <button name='NEIbtnsubmit' className={styles.btnSubmit} onClick={handleNEIBT}>Update</button>&nbsp;
+              <button name='NEIbtnsubmit' className={styles.btnSubmit} onClick={handleQANEISubmit}>Update</button>&nbsp;
               <button name='NEIbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
             </div>
           </div>
           <div className='row' id='ReimbursementD' style={{ paddingTop: "2%", display: isActiveREIMD ? "block" : "none", alignSelf: "center" }}>
-            <div className={styles['form-control']}>
-              <label>Approver</label>
+            <div className={styles['form-control']}>              
               <PeoplePicker
                 key={[form.ApproverEMail].join(",")}
-                context={props.context.pageContext.web.absoluteUrl as any}
-                titleText="Select Approver"
+                context={peoplePickerContext}
+                titleText="Department Head"
                 personSelectionLimit={1}
                 showtooltip={true}
                 required={true}
                 disabled={false}
-                ensureUser={true}
+                 searchTextLimit={2}      
+                resolveDelay={1000}          
                 principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserChange}
+                onChange={onUserREIMDChange}
               />
             </div>
             {/* Buttons */}
             <div className={styles['btn-group']}>
-              <button name='Reimbtnsubmit' className={styles.btnSubmit} onClick={handleREIMD}>Update</button>&nbsp;
+              <button name='Reimbtnsubmit' className={styles.btnSubmit} onClick={handleREIMDSubmit}>Update</button>&nbsp;
               <button name='ReimbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
             </div>
           </div>
           <div className='row' id='ReimbursementF' style={{ paddingTop: "2%", display: isActiveREIMF ? "block" : "none", alignSelf: "center" }}>
-            <div className={styles['form-control']}>
-              <label>Approver</label>
-              <PeoplePicker
-                key={[form.ApproverEMail].join(",")}
-                context={props.context.pageContext.web.absoluteUrl as any}
-                titleText="Select Approver"
+            <div className={styles['form-control']}>              
+              <PeoplePicker                
+                context={peoplePickerContext}
+                titleText="Approver"
                 personSelectionLimit={1}
                 showtooltip={true}
                 required={true}
                 disabled={false}
-                ensureUser={true}
+                searchTextLimit={2}      
+                resolveDelay={1000}          
                 principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserChange}
+                onChange={onUserREIMFChange}
               />
             </div>
             {/* Buttons */}
             <div className={styles['btn-group']}>
-              <button name='Reimbtnsubmit' className={styles.btnSubmit} onClick={handleREIMF}>Update</button>&nbsp;
+              <button name='Reimbtnsubmit' className={styles.btnSubmit} onClick={handleREIMFSubmit}>Update</button>&nbsp;
               <button name='ReimbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
             </div>
           </div>
           <div className='row' id='BillProcessing' style={{ paddingTop: "2%", display: isActiveBP ? "block" : "none", alignSelf: "center" }}>
             <div className={styles['form-control']}>
-              <label>Approver</label>
-              <PeoplePicker
-                key={[form.ApproverEMail].join(",")}
-                context={props.context.pageContext.web.absoluteUrl as any}
-                titleText="Select Approver"
+              <PeoplePicker                
+                context={peoplePickerContext}
+                titleText="Finance Controller"
                 personSelectionLimit={1}
                 showtooltip={true}
                 required={true}
                 disabled={false}
-                ensureUser={true}
+                searchTextLimit={2}      
+                resolveDelay={1000}          
                 principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserChange}
+                onChange={onUserBPFinanceChange}
+              />             
+            </div>
+            <div className={styles['form-control']}>
+              <PeoplePicker                
+                context={peoplePickerContext}
+                titleText="Billing2 & Approver"
+                personSelectionLimit={1}
+                showtooltip={true}
+                required={true}
+                disabled={false}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                defaultSelectedUsers={[form.Approver1EMail]}
+                onChange={onUserBPBillingChange}
               />
             </div>
             {/* Buttons */}
@@ -921,25 +1370,24 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
             </div>
           </div>
           <div className='row' id='PurchaseOrder' style={{ paddingTop: "2%", display: isActivePO ? "block" : "none", alignSelf: "center" }}>
-            <div className={styles['form-control']}>
-              <label>Approver</label>
-              <PeoplePicker
-                key={[form.ApproverEMail].join(",")}
-                context={props.context.pageContext.web.absoluteUrl as any}
+            <div className={styles['form-control']}>              
+              <PeoplePicker                
+                context={peoplePickerContext}
                 titleText="Select Approver"
                 personSelectionLimit={1}
                 showtooltip={true}
                 required={true}
                 disabled={false}
-                ensureUser={true}
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                searchTextLimit={2}
+                principalTypes={[PrincipalType.User]}
+                resolveDelay={1000}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserChange}
+                onChange={onUserPOChange}
               />
             </div>
             {/* Buttons */}
             <div className={styles['btn-group']}>
-              <button name='PObtnsubmit' className={styles.btnSubmit} onClick={handlePO}>Update</button>&nbsp;
+              <button name='PObtnsubmit' className={styles.btnSubmit} onClick={handlePOSubmit}>Update</button>&nbsp;
               <button name='PObtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
             </div>
           </div>
