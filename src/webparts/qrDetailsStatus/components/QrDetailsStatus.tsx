@@ -4,69 +4,118 @@ import { SPHttpClient } from '@microsoft/sp-http';
 import { IQrDetailsStatusProps } from './IQrDetailsStatusProps';
 import styles from './QrDetailsStatus.module.scss';
 
-const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
+interface IAttachmentFile {
+  FileName: string;
+  ServerRelativeUrl: string;
+}
 
-  const [data, setData] = useState<any>(null);
-  const [poItems, setPoItems] = useState<any[]>([]);
-  const [history, setHistory] = useState<any[]>([]);
+interface IFormData {
+  RequestNo?: string;
+  CurrentStatus?: string;
+  ApprovalPath?: string;
+  ProjectTitle?: string;
+  ProjectReffNo?: string;
+  ProjectDescription?: string;
+  TotalProjectAmount?: string | number;
+  ApplicableTaxes?: string | number;
+  Selectedvendor?: string;
+  SelectedQuote?: string | number;
+  Department?: string;
+  Advancepayment?: string;
+  AttachmentFiles?: IAttachmentFile[];
+  [key: string]: unknown;
+}
+
+interface IHistoryItem {
+  Designation?: string;
+  UserName?: string;
+  UserAction?: string;
+  UserComment?: string;
+  ActionDate?: string;
+}
+
+interface IUserLookup {
+  Title?: string;
+}
+
+interface IDepartmentApproverData {
+  Departmenthead?: IUserLookup;
+  Approval1?: IUserLookup;
+  Approval2?: IUserLookup;
+  Approval3?: IUserLookup;
+  Approval4?: IUserLookup;
+}
+
+interface IWorkflowStep {
+  designation: string;
+  userName: string;
+}
+
+interface IPurchaseOrderItem {
+  Description?: string;
+  Quantity?: string | number;
+  Rate?: string | number;
+  Amount?: string | number;
+}
+
+const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
+  const [data, setData] = useState<IFormData | null>(null);
+  const [poItems, setPoItems] = useState<IPurchaseOrderItem[]>([]);
+  const [history, setHistory] = useState<IHistoryItem[]>([]);
+  const [approverData, setApproverData] = useState<IDepartmentApproverData | null>(null);
   const [loading, setLoading] = useState(true);
 
   const params = new URLSearchParams(window.location.search);
-  const itemId = Number(params.get('id'));
+  const itemId = Number(params.get('id') || params.get('ID'));
+  const normalizeValue = (value?: string): string => String(value || '').toLowerCase().replace(/\s/g, '').trim();
 
-  // Fetch history data for timeline
-  const fetchHistory = async () => {
-    try {
-      const res = await props.spHttpClient.get(
-        `${props.siteUrl}/_api/web/lists/getbytitle('History')/items?$filter=FID eq ${itemId}&$orderby=Created asc`,
-        SPHttpClient.configurations.v1
-      );
-
-      const data = await res.json();
-      console.log("History:", data);
-
-      setHistory(data.value || []);
-    } catch (err) {
-      console.error("History error:", err);
-      setHistory([]);
-    }
+  // Load action history for the right-side timeline and top approval strip.
+  const fetchHistory = async (): Promise<void> => {
+    const res = await props.spHttpClient.get(
+      `${props.siteUrl}/_api/web/lists/getbytitle('History')/items?$filter=FID eq ${itemId}&$orderby=Created asc`,
+      SPHttpClient.configurations.v1
+    );
+    const result = await res.json();
+    setHistory(result.value || []);
   };
 
-  const fetchData = async () => {
-    try {
-      if (!itemId) return;
+  // Load the main request, department approvers, and PO rows used by the page.
+  const fetchData = async (): Promise<void> => {
+    const res = await props.spHttpClient.get(
+      `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles`,
+      SPHttpClient.configurations.v1
+    );
+    const result: IFormData = await res.json();
+    setData(result);
 
-      // MAIN DATA
-      const res = await props.spHttpClient.get(
-        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles`,
+    if (result.Department) {
+      const safeDepartmentName = String(result.Department).replace(/'/g, "''");
+      const deptRes = await props.spHttpClient.get(
+        `${props.siteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?$filter=DepartmentName eq '${safeDepartmentName}'&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4`,
         SPHttpClient.configurations.v1
       );
-
-      const result = await res.json();
-      setData(result);
-
-      // PO DATA
-      const poRes = await props.spHttpClient.get(
-        `${props.siteUrl}/_api/web/lists/getbytitle('PurchaseOrderDetails')/items?$filter=QuotationIdId eq ${itemId}`,
-        SPHttpClient.configurations.v1
-      );
-
-      const poData = await poRes.json();
-      setPoItems(poData.value || []);
-
-    } catch (err) {
-      console.error(err);
+      const deptData = await deptRes.json();
+      setApproverData((deptData.value && deptData.value[0]) || null);
     }
+
+    const poRes = await props.spHttpClient.get(
+      `${props.siteUrl}/_api/web/lists/getbytitle('PurchaseOrderDetails')/items?$filter=QuotationIdId eq ${itemId}`,
+      SPHttpClient.configurations.v1
+    );
+    const poData = await poRes.json();
+    setPoItems(poData.value || []);
   };
 
-  // Load data on mount
   useEffect(() => {
-    const loadAll = async () => {
+    const load = async (): Promise<void> => {
       await fetchData();
       await fetchHistory();
       setLoading(false);
     };
-    loadAll();
+
+    load().catch(() => {
+      setLoading(false);
+    });
   }, []);
 
   if (loading) return <div>Loading...</div>;
@@ -74,188 +123,223 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
   const requestLabel = data.RequestNo || `PRJ-${itemId}`;
   const currentStatus = data.CurrentStatus || 'Pending';
-  const approvalNames = String(data.ApprovalPath || '')
+  const approvalPathNames = String(data.ApprovalPath || '')
     .split('>')
-    .map((item: string) => item.replace(/^\s*\d+\.\s*/, '').trim())
-    .filter((item: string) => item);
+    .map((value: string) => value.replace(/^\d+\.\s*/, '').trim())
+    .filter((value: string) => value);
 
+  const approvedHistory = history.filter(h =>
+    (h.UserAction || "").toLowerCase().includes("approved") ||
+    (h.UserAction || "").toLowerCase().includes("submit")
+  );
+
+  // Keep only the latest history item for each designation so the UI does not repeat the same step.
+  const getLatestHistoryByDesignation = (items: IHistoryItem[]): IHistoryItem[] => {
+    const latestByDesignation = items.reduce((acc: Record<string, IHistoryItem>, curr: IHistoryItem) => {
+      const designation = curr.Designation || curr.UserName || 'Unknown';
+      acc[designation] = curr;
+      return acc;
+    }, {} as Record<string, IHistoryItem>);
+
+    return Object.keys(latestByDesignation).map((key) => latestByDesignation[key]);
+  };
+
+  const latestApprovedHistory = getLatestHistoryByDesignation(approvedHistory);
+  const latestTimelineHistory = getLatestHistoryByDesignation(history);
+
+  // DepartmentMaster is the preferred source for showing the pending approver flow.
+  const departmentWorkflowSteps: IWorkflowStep[] = [
+    { designation: 'Department Head', userName: approverData?.Departmenthead?.Title || '' },
+    { designation: 'Management 1', userName: approverData?.Approval1?.Title || '' },
+    { designation: 'Management 2', userName: approverData?.Approval2?.Title || '' },
+    { designation: 'Management 3', userName: approverData?.Approval3?.Title || '' },
+    { designation: 'Management 4', userName: approverData?.Approval4?.Title || '' }
+  ].filter((step: IWorkflowStep) => step.userName);
+
+  const fallbackWorkflowSteps: IWorkflowStep[] = approvalPathNames.map((name: string, index: number) => ({
+    designation: index === 0 ? 'Department Head' : `Management ${index}`,
+    userName: name
+  }));
+
+  const workflowSteps = departmentWorkflowSteps.length > 0 ? departmentWorkflowSteps : fallbackWorkflowSteps;
+
+  // The top strip shows the latest approved step on the left and only still-pending steps on the right.
+  const latestApprovedTopItem = latestApprovedHistory.length > 0
+    ? latestApprovedHistory[latestApprovedHistory.length - 1]
+    : null;
+  const approvedNames = latestApprovedHistory.map((item: IHistoryItem) => normalizeValue(item.UserName || item.Designation));
+  const pendingTopSteps = workflowSteps.filter((step: IWorkflowStep, index: number, arr: IWorkflowStep[]) => {
+    const normalizedUserName = normalizeValue(step.userName);
+    if (!normalizedUserName) {
+      return false;
+    }
+
+    const isApproved = approvedNames.indexOf(normalizedUserName) !== -1;
+    const isDuplicate = arr.findIndex((candidate: IWorkflowStep) => normalizeValue(candidate.userName) === normalizedUserName) !== index;
+    return !isApproved && !isDuplicate;
+  });
+
+  // Timeline colors are driven from the saved action text.
+  const getTimelineStatus = (actionValue?: string): 'approved' | 'rejected' | 'pending' => {
+    const action = (actionValue || '').toLowerCase();
+
+    if (action.includes('approved') || action.includes('submit')) {
+      return 'approved';
+    }
+
+    if (action.includes('reject')) {
+      return 'rejected';
+    }
+
+    return 'pending';
+  };
+
+  const getTimelineMarker = (status: 'approved' | 'rejected' | 'pending'): string => {
+    if (status === 'approved') {
+      return '✓';
+    }
+
+    if (status === 'rejected') {
+      return '×';
+    }
+
+    return '•';
+  };
+
+  const timelineStatusClassMap = {
+    approved: styles.approved,
+    rejected: styles.rejected,
+    pending: styles.pending
+  };
 
   return (
     <div className={styles.container}>
 
       <div className={styles.heading}>
-        Quotation Request Details & Status:
+        Quotation Request Details & Status
       </div>
 
       <div className={styles.mainLayout}>
 
-        {/* ================= LEFT SECTION ================= */}
+        {/* ================= LEFT ================= */}
         <div className={styles.leftSection}>
 
+          {/* TOP */}
           <div className={styles.topSummary}>
             <div className={styles.requestCode}>{requestLabel}</div>
             <div className={styles.currentStatus}>
-              <span>Current Status :</span>
-              <strong>{currentStatus}</strong>
+              Current Status : <strong>{currentStatus}</strong>
             </div>
           </div>
 
-<div className={styles.approverFlow}>
+          <div className={styles.approverFlow}>
+            {latestApprovedTopItem && (
+              <div className={styles.departmentStep}>
+                <div className={styles.approverName}>{latestApprovedTopItem.UserName}</div>
+                <div className={styles.approverRole}>{latestApprovedTopItem.Designation}</div>
+                <div className={styles.approverStatus}>Approved</div>
+              </div>
+            )}
 
-  {/* GREEN (Approved) */}
-  {(history || [])
-    .filter(item => {
-      const a = (item.UserAction || "").toLowerCase();
-      return a.includes("approved") || a.includes("submit");
-    })
-    .slice(0, 1) // only first approved
-    .map((item, i) => (
-      <div key={i} className={styles.departmentStep}>
-        <div className={styles.approverName}>{item.UserName}</div>
-        <div className={styles.approverRole}>{item.Designation}</div>
-        <div className={styles.approverStatus}>Approved</div>
-      </div>
-    ))}
-
-  {/* YELLOW (Pending stacked) */}
-  <div className={styles.managementColumn}>
-    {(history || [])
-      .filter(item => {
-        const a = (item.UserAction || "").toLowerCase();
-        return !a.includes("approved") && !a.includes("submit");
-      })
-      .map((item, i) => (
-        <div key={i} className={styles.managementStep}>
-          <div className={styles.approverName}>{item.UserName}</div>
-          <div className={styles.approverRole}>{item.Designation}</div>
-          <div className={styles.approverStatus}>Pending</div>
-        </div>
-      ))}
-  </div>
-
-</div>
-          {/* Project Title */}
-          <div className={styles.formRow}>
-            <label className={styles.label}>Project Title <span className={styles.required}>*</span></label>
-            <input className={styles.input} value={data.ProjectTitle || ''} disabled />
+            <div className={styles.managementColumn}>
+              {pendingTopSteps.map((item: IWorkflowStep, i: number) => (
+                <div key={i} className={styles.managementStep}>
+                  <div className={styles.approverName}>{item.userName}</div>
+                  <div className={styles.approverRole}>{item.designation || 'Pending Approval'}</div>
+                  <div className={styles.approverStatus}>Pending</div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Reference */}
+          {/* ================= FORM ================= */}
+
           <div className={styles.formRow}>
-            <label className={styles.label}>Project Reference Number</label>
-            <input className={styles.input} value={data.ProjectReffNo || ''} disabled />
+            <label>Project Title *</label>
+            <input value={data.ProjectTitle || ''} disabled />
           </div>
 
-          {/* Description */}
           <div className={styles.formRow}>
-            <label className={styles.label}>Project Description & Advance Payment Details <span className={styles.required}>*</span></label>
-            <input className={styles.input} value={data.ProjectDescription || ''} disabled />
+            <label>Project Reference Number</label>
+            <input value={data.ProjectReffNo || ''} disabled />
           </div>
 
-          {/* Amount */}
           <div className={styles.formRow}>
-            <label className={styles.label}>Total Project Amount</label>
+            <label>Project Description *</label>
+            <input value={data.ProjectDescription || ''} disabled />
+          </div>
+
+          <div className={styles.formRow}>
+            <label>Total Project Amount</label>
             <div className={styles.twoCol}>
-              <input className={styles.input} value={data.TotalProjectAmount || ''} disabled />
-              <span className={styles.inlineLabel}>Applicable Taxes</span>
-              <input className={styles.input} value={data.ApplicableTaxes || ''} disabled />
+              <input value={data.TotalProjectAmount || ''} disabled />
+              <input value={data.ApplicableTaxes || ''} disabled />
             </div>
           </div>
 
-          {/* Vendors */}
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3].map(i => (
             <div key={i} className={styles.formRow}>
-              <label className={styles.label}>
-                Vendor {i} {i === 1 && <span className={styles.required}>*</span>}
-              </label>
-
+              <label>Vendor {i}</label>
               <div className={styles.twoCol}>
-                <input className={styles.input} value={data[`Vendor${i}`] || ''} disabled />
-                <span className={styles.inlineLabel}>
-                  Quote {i} {i === 1 && <span className={styles.required}>*</span>}
-                </span>
-                <input className={styles.input} value={data[`Quote${i}`] || ''} disabled />
+                <input value={String(data[`Vendor${i}`] || '')} disabled />
+                <input value={String(data[`Quote${i}`] || '')} disabled />
               </div>
             </div>
           ))}
 
-          {/* Selected Vendor */}
           <div className={styles.formRow}>
-            <label className={styles.label}>Select Vendor <span className={styles.required}>*</span></label>
-            <input className={styles.input} value={data.Selectedvendor || ''} disabled />
+            <label>Select Vendor *</label>
+            <input value={data.Selectedvendor || ''} disabled />
           </div>
 
-          {/* Selected Quote */}
           <div className={styles.formRow}>
-            <label className={styles.label}>Selected Quote <span className={styles.required}>*</span></label>
-            <input className={styles.input} value={data.SelectedQuote || ''} disabled />
+            <label>Selected Quote *</label>
+            <input value={data.SelectedQuote || ''} disabled />
           </div>
 
-          {/* Department */}
           <div className={styles.formRow}>
-            <label className={styles.label}>Department <span className={styles.required}>*</span></label>
-            <input className={styles.input} value={data.Department || ''} disabled />
+            <label>Department *</label>
+            <input value={data.Department || ''} disabled />
           </div>
 
-          {/* Advance Payment */}
           <div className={styles.formRow}>
-            <label className={styles.label}>Advance Payment <span className={styles.required}>*</span></label>
-            <input className={styles.input} value={data.Advancepayment || ''} disabled />
+            <label>Advance Payment *</label>
+            <input value={data.Advancepayment || ''} disabled />
           </div>
 
-          {/* Approval Path */}
           <div className={styles.formRow}>
-            <label className={styles.label}>Approval Path <span className={styles.required}>*</span></label>
-            <input className={styles.input} value={data.ApprovalPath || ''} disabled />
+            <label>Approval Path *</label>
+            <input value={data.ApprovalPath || ''} disabled />
           </div>
 
-          {/* Attachments */}
+          {/* ATTACHMENTS */}
           <div className={styles.formRow}>
-            <label className={styles.label}>Attach Documents <span className={styles.required}>*</span></label>
-            <div>
-              {data.AttachmentFiles?.length > 0 ? (
-                data.AttachmentFiles.map((f: any) => (
-                  <a
-                    key={f.FileName}
-                    className={styles.attachmentLink}
-                    href={f.ServerRelativeUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {f.FileName}
-                  </a>
-                ))
-              ) : (
-                <span>No documents attached</span>
-              )}
-            </div>
+            <label>Attachments</label>
+            {data.AttachmentFiles?.map((f: IAttachmentFile) => (
+              <a
+                key={f.FileName}
+                className={styles.attachmentLink}
+                href={f.ServerRelativeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {f.FileName}
+              </a>
+            ))}
           </div>
 
-          {/* PO SECTION */}
-          <div className={styles.formRow}>
-            <label className={styles.label}>Purchase Order Details <span className={styles.required}>*</span></label>
+          {/* PO TABLE */}
+          <div className={styles.poSection}>
+            <div className={styles.poHeader}>Purchase Order Details</div>
 
-            <div className={styles.poSection}>
-              <div className={styles.poHeader}>Purchase Order Details</div>
-
-              <div className={styles.poTable}>
-                <div className={styles.poRowHeader}>
-                  <div>Description</div>
-                  <div>Qty</div>
-                  <div>Rate</div>
-                  <div>Amount</div>
-                </div>
-
-                {poItems.map((item, i) => (
-                  <div key={i} className={styles.poRow}>
-                    <input className={styles.input} value={item.Description || ''} disabled />
-                    <input className={styles.input} value={item.Quantity || ''} disabled />
-                    <input className={styles.input} value={item.Rate || ''} disabled />
-                    <input className={styles.input} value={item.Amount || ''} disabled />
-                  </div>
-                ))}
+            {poItems.map((item: IPurchaseOrderItem, i: number) => (
+              <div key={i} className={styles.poRow}>
+                <input value={item.Description || ''} disabled />
+                <input value={item.Quantity || ''} disabled />
+                <input value={item.Rate || ''} disabled />
+                <input value={item.Amount || ''} disabled />
               </div>
-            </div>
+            ))}
           </div>
 
         </div>
@@ -263,27 +347,38 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
         {/* ================= RIGHT TIMELINE ================= */}
         <div className={styles.rightTimeline}>
 
-          <div className={styles.timelineTitle}>Timeline</div>
+          <div className={styles.timelineTitle}>Timeline of the Request - {requestLabel}</div>
 
-          {(history || []).map((item, i) => {
-
-            const action = (item.UserAction || "").toLowerCase();
-
+          {latestTimelineHistory.map((item: IHistoryItem, i: number) => {
+            const timelineStatus = getTimelineStatus(item.UserAction);
             const status =
-              action.includes("approved") || action.includes("submit")
-                ? "Approved"
-                : action.includes("reject")
-                  ? "Rejected"
-                  : "Pending";
+              timelineStatus === 'approved'
+                ? 'Approved'
+                : timelineStatus === 'rejected'
+                  ? 'Rejected'
+                  : 'Pending';
 
             return (
-              <div
-                key={i}
-                className={`${styles.timelineItem} ${status === "Rejected" ? styles.rejected : ""
-                  }`}
-              >
-                <strong>{item.Designation}</strong>
-                <div>Status: {status}</div>
+              <div key={i} className={styles.timelineItem}>
+                <div className={`${styles.timelineDot} ${timelineStatusClassMap[timelineStatus]}`}>
+                  {getTimelineMarker(timelineStatus)}
+                </div>
+
+                <div className={styles.timelineText}>
+                  <b>{item.Designation}</b>
+
+                  <div>Approver Name: {item.UserName}</div>
+                  <div>Action Taken: {status}</div>
+                  <div>
+                    Action Date: {item.ActionDate
+                      ? new Date(item.ActionDate).toLocaleString()
+                      : '-'}
+                  </div>
+
+                  {item.UserComment && (
+                    <div>Comments: {item.UserComment}</div>
+                  )}
+                </div>
               </div>
             );
           })}

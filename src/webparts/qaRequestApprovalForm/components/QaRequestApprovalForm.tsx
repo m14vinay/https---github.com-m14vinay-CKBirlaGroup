@@ -88,7 +88,8 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
   const [currentStep, setCurrentStep] = React.useState(1);
 
   const params = new URLSearchParams(window.location.search);
-  const itemId = Number(params.get('id'));
+  const itemId =
+  Number(params.get('id')) || Number(params.get('ID'));
   const requestLabel = `PRJ-${itemId}`;
 
   const isReadOnly =

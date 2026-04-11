@@ -162,18 +162,33 @@
   background: #bdebd7;
 }
 
-.timelineItem::after {
-  content: "";
+.timelineDot {
   position: absolute;
-  left: -13px;
-  top: 2px;
-  width: 12px;
-  height: 12px;
+  left: -20px;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: #10b981;
+  font-size: 11px;
+  font-weight: 700;
   box-shadow: 0 0 0 4px #fff;
 }
 
+.timelineText {
+  font-size: 12px;
+  color: #444;
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+.timelineStepTitle {
+  font-weight: 600;
+  font-size: 14px;
+  color: #222;
+  margin-bottom: 4px;
+}
 .timelineItem:last-child::before {
   display: none;
 }
@@ -350,6 +365,18 @@
     grid-template-columns: 1fr;
   }
 }
+
+.approved {
+  color: #fff;
+  background: #10b981;
+}
+
+.pending {
+  color: #111;
+  background: #ffcc12;
+}
+
 .rejected {
-  color: #e53935;
+  background: #e53935;
+  color: #fff;
 }
