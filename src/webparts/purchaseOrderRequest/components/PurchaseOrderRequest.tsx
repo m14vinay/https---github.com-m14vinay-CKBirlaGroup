@@ -5,7 +5,7 @@ import { SPHttpClient } from '@microsoft/sp-http';
 import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
 import SharePointService from '../service/Service';
 import { PageContext } from '@microsoft/sp-page-context';
-
+import { Spinner, SpinnerSize } from '@fluentui/react';
 const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
   // State
@@ -15,42 +15,34 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     projectTitle: '',
     vendorName: '',
     vendorNameID:'',
-    RemainingAmount: '',
-    TotalAmount:'',
-    OccupiedAmount:'',
+    RemainingAmount: 0,
+    TotalAmount:0,
+    OccupiedAmount:0,
     Department: '',
     POAmount: 0,
     ApplicableTaxes: 0,
+    AssignedTo: '',
     PoMaster: '',
+     POCategory: '',
     Comments: '',
    files: [] as File[],
      Attachments: [],
     POrequestNo:'',
     CurrentStatus:'',
-    approver1: '',
-   approver2: '',
-   approver3: '',
-   approver4: '',
-   approver5: '',
-   DepartmentHead: ''
+    RequestNo:''
   });
 
+
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
-  const [vendorOptions, setvendorOptions] = React.useState<IDropdownOption[]>([]);
-  const [itemId, setItemId] = React.useState<number | null>(null);
-  const [Approver1ID, setApprover1ID] = React.useState<number | null>(null);
-  const [Approver2ID, setApprover2ID] = React.useState<number | null>(null);
-  const [Approver3ID, setApprover3ID] = React.useState<number | null>(null);
-  const [Approver4ID, setApprover4ID] = React.useState<number | null>(null);
-  const [Approver5ID, setApprover5ID] = React.useState<number | null>(null);
+    const [itemId, setItemId] = React.useState<number | null>(null);
+  const [FinanceController, setApprover2ID] = React.useState<number | null>(null);
+  const [AssignedID, setAssignedID] = React.useState<number | null>(null);
   const [Departmenthead, setDepartmentHead] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
-   const [POrequestNo, setPORequestNo] = React.useState('');
-  const [POrequestNoError, setPORequestNoError] = React.useState('');
-  const [department, setDepartment] = React.useState('');
-    const [projectTitle, setProjectTitle] = React.useState('');
-     const [attachments, setAttachments] = React.useState<any[]>([]);
-    const MAX_TOTAL_SIZE_MB = 25;
+  const [attachments, setAttachments] = React.useState<any[]>([]);
+  const[occupiedAmount,setoccupiedAmount]=React.useState(0);
+  const [loading, setLoading] = React.useState(false);  
+  const MAX_TOTAL_SIZE_MB = 25;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
     
 
@@ -58,7 +50,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   // --- 1️⃣ Get ID from query string ---
     const getIdFromQueryString = (): number | null => {
       const params = new URLSearchParams(window.location.search);
-      const id = params.get('ID');
+      const id = params.get('RequestId');
       return id ? parseInt(id, 10) : null;
     };
   
@@ -84,15 +76,16 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
      React.useEffect(() => {
        if (itemId) {
          loadAttachments(itemId);
-        getApprover();
+        //getApprover();
        }
      }, [itemId]);
 
 //FETCH DATA-----
   const handleFetchById = async (id: number) => {
     try {
+         setLoading(true);
       console.log("Calling API with ID:", id);
-
+      
       const result = await service.getItemByRequestNo(id);
 
       console.log("Result:", result);
@@ -100,6 +93,9 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       if (result.CurrentStatus==='Draft') {
       setItemId(result.Id);
 
+       const selectedOption = poOptions.find(
+    opt => opt.text === result.PoMaster
+  );
         setForm(prev => ({
           ...prev,
           
@@ -107,14 +103,29 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
           Department: result.Department || '',
           projectTitle: result.ProjectTitle || '',
           vendorName: result.VendorName || '',
+          VendorNameID: result.VendorNameID || '',
+          RemainingAmount: result.RemainingAmount || '',
+          TotalAmount: result.TotalAmount || '',
+          OccupiedAmount: result.OccupiedAmount || 0,  
           POAmount: result.POAmount || 0,
           ApplicableTaxes: result.ApplicableTaxes || 0,
-          Comments: result.ProjectDescription || ''
-          
-         
+          Comments: result.ProjectDescription || '',
+          POCategory: selectedOption?.text || ''        
         }));
-
-       
+      const data = await service.GetApprover(result.Department);
+      if (data?.Id > 0) {                
+        setDepartmentHead(data.Departmenthead?.Id || null);
+        const User=await service.getUserById(data.Departmenthead.Id);
+        if(User?.Id)
+        {
+          setAssignedID(User.Title);          
+        }
+        const dataApprover = await service.GetApproverFromFinance(result.PoMaster);
+        if(dataApprover?.Id)
+        {
+          setApprover2ID(dataApprover.FinanceController?.Id || null);
+        }
+      }      
 
       } else {
         alert("No data found");
@@ -123,6 +134,10 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     } catch (error) {
       console.error("Error:", error);
     }
+    finally
+  {
+    setLoading(false);
+  }
   };
 
 
@@ -134,32 +149,41 @@ const handleDownload = () => {
   const url = `${props.context.pageContext.web.absoluteUrl}/sites/DigiflowUAT/Shared%20Documents/PO_Format%20(1).xlsx?d=w7b16074a3861495c96494464b6b1818d&csf=1&web=1&e=rkBQLk`;
   window.location.assign(url);
 };
-const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event?.target?.files;
+ const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
+  const files = event?.target?.files;
   if (!files) return;
 
-  
+  const allowedExtensions = ['pdf', 'xlsx', 'docx'];
   const filesArray = Array.from(files);
 
+  // 🔹 Check each file
+  for (let file of filesArray) {
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
+      alert(`File type not allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
+      return; // stop execution
+    }
+  }
+
+  // 🔹 Total size check
   const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
   if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
     alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
     return;
   }
-   // Invalid filename check
+
+  // 🔹 Invalid filename check
   const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
   if (invalidFiles.length > 0) {
     alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
     return;
   }
-   if (event.target.files) {
-    const selectedFiles = Array.from(event.target.files);
 
-    setForm((prev: any) => ({
-      ...prev,
-      files: [...prev.files, ...selectedFiles]
-    }));
-  }
+  // ✅ Add valid files to form state
+  setForm((prev: any) => ({
+    ...prev,
+    files: [...prev.files, ...filesArray]
+  }));
 };
 const removeFile = (index: number) => {
   setForm((prev: any) => ({
@@ -175,53 +199,54 @@ const removeExistingFile = async (index: number) => {
   await service.deleteAttachmentFromSP(file);
   setAttachments(prev => prev.filter((_, i) => i !== index));
 };
-
-
-
-
 const resetFields = () => {
   setForm(prev => ({
     ...prev,
     Department: '',
-    ProjectTitle: ''
+    ProjectTitle: '',
+    department:'',
+    projectTitle: '',
+    vendorName: '',
+    vendorNameID:'',
+    RemainingAmount: 0,
+    TotalAmount:0,
+    OccupiedAmount:0,
+    POAmount: 0,
+    ApplicableTaxes: 0,
+    AssignedTo: '',
+    PoMaster: '',
+    Comments: '',
+   files: [] as File[],
+     Attachments: [],
+    POrequestNo:'',
+    CurrentStatus:'',
+    RequestNo:''
   }));
 
-  setApprover1ID(null);
   setApprover2ID(null);
-  setApprover3ID(null);
-  setApprover4ID(null);
-  setApprover5ID(null);
   setDepartmentHead(null);
 };
 
-
-const getApprover = async () => {
-    try {
-      const data = await service.GetApprover('');
-
-      console.log("Approver Data:", data);
-
-      if (data && data.length > 0) {
-        setApprover1ID(data[0].approver1 || '');
-        setApprover3ID(data[0].approver2 || '');
-        setApprover3ID(data[0].approver3 || '');
-        setApprover4ID(data[0].approver4 || '');
-        setApprover5ID(data[0].approver5 || '');
-        setDepartmentHead(data[0].DepartmentHead || '');
-      }
-
-    } catch (error) {
-      console.error(error);
-    }
-  };
+const handlecheckamount=async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = e.target;
+  setForm({
+    ...form,
+    [name]: value
+  });
+  if(Number(value)>(form.RemainingAmount))
+  {setForm(prev => ({
+    ...prev,
+    POAmount:0
+  }));
+    alert("Please Enter PO Amount less or equal to Remaining Amount.");
+  }
+}
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-
+  const value = e.target.value.toUpperCase();
   setForm(prev => ({
     ...prev,
     projectCode: value
   }));
-
   if (!value) {
     resetFields();
     return;
@@ -229,35 +254,55 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
   try {
     const result = await service.getRequestDetails(value);
-
     if (result.length > 0) {
       const item = result[0];
-
+      const OccupiedAmount = await service.getTotaloccupiedAmount(value);
+      let total = 0;
+      if (OccupiedAmount.length > 0) {
+        total = OccupiedAmount.reduce((sum: number, items: any) => {
+          return sum + Number(items.POAmount || 0);
+        }, 0);
+      }
+        if (item.Status === 'Approved') {
       // 👉 Form fields update
       setForm(prev => ({
         ...prev,
         Department: item.Department || '',
-        projectTitle: item.ProjectTitle || ''
+        projectTitle: item.ProjectTitle || '',
+        vendorName: item.Selectedvendor || '',
+        TotalAmount:item.TotalProjectAmount || 0,
+        OccupiedAmount:total||0,
+        RemainingAmount:item.TotalProjectAmount-total
       }));
-
+      
       // 👉 Approver API call
       const data = await service.GetApprover(item.Department);
-
-      if (data?.Id > 0) {
-        setApprover1ID(data.Approval1?.Id || null);
-        setApprover2ID(data.Approval2?.Id || null);
-        setApprover3ID(data.Approval3?.Id || null);
-        setApprover4ID(data.Approval4?.Id || null);
-        setApprover5ID(data.Approval5?.Id || null);
+      if (data?.Id > 0) {                
         setDepartmentHead(data.Departmenthead?.Id || null);
-      }
-
-    } else {
+        const User=await service.getUserById(data.Departmenthead.Id);
+        if(User?.Id)
+        {
+          setAssignedID(User.Title);
+        }
+        const dataApprover = await service.GetApproverFromFinance(item.PoMaster);
+        if(dataApprover?.Id)
+        {
+          setApprover2ID(dataApprover.FinanceController?.Id || null);
+        }
+      }  
+    }
+    else {
+      alert("This request is not approved ✅");
       resetFields();
     }
-
+    } 
+    else      
+      {
+    resetFields();
+      }
   } catch (error) {
     console.error("Error fetching data:", error);
+    resetFields();
   }
 };
  
@@ -280,18 +325,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 // 🔹 Load data
   React.useEffect(() => {
     loadDepartments();
-    //loadVendor();
   }, []);
-
-  // const loadVendor = async () => {    
-  //   const data = await service.getVendor();
-  //   const options = data.map((item: any) => ({
-  //     key: item.Id,
-  //     text: item.VendorName
-  //   }));
-
-  //   setvendorOptions(options);
-  // };
 
   // // 🔹 Handle input change
  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -303,15 +337,28 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
   });
 };
 
-const getPOCategoryText = () => {
-  if (form.PoMaster === "1") return "Issue To Vendor";
-  if (form.PoMaster === "2") return "Internal Compliance";
-  return "";
+
+const handleSaveHistory = async (id: number) => {
+
+  const currentuser = await service.getUser();
+
+  const payload = {
+    Title: 'PO',
+    FID: id,  
+    UserName: currentuser.Title,
+    UserAction: 'Request Initiator',
+    ActionDate: new Date().toISOString(),
+     Designation: 'Request Initiator',
+  };
+
+  await service.createHistoryItem(payload);
 };
+
 
 //SAVE DRAFT DATA
 
   const handleSaveOrUpdate = async () => {
+    setLoading(true);
   // 🔹 Validations
   if(!form.projectCode) return alert("Project Code required");
     if(!form.POAmount) return alert("Enter POAmount");
@@ -329,16 +376,14 @@ const getPOCategoryText = () => {
     ProjectCode: form.projectCode,
     Department: form.Department,
     ProjectTitle: form.projectTitle,
-    VendorName: 'vinay',
-    //TotalAmount:form.TotalAmount,
-    //OccupiedAmount: form.OccupiedAmount,
-    //RemainingAmount: form.RemainingAmount,
+    VendorName: form.vendorName,
+    TotalAmount:Number(form.TotalAmount),
+    OccupiedAmount: Number(form.OccupiedAmount),
+    RemainingAmount: Number(form.RemainingAmount),
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
-   PoMaster:form.PoMaster,
+    PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
-    Departmenthead: setDepartmentHead,
-     Approver2: setApprover2ID,
     CurrentStatus:'Draft'
   };
 
@@ -351,9 +396,13 @@ const getPOCategoryText = () => {
       if (res.Id > 0 && form.files.length > 0) {
         for (let i = 0; i < form.files.length; i++) {
           await service.uploadFile(res.Id, form.files[i]);
-        }
+           
       }
+    }
       alert("Data Saved Successfully ✅");
+      await service.updateItem(res.Id, {
+          RequestNo: `CKBCSL/25-26/IV/Finance/${res.Id}`
+        });
     } else {
       // 🔹 UPDATE
       await service.updateItem(itemId, payload);
@@ -369,12 +418,18 @@ const getPOCategoryText = () => {
     console.error(error);
     alert("Error occurred ❌");
   }
+  finally
+  {
+    setLoading(false);
+  }
 };
 
   
 
 // Update
 const handleUpdate = async () => {
+  try {
+  setLoading(true);
    if(!form.projectCode) return alert("Project Code required");
   if(!form.POAmount) return alert("Enter POAmount");
     if(!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
@@ -385,37 +440,71 @@ const handleUpdate = async () => {
 ) {
   return alert("Attach files");
 }
+        const dataApprover = await service.GetApproverFromFinance(form.PoMaster);
+        if(dataApprover?.Id)
+        {
+          //const item = dataApprover?.FinanceController?.Id;
+          setApprover2ID(dataApprover.FinanceController?.Id || null);
+        }
+       
   const payload = {
     Title:"Testing",
     ProjectCode: form.projectCode,
     ProjectTitle: form.projectTitle,
-    VendorName: 'Vinay',
-    //RemainingAmount: form.RemainingAmount,
+    VendorName: form.vendorName,
+   TotalAmount:Number(form.TotalAmount),
+    OccupiedAmount: Number(form.OccupiedAmount),
+    RemainingAmount: Number(form.RemainingAmount),
     Department: form.Department,
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
-   PoMaster:form.PoMaster,
+    PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
     CurrentStatus:'Pending',
-    Departmenthead: setDepartmentHead,
-     Approver2: setApprover2ID
+    AssignedTo: AssignedID,
+    DepartmentHeadId: Number(Departmenthead),
+    AssignedToEmailId:Number(Departmenthead),
+    Approver2Id: dataApprover?.FinanceController?.Id
   };
-  try {
-    if (itemId) {
-      // 🔥 UPDATE
+  
+    if (itemId) {       
      await service.updateItem(itemId, payload);
-    if (form.files && form.files.length > 0) {
+     await handleSaveHistory(itemId);
+     if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(itemId, form.files[i]);
       }
     }
-      alert("Data Submitted Successfully ✅");    
-      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
-     window.location.assign(url);  
+    alert("Data Submitted Successfully ✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);  
     }
-  } catch (error) {
+    else{
+     const res= await service.createItem(payload);
+      setItemId(res.Id);
+     await handleSaveHistory(res.Id);
+     if(res.Id>0)
+     {
+     if (res.Id > 0 && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(res.Id , form.files[i]);
+      }
+      alert("Data Submitted Successfully ✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    window.location.assign(url);  
+     }
+    }    
+    }
+
+  }
+       
+   catch (error) {
     console.error(error);
     alert("Error occurred");
+  }
+  finally
+  {
+    setLoading(false);
   }
 };
 
@@ -431,71 +520,73 @@ const validatePO = (value: string) => {
    
   // 🔹 UI
   return (
+         <section>
+           {loading && (
+     <div style={{
+       position: 'fixed',
+       top: 0,
+       left: 0,
+       width: '100%',
+       height: '100%',
+       background: 'rgba(255,255,255,0.6)',
+       zIndex: 9999
+     }}>
+       <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+         <Spinner label="Processing..." size={SpinnerSize.large} />
+       </div>
+     </div>
+   )}
     <div className={styles.container}>
-
-      <div className={styles.leftPanel}>
-        <h2>PO Approval Request Form</h2>
-        <h4>PO Approval / Request Form</h4>
+          <div className={styles.header}>
+            <h4>PO Approval Form </h4>          
+          </div>
+          <div className={styles.row}>
+            <div className={styles['col-md-9']}>
+              <div className={styles.leftPanel}>
+                <div className={styles.leftPanelHeader}>
+                  <h4>PO Approval Form</h4>              
+                </div>
        <button style={{backgroundColor:'purple',color:'white',fontSize:'bold',width:'100%'}} onClick={handleDownload}>Download Purchase Order</button>
        <div></div>
         <label>Project Code <span className={styles.required}>*</span> </label>
         <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange} />
 
-        {/* <label>Department</label>
-        <Dropdown
-          options={departmentOptions}
-          selectedKey={form.Department}
-          onChange={(e, option) =>
-            setForm({ ...form, Department: option?.text as string })
-          }
-        /> */}
-         
-
          <label>Department</label>
-          <input name="Department" value={form.Department} readOnly />
-        
+          <input name="Department" value={form.Department} readOnly style={{backgroundColor:"lightgray"}}  />        
 
         <label>Project Title</label>
-        <input name="projectTitle" value={form.projectTitle} readOnly />
+        <input name="projectTitle" value={form.projectTitle} readOnly style={{backgroundColor:"lightgray"}}  />
 
-        <label>Select Vendor Name</label>
-        <Dropdown
-          options={vendorOptions}
-          selectedKey={form.vendorNameID}     
-          onChange={(e, option) =>
-            setForm({ ...form, vendorName: option?.text as string,vendorNameID: option?.key as string, })
-          }    
-        />
+        <label>Vendor Name</label>
+        <input name="VendorName" value={form.vendorName} readOnly style={{backgroundColor:"lightgray"}}  />
 
         <label>Total Amount</label>
-        <input name="TotalAmount" value={form.TotalAmount} onChange={handleChange} />
+        <input name="TotalAmount" value={form.TotalAmount} onChange={handleChange} readOnly style={{backgroundColor:"lightgray"}}  />
 
         <label>Occupied Amount</label>
-        <input name="OccupiedAmount" value={form.OccupiedAmount} onChange={handleChange} />
+        <input name="OccupiedAmount" value={form.OccupiedAmount} onChange={handleChange} readOnly style={{backgroundColor:"lightgray"}}  />
 
         <label>Remaining Amount</label>
-        <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange} />
+        <input name="RemainingAmount" value={form.RemainingAmount} onChange={handleChange}readOnly style={{backgroundColor:"lightgray"}}  />
 
         <label>PO Amount <span className={styles.required}>*</span></label>
-        <input name="POAmount" value={form.POAmount} onChange={handleChange} />
+        <input name="POAmount" value={form.POAmount} onChange={handlecheckamount} type='number' />
 
         <label>Applicable Taxes <span className={styles.required}>*</span></label>
-        <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} />
+        <input name="ApplicableTaxes" value={form.ApplicableTaxes} onChange={handleChange} type='number' />
 
         <ChoiceGroup
   label="PO Category"
   options={poOptions}
-  selectedKey={form.PoMaster}   // ✅ form se bind karo
-  onChange={(e, option) =>{
+  selectedKey={poOptions.find(opt => opt.text === form.PoMaster)?.key}
+   //selectedKey={form.PoMaster}
+  onChange={(_, option) => {
     setForm(prev => ({
       ...prev,
-      PoMaster: option?.text as string
+      PoMaster: option?.text || "" // text store karo
     }));
-  }
-}
+  }}
 />
-
-
         <label>Additional Information & Remarks</label>
         <input name="Comments" value={form.Comments} onChange={handleChange} />
 
@@ -556,35 +647,52 @@ const validatePO = (value: string) => {
     </ul>
        )}
         <div className={styles.buttonGroup}>          
-          <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
+          <button className={styles.submitBtn} onClick={handleUpdate}  >Submit</button>
           <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
           <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
         </div>
-      </div>
-       <div className={styles.rightPanel}>
+          </div>
+        </div>
+       <div className={styles['col-md-3']}>
+        <div className={styles.leftPanelHeader}>
+             
+        </div>        
+      <div className={styles.rightPanel}>        
           {/* Templates */}
           <div className={styles.card}>
-            <h4>Templates</h4>
-            <ul>
-              <li>PO_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
-            </ul>
+             <div>
+              <h6>Templates</h6>              
+            </div>
+            <ol>
+             <li>
+      <a 
+        href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/PO_v1.0.xlsx"
+      target="_blank"
+      rel="noopener noreferrer"
+      >
+      PO_v1.0.xlsx
+      </a>
+    </li>
+            </ol>
           </div>
           {/* Guidelines */}
           <div className={styles.card}>
-            <h4>Important Guidelines</h4>
+             <div>
+              <h6>Importance Guidelines</h6>              
+            </div>
             <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
+              <li>To find your project code, please refer to the home page and 'my requests' section. Please take note that the system would not allow to create a 'purchase order' 
+                approval request unless the previous stage vendor mapping request is approved.</li>
+              <li>Attach all documents (excel form, pdf, emails, scan documents etc) before submitting the form. Once form is submitted it is non-editable. Total attachment size limit is 25 MB. 
+                It is recommended that the attachment name to not have spaces in it.</li>
+             
             </ol>
           </div>
         </div>
-
-    </div>
-  );
+      </div>
+      </div>
+      </div>
+    </section>
+   );
 };
-
 export default PurchaseOrderRequest;

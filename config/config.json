@@ -186,14 +186,6 @@
         }
       ]
     },
-    "vendor-registration-web-part": {
-      "components": [
-        {
-          "entrypoint": "./lib/webparts/vendorRegistration/VendorRegistrationWebPart.js",
-          "manifest": "./src/webparts/vendorRegistration/VendorRegistrationWebPart.manifest.json"
-        }
-      ]
-    },
     "vendor-registration-manually-web-part": {
       "components": [
         {
@@ -241,6 +233,14 @@
           "manifest": "./src/webparts/digiflowMenu/DigiflowMenuWebPart.manifest.json"
         }
       ]
+    },
+    "manage-approvers-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/manageApprovers/ManageApproversWebPart.js",
+          "manifest": "./src/webparts/manageApprovers/ManageApproversWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -268,12 +268,13 @@
     "SummaryReportWebPartStrings": "lib/webparts/summaryReport/loc/{locale}.js",
     "FinanceReportWebPartStrings": "lib/webparts/financeReport/loc/{locale}.js",
     "RequestHistoryReportWebPartStrings": "lib/webparts/requestHistoryReport/loc/{locale}.js",
-    "VendorRegistrationWebPartStrings": "lib/webparts/vendorRegistration/loc/{locale}.js",
     "VendorRegistrationManuallyWebPartStrings": "lib/webparts/vendorRegistrationManually/loc/{locale}.js",
     "VendorRegistrationDetailWebPartStrings": "lib/webparts/vendorRegistrationDetail/loc/{locale}.js",
     "VendorRegistrationSearchWebPartStrings": "lib/webparts/vendorRegistrationSearch/loc/{locale}.js",
     "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js",
     "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js",
-    "DigiflowMenuWebPartStrings": "lib/webparts/digiflowMenu/loc/{locale}.js"
+    "DigiflowMenuWebPartStrings": "lib/webparts/digiflowMenu/loc/{locale}.js",
+    "ManageApproversWebPartStrings": "lib/webparts/manageApprovers/loc/{locale}.js",
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
   }
 }

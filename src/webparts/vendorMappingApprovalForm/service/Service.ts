@@ -5,6 +5,7 @@ export default class Service {
    private listname="VendorMapping";
   private Departmentmaster ="DepartmentMaster";
   private VendorList="";
+      private HistoryList="History";
 
   constructor(context: any) {
     this.context = context;
@@ -81,7 +82,7 @@ export default class Service {
   }
 
   // Update the Record (Submit)
-  public async updateItemdata(id: number,status:string, comments: string ): Promise<void> {
+  public async updateItemdata(id: number,status:string, comments: string,AssignedStatus: string ): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
     await this.context.spHttpClient.post(
@@ -97,6 +98,7 @@ export default class Service {
         body: JSON.stringify({
         CurrentStatus: status,
          ApproverComment: comments,
+         AssignedTo:AssignedStatus,
          Actiondate1: new Date().toISOString()
      })
       }
@@ -117,6 +119,7 @@ export default class Service {
    if (item && item.Id) {
     return {
       Id: item.Id,
+      RequestNo: item.RequestNo,
       ProjectCode: item.ProjectCode,
       ProjectTitle: item.ProjectTitle,
       ProjectDescription: item.ProjectDescription,
@@ -125,7 +128,8 @@ export default class Service {
       ApproverComments: item.ApproverComments, // 👈 check column name
       Attachments: item.AttachmentFiles || [],
       CurrentStatus:item.CurrentStatus ,// 👈 important
-      Actiondate1 : item.Actiondate1
+      Actiondate1 : item.Actiondate1,
+      AssignedTo : item.AssignedTo
     };
   }
 
@@ -169,6 +173,61 @@ export default class Service {
 
   return data.value; // array of attachments
 }
+
+ public async getUser(): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data;
   }
+  // Save the Hitory Record
+   public async createHistoryItem(data: any): Promise<any> {
+         const itemType = await this.getListItemType();
+         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items`;   
+         const response = await this.context.spHttpClient.post(
+           url,
+          SPHttpClient.configurations.v1,
+             {
+               headers: {
+                 'Accept': 'application/json',
+                 'Content-Type': 'application/json'
+               },
+               body: JSON.stringify(data)
+             }
+         );
+         return response.json();
+       }
+    // Get the History Record
+    public async GetHistoryItem(ID:Number,FormCode:string): Promise<any> {
+      const itemType = await this.getListItemType();
+       const url =`${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${ID} and Title eq '${encodeURIComponent(FormCode)}'`;  
+      console.log("URL:",url)  
+    const response = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+   const data = await response.json();
+   return data.value;
+    }
+  // GetList Item
+private async getListItemType(): Promise<string> {
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')?$select=ListItemEntityTypeFullName`;
+
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+
+  const data = await res.json();
+  return data.ListItemEntityTypeFullName;
+}
+  }
+  
+
+
+  
 
 

@@ -4,8 +4,9 @@ import { ISummaryReportProps } from './ISummaryReportProps';
 import { Dropdown, Icon, IDropdownOption, Label } from '@fluentui/react';
 import SharePointService from '../service/Service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
-import DataTable, { TableColumn } from "react-data-table-component";
 import { useEffect, useState } from 'react';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -15,284 +16,435 @@ import {
   flexRender,
   useReactTable,
 } from '@tanstack/react-table';
-import { Table } from 'react-bootstrap';
+import Table from 'react-bootstrap/Table';
+import 'bootstrap/dist/css/bootstrap.min.css';
 const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
-const [form, setForm] = React.useState({
-      VendorName: '',
-      VendorID: ''
-  });
-  
-
   const [loading, setLoading] = React.useState(false);
-  const [vendorOptions, setVendorOptions] = React.useState<IDropdownOption[]>([]);
-  const params = new URLSearchParams(window.location.search);
   const service = new SharePointService(props.context);
-  const [search, setSearch] = useState("");
-    const [data, _setData] = useState<any[]>(() => []);
-    const [user, setUser] = useState<any>(null);
-    const [globalFilter, setGlobalFilter] = useState("");
-    const [sorting, setSorting] = useState<any>([]);
-    
-const filteredData = data.filter(item =>
-  item.DocumentName?.toLowerCase().includes(search.toLowerCase()) ||
-  item.VendorName?.toLowerCase().includes(search.toLowerCase())
-);
-
-const columnHelper = createColumnHelper<any>()
-    const columns = [
-        columnHelper.accessor('ID', {
-            header: () => <span>Document ID</span>
-        }),
-        columnHelper.accessor('Title', {
-            header: () => 'Document Name'
-        }),
-        columnHelper.accessor('VendorName', {
-            header: () => <span>Vendor Name</span>
-        }),
-        columnHelper.accessor('BillNumber', {
-            header: 'Bill Number'
-        }),
-        columnHelper.accessor('BillDate', {
-  header: 'Bill Date',
-  cell: info =>
-    info.getValue()
-      ? new Date(info.getValue()).toLocaleDateString()
-      : ""
-}),
-        columnHelper.accessor('BillAmount', {
-            header: 'Bill Amount'            
-        }),
-        columnHelper.accessor('Created', {
-  header: 'Uploaded Date',
-  cell: info => new Date(info.getValue()).toLocaleDateString()
-}),
-        columnHelper.accessor(row => row.Author?.Title, {
-  id: 'Author',
-  header: 'Uploader'
-}),
-        columnHelper.display({
-  id: 'view',
-  header: 'View',
-  cell: info => (
-    <button onClick={() => handleView(info.row.original)}>
-      View
-    </button>
-  )
-})
-    ]
-    const table = useReactTable({
-            data,
-            columns,
-            getCoreRowModel: getCoreRowModel(),
-            state: {
-                globalFilter,
-                sorting,
-            },
-            onGlobalFilterChange: setGlobalFilter,
-            onSortingChange: setSorting,
-            getPaginationRowModel: getPaginationRowModel(),
-            getSortedRowModel: getSortedRowModel(),
-            getFilteredRowModel: getFilteredRowModel(),
-        });
-  // 🔹 Load data
-    React.useEffect(() => {
-      loadMaster();
-      getUser();
-    }, []);
+  const [data, _setData] = useState<any[]>(() => []);
+  const [user, setUser] = useState<any>(null);
+  const [isActiveQA, setIsActiveQA] = React.useState(false);
+  const [isActivePO, setIsActivePO] = React.useState(false);
+  const [isActiveVM, setIsActiveVM] = React.useState(false);
+  const [isActiveBP, setIsActiveBP] = React.useState(false);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [sorting, setSorting] = useState<any>([]);
+  const [Label, setLabel] = useState("");
+  const columnHelper = createColumnHelper<any>();
+  const [columns, setColumns] = React.useState<any[]>([]);
+  
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    state: {
+      globalFilter,
+      sorting,
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    onSortingChange: setSorting,
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+  });
+  // Load data
+  React.useEffect(() => {
+    getUser();
+    _setData(data);
+    setColumns(columns); 
+    handleQuotation();
+  }, []);
   // Load the User Details
   const getUser = async () => {
-      const data = await service.getUser();
-      if(data && Array.isArray(data))
-      {
+    const data = await service.getUser();
+    if (data.Id > 0) {
       setUser(data);
     }
-    };
-    //Load the Master Data for Dropdown
-    const loadMaster = async () => {
-      const data = await service.getMasterDocument();
-      if(data && Array.isArray(data))
-      {
-      const options = data.map((item: any) => ({
-        key: item.Id,
-        text: item.VendorName
-      }));
-      setVendorOptions(options);
+  };
+  const handleQuotation = async () => {
+    _setData([]);
+    setLabel('Quotation Approval');
+    setIsActiveQA(true);
+    setIsActiveBP(false);
+    setIsActivePO(false);
+    setIsActiveVM(false);
+    const setDynamicColumns =[
+    columnHelper.accessor('RequestNo', {
+      header: "Request No"
+    }),
+    columnHelper.accessor('ProjectReffNo', {
+      header: "Description"
+    }),
+    columnHelper.accessor('ProjectTitle', {
+      header: "Project Title"
+    }),
+    columnHelper.accessor('ProjectDescription', {
+      header: "Project Description"
+    }),
+    columnHelper.accessor('Department', {
+      header: "Department"
+    }),
+    columnHelper.accessor('Status', {
+      header: "Status"
+    }),
+    columnHelper.accessor('ApprovalPath', {
+      header: "Approval Path"
+    })
+  ]
+   setColumns(setDynamicColumns);
+    await getDatafromListByTitle('QuotationApproval');
+  };
+  const handleVendor = async () => {
+    _setData([]);
+    setLabel('Vendor Mapping');
+    setIsActiveQA(false);
+    setIsActiveBP(false);
+    setIsActivePO(false);
+    setIsActiveVM(true);
+    const setDynamicColumns = [
+    columnHelper.accessor('ProjectCode', {
+      header: "Project Code"
+    }),
+    columnHelper.accessor('ProjectReffNo', {
+      header: "Description"
+    }),
+    columnHelper.accessor('ProjectTitle', {
+      header: "Project Title"
+    }),
+    columnHelper.accessor('ProjectDescription', {
+      header: "Project Description"
+    }),
+    columnHelper.accessor('Department', {
+      header: "Department"
+    }),
+    columnHelper.accessor('Vendorcode', {
+      header: "Vendor Code"
+    }),
+    columnHelper.accessor('VendorName', {
+      header: "Vendor Name"
+    }),
+    columnHelper.accessor('CurrentStatus', {
+      header: "Status"
+    }),
+    columnHelper.accessor('RequestNo', {
+      header: "Request No"
+    })
+  ]
+    setColumns(setDynamicColumns);
+    await getDatafromListByTitle('VendorMapping');
+  };
+  const handlePO = async () => {
+    _setData([]);
+    setLabel('PO Approval');
+    setIsActiveQA(false);
+    setIsActiveBP(false);
+    setIsActivePO(true);
+    setIsActiveVM(false);
+    const setDynamicColumns = [
+    columnHelper.accessor('ProjectCode', {
+      header: "Project Code"
+    }),
+    columnHelper.accessor('ProjectDescription', {
+      header: "Description"
+    }),
+    columnHelper.accessor('Department', {
+      header: "Department"
+    }),
+    columnHelper.accessor('VendorName', {
+      header: "Vendor Name"
+    }),
+    columnHelper.accessor('CurrentStatus', {
+      header: "Status"
+    }),
+    columnHelper.accessor('RequestNo', {
+      header: "Request No"
+    })
+  ]
+    setColumns(setDynamicColumns);
+    await getDatafromListByTitle('PoApproval');
+  };
+  const handleBill = async () => {
+    _setData([]);
+     setLabel('Bill Processing');
+    setIsActiveQA(false);
+    setIsActiveBP(true);
+    setIsActivePO(false);
+    setIsActiveVM(false);
+const setDynamicColumns = [
+    columnHelper.accessor('ProjectCode', {
+      header: "Project Code"
+    }),
+    columnHelper.accessor('ProjectDescription', {
+  header: "Description",
+  cell: info => (
+    <div
+      dangerouslySetInnerHTML={{
+        __html: info.getValue()
+      }}
+    />
+  )
+}),
+    columnHelper.accessor('ProjectTitle', {
+      header: "Project Title"
+    }),
+    columnHelper.accessor('Vendorcode', {
+      header: "Vendor Code"
+    }),
+    columnHelper.accessor('VendorName', {
+      header: "Vendor Name"
+    }),
+    columnHelper.accessor('CurrentStatus', {
+      header: "Status"
+    }),
+    columnHelper.accessor('RequestNo', {
+      header: "Request No"
+    })
+  ]
+   setColumns(setDynamicColumns);
+    await getDatafromListByTitle('BillProcessing');
+  };
+const getVisibleColumns = () => {
+  return table
+    .getVisibleLeafColumns()
+    .map(col => ({
+      id: col.id,
+      header:
+        typeof col.columnDef.header === "function"
+          ? col.columnDef.header // if JSX/function
+          : col.columnDef.header
+    }));
+};
+const getVisibleRows = () => {
+  return table.getFilteredRowModel().rows;
+};
+const getExportData = () => {
+  const columns = getVisibleColumns();
+  const rows = getVisibleRows();
+
+  return rows.map(row => {
+    const obj: any = {};
+
+    columns.forEach(col => {
+      obj[col.id] = row.getValue(col.id);
+    });
+
+    return obj;
+  });
+};
+  const handleExcel = async () => {
+    try{
+  setLoading(true);
+  const data = getExportData();
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array"
+  });
+  const blob = new Blob([excelBuffer], {
+    type:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
+  });
+  saveAs(blob, "Data.xlsx");
+}
+catch
+{
+
+}
+finally
+{
+  setLoading(false);
+}
+  };
+  const handleCSV = async () => {
+    const data = getExportData();
+    const headers = Object.keys(data[0]);
+  const rows = data.map(row =>
+    headers
+      .map(field => {
+        let value = row[field] ?? "";
+        value = String(value).replace(/"/g, '""');
+        return `"${value}"`;
+      })
+      .join(",")
+  );
+  const csvContent = [headers.join(","), ...rows].join("\n");
+  const blob = new Blob([csvContent], {
+    type: "text/csv;charset=utf-8;"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "Data.csv";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  };
+  const getDatafromListByTitle = async (listname:string) => {
+    try {
+      setLoading(true);
+      const data = await service.getItemByTitle(listname);
+      if (data) {
+        _setData((d) => [...d.concat(data)]);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error occurred");
     }
-    };
-  const handleAddNewDocument = () => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
-  window.location.assign(url);
-};
- const handleView = (documentId: string) => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx?documentId=${documentId}`;
-  window.location.assign(url);
-};
-const handlesearch = async () => {
-  _setData([]);
-  if (!form.VendorName) {
-    alert("Please select a Vendor Name");
-    return;
-  }
-  await getDatafromListByTitle(form.VendorName);
-};    
-const getDatafromListByTitle = async (parm_vendorname:string) => {
-  try
-  {
-    setLoading(true);
-  const data = await service.getItemByTitle(parm_vendorname);
-    if(data.Id>0)
-    {
-      _setData((d) => [...d.concat(data)]);
+    finally {
+      setLoading(false);
     }
-  }catch (error) {
-    console.error(error);
-    alert("Error occurred");
-  }
-  finally
-  {
-    setLoading(false);
-  }
-};
+  };
   return (
-<div className={styles.pagecontainer}>
-  <div className={styles.headerbar}>
-      <h2 className={styles.leftPanel}>My Documents List</h2>      
-    <div className={styles.rightPanel}> 
-      <span className={styles.rightPanel}>Digiflow / My Documents List</span>
-      <br></br>      
-    </div>
-  </div>
-  <div className={styles.searchbox}>
-    <span><h3>Search My Document</h3>    
-      <button className={styles.btnadd} onClick={handleAddNewDocument}>Add New Document</button></span>    
-    <div className={styles.searchrow}>
-      <div className={styles.field}>
-        <label className={styles.field}>Vendor Name</label>
-        <Dropdown
-                  options={vendorOptions}
-                  selectedKey={form.VendorID}
-                  onChange={(e, option) =>
-                    setForm({ ...form, VendorName: option?.text as string,VendorID: option?.key as string, })
-                  }
-                />
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2>Summary Report
+          <span>Digiflow / AP Report / Summary Report</span>
+        </h2>
       </div>
-      <div className={styles.btnarea}>
-        <button className={styles.btnsearch} onClick={handlesearch}>Search</button>
+      <div className={styles.searchBox}>        
+        <div className={styles.container}>
+          <div className={styles.row}>            
+            <div className={styles['col-md-3']}>
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:isActiveQA?"red":"grey"}} onClick={handleQuotation}>Quotation Approval</button>
+            </div>  
+            <div className={styles['col-md-3']}>
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:isActiveVM?"red":"grey"}} onClick={handleVendor}>Vendor Mapping</button>
+            </div>  
+            <div className={styles['col-md-3']} >
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:isActivePO?"red":"grey"}} onClick={handlePO}>PO Approval</button>
+            </div>  
+            <div className={styles['col-md-3']}>
+             <button className={styles.btnSearch} style={{width:"100%",backgroundColor:isActiveBP?"red":"grey"}} onClick={handleBill}>Bill Processing</button>
+            </div>                
+            <div style={{paddingBottom:"5%"}}></div>
+            <div className={styles['col-md-6']} style={{ width:"22%",paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
+              <button className={styles.btnSearch} onClick={handleExcel}>Export to Excel</button>
+            </div>
+            <div className={styles['col-md-6']} style={{paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
+              <button className={styles.btnSearch} onClick={handleCSV}>Export to CSV</button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-      <div className={styles.pagecontainer}>
-        <Label style={{display:"inline-block"}}>My Documents List</Label>
-         <input
-                    value={globalFilter ?? ""}
-                    onChange={(e) => setGlobalFilter(e.target.value)}
-                    placeholder="Search..."
-                    style={{ marginBottom: "10px", padding: "5px", float:"right" }}
-                />
-                          <Table striped bordered hover>
-                <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                        <th 
-                        key={header.id} 
-                        onClick={header.column.getToggleSortingHandler()}>
-                        {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                            )}
-                            {{
-                                asc: <Icon iconName='ChevronUpMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
-                                desc: <Icon iconName='ChevronDownMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
-                            }[header.column.getIsSorted() as string] ?? null}
-                        </th>
-                    ))}
-                    </tr>
+      <div className="p-2">
+        <div>
+          <span style={{ display: "inline-block" }}>{Label}</span>
+          <input
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Search..."
+            style={{ marginBottom: "10px", padding: "5px", float: "right" }}
+          />
+        </div>
+        <Table striped bordered hover>
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    onClick={header.column.getToggleSortingHandler()}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    {{
+                      asc: <Icon iconName='ChevronUpMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
+                      desc: <Icon iconName='ChevronDownMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
+                    }[header.column.getIsSorted() as string] ?? null}
+                  </th>
                 ))}
-                </thead>
-                <tbody>
-                {table.getRowModel().rows.map((row) => (
-                    <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                    ))}
-                    </tr>
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
                 ))}
-                </tbody>
-                
-                 <div className="pagination" style={{padding:"10px",textAlign:"right"}}>
-                <span>
-                    Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
-                    {table.getRowCount().toLocaleString()} Rows
-                </span>
-                <div style={{float:"right", textAlign:"right"}}>
-                    <label>
-                    Go to page:
-                    </label>
-                    <label>
-                        <input
-                            type="number"
-                            min="1"
-                            max={table.getPageCount()}
-                            defaultValue={table.getState().pagination.pageIndex + 1}
-                            onChange={(e) => {
-                            const page = e.target.value ? Number(e.target.value) - 1 : 0
-                            table.setPageIndex(page)
-                            }}
-                            className="border p-1 rounded w-16"
-                        />
-                    </label>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.firstPage()}
-                    disabled={!table.getCanPreviousPage()}
-                    >
-                    {'<<'}
-                    </button>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                    >
-                    {'<'}
-                    </button>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                    >
-                    {'>'}
-                    </button>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.lastPage()}
-                    disabled={!table.getCanNextPage()}
-                    >
-                    {'>>'}
-                    </button>
-                    <span>Page size</span>
-                    <select
-                    value={table.getState().pagination.pageSize}
-                    onChange={(e) => {
-                        table.setPageSize(Number(e.target.value))
-                    }}
-                    >
-                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                        <option key={pageSize} value={pageSize}>
-                        {pageSize}
-                        </option>
-                    ))}
-                    </select>
-                </div>
-                </div>
-                
-            </Table>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+
+        {/* 📄 Pagination */}
+        <div className="flex items-center gap-2">
+          <span>
+            Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
+            {table.getRowCount().toLocaleString()} Rows
+          </span>
+          <div style={{ float: "right" }} className="flex items-center gap-2">
+            <label>
+              Go to page:
+            </label>
+            <label>
+              <input
+                type="number"
+                min="1"
+                max={table.getPageCount()}
+                defaultValue={table.getState().pagination.pageIndex + 1}
+                onChange={(e) => {
+                  const page = e.target.value ? Number(e.target.value) - 1 : 0
+                  table.setPageIndex(page)
+                }}
+                className="border p-1 rounded w-16"
+              />
+            </label>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.firstPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {'<<'}
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {'<'}
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {'>'}
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.lastPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {'>>'}
+            </button>
+            <span>Page size</span>
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => {
+                table.setPageSize(Number(e.target.value))
+              }}
+            >
+              {[10, 20, 30, 40, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+
       </div>
-  </div>
+    </div>
   );
 };
 export default SummaryReport;

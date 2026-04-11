@@ -22,6 +22,8 @@
   font-weight: 400;
 }
 
+
+
 .searchBox {
   background-color: #fff;
   box-shadow: 0 3px 3px #8e8e8e;
@@ -56,4 +58,41 @@
   border-radius: 5px;
   color: #fff;
   padding: 5px 15px;
+  margin: 10px 0px 10px 0px;
+}
+btn-group {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+}
+
+.btnSubmit {
+  background: #04d651;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 20px;
+}
+
+.btnSave {
+  background: #d0d010;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 20px;
+}
+
+.btnCancel {
+  background: #3e3e3e;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 20px;
+}
+
+.btnGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: center;
 }

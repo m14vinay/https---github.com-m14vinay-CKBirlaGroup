@@ -4,8 +4,9 @@ import { IRequestHistoryReportProps } from './IRequestHistoryReportProps';
 import { Dropdown, Icon, IDropdownOption, Label } from '@fluentui/react';
 import SharePointService from '../service/Service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
-//import DataTable, { TableColumn } from "react-data-table-component";
 import { useEffect, useState } from 'react';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -15,284 +16,370 @@ import {
   flexRender,
   useReactTable,
 } from '@tanstack/react-table';
-import { Table } from 'react-bootstrap';
+import Table from 'react-bootstrap/Table';
+import 'bootstrap/dist/css/bootstrap.min.css';
 const RequestHistoryReport: React.FC<IRequestHistoryReportProps> = (props) => {
-const [form, setForm] = React.useState({
-      VendorName: '',
-      VendorID: ''
-  });
-  
-
   const [loading, setLoading] = React.useState(false);
-  const [vendorOptions, setVendorOptions] = React.useState<IDropdownOption[]>([]);
-  const params = new URLSearchParams(window.location.search);
   const service = new SharePointService(props.context);
-  const [search, setSearch] = useState("");
-    const [data, _setData] = useState<any[]>(() => []);
-    const [user, setUser] = useState<any>(null);
-    const [globalFilter, setGlobalFilter] = useState("");
-    const [sorting, setSorting] = useState<any>([]);
-    
-const filteredData = data.filter(item =>
-  item.DocumentName?.toLowerCase().includes(search.toLowerCase()) ||
-  item.VendorName?.toLowerCase().includes(search.toLowerCase())
-);
+  const [data, _setData] = useState<any[]>(() => []);
+  const [user, setUser] = useState<any>(null);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [sorting, setSorting] = useState<any>([]);
 
-const columnHelper = createColumnHelper<any>()
-    const columns = [
-        columnHelper.accessor('ID', {
-            header: () => <span>Document ID</span>
-        }),
-        columnHelper.accessor('Title', {
-            header: () => 'Document Name'
-        }),
-        columnHelper.accessor('VendorName', {
-            header: () => <span>Vendor Name</span>
-        }),
-        columnHelper.accessor('BillNumber', {
-            header: 'Bill Number'
-        }),
-        columnHelper.accessor('BillDate', {
-  header: 'Bill Date',
-  cell: info =>
-    info.getValue()
-      ? new Date(info.getValue()).toLocaleDateString()
-      : ""
-}),
-        columnHelper.accessor('BillAmount', {
-            header: 'Bill Amount'            
-        }),
-        columnHelper.accessor('Created', {
-  header: 'Uploaded Date',
-  cell: info => new Date(info.getValue()).toLocaleDateString()
-}),
-        columnHelper.accessor(row => row.Author?.Title, {
-  id: 'Author',
-  header: 'Uploader'
-}),
-        columnHelper.display({
-  id: 'view',
-  header: 'View',
-  cell: info => (
-    <button onClick={() => handleView(info.row.original)}>
-      View
-    </button>
-  )
-})
-    ]
-    const table = useReactTable({
-            data,
-            columns,
-            getCoreRowModel: getCoreRowModel(),
-            state: {
-                globalFilter,
-                sorting,
-            },
-            onGlobalFilterChange: setGlobalFilter,
-            onSortingChange: setSorting,
-            getPaginationRowModel: getPaginationRowModel(),
-            getSortedRowModel: getSortedRowModel(),
-            getFilteredRowModel: getFilteredRowModel(),
-        });
-  // 🔹 Load data
-    React.useEffect(() => {
-      loadMaster();
-      getUser();
-    }, []);
+  const columnHelper = createColumnHelper<any>()
+  const columns = [
+    columnHelper.accessor('ID', {
+      header: () => 'Req No.'
+    }),
+    columnHelper.accessor('ProjectTitle', {
+      header: () => 'Project Title'
+    }),
+    columnHelper.accessor('ProjectReffNo', {
+      header: () => 'Project Ref No.'
+    }),
+    columnHelper.accessor('Department', {
+      header: 'Department'
+    }),
+    columnHelper.accessor('Description', {
+      header: 'Description'
+    }),
+    columnHelper.accessor('CurrentStatus', {
+      header: 'Status'
+    }),
+    columnHelper.accessor('Created', {
+      header: 'Submitted Date'
+    }),
+    columnHelper.accessor('', {
+      header: 'Approved Date'
+    }),
+    columnHelper.accessor('ProjectCode', {
+      header: 'Project Code'
+    }),
+    columnHelper.accessor('', {
+      header: 'Approval Path'
+    }),
+    columnHelper.accessor('AssignedTo', {
+      header: 'Approved Pending On'
+    }),
+    columnHelper.accessor('', {
+      header: 'Approval Pending Date'
+    }),
+    columnHelper.accessor('VendorRequestNo', {
+      header: 'Vendor Req No.'
+    }),
+    columnHelper.accessor('VendorCode', {
+      header: 'Vendor Code'
+    }),
+    columnHelper.accessor('VendorName', {
+      header: 'Vendor Name'
+    }),
+    columnHelper.accessor('PORequestNo', {
+      header: 'PO Request No.'
+    }),
+    columnHelper.accessor('', {
+      header: 'Requestor Name'
+    })
+  ]
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    state: {
+      globalFilter,
+      sorting,
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    onSortingChange: setSorting,
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+  });
+  const [form, setForm] = React.useState({
+    FromDate: new Date(),
+    ToDate: new Date()
+  });
+  // Load data
+  React.useEffect(() => {
+    getUser();
+  }, []);
   // Load the User Details
   const getUser = async () => {
-      const data = await service.getUser();
-      if(data && Array.isArray(data))
-      {
+    const data = await service.getUser();
+    if (data.Id > 0) {
       setUser(data);
     }
-    };
-    //Load the Master Data for Dropdown
-    const loadMaster = async () => {
-      const data = await service.getMasterDocument();
-      if(data && Array.isArray(data))
-      {
-      const options = data.map((item: any) => ({
-        key: item.Id,
-        text: item.VendorName
+  };
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: name === "BillDate" ? new Date(value) : value
+    });
+  };
+  const getVisibleColumns = () => {
+    return table
+      .getVisibleLeafColumns()
+      .map(col => ({
+        id: col.id,
+        header:
+          typeof col.columnDef.header === "function"
+            ? col.columnDef.header // if JSX/function
+            : col.columnDef.header
       }));
-      setVendorOptions(options);
+  };
+  const getVisibleRows = () => {
+    return table.getFilteredRowModel().rows;
+  };
+  const getExportData = () => {
+    const columns = getVisibleColumns();
+    const rows = getVisibleRows();
+
+    return rows.map(row => {
+      const obj: any = {};
+
+      columns.forEach(col => {
+        obj[col.id] = row.getValue(col.id);
+      });
+
+      return obj;
+    });
+  };
+  const handleExcel = async () => {
+    try {
+      setLoading(true);
+      const data = getExportData();
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array"
+      });
+      const blob = new Blob([excelBuffer], {
+        type:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
+      });
+      saveAs(blob, "Data.xlsx");
     }
-    };
-  const handleAddNewDocument = () => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
-  window.location.assign(url);
-};
- const handleView = (documentId: string) => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx?documentId=${documentId}`;
-  window.location.assign(url);
-};
-const handlesearch = async () => {
-  _setData([]);
-  if (!form.VendorName) {
-    alert("Please select a Vendor Name");
-    return;
-  }
-  await getDatafromListByTitle(form.VendorName);
-};    
-const getDatafromListByTitle = async (parm_vendorname:string) => {
-  try
-  {
-    setLoading(true);
-  const data = await service.getItemByTitle(parm_vendorname);
-    if(data.Id>0)
-    {
-      _setData((d) => [...d.concat(data)]);
+    catch {
+
     }
-  }catch (error) {
-    console.error(error);
-    alert("Error occurred");
-  }
-  finally
-  {
-    setLoading(false);
-  }
-};
+    finally {
+      setLoading(false);
+    }
+  };
+  const handleCSV = async () => {
+    const data = getExportData();
+    const headers = Object.keys(data[0]);
+    const rows = data.map(row =>
+      headers
+        .map(field => {
+          let value = row[field] ?? "";
+          value = String(value).replace(/"/g, '""');
+          return `"${value}"`;
+        })
+        .join(",")
+    );
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;"
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Data.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+  const handlesearch = async () => {
+    _setData([]);
+    await getDatafromListByTitle();
+  };
+  const getDatafromListByTitle = async () => {
+    try {
+      setLoading(true);
+      const data = await service.getItemByTitle(form.FromDate.toString(), form.ToDate.toString());
+      if (data) {
+        _setData((d) => [...d.concat(data)]);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error occurred");
+    }
+    finally {
+      setLoading(false);
+    }
+  };
   return (
-<div className={styles.pagecontainer}>
-  <div className={styles.headerbar}>
-      <h2 className={styles.leftPanel}>My Documents List</h2>      
-    <div className={styles.rightPanel}> 
-      <span className={styles.rightPanel}>Digiflow / My Documents List</span>
-      <br></br>      
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2>Request History Report
+          <span>Digiflow / AP Report / Request History Report</span>
+        </h2>
+      </div>
+      <div className={styles.searchBox}>
+        <div className={styles.container}>
+          <div className={styles.row}>
+            <div className={styles['col-md-4']}>
+              <label>From Date</label>
+            </div>
+            <div className={styles['col-md-8']}>
+              <input
+                name="FromDate"
+                type="date"
+                value={
+                  form.FromDate
+                    ? new Date(form.FromDate).toISOString().split('T')[0]
+                    : ''
+                }
+                style={{ width: "100%" }}
+                onChange={handleDateChange}
+              />
+            </div>
+            <div className={styles['col-md-4']} style={{ paddingTop: "10px" }}>
+              <label>To Date</label>
+            </div>
+            <div className={styles['col-md-8']} style={{ paddingTop: "10px" }}>
+              <input
+                name="ToDate"
+                type="date"
+                value={
+                  form.ToDate
+                    ? new Date(form.ToDate).toISOString().split('T')[0]
+                    : ''
+                }
+                onChange={handleDateChange}
+                style={{ width: "100%" }}
+              />
+              <button className={styles.btnSearch} onClick={handlesearch} style={{ marginTop: "10px" }}>Search</button>
+            </div>
+            <div className={styles['col-md-6']} style={{ width: "22%", paddingTop: "10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
+              <button className={styles.btnExport} onClick={handleExcel}>Export to Excel</button>
+            </div>
+            <div className={styles['col-md-6']} style={{ paddingTop: "10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
+              <button className={styles.btnExport} onClick={handleCSV}>Export to CSV</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="p-2">
+        <div style={{ marginBottom: "10px", padding: "5px", textAlign: 'right' }}>
+          <input
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Search..."
+          />
+        </div>
+        <div className={styles['table-responsive']}>
+          <Table striped bordered hover>
+            <thead>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      onClick={header.column.getToggleSortingHandler()}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                      {{
+                        asc: <Icon iconName='ChevronUpMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
+                        desc: <Icon iconName='ChevronDownMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
+                      }[header.column.getIsSorted() as string] ?? null}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+
+        {/* 📄 Pagination */}
+        <div className="flex items-center gap-2">
+          <span>
+            Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
+            {table.getRowCount().toLocaleString()} Rows
+          </span>
+          <div style={{ float: "right" }} className="flex items-center gap-2">
+            <label>
+              Go to page:
+            </label>
+            <label>
+              <input
+                type="number"
+                min="1"
+                max={table.getPageCount()}
+                defaultValue={table.getState().pagination.pageIndex + 1}
+                onChange={(e) => {
+                  const page = e.target.value ? Number(e.target.value) - 1 : 0
+                  table.setPageIndex(page)
+                }}
+                className="border p-1 rounded w-16"
+              />
+            </label>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.firstPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {'<<'}
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {'<'}
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {'>'}
+            </button>
+            <button
+              className="border rounded p-1"
+              onClick={() => table.lastPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {'>>'}
+            </button>
+            <span>Page size</span>
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => {
+                table.setPageSize(Number(e.target.value))
+              }}
+            >
+              {[10, 20, 30, 40, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+
+      </div>
     </div>
-  </div>
-  <div className={styles.searchbox}>
-    <span><h3>Search My Document</h3>    
-      <button className={styles.btnadd} onClick={handleAddNewDocument}>Add New Document</button></span>    
-    <div className={styles.searchrow}>
-      <div className={styles.field}>
-        <label className={styles.field}>Vendor Name</label>
-        <Dropdown
-                  options={vendorOptions}
-                  selectedKey={form.VendorID}
-                  onChange={(e, option) =>
-                    setForm({ ...form, VendorName: option?.text as string,VendorID: option?.key as string, })
-                  }
-                />
-      </div>
-      <div className={styles.btnarea}>
-        <button className={styles.btnsearch} onClick={handlesearch}>Search</button>
-      </div>
-    </div>
-  </div>
-      <div className={styles.pagecontainer}>
-        <Label style={{display:"inline-block"}}>My Documents List</Label>
-         <input
-                    value={globalFilter ?? ""}
-                    onChange={(e) => setGlobalFilter(e.target.value)}
-                    placeholder="Search..."
-                    style={{ marginBottom: "10px", padding: "5px", float:"right" }}
-                />
-                          <Table striped bordered hover>
-                <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                        <th 
-                        key={header.id} 
-                        onClick={header.column.getToggleSortingHandler()}>
-                        {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                            )}
-                            {{
-                                asc: <Icon iconName='ChevronUpMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
-                                desc: <Icon iconName='ChevronDownMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
-                            }[header.column.getIsSorted() as string] ?? null}
-                        </th>
-                    ))}
-                    </tr>
-                ))}
-                </thead>
-                <tbody>
-                {table.getRowModel().rows.map((row) => (
-                    <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                    ))}
-                    </tr>
-                ))}
-                </tbody>
-                
-                 <div className="pagination" style={{padding:"10px",textAlign:"right"}}>
-                <span>
-                    Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
-                    {table.getRowCount().toLocaleString()} Rows
-                </span>
-                <div style={{float:"right", textAlign:"right"}}>
-                    <label>
-                    Go to page:
-                    </label>
-                    <label>
-                        <input
-                            type="number"
-                            min="1"
-                            max={table.getPageCount()}
-                            defaultValue={table.getState().pagination.pageIndex + 1}
-                            onChange={(e) => {
-                            const page = e.target.value ? Number(e.target.value) - 1 : 0
-                            table.setPageIndex(page)
-                            }}
-                            className="border p-1 rounded w-16"
-                        />
-                    </label>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.firstPage()}
-                    disabled={!table.getCanPreviousPage()}
-                    >
-                    {'<<'}
-                    </button>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                    >
-                    {'<'}
-                    </button>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                    >
-                    {'>'}
-                    </button>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.lastPage()}
-                    disabled={!table.getCanNextPage()}
-                    >
-                    {'>>'}
-                    </button>
-                    <span>Page size</span>
-                    <select
-                    value={table.getState().pagination.pageSize}
-                    onChange={(e) => {
-                        table.setPageSize(Number(e.target.value))
-                    }}
-                    >
-                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                        <option key={pageSize} value={pageSize}>
-                        {pageSize}
-                        </option>
-                    ))}
-                    </select>
-                </div>
-                </div>
-                
-            </Table>
-      </div>
-  </div>
   );
 };
 export default RequestHistoryReport;

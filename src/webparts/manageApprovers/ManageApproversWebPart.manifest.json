@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "d8dd9fb2-e827-421e-b38f-2ffbda1a47bf",
-  "alias": "VendorRegistrationWebPart",
+  "id": "d8a18e58-77b7-4a45-ba37-884a6f00d9ae",
+  "alias": "ManageApproversWebPart",
   "componentType": "WebPart",
 
   // The "*" signifies that the version should be taken from the package.json
@@ -18,11 +18,11 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Advanced
     "group": { "default": "Advanced" },
-    "title": { "default": "VendorRegistration" },
-    "description": { "default": "VendorRegistration description" },
+    "title": { "default": "ManageApprovers" },
+    "description": { "default": "ManageApprovers description" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "description": "VendorRegistration"
+      "description": "ManageApprovers"
     }
   }]
 }

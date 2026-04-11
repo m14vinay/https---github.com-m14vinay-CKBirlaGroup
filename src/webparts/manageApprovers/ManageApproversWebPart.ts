@@ -5,33 +5,33 @@ import {
   type IPropertyPaneConfiguration,
   PropertyPaneTextField
 } from '@microsoft/sp-property-pane';
-import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
+import { BaseClientSideWebPart, WebPartContext } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
-import * as strings from 'ReimbursementRequestApprovalWebPartStrings';
-import ReimbursementRequestApproval from './components/ReimbursementRequestApproval';
-import { IReimbursementRequestApprovalProps } from './components/IReimbursementRequestApprovalProps';
+import * as strings from 'ManageApproversWebPartStrings';
+import ManageApprovers from './components/ManageApprovers';
+import { IManageApproversProps } from './components/IManageApproversProps';
 import { Environment, EnvironmentType } from '@microsoft/sp-core-library';
 import * as microsoftTeams from "@microsoft/teams-js";
-export interface IReimbursementRequestApprovalWebPartProps {
+export interface IManageApproversWebPartProps {
   description: string;
 }
 
-export default class ReimbursementRequestApprovalWebPart extends BaseClientSideWebPart<IReimbursementRequestApprovalWebPartProps> {
+export default class ManageApproversWebPart extends BaseClientSideWebPart<IManageApproversWebPartProps> {
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
 
   public render(): void {
-    const element: React.ReactElement<IReimbursementRequestApprovalProps> = React.createElement(
-      ReimbursementRequestApproval,
+    const element: React.ReactElement<IManageApproversProps> = React.createElement(
+      ManageApprovers,
       {
         description: this.properties.description,
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
-        context: this.context
+        context:this.context
       }
     );
 
@@ -112,10 +112,11 @@ export default class ReimbursementRequestApprovalWebPart extends BaseClientSideW
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
- //protected dataVersion: Version = Version.parse('1.0');
+  //protected dataVersion: Version = Version.parse('1.0');
 protected get dataVersion(): Version {
   return Version.parse('1.0');
 }
+
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [
