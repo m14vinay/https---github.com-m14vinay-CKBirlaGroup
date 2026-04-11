@@ -26,6 +26,30 @@ export default function MyPendingRequests() {
     let data1:any[] = [];
     let counter = 0;
 
+    const openForm = (row:any) => {
+        console.log(row);
+
+        if(row["@odata.type"]){
+            switch(row["@odata.type"]){
+                case '#SP.Data.QuotationApprovalListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationApproval.aspx?RequestId=" + row.Id,"_blank");
+                case '#SP.Data.PoApprovalListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchaseOrderApproval.aspx?RequestId=" + row.Id,"_blank");
+                case '#SP.Data.VendorMappingListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingApproval.aspx?RequestId=" + row.Id,"_blank");
+                case '#SP.Data.Remb_ExpanseMasterListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementApproval.aspx?RequestId=" + row.Id,"_blank");  
+                case '#SP.Data.BillProcessingListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/BillProcessingApproval.aspx?RequestId=" + row.Id,"_blank");  
+                case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationNEIBTAdminApproval.aspx?RequestId=" + row.Id,"_blank");            
+                default:
+                    alert("Page not found");
+                    break;
+            }
+        }
+    }
+
     const columns = [
         columnHelper.accessor('RequestNo', {
             header: () => <span>Request No</span>
@@ -56,7 +80,7 @@ export default function MyPendingRequests() {
         }),
         columnHelper.accessor('Created', {
             header: 'View',
-            cell: (info) => <span>TBD</span>
+            cell: (info) => <span style={{cursor:"pointer"}}><Icon iconName="RedEye" onClick={() => openForm(info.row.original)}></Icon></span>
         })
     ]
     const [data, _setData] = useState<any[]>(() => []);
