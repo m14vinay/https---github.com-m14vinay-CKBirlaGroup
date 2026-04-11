@@ -124,14 +124,14 @@ const handleFetchById = async (id: number) => {
 }
 
       } else {
-        alert("No data found");
+        alert("No Data Found.");
       }
 
     } else {
       alert("❌ This action has already taken.Please wait for queue");
     }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error Occurred,Please Contact To System Administrator.:", error);
     }
     finally
   {
@@ -183,8 +183,8 @@ const handleSaveRejectedHistory = async (id: number) => {
     if (!itemId) return;
     await service.updateItemdata(itemId, "Approved", approverComment,"Approved");
      await handleSaveApproveHistory(itemId);
-    alert("✅ Approved successfully");
-     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    alert("✅ Approved Successfully");
+     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url);  
   } catch (error) {
     console.error(error);
@@ -208,8 +208,8 @@ const handleReject = async () => {
 
     await service.updateItemdata(itemId, "Rejected", approverComment,"Rejected");
     await handleSaveRejectedHistory(itemId);
-    alert("❌ Rejected successfully");
-     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    alert("❌ Rejected Successfully");
+     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url);  
     //setApproverComment('');
   } catch (error) {

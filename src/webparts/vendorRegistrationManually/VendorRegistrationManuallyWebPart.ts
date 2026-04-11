@@ -7,7 +7,6 @@ import {
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
-
 import * as strings from 'VendorRegistrationManuallyWebPartStrings';
 //import { VendorRegistrationManually } from './components/VendorRegistrationManually';
 import VendorRegistrationManually from './components/VendorRegistrationManually';
@@ -119,10 +118,10 @@ export default class VendorRegistrationManuallyWebPart extends BaseClientSideWeb
    protected onDispose(): void {
      ReactDom.unmountComponentAtNode(this.domElement);
    }
- protected dataVersion: Version = Version.parse('1.0');
-//     protected get dataVersion(): Version {
-//   return Version.parse('1.0');
-// }
+ //protected dataVersion: Version = Version.parse('1.0');
+    protected get dataVersion(): Version {
+  return Version.parse('1.0');
+}
 
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {

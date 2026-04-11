@@ -142,10 +142,10 @@ const loadAttachments = async (id:number) => {
       
       }));       
     } else {
-      alert("No data found");
+      alert("No Data Found");
     }
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error Occurred,Please Contact To System Administrator.:", error);
   }
   finally
   {
@@ -154,7 +154,7 @@ const loadAttachments = async (id:number) => {
 };
 
   const handleCancel = () => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);
   };
 
@@ -169,7 +169,7 @@ const loadAttachments = async (id:number) => {
     for (let file of filesArray) {
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
       if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
-        alert(`File type not allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
+        alert(`File Type Not Allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
         return; // stop execution
       }
     }
@@ -177,14 +177,14 @@ const loadAttachments = async (id:number) => {
     // 🔹 Total size check
     const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
     if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
-      alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+      alert(`Total File Size Must Not Exceed ${MAX_TOTAL_SIZE_MB} MB`);
       return;
     }
   
     // 🔹 Invalid filename check
     const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
     if (invalidFiles.length > 0) {
-      alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+      alert(`File Names Cannot Have Special Characters: ${invalidFiles.map(f => f.name).join(", ")}`);
       return;
     }
   
@@ -310,14 +310,14 @@ const handleSaveHistory = async (id: number) => {
   // 🔹 Validations
   try {
     setLoading(true);
-    if(!form.ProjectTitle) return alert("Project Title required");
+   if(!form.ProjectTitle) return alert("Enter Project Title ");
     if(!form.Vendor1) return alert("Enter Vendor1 ");
     if(!form.Quote1) return alert("Enter Quote1");
-    if(!form.Selectedvendor) return alert("Select Vendor");
-    if(!form.Quote1) return alert("Selected Quote");
-    if(!form.Department) return alert("Select Department Name");
-    if(!form.Advancepayment) return alert("Select Advance Payemnt");
-     if (!form.files || form.files.length === 0) return alert("Attach files");
+    if(!form.Selectedvendor) return alert("Please Select Vendor");
+    if(!form.SelectedQuote) return alert("Please Selected Quote");
+    if(!form.Department) return alert("Please Select Department Name");
+    if(!form.Advancepayment) return alert("Please Select Advance Payemnt");
+     if (!form.files || form.files.length === 0) return alert("Please Attach files");
 const User=await service.getUserById(Number(form.Approval1Id));
   if(User?.Id)
   {
@@ -328,8 +328,8 @@ const User=await service.getUserById(Number(form.Approval1Id));
     ProjectTitle: form.ProjectTitle,
     ProjectReffNo: form.ProjectReffNo,
      ProjectDescription: form.ProjectDescription,
-     //TotalProjectAmount:form.TotalProjectAmount,
-     //ApplicableTaxes: form.ApplicableTaxes,
+     TotalProjectAmount:form.TotalProjectAmount,
+     ApplicableTaxes: form.ApplicableTaxes,
      Vendor1:form.Vendor1,
      Vendor2:form.Vendor2,
       Vendor3: form.Vendor3,
@@ -361,7 +361,7 @@ const User=await service.getUserById(Number(form.Approval1Id));
         await service.uploadFile(res.Id , form.files[i]);
         }
       }
-      alert("Data Saved Successfully ✅");
+      alert("Saved Successfully.✅");
        await service.updateItem(res.Id, {
        RequestNo: `VMR-${res.Id}`
   });
@@ -375,11 +375,11 @@ const User=await service.getUserById(Number(form.Approval1Id));
         await service.uploadFile(itemId, form.files[i]);
         }
       }
-      alert("Data Updated Successfully ✅");
+      alert("Updated Successfully ✅");
     }
   } catch (error) {
     console.error(error);
-    alert("Error occurred ❌");
+    alert("Error Occurred,Please Contact To System Administrator.❌");
   }
   finally
   {
@@ -392,14 +392,14 @@ const User=await service.getUserById(Number(form.Approval1Id));
 const handleUpdate = async () => {
   try {
    setLoading(true);
-   if(!form.ProjectTitle) return alert("Project Title required");
+   if(!form.ProjectTitle) return alert("Enter Project Title ");
     if(!form.Vendor1) return alert("Enter Vendor1 ");
     if(!form.Quote1) return alert("Enter Quote1");
-    if(!form.Selectedvendor) return alert("Select Vendor");
-    if(!form.SelectedQuote) return alert("Selected Quote");
-    if(!form.Department) return alert("Select Department Name");
-    if(!form.Advancepayment) return alert("Select Advance Payemnt");
-     if (!form.files || form.files.length === 0) return alert("Attach files");
+    if(!form.Selectedvendor) return alert("Please Select Vendor");
+    if(!form.SelectedQuote) return alert("Please Selected Quote");
+    if(!form.Department) return alert("Please Select Department Name");
+    if(!form.Advancepayment) return alert("Please Select Advance Payemnt");
+     if (!form.files || form.files.length === 0) return alert("Please Attach files");
      const User=await service.getUserById(Number(form.ApprovalID.split('_')[0]));
       if(User?.Id)
       {
@@ -439,8 +439,8 @@ const handleUpdate = async () => {
         await service.uploadFile(itemId, form.files[i]);
       }
     }
-    alert("Data Submitted Successfully ✅");    
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    alert("Submitted Successfully.✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
     }
     else{
@@ -453,8 +453,8 @@ const handleUpdate = async () => {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id , form.files[i]);
       }
-      alert("Data Submitted Successfully ✅");    
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+      alert("Submitted Successfully.✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
      }
     }    

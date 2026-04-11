@@ -130,10 +130,10 @@ const VendorRegistrationDetail: React.FC<IVendorRegistrationDetailProps> = (prop
       CurrentStatus:result.CurrentStatus || '',
         }));
       } else {
-        alert("No data found");
+        alert("No Data Found");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error Occurred,Please Contact To System Administrator.:", error);
     }
     finally
     {

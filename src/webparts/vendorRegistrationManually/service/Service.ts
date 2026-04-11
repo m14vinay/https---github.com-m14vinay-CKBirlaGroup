@@ -63,7 +63,7 @@ export default class Service {
       SPHttpClient.configurations.v1,
       {
         headers: {
-          "Accept": "application/json;odata=nometadata"
+          "Accept": "application/json;"
         },
         body: buffer
       }
@@ -107,8 +107,39 @@ public async deleteAttachmentFromSP(file: any) : Promise<void> {
 
 };
 
+public checkGSTExists = async (gst: string,currentId?:number): Promise<boolean> => {
+
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=GST eq '${gst}'`;
+
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+
+  const data = await res.json();
+if (currentId) {
+    return data.value.some((item: any) => item.Id !== currentId);
+  }
+  return data.value.length > 0;
+};
+
 public saveToSharePoint = async (items: any[]) => {
+  const results: any[] = [];
+
   for (const item of items) {
+    const gst = item.GST?.toString().trim();
+
+    //  Skip empty GST
+    if (!gst) continue;
+  const isExists = await this.checkGSTExists(gst);
+    // 🔥 GST check inside loop
+    
+    // Already exists → skip
+    if (isExists) {
+      console.log(`GST already exists: ${gst}`);
+      alert("GST already exists");
+      continue;
+    }
   const utc_days = Math.floor(item.CommencementDate - 25569);
   const utc_value = utc_days * 86400; 
 
@@ -123,8 +154,8 @@ public saveToSharePoint = async (items: any[]) => {
           },
           body: JSON.stringify({
             Title: item.Title,
-      YearofEstablishment: item.YearofEstablishment,
-      GST:item.GST,
+      YearofEstablishment: item.YearofEstablishment,   
+      GST:gst,
       CommencementDate: new Date(utc_value * 1000),
       Pan: item.Pan,
       Tin:item.Tin,
@@ -164,8 +195,10 @@ public saveToSharePoint = async (items: any[]) => {
           })
         }
     );
-    return response.json();
+    const data = await response.json();
+    results.push(data);
   }
+  return results;
 };
 
 }

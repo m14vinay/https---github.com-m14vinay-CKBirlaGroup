@@ -172,14 +172,14 @@ const [History, setHistory] = useState<any[]>([]);
 
 
      } else {
-        alert("No data found");
+        alert("No Data Found");
       }
 
     } else {
-      alert("❌ This action has already taken.Please wait for queue");
+      alert("❌ This Action Has Already Taken.Please Wait For Queue");
     }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error Occurred,Please Contact To System Administrator.:", error);
     }
     finally
   {
@@ -227,15 +227,15 @@ const handleSaveRejectedHistory = async (id: number) => {
     try {
       // setActionType('approve');
       setLoading(true);
-      if (!approverComment) return alert("Approver Comment required");
+      if (!approverComment) return alert("Enter Approver Comment");
       
       if (!itemId) return;
      if(form.ActionDate1==='')
      {
       await service.updateItemdata(itemId, "Approved", approverComment,form.Approver2EmailId,form.approver2 || '');
          await handleSaveApproveHistory(itemId);
-      alert("✅ First level approved");
- const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+      alert("✅ First Level Approved Successfully.");
+ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url); 
       return; 
      }
@@ -243,8 +243,8 @@ const handleSaveRejectedHistory = async (id: number) => {
      {
        await service.updateItemdata2(itemId, "Approved",approverComment,'Approved');
         await handleSaveApproveHistory(itemId);
-       alert("✅ Final approval done");
-       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+       alert("✅ Final Level Approved Successfully.");
+       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url); 
       return; // 🔥 stop again
     }
@@ -264,7 +264,7 @@ const handleSaveRejectedHistory = async (id: number) => {
     try {
        //setActionType('reject');
         setLoading(true);
-      if (!approverComment) return alert("Approver Comment required");
+      if (!approverComment) return alert("Enter Approver Comment");
       if (!itemId) return;
 
       if (!approverComment) {
@@ -275,8 +275,8 @@ const handleSaveRejectedHistory = async (id: number) => {
       {
       await service.updateItemdata(itemId, "Rejected", approverComment,form.Approver2EmailId,"Rejected",);
          await handleSaveRejectedHistory(itemId);
-      alert("✅ First level Rejected successfully");
-         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+      alert("✅ First Level Rejected Successfully");
+         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url); 
         return;
 
@@ -285,13 +285,13 @@ const handleSaveRejectedHistory = async (id: number) => {
      {
        await service.updateItemdata2(itemId, "Rejected", approverComment,"Rejected");
          await handleSaveRejectedHistory(itemId);
-       alert("✅ Final Rejection done");
-        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+       alert("✅ Final Level Rejected Successfully");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url); 
       return; // 🔥 stop again
        
      }
-      alert("❌ Rejected successfully");
+      alert("❌ Rejected Successfully");
       setApproverComment('');
     } catch (error) {
       console.error(error);

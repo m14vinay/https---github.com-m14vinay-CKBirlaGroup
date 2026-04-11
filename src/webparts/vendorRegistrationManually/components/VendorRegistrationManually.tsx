@@ -2,12 +2,16 @@ import * as React from 'react';
 import type { IVendorRegistrationManuallyProps } from './IVendorRegistrationManuallyProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import styles from './VendorRegistrationManually.module.scss';
-//import 'bootstrap/dist/css/bootstrap.min.css';
+//import 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 //import 'bootstrap-icons/font/bootstrap-icons.css';
+import'bootstrap-icons/font/bootstrap-icons.css';
 import SharePointService from '../service/Service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import * as XLSX from 'xlsx';
+
+
 
 const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (props) => {
   const [isActiveExcel, setIsActiveExcel] = React.useState(false);
@@ -60,13 +64,26 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
       BankAccountNo:'',
       BankIFSCMICRCode:'',
       CurrentStatus:'',
+      filesDeedExcel:[]as File[],
+      filesMSMEExcel:[]as File[],
+      filesIFSCExcel:[]as File[],
+      filesPanExcel:[]as File[],
+      filesVATExcel:[]as File[],
+      filesNameExcel:[]as File[],
+      filesCancelExcel:[]as File[],
+      filesRegCerExcel:[]as File[],
+      filesOtherExcel:[]as File[],
       files: [] as File[],
       UploadExcelFile:[]as File[]
     });
+
+
+
+
   // Get Value From Query String
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('ID');
+    const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
   // Load on Mount
@@ -99,6 +116,8 @@ const removeExistingFile = async (index: number) => {
   await service.deleteAttachmentFromSP(file);
   setAttachments(prev => prev.filter((_, i) => i !== index));
 };
+
+
   // Fetch Detail by ID
   const handleFetchById = async (id: number) => {
     try {
@@ -150,10 +169,10 @@ const removeExistingFile = async (index: number) => {
       CurrentStatus:result.CurrentStatus || '',
         }));
       } else {
-        alert("No data found");
+        alert("No Data Found.");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error Occurred,Please Contact To System Administrator.:", error);
     }
     finally
     {
@@ -182,16 +201,22 @@ const removeExistingFile = async (index: number) => {
   // 🔹 Invalid filename check
   const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
   if (invalidFiles.length > 0) {
-    alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+    alert(`File Names Cannot Have Special Characters: ${invalidFiles.map(f => f.name).join(", ")}`);
     return;
   }
   // ✅ Add valid files to form state
   setForm((prev: any) => ({
     ...prev,
-    files: [...prev.files, ...filesArray]
+    
+    files: [...prev.files, ...filesArray],
+       // 👈 ONLY that field update
   }));
+    
+
+  
   };
 
+  
   // Upload ExcelFile Check
   const handleExcelFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event?.target?.files;
@@ -202,20 +227,20 @@ const removeExistingFile = async (index: number) => {
   for (let file of filesArray) {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
-      alert(`File type not allowed: ${file.name}. Only XLSX is allowed.`);
+      alert(`File Type Not Allowed: ${file.name}. Only XLSX is Allowed.`);
       return; // stop execution
     }
   }
   // 🔹 Total size check
   const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
   if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
-    alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+    alert(`Total File Size Must Not Exceed ${MAX_TOTAL_SIZE_MB} MB`);
     return;
   }
   // 🔹 Invalid filename check
   const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
   if (invalidFiles.length > 0) {
-    alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+    alert(`File Names Cannot Have Special Characters: ${invalidFiles.map(f => f.name).join(", ")}`);
     return;
   }
   // ✅ Add valid files to form state
@@ -253,12 +278,27 @@ const removeExistingFile = async (index: number) => {
   };
   // Button click save
   const handleSaveManual = async () => {
+    const gst = form.GST?.toString().trim();
+
+  //  GST validation
+  if (!gst) {
+    alert("GST is Required ❗");
+    return;
+  }
+
+  const isExists = await service.checkGSTExists(gst, itemId || undefined);
+
+  if (isExists) {
+    alert(`GST ${gst} Already Exists ❌`);
+    return;
+  }
+
   const dateOnly  = new Date(form.CommencementDate);
   const payload = {
       Title: form.Title,
       YearofEstablishment: form.YearofEstablishment,
       CommencementDate: dateOnly,
-      GST:form.GST,
+      GST:gst,
       Pan: form.Pan,
       Tin:form.Tin,
       CentralSalesTaxNo:form.CentralSalesTaxNo,
@@ -307,7 +347,7 @@ const removeExistingFile = async (index: number) => {
         await service.uploadFile(res.Id, form.files[i]);
       }
     }
-      alert("Data Saved Successfully✅");
+      alert("Saved Successfully.✅");
   }  
   else{
     alert("Data Not Saved.");
@@ -320,11 +360,11 @@ const removeExistingFile = async (index: number) => {
           await service.uploadFile(itemId, form.files[i]);
         }
       }
-      alert("Data Updated Successfully ✅");
+      alert("Updated Successfully.✅");
       }
   } catch (error) {
     console.error(error);
-    alert("Error occurred");
+    alert("Error Occurred,Please Contact To System Administrator.");
   }
   finally{
     setLoading(false);
@@ -333,12 +373,32 @@ const removeExistingFile = async (index: number) => {
   // Button click submit Manual
     const handleSubmitManual = async () => {  
     try {
+  setLoading(true)
+       if (!form.files || form.files.length < 9) {
+      alert("Please upload all required files");
+      setLoading(false);
+      return;
+    }
+      const gst = form.GST?.toString().trim();
+
+  //  GST validation
+  if (!gst) {
+    alert("GST Required ❗");
+    return;
+  }
+
+  const isExists = await service.checkGSTExists(gst, itemId || undefined);
+
+  if (isExists) {
+    alert(`GST ${gst} Already Exists ❌`);
+    return;
+  }
     const dateOnly  = new Date(form.CommencementDate);
     const payload = {
       Title: form.Title,
       YearofEstablishment: form.YearofEstablishment,
       CommencementDate: dateOnly,
-      GST:form.GST,
+      GST:gst,
       Pan: form.Pan,
       Tin:form.Tin,
       CentralSalesTaxNo:form.CentralSalesTaxNo,
@@ -382,20 +442,20 @@ const removeExistingFile = async (index: number) => {
         await service.uploadFile(itemId, form.files[i]);
       }
     }
-    alert("Data Submitted Successfully ✅");    
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    alert("Submitted Successfully.✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
     }
     else{
      const res= await service.createItem(payload);
      if(res.Id>0)
      {
-     if (form.files && form.files.length > 0) {
+     if (res.Id > 0 && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
-        await service.uploadFile(itemId, form.files[i]);
+        await service.uploadFile(res.Id, form.files[i]);
       }
-      alert("Data Submitted Successfully ✅");    
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+      alert("Submitted Successfully.✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
      }
     }    
@@ -409,16 +469,43 @@ const removeExistingFile = async (index: number) => {
     setLoading(false);
   }
   };
+
+
+
+
+const handleFileExChange = (
+  event: React.ChangeEvent<HTMLInputElement>,
+  fieldName: string
+) => {
+  const files = event?.target?.files;
+  if (!files) return;
+
+  const filesArray = Array.from(files);
+
+  // ✅ validations same rahengi (no change)
+
+  setForm((prev: any) => ({
+    ...prev,
+   files: [...prev.files, ...filesArray],
+
+    
+  }));
+};
    // Button click submit Upload
   const handleSubmitUpload = async (event: any) => {  
   try{
   setLoading(true);
-   if (
-  (!form.files || form.files.length === 0) &&
-  (!attachments || attachments.length === 0)
-) {
-  return alert("Attach files");
-}
+
+ if (!form.UploadExcelFile?.length )
+ {
+      alert("Please Upload Excel Files ❗");
+      return;
+ }
+ if (!form.files || form.files.length < 9) {
+      alert("Please upload All Required Files");
+      setLoading(false);
+      return;
+    }
   const file = form.UploadExcelFile?.[0];
   
   const data = await file.arrayBuffer();
@@ -428,21 +515,23 @@ const removeExistingFile = async (index: number) => {
   const jsonData = XLSX.utils.sheet_to_json(worksheet);
   console.log(jsonData);
   const res =await service.saveToSharePoint(jsonData);
-  if(res.Id>0)
-  {   setItemId(res.Id);  
+  if (res && res.length > 0) {
+  const firstId = res[0].Id;
+  //setItemId(firstId);
       if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
-        await service.uploadFile(res.Id, form.files[i]);
+        await service.uploadFile(firstId, form.files[i]);
       }
     }  
-    alert("Data Submitted Successfully ✅");    
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+   
+    alert("Submitted Successfully.✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
   }
 }
 catch (error) {
     console.error(error);
-    alert("Error occurred");
+    alert("Error Occurred,Please Contact To System Administrator.");
   }
 finally
   {
@@ -880,13 +969,13 @@ finally
                             <div className={styles["accordion-body"]}>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Partnership Deed or Memorandum of Article of Association</label>
+                                  <label style={{width: '50%'}}>Partnership Deed or Memorandum of Article of Association<span className={styles.required}>*</span></label>
                                   <input style={{width: '100%'}} name="filesDeedManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>MSME Registration Certificate</label>
+                                  <label style={{width: '50%'}}>MSME Registration Certificate<span className={styles.required}>*</span></label>
                                   <input style={{width: '100%'}} name="filesMSMEManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
                               </div>
@@ -904,13 +993,13 @@ finally
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Bank IFSC/MICR code</label>
+                                  <label style={{width: '50%'}}>Bank IFSC/MICR code<span className={styles.required}>*</span></label>
                                   <input style={{width: '100%'}} name="filesIFSCManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Copy of Pan</label>
+                                  <label style={{width: '50%'}}>Copy of Pan<span className={styles.required}>*</span></label>
                                   <input style={{width: '100%'}} name="filesPanManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
                               </div>
@@ -922,7 +1011,7 @@ finally
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>VAT/CST Registration</label>
+                                  <label style={{width: '50%'}}>VAT/CST Registration<span className={styles.required}>*</span></label>
                                   <input style={{width: '100%'}} name="filesVATManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
                               </div>
@@ -934,25 +1023,25 @@ finally
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Name and Address of All Partners/ Directors</label>
+                                  <label style={{width: '50%'}}>Name and Address of All Partners/ Directors<span className={styles.required}>*</span></label>
                                   <input style={{width: '100%'}} name="filesNameManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Cancelled cheque</label>
+                                  <label style={{width: '50%'}}>Cancelled cheque<span className={styles.required}>*</span></label>
                                   <input style={{width: '100%'}} name="filesCancelManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Registration Certificate with any other authority (if required)</label>
+                                  <label style={{width: '50%'}}>Registration Certificate with any other authority (if required)<span className={styles.required}>*</span></label>
                                   <input style={{width: '100%'}} name="filesRegCertManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Any other document (as per the nature of the transaction/vendor)</label>
+                                  <label style={{width: '50%'}}>Any other document (as per the nature of the transaction/vendor)<span className={styles.required}>*</span></label>
                                   <input style={{width: '100%'}} name="filesOtherManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
                               </div>
@@ -970,8 +1059,8 @@ finally
                          <div className={styles["accordion-item"]}>
                           <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Upload Vendor Registration Form</label>
-                                  <input style={{width: '100%'}} name="UploadExcelFile" accept=".xlsx, .xls" type="file" multiple onChange={handleExcelFileChange} />
+                                  <label style={{width: '50%'}}>Upload Vendor Registration Form<span className={styles.required}>*</span></label>
+                                  <input style={{width: '100%'}} name="UploadExcelFile"  accept=".xlsx, .xls" type="file" multiple onChange={handleExcelFileChange} />
                                 </div>
                           </div>
                           <div className={styles['col-md-12']}>
@@ -980,20 +1069,20 @@ finally
                             <div>
                               <div className={styles['col-md-12']}>
                                 <div className="formGroup">
-                                  <label style={{width: '50%'}}>Partnership Deed or Memorandum of Article of Association</label>
-                                  <input style={{width: '100%'}} name="filesDeedExcel" type="file" multiple onChange={handleFileChange} />
+                                  <label style={{width: '50%'}}>Partnership Deed or Memorandum of Article of Association<span className={styles.required}>*</span></label>
+                                  <input style={{width: '100%'}} name="filesDeedExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesDeedExcel")} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>MSME Registration Certificate</label>
-                                  <input style={{width: '100%'}} name="filesMSMEExcel" type="file" multiple onChange={handleFileChange}  />
+                                  <label style={{width: '50%'}}>MSME Registration Certificate<span className={styles.required}>*</span></label>
+                                  <input style={{width: '100%'}} name="filesMSMEExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesMSMEExcel")} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
                                   <label style={{width: '50%'}}>Factory License</label>
-                                  <input style={{width: '100%'}} name="filesLicenseExcel" type="file" multiple onChange={handleFileChange}  />
+                                  <input style={{width: '100%'}} name="filesLicenseExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesLicenseExcel")} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
@@ -1004,26 +1093,26 @@ finally
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Bank IFSC/MICR code</label>
-                                  <input style={{width: '100%'}} name="filesIFSCExcel" type="file" multiple onChange={handleFileChange}  />
+                                  <label style={{width: '50%'}}>Bank IFSC/MICR code<span className={styles.required}>*</span></label>
+                                  <input style={{width: '100%'}} name="filesIFSCExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesIFSCExcel")} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Copy of Pan</label>
-                                  <input style={{width: '100%'}} name="filesPanExcel" type="file" multiple onChange={handleFileChange} />
+                                  <label style={{width: '50%'}}>Copy of Pan<span className={styles.required}>*</span></label>
+                                  <input style={{width: '100%'}} name="filesPanExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesPanExcel")}  />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
                                   <label style={{width: '50%'}}>Service Tax Registration</label>
-                                  <input style={{width: '100%'}} name="filesServiceExcel" type="file" multiple onChange={handleFileChange} />
+                                  <input style={{width: '100%'}} name="filesServiceExcel" type="file" multiple onChange={handleFileChange}  />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>VAT/CST Registration</label>
-                                  <input style={{width: '100%'}} name="filesVATExcel" type="file" multiple onChange={handleFileChange} />
+                                  <label style={{width: '50%'}}>VAT/CST Registration<span className={styles.required}>*</span></label>
+                                  <input style={{width: '100%'}} name="filesVATExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesVATExcel")}  />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
@@ -1034,32 +1123,32 @@ finally
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Name and Address of All Partners/ Directors</label>
-                                  <input style={{width: '100%'}} name="filesNameExcel" type="file" multiple onChange={handleFileChange} />
+                                  <label style={{width: '50%'}}>Name and Address of All Partners/ Directors<span className={styles.required}>*</span></label>
+                                  <input style={{width: '100%'}} name="filesNameExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesNameExcel")}  />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Cancelled cheque</label>
-                                  <input style={{width: '100%'}} name="filesCancelExcel" type="file" multiple onChange={handleFileChange} />
+                                  <label style={{width: '50%'}}>Cancelled cheque<span className={styles.required}>*</span></label>
+                                  <input style={{width: '100%'}} name="filesCancelExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesCancelExcel")}  />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Registration Certificate with any other authority (if required)</label>
-                                  <input style={{width: '100%'}} name="filesRegCerExcel" type="file" multiple onChange={handleFileChange} />
+                                  <label style={{width: '50%'}}>Registration Certificate with any other authority (if required)<span className={styles.required}>*</span></label>
+                                  <input style={{width: '100%'}} name="filesRegCerExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesRegCerExcel")}  />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
                               <div className="form-group">
-                                  <label style={{width: '50%'}}>Any other document (as per the nature of the transaction/vendor)</label>
-                                  <input style={{width: '100%'}} name="filesOtherExcel" type="file" multiple onChange={handleFileChange} />
+                                  <label style={{width: '50%'}}>Any other document (as per the nature of the transaction/vendor)<span className={styles.required}>*</span></label>
+                                  <input style={{width: '100%'}} name="filesOtherExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesOtherExcel")}  />
                                 </div>
                               </div>
                             </div>                          
                         </div>
                         <div className={styles['btn-group']}>
-                        <button className={styles.ApproveBtn} onClick={handleSubmitUpload}>Submit</button>&nbsp;
+                        <button className={styles.ApproveBtn} onClick={handleSubmitUpload}>Submit</button>
                         <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
                       </div>
                     </div>
