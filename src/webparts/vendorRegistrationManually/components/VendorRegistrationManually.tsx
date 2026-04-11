@@ -2,11 +2,9 @@ import * as React from 'react';
 import type { IVendorRegistrationManuallyProps } from './IVendorRegistrationManuallyProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import styles from './VendorRegistrationManually.module.scss';
-//import 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-//import 'bootstrap-icons/font/bootstrap-icons.css';
-import'bootstrap-icons/font/bootstrap-icons.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import SharePointService from '../service/Service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import * as XLSX from 'xlsx';
@@ -599,19 +597,19 @@ finally
                           <div id="panelsStayOpen-collapseOne" className="accordion-collapse collapse show">
                             <div className={styles["accordion-body"]}>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Name of the Vendor</label>
                                   <input style={{width: '100%'}} name='Title' value={form.Title} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Year of Establishment</label>
                                   <input style={{width: '100%'}} name='YearofEstablishment' value={form.YearofEstablishment} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Date of Commencement of Business</label>
                                   <input style={{width: '100%'}} 
                                   name="CommencementDate"
@@ -625,61 +623,61 @@ finally
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>GST</label>
                                   <input style={{width: '100%'}} name='GST' value={form.GST} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>PAN</label>
                                   <input style={{width: '100%'}} name='Pan' value={form.Pan} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>TIN</label>
                                   <input style={{width: '100%'}} name='Tin' value={form.Tin} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Central Sales Tax No.</label>
                                   <input style={{width: '100%'}} name='CentralSalesTaxNo' value={form.CentralSalesTaxNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Service Tax Regd No.</label>
                                   <input style={{width: '100%'}} name='ServiceTaxRegNo' value={form.ServiceTaxRegNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Nature of Services/Goods</label>
                                   <input style={{width: '100%'}} name='NatureofService' value={form.NatureofService} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>MSME Registration No.</label>
                                   <input style={{width: '100%'}} name='MSMERegistrationNo' value={form.MSMERegistrationNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>ESIC No.</label>
                                   <input style={{width: '100%'}} name='ESICNo' value={form.ESICNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Excise Registration No.</label>
                                   <input style={{width: '100%'}} name='ExciseRegisterNo' value={form.ExciseRegisterNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Work Contract Tax No</label>
                                   <input style={{width: '100%'}} name='WorkContractTaxNo' value={form.WorkContractTaxNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
@@ -696,31 +694,31 @@ finally
                           <div id="panelsStayOpen-collapseTwo" className="accordion-collapse collapse">
                             <div className={styles["accordion-body"]}>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Full Address</label>
                                   <input style={{width: '100%'}} name='FullAddress' value={form.FullAddress} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Telephone No.</label>
                                   <input style={{width: '100%'}} name='TelephoneNo' value={form.TelephoneNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Fax No.</label>
                                   <input style={{width: '100%'}} name='FaxNo' value={form.FaxNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Email ID</label>
                                   <input style={{width: '100%'}} name='EmailId' value={form.EmailId} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Contacted Person</label>
                                   <input style={{width: '100%'}} name='ContactPerson' value={form.ContactPerson} onChange={handleChange} className='form-control' type='text' />
                                 </div>
@@ -737,31 +735,31 @@ finally
                           <div id="panelsStayOpen-collapseThree" className="accordion-collapse collapse">
                             <div className={styles["accordion-body"]}>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Registered Full Address</label>
                                   <input style={{width: '100%'}} name='RegFullAddress' value={form.RegFullAddress} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Registered Telephone No.</label>
                                   <input style={{width: '100%'}} name='RegTelephoneNo' value={form.RegTelephoneNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Registered Fax No.</label>
                                   <input style={{width: '100%'}} name='RegFaxNo' value={form.RegFaxNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Registered Email ID</label>
                                   <input style={{width: '100%'}} name='RegEmailId' value={form.RegEmailId} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Registered Contacted Person</label>
                                   <input style={{width: '100%'}} name='RegContactPerson' value={form.RegContactPerson} onChange={handleChange} className='form-control' type='text' />
                                 </div>
@@ -778,7 +776,7 @@ finally
                           <div id="panelsStayOpen-collapseFour" className="accordion-collapse collapse">
                             <div className={styles["accordion-body"]}>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Whether Proprietary or Partnership firm or Pvt. Ltd. Or Public Ltd.</label>
                                   <input style={{width: '100%'}} name='ConstitutionofOrganization' value={form.ConstitutionofOrganization} onChange={handleChange} className='form-control' type='text' />
                                 </div>
@@ -795,31 +793,31 @@ finally
                           <div id="panelsStayOpen-collapseFive" className="accordion-collapse collapse">
                             <div className={styles["accordion-body"]}>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Manufacturer</label>
                                   <input style={{width: '100%'}} name='Manufacturer' value={form.Manufacturer} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Authorized Agent</label>
                                   <input style={{width: '100%'}} name='AuthorizedAgent' value={form.AuthorizedAgent} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Trader</label>
                                   <input style={{width: '100%'}} name='Trader' value={form.Trader} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Consulting</label>
                                   <input style={{width: '100%'}} name='ConsultingCompany' value={form.ConsultingCompany} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Other(Specify)</label>
                                   <input style={{width: '100%'}} name='Other' value={form.Other} onChange={handleChange} className='form-control' type='text' />
                                 </div>
@@ -836,19 +834,19 @@ finally
                           <div id="panelsStayOpen-collapseSix" className="accordion-collapse collapse">
                             <div className={styles["accordion-body"]}>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Name</label>
                                   <input style={{width: '100%'}} name='Name' value={form.Name} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Address</label>
                                   <input style={{width: '100%'}} name='Address' value={form.Address} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Contact No.</label>
                                   <input style={{width: '100%'}} name='ContactNo' value={form.ContactNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
@@ -865,7 +863,7 @@ finally
                           <div id="panelsStayOpen-collapseSeven" className="accordion-collapse collapse">
                             <div className={styles["accordion-body"]}>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Details (if any)</label>
                                   <input style={{width: '100%'}} name='Details' value={form.Details} onChange={handleChange} className='form-control' type='text' />
                                 </div>
@@ -882,31 +880,31 @@ finally
                           <div id="panelsStayOpen-collapseEight" className="accordion-collapse collapse">
                             <div className={styles["accordion-body"]}>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Bank Name</label>
                                   <input style={{width: '100%'}} name='BankName' value={form.BankName} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Branch Address</label>
                                   <input style={{width: '100%'}} name='BankAddress' value={form.BankAddress} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group"> 
+                                <div className={styles["formGroup"]}> 
                                   <label style={{width: '50%'}}>Name as appearing in account</label>
                                   <input style={{width: '100%'}} name='NameinBankAccount' value={form.NameinBankAccount} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Bank Account No.</label>
                                   <input style={{width: '100%'}} name='BankAccountNo' value={form.BankAccountNo} onChange={handleChange} className='form-control' type='text' />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Bank IFSC/MICR code</label>
                                   <input style={{width: '100%'}} name='BankIFSCMICRCode' value={form.BankIFSCMICRCode} onChange={handleChange} className='form-control' type='text' />
                                 </div>
@@ -923,7 +921,7 @@ finally
                           <div id="panelsStayOpen-collapseTen" className="accordion-collapse collapse">
                             <div className={styles["accordion-body"]}>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   {attachments?.length > 0 && (
                                                       <ul style={{ listStyle: "none", padding: 0 }}>
                                                         {attachments.map((file, index) => (
@@ -980,13 +978,13 @@ finally
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Factory License</label>
                                   <input style={{width: '100%'}} name="filesLicenseManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>ISO 9001 Certificates</label>
                                   <input style={{width: '100%'}} name="filesISOManual" type="file" multiple onChange={handleFileChange}  />
                                 </div>
@@ -1004,7 +1002,7 @@ finally
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Service Tax Registration</label>
                                   <input style={{width: '100%'}} name="filesServiceManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
@@ -1016,7 +1014,7 @@ finally
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Telephone and Electricity Bill</label>
                                   <input style={{width: '100%'}} name="filesTelephonManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
@@ -1050,8 +1048,8 @@ finally
                         </div>
                       </div>
                       <div className={styles['btn-group']}>
-                        <button className={styles.ApproveBtn} onClick={handleSubmitManual}>Submit</button>
-                        <button className={styles.ApproveBtn} onClick={handleSaveManual}>Save</button>
+                        <button className={styles.ApproveBtn} onClick={handleSubmitManual}>Submit</button>&nbsp;
+                        <button className={styles.ApproveBtn} onClick={handleSaveManual}>Save</button>&nbsp;
                         <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
                       </div>
                     </div>
@@ -1080,13 +1078,13 @@ finally
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Factory License</label>
                                   <input style={{width: '100%'}} name="filesLicenseExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesLicenseExcel")} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>ISO 9001 Certificates</label>
                                   <input style={{width: '100%'}} name="filesISOExcel" type="file" multiple onChange={handleFileChange}  />
                                 </div>
@@ -1104,7 +1102,7 @@ finally
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Service Tax Registration</label>
                                   <input style={{width: '100%'}} name="filesServiceExcel" type="file" multiple onChange={handleFileChange}  />
                                 </div>
@@ -1116,7 +1114,7 @@ finally
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                              <div className="form-group">
+                                <div className={styles["formGroup"]}>
                                   <label style={{width: '50%'}}>Telephone and Electricity Bill</label>
                                   <input style={{width: '100%'}} name="filesTelephoneExcel" type="file" multiple onChange={handleFileChange} />
                                 </div>
