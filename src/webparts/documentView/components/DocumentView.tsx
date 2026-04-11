@@ -29,7 +29,7 @@ const handleCancel = () => {
   // 🔹 Load data
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const ID= Number(params.get("ID"));
+    const ID= Number(params.get("RequestId"));
     getDatafromListByTitle(ID);
   }, []);
 const getDatafromListByTitle = async (parm_Title:number) => {

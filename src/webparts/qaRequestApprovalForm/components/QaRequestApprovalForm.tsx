@@ -13,7 +13,7 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
   const [comment, setComment] = useState("");
 
   const params = new URLSearchParams(window.location.search);
-  const rawItemId = params.get("id");
+  const rawItemId = params.get("RequestId");
   const itemId = rawItemId ? Number(rawItemId) : null;
   const isReadOnly = data?.Status === "Approved" || data?.Status === "Rejected";
 

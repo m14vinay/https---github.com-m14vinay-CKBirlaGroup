@@ -609,7 +609,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
                 borderRadius: '10px'
               }}
             >
-              View
+              Edit
             </button>
           );
         }
@@ -630,9 +630,6 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setIsActiveREIMF(false);
     setIsActiveNEI(false);
     const setDynamicColumns = [
-      columnHelper.accessor('Approver.Id', {
-        header: "Approver ID"
-      }),
       columnHelper.accessor('Approver.Title', {
         header: "Approver Name"
       }),
@@ -659,7 +656,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
                 borderRadius: '10px'
               }}
             >
-              View
+              Edit
             </button>
           );
         }
@@ -682,9 +679,6 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     const setDynamicColumns = [
       columnHelper.accessor('DepartmentName', {
         header: "Department Name"
-      }),
-      columnHelper.accessor('FinanceController.Id', {
-        header: "Finance Controller ID"
       }),
       columnHelper.accessor('FinanceController.Title', {
         header: "Finance Controller Name"
@@ -712,7 +706,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
                 borderRadius: '10px'
               }}
             >
-              View
+              Edit
             </button>
           );
         }
@@ -768,7 +762,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
                 borderRadius: '10px'
               }}
             >
-              View
+              Edit
             </button>
           );
         }
@@ -791,9 +785,6 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     const setDynamicColumns = [
       columnHelper.accessor('ApproverType', {
         header: "Approver Type"
-      }),
-      columnHelper.accessor('ApproverName.Id', {
-        header: "Approver ID"
       }),
       columnHelper.accessor('ApproverName.Title', {
         header: "Approver Name"
@@ -821,7 +812,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
                 borderRadius: '10px'
               }}
             >
-              View
+              Edit
             </button>
           );
         }
@@ -844,9 +835,6 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     const setDynamicColumns = [
       columnHelper.accessor('DepartmentName', {
         header: "Department Name"
-      }),
-      columnHelper.accessor('DepartmentHead.Id', {
-        header: "Department Head Id"
       }),
       columnHelper.accessor('DepartmentHead.Title', {
         header: "Department Head Name"
@@ -874,7 +862,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
                 borderRadius: '10px'
               }}
             >
-              View
+              Edit
             </button>
           );
         }
@@ -930,7 +918,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
                 borderRadius: '10px'
               }}
             >
-              View
+              Edit
             </button>
           );
         }

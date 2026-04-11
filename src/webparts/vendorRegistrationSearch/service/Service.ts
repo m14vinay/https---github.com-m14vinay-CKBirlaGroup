@@ -35,7 +35,7 @@ export default class Service {
     filters.push(`GST eq '${parm_GST}'`);
   }
   if (parm_VendorCode) {
-    filters.push(`ID eq ${parm_VendorCode.split('_')[1]}`);
+    filters.push(`ID eq ${parm_VendorCode.includes('_')?parm_VendorCode.split('_')[1]:parm_VendorCode}`);
   }
   if (parm_Tin) {
     filters.push(`Tin eq '${parm_Tin}'`);
@@ -51,7 +51,7 @@ export default class Service {
     SPHttpClient.configurations.v1
   );
   const data = await res.json();
-  return data.value.length > 0 ? data.value[0]: []; // Return array of results or empty array if no matches
+  return data ? data.value[0]: []; // Return array of results or empty array if no matches
 }
   // Get the Attachments from List
    public async getAttachments(itemId: number): Promise<any[]> {

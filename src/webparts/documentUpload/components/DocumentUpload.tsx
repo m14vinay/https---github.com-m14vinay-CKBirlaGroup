@@ -107,7 +107,7 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   try {    
     setLoading(true);
       // CREATE
-      const resutldata=await service.getItemByTitle(form.Title+'_'+dateOnly);
+      const resutldata=await service.getItemByTitle(form.BillNumber,form.BillDate);
       if(resutldata==0)
       {
       const res = await service.createItem(payload);
@@ -136,7 +136,7 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   }
       }
       else{
-        alert("Record already exists with the Document ID : "+form.Title+'_'+dateOnly);
+        alert("Record already exists with the BillNumber : "+form.BillNumber+' and BillDate '+form.BillDate);
       }
   } catch (error) {
     console.error(error);

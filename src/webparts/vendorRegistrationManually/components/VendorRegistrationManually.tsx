@@ -65,7 +65,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
   // Get Value From Query String
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('RequestID');
+    const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
   // Load on Mount
