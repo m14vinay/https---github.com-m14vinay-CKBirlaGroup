@@ -39,8 +39,8 @@ export default class Service {
     return response.json();
   }
   // Fetch the Record
-  public async getItemByTitle(Title: string): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=Title eq '${Title}'`;
+  public async getItemByTitle(BillNumber: string,BillDate:Date): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=BillNumber eq '${BillNumber}' or BillDate eq '${BillDate}'`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1

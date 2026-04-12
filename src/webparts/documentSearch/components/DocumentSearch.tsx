@@ -148,12 +148,14 @@ const DocumentSearch: React.FC<IDocumentSearchProps> = (props) => {
     window.location.assign(url);
   };
   const handlesearch = async () => {
+    setLoading(true);
     _setData([]);
     if (!form.VendorName && !form.BillAmount && !form.Title && !form.BillDate && !form.BillNumber) {
       alert("Please select any one  fields to search");
       return;
     }
     await getDatafromListByTitle(form.VendorName, form.BillAmount, form.Title, form.BillDate, form.BillNumber);
+    setLoading(false);
   };
   const getDatafromListByTitle = async (parm_vendorname: string, parm_billamount: string, parm_title: string, parm_billdate: string, parm_billnumber: string) => {
     try {
@@ -171,6 +173,22 @@ const DocumentSearch: React.FC<IDocumentSearchProps> = (props) => {
     }
   };
   return (
+    <section>
+      {loading && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: 'rgba(255,255,255,0.6)',
+                zIndex: 9999
+              }}>
+                <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                  <Spinner label="Processing..." size={SpinnerSize.large} />
+                </div>
+              </div>
+            )}
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>My Document List
@@ -355,10 +373,9 @@ const DocumentSearch: React.FC<IDocumentSearchProps> = (props) => {
             </select>
           </div>
         </div>
-
-
       </div>
     </div>
+    </section>
   );
 };
 export default DocumentSearch;

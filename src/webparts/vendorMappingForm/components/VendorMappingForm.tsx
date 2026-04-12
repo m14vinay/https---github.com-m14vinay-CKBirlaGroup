@@ -5,7 +5,8 @@ import styles from './VendorMappingForm.module.scss';
 import { IVendorMappingFormProps } from './IVendorMappingFormProps';
 import SharePointService from '../service/Service';
 import Service from '../service/Service';
-import { Spinner, SpinnerSize } from '@fluentui/react';
+import { Spinner, SpinnerSize,IDropdownOption,Dropdown } from '@fluentui/react';
+//import { Dropdown } from 'react-bootstrap';
 
 
 const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
@@ -42,6 +43,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
    const [attachments, setAttachments] = React.useState<any[]>([]);
    const [loading, setLoading] = React.useState(false);
+  const [vendorOptions, setVendorOptions] = React.useState<IDropdownOption[]>([]);
 
 
 
@@ -74,7 +76,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
      React.useEffect(() => {
        if (itemId) {
          loadAttachments(itemId);
-        
+        loadVendors();
        }
      }, [itemId]);
     const handleFetchById = async (id: number) => {
@@ -107,11 +109,11 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
          }
           
       } else {
-        alert("No data found");
+        alert("No Data Found");
       }
       
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error Occurred,Please Contact To System Administrator.:", error);
     }
     finally
   {
@@ -120,6 +122,19 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   };
 
 
+  
+const loadVendors = async () => {
+      const data = await service.getVendor();
+      const options = data.map((item: any) => ({
+        key: item.Title,
+        text: item.Title
+      }));
+      setVendorOptions(options);
+    }
+
+     React.useEffect(() => {
+          loadVendors();     
+        }, []);
   // --- VALIDATIONS ---
   const validateProjectCode = (value: string): string => {
     if (!value) return 'Project Code is required';
@@ -159,7 +174,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   for (let file of filesArray) {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
-      alert(`File type not allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
+      alert(`File Type Not Allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
       return; // stop execution
     }
   }
@@ -167,14 +182,14 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   // 🔹 Total size check
   const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
   if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
-    alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+    alert(`Total File Size Must Not Exceed ${MAX_TOTAL_SIZE_MB} MB`);
     return;
   }
 
   // 🔹 Invalid filename check
   const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
   if (invalidFiles.length > 0) {
-    alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+    alert(`File Names Cannot Have Special Characters: ${invalidFiles.map(f => f.name).join(", ")}`);
     return;
   }
 
@@ -199,62 +214,6 @@ const removeExistingFile = async (index: number) => {
 await service.deleteAttachmentFromSP(file);
   setAttachments(prev => prev.filter((_, i) => i !== index));
 };
-
-
-
-
-  
-
-// const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-//   const value = e.target.value;
-
-//   // ✅ form me update karo (IMPORTANT)
-//   setForm(prev => ({
-//     ...prev,
-//     projectCode: value
-//   }));
-
-//   // validation
-//   const errorMsg = validateProjectCode(value);
-//   setRequestNoError(errorMsg);
-
-//   if (errorMsg || !value) {
-//     setForm(prev => ({
-//       ...prev,
-//       projectTitle: '',
-//       projectDescription: ''
-//     }));
-//     return;
-//   }
-
-//   try {
-//     const result = await service.getRequestDetails(value);
-//     // if(result.Status==='Approved')
-//     // {
-//     if (result.length > 0) {
-//       setForm(prev => ({
-//         ...prev,
-//         projectTitle: result[0].ProjectTitle || '',
-//         projectDescription: result[0].ProjectDescription || ''
-//       }));
-//     } 
-  
-  
-//   else {
-//       setForm(prev => ({
-//         ...prev,
-//         projectTitle: '',
-//         projectDescription: ''
-//       }));
-//     }
-
-//   } catch (error) {
-//     console.error("Error fetching data:", error);
-//   }
-// };
-
-
- //const user = await service.getVendorApprover();
 
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value.toUpperCase();
@@ -291,7 +250,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
           projectDescription: result[0].ProjectDescription || ''
         }));
       } else {
-        alert("This request is not approved ✅");
+        alert("This request is Not Approved.✅");
         setForm(prev => ({
           ...prev,
           projectTitle: '',
@@ -301,7 +260,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     
     }
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error Fetching Data:", error);
     alert("Error fetching request details");
   }
 };
@@ -338,13 +297,13 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
   // 🔹 Validations
   try {
    setLoading(true);
-  if (!form.projectCode) return alert("Project Code required");
-  if (!form.vendorName) return alert("Select Vendor");
+  if (!form.projectCode) return alert("Enter Project Code");
+  if (!form.vendorName) return alert("Please Select Vendor");
  if (
   (!form.files || form.files.length === 0) &&
   (!attachments || attachments.length === 0)
 ) {
-  return alert("Attach files");
+  return alert("Please Attach Files");
 }
  
 
@@ -372,7 +331,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
         await service.uploadFile(res.Id , form.files[i]);
         }
       }
-      alert("Data Saved Successfully ✅");
+      alert("Saved Successfully.✅");
        await service.updateItem(res.Id, {
        RequestNo: `VMR-${res.Id}`
   });
@@ -386,11 +345,11 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
         await service.uploadFile(itemId, form.files[i]);
         }
       }
-      alert("Data Updated Successfully ✅");
+      alert("Updated Successfully.✅");
     }
   } catch (error) {
     console.error(error);
-    alert("Error occurred ❌");
+    alert("Error Occurred,Please Contact To System Administrator.❌");
   }
   finally
   {
@@ -403,13 +362,13 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 const handleUpdate = async () => {
    setLoading(true);
     try {
-   if (!form.projectCode) return alert("Project Code required");
-    if (!form.vendorName) return alert("Select Vendor");
+   if (!form.projectCode) return alert("Enter Project Code");
+    if (!form.vendorName) return alert("Please Select Vendor");
     if (
   (!form.files || form.files.length === 0) &&
   (!attachments || attachments.length === 0)
 ) {
-  return alert("Attach files");
+  return alert("Please Attach files");
 }
  const users = await service.getVendorApprover();
 const item = users?.Approver?.Id;
@@ -435,8 +394,8 @@ const item = users?.Approver?.Id;
         await service.uploadFile(itemId, form.files[i]);
       }
     }
-    alert("Data Submitted Successfully ✅");    
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    alert("Submitted Successfully.✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
     }
     else{
@@ -449,8 +408,8 @@ const item = users?.Approver?.Id;
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id , form.files[i]);
       }
-      alert("Data Submitted Successfully ✅");    
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+      alert("Submitted Successfully.✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
      }
     }    
@@ -460,7 +419,7 @@ const item = users?.Approver?.Id;
        
    catch (error) {
     console.error(error);
-    alert("Error occurred");
+    alert("Error Occurred,Please Contact To System Administrator.");
   }
   finally
   {
@@ -511,13 +470,18 @@ const item = users?.Approver?.Id;
         <input name="projectDescription" value={form.projectDescription} readOnly style={{backgroundColor:"lightgray"}}  />
 
 
-        <label>Select Vendor <span className={styles.required}>*</span></label>
-      <select name="vendorName" value={form.vendorName} onChange={(e) =>setForm(prev => ({
-      ...prev,vendorName: e.target.value}))} >
-       <option value="">Select Vendor</option>
-  <option value="Vendor1">Vendor 1</option>
-  <option value="Vendor2">Vendor 2</option>
-</select>
+         <label>Select Vendor <span className={styles.required}>*</span></label>
+      <Dropdown
+                placeholder="Select Vendor"
+                options={vendorOptions}
+                selectedKey={form.vendorName}
+        onChange={(e, option) =>
+          setForm(prev => ({
+            ...prev,
+            vendorName: option?.key as string // safe default empty string
+          }))
+        }
+      /> 
         <label>Additional Information & Remarks</label>
         <input name="vendorDescription" value={form.vendorDescription} onChange={handleChange}  />
         

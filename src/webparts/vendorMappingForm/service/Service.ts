@@ -5,7 +5,7 @@ export default class Service {
   private listname="VendorMapping";
   private Departmentmaster ="DepartmentMaster";
    private FetchList ="QuotationApproval";
-  private VendorList="";
+  private VendorList="AllVendor";
     private HistoryList="History";
     private Approver="VendorMappingApproval";
 
@@ -144,6 +144,8 @@ Approver/Id,Approver/Title&$expand=Approver`;
 
  return data.value;
 }
+
+
 
   // Upload Files
 

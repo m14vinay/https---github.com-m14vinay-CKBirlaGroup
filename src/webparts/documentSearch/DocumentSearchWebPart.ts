@@ -112,8 +112,8 @@ export default class DocumentSearchWebPart extends BaseClientSideWebPart<IDocume
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
-  //protected dataVersion: Version = Version.parse('1.0');
-protected get dataVersion(): Version {
+ // protected dataVersion: Version = Version.parse('1.0');
+ protected get dataVersion(): Version {
   return Version.parse('1.0');
 }
   

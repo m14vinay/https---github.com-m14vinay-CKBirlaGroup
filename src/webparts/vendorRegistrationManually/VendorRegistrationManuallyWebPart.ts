@@ -7,7 +7,6 @@ import {
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
-
 import * as strings from 'VendorRegistrationManuallyWebPartStrings';
 //import { VendorRegistrationManually } from './components/VendorRegistrationManually';
 import VendorRegistrationManually from './components/VendorRegistrationManually';

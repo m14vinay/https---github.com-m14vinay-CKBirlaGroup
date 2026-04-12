@@ -128,11 +128,11 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       }      
 
       } else {
-        alert("No data found");
+        alert("No Data Found");
       }
 
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error Occurred,Please Contact To System Administrator.:", error);
     }
     finally
   {
@@ -142,7 +142,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
 
 const handleCancel = () => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
   window.location.assign(url);
 };
 const handleDownload = () => {
@@ -160,7 +160,7 @@ const handleDownload = () => {
   for (let file of filesArray) {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
-      alert(`File type not allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
+      alert(`File Type Not Allowed: ${file.name}. Only PDF, XLSX, DOCX are Allowed.`);
       return; // stop execution
     }
   }
@@ -168,14 +168,14 @@ const handleDownload = () => {
   // 🔹 Total size check
   const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
   if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
-    alert(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+    alert(`Total File Sie Must Not Exceed ${MAX_TOTAL_SIZE_MB} MB`);
     return;
   }
 
   // 🔹 Invalid filename check
   const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
   if (invalidFiles.length > 0) {
-    alert(`File names cannot have special characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+    alert(`File Names Cannot Have Special Characters: ${invalidFiles.map(f => f.name).join(", ")}`);
     return;
   }
 
@@ -238,7 +238,7 @@ const handlecheckamount=async (e: React.ChangeEvent<HTMLInputElement>) => {
     ...prev,
     POAmount:0
   }));
-    alert("Please Enter PO Amount less or equal to Remaining Amount.");
+    alert("Please Enter PO Amount Less or Equal To Remaining Amount.");
   }
 }
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -292,7 +292,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
       }  
     }
     else {
-      alert("This request is not approved ✅");
+      alert("This Request is Not Approved ✅");
       resetFields();
     }
     } 
@@ -360,15 +360,15 @@ const handleSaveHistory = async (id: number) => {
   const handleSaveOrUpdate = async () => {
     setLoading(true);
   // 🔹 Validations
-  if(!form.projectCode) return alert("Project Code required");
+  if(!form.projectCode) return alert("Enter Project Code");
     if(!form.POAmount) return alert("Enter POAmount");
     if(!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
-    if(!form.POAmount) return alert("Choose POCategory");
+    if(!form.POAmount) return alert("Please Choose POCategory");
     if (
   (!form.files || form.files.length === 0) &&
   (!attachments || attachments.length === 0)
 ) {
-  return alert("Attach files");
+  return alert("Please Attach files");
 }
 
   // 🔹 Payload (common)
@@ -399,7 +399,7 @@ const handleSaveHistory = async (id: number) => {
            
       }
     }
-      alert("Data Saved Successfully ✅");
+      alert("Saved Successfully.✅");
       await service.updateItem(res.Id, {
           RequestNo: `CKBCSL/25-26/IV/Finance/${res.Id}`
         });
@@ -412,11 +412,11 @@ const handleSaveHistory = async (id: number) => {
           await service.uploadFile(itemId, form.files[i]);
         }
       }
-      alert("Data Updated Successfully ✅");
+      alert(" Updated Successfully ✅");
     }
   } catch (error) {
     console.error(error);
-    alert("Error occurred ❌");
+    alert("Error Occurred,Please Contact To System Administrator.❌");
   }
   finally
   {
@@ -430,15 +430,15 @@ const handleSaveHistory = async (id: number) => {
 const handleUpdate = async () => {
   try {
   setLoading(true);
-   if(!form.projectCode) return alert("Project Code required");
+   if(!form.projectCode) return alert("Enter Project Code ");
   if(!form.POAmount) return alert("Enter POAmount");
     if(!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
-    if(!form.PoMaster) return alert("Choose POCategory");
+    if(!form.PoMaster) return alert("Please Choose POCategory");
      if (
   (!form.files || form.files.length === 0) &&
   (!attachments || attachments.length === 0)
 ) {
-  return alert("Attach files");
+  return alert("Please Attach files");
 }
         const dataApprover = await service.GetApproverFromFinance(form.PoMaster);
         if(dataApprover?.Id)
@@ -475,8 +475,8 @@ const handleUpdate = async () => {
         await service.uploadFile(itemId, form.files[i]);
       }
     }
-    alert("Data Submitted Successfully ✅");    
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    alert("Submitted Successfully.✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
     }
     else{
@@ -489,8 +489,8 @@ const handleUpdate = async () => {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id , form.files[i]);
       }
-      alert("Data Submitted Successfully ✅");    
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+      alert("Submitted Successfully.✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
      }
     }    
@@ -500,7 +500,7 @@ const handleUpdate = async () => {
        
    catch (error) {
     console.error(error);
-    alert("Error occurred");
+    alert("Error Occurred,Please Contact To System Administrator.");
   }
   finally
   {
