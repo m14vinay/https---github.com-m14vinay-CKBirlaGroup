@@ -66,7 +66,7 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
   const [loading, setLoading] = useState(true);
 
   const params = new URLSearchParams(window.location.search);
-  const itemId = Number(params.get('id') || params.get('ID'));
+  const itemId = Number(params.get('RequestId'));
   const normalizeValue = (value?: string): string => String(value || '').toLowerCase().replace(/\s/g, '').trim();
 
   // Load action history for the right-side timeline and top approval strip.

@@ -110,7 +110,7 @@ const QuotationApprovalForm: React.FC<IQuotationApprovalFormProps> = (props) => 
   // Query-string helper used to reload a draft by item ID.
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('ID') || params.get('id');
+    const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
 
