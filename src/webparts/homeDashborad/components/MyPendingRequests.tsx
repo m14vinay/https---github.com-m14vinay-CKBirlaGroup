@@ -60,7 +60,7 @@ export default function MyPendingRequests() {
         columnHelper.accessor('RequestNo', {
             header: () => <span>Request No</span>
         }),
-        columnHelper.accessor((row) => row.lastName, {
+        columnHelper.accessor('ProjectTitle', {
             id: 'ProjectTitle',
             header: () => <span>Project Title</span>
         }),
