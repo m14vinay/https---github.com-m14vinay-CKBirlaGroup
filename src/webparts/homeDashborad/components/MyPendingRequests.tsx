@@ -74,11 +74,12 @@ export default function MyPendingRequests() {
             header: 'Status'
         }),
         columnHelper.accessor('Created', {
-            header: 'Submitted Date'
+            header: 'Submitted Date',
+            cell: (info) => <span>{new Date(info.row.original.Created).toLocaleDateString}</span>
         }),
         columnHelper.accessor('Created', {
             header: 'Approved Date',
-            cell: (info) => <span>TBD</span>
+            cell: (info) => <span>{info.row.original.CurrentStatus === "Approved"?new Date(info.row.original.Modified).toLocaleDateString():""}</span>
         }),
         columnHelper.accessor('Created', {
             header: 'View',

@@ -9,3 +9,9 @@
 .CommentsWrapper {
     display: none !important;
 }
+
+/* Hide menu dropfown icon */
+
+#basic-nav-dropdown::after {
+    display: none !important;
+}

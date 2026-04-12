@@ -15,6 +15,7 @@ import './HideTopBar.css';
 
 interface IDigiflowMenuState {
   items:any[];
+  showDropdown:string;
 }
 
 export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, IDigiflowMenuState> {
@@ -23,10 +24,12 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
     super(props);
 
     this.state = {
-      items:[]
+      items:[],
+      showDropdown:""
     }
 
     this.getMenuItems = this.getMenuItems.bind(this);
+    this.setMenuDropdown = this.setMenuDropdown.bind(this);
     this.getMenuItems();
   }
 
@@ -43,6 +46,12 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
     })
   }
 
+  private setMenuDropdown(value:string){
+    this.setState({
+      showDropdown:value
+    })
+  }
+
   private menuBar() {
     let base = this.state.items.filter(item => {
       return item.ParentId === null;
@@ -53,7 +62,11 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
         {base.map(b => {
           let childItems = this.state.items.filter(item => item.ParentId == b.Id);
           if(childItems.length > 0){
-            return <NavDropdown title={
+            return <NavDropdown 
+            onMouseEnter={() => this.setMenuDropdown(b.Title)}
+            onMouseLeave={() => this.setMenuDropdown("")}
+            show={this.state.showDropdown === b.Title}
+            title={
                   <span><span><img className={styles.iconImg} src={b.Icon}></img></span><span className={styles.menuHaeding}>{b.Title}</span></span>
                 } id="basic-nav-dropdown">
                   {childItems.map((c,i) => {
