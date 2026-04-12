@@ -83,7 +83,7 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const { name, value } = e.target;
   setForm({
     ...form,
-    [name]: name === "BillDate" ? new Date(value) : value
+    [name]: name === "BillDate" ? new Date(value).toISOString() : value
   });
 };
   // Save Data
@@ -99,7 +99,7 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     TypeOfDocument:form.TypeOfDocument,
       Title:form.Title+'_'+dateOnly,
       BillNumber: form.BillNumber,
-      BillDate: form.BillDate,
+      BillDate: form.BillDate.toISOString(),
       VendorName:form.VendorName,
       BillAmount : form.BillAmount,
       Remarks: form.Remarks
@@ -107,7 +107,7 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   try {    
     setLoading(true);
       // CREATE
-      const resutldata=await service.getItemByTitle(form.BillNumber,form.BillDate);
+      const resutldata=await service.getItemByTitle(form.BillNumber,form.BillDate.toString());
       if(resutldata==0)
       {
       const res = await service.createItem(payload);
