@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
   "id": "c3406b85-ccd5-4244-b3f8-efb6b18be8bc",
-  "alias": "OuotationApprovalFormWebPart",
+  "alias": "QuotationApprovalFormWebPart",
   "componentType": "WebPart",
 
   "version": "*",
@@ -15,11 +15,11 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
     "group": { "default": "Advanced" },
-    "title": { "default": "Ouotation Approval Form" },
-    "description": { "default": "Ouotation Approval Form description" },
+    "title": { "default": "Quotation Approval Form" },
+    "description": { "default": "Quotation Approval Form description" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "description": "Ouotation Approval Form"
+      "description": "Quotation Approval Form"
     }
   }]
 }

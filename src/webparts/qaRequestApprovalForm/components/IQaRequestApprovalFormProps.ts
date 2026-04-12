@@ -6,8 +6,6 @@ export interface IQaRequestApprovalFormProps {
   environmentMessage: string;
   hasTeamsContext: boolean;
   userDisplayName: string;
-
-  // 🔥 Add these
   siteUrl: string;
   spHttpClient: SPHttpClient;
   listName: string;

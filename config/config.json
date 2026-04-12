@@ -10,11 +10,11 @@
         }
       ]
     },
-    "ouotation-approval-form-web-part": {
+    "quotation-approval-form-web-part": {
       "components": [
         {
-          "entrypoint": "./lib/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.js",
-          "manifest": "./src/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.manifest.json"
+          "entrypoint": "./lib/webparts/QuotationApprovalForm/QuotationApprovalFormWebPart.js",
+          "manifest": "./src/webparts/QuotationApprovalForm/QuotationApprovalFormWebPart.manifest.json"
         }
       ]
     },
@@ -246,7 +246,7 @@
   "externals": {},
   "localizedResources": {
     "HomeDashboradWebPartStrings": "lib/webparts/homeDashborad/loc/{locale}.js",
-    "OuotationApprovalFormWebPartStrings": "lib/webparts/ouotationApprovalForm/loc/{locale}.js",
+    "QuotationApprovalFormWebPartStrings": "lib/webparts/QuotationApprovalForm/loc/{locale}.js",
     "VendorMappingFormWebPartStrings": "lib/webparts/vendorMappingForm/loc/{locale}.js",
     "PurchaseOrderRequestWebPartStrings": "lib/webparts/purchaseOrderRequest/loc/{locale}.js",
     "PurchaseOrderApprovalWebPartStrings": "lib/webparts/purchaseOrderApproval/loc/{locale}.js",
