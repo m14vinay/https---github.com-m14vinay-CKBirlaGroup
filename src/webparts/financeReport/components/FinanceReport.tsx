@@ -47,7 +47,9 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
       header: 'Status'
     }),
     columnHelper.accessor('Created', {
-      header: 'Submitted Date'
+      header: 'Submitted Date',
+      cell: info =>
+    new Date(info.getValue()).toISOString()
     }),
     columnHelper.accessor('', {
       header: 'Approved Date'
@@ -258,7 +260,7 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
               />
               <button className={styles.btnSearch} onClick={handlesearch} style={{ marginTop: "10px" }}>Search</button>
             </div>
-            <div className={styles['col-md-6']} style={{ width: "22%", paddingTop: "10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
+            <div className={styles['col-md-6']} style={{ width: "15%", paddingTop: "10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
               <button className={styles.btnExport} onClick={handleExcel}>Export to Excel</button>
             </div>
             <div className={styles['col-md-6']} style={{ paddingTop: "10px", alignItems: "flex-end", justifyContent: "flex-end" }}>

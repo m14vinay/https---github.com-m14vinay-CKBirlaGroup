@@ -320,7 +320,7 @@ finally
              <button className={styles.btnSearch} style={{width:"100%",backgroundColor:isActiveBP?"red":"grey"}} onClick={handleBill}>Bill Processing</button>
             </div>                
             <div style={{paddingBottom:"5%"}}></div>
-            <div className={styles['col-md-6']} style={{ width:"22%",paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
+            <div className={styles['col-md-6']} style={{ width:"15%",paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
               <button className={styles.btnSearch} onClick={handleExcel}>Export to Excel</button>
             </div>
             <div className={styles['col-md-6']} style={{paddingTop:"10px", alignItems: "flex-end", justifyContent: "flex-end" }}>
