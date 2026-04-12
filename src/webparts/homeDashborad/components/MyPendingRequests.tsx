@@ -33,16 +33,22 @@ export default function MyPendingRequests() {
             switch(row["@odata.type"]){
                 case '#SP.Data.QuotationApprovalListItem':
                     window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationApproval.aspx?RequestId=" + row.Id,"_blank");
+                    break;
                 case '#SP.Data.PoApprovalListItem':
                     window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchaseOrderApproval.aspx?RequestId=" + row.Id,"_blank");
+                    break;
                 case '#SP.Data.VendorMappingListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingApproval.aspx?RequestId=" + row.Id,"_blank");
-                case '#SP.Data.Remb_ExpanseMasterListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementApproval.aspx?RequestId=" + row.Id,"_blank");  
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingApprovalForm.aspx?RequestId=" + row.Id,"_blank");
+                    break;
+                case '#SP.Data.Remb_x005f_ExpanseMasterListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementExpenseApproval.aspx?RequestId=" + row.Id,"_blank");
+                    break;
                 case '#SP.Data.BillProcessingListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/BillProcessingApproval.aspx?RequestId=" + row.Id,"_blank");  
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Bill-Processing-Approval.aspx?RequestId=" + row.Id,"_blank");
+                    break; 
                 case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationNEIBTAdminApproval.aspx?RequestId=" + row.Id,"_blank");            
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Approval.aspx?RequestId=" + row.Id,"_blank");
+                    break;            
                 default:
                     alert("Page not found");
                     break;
@@ -72,10 +78,6 @@ export default function MyPendingRequests() {
         }),
         columnHelper.accessor('Created', {
             header: 'Approved Date',
-            cell: (info) => <span>TBD</span>
-        }),
-        columnHelper.accessor('Created', {
-            header: 'Approval History',
             cell: (info) => <span>TBD</span>
         }),
         columnHelper.accessor('Created', {
