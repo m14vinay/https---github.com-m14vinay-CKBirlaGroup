@@ -1,269 +1,529 @@
 import * as React from 'react';
 import styles from './BillProcessingForm.module.scss';
-import type { IBillProcessingFormProps } from './IBillProcessingFormProps';
-import { escape } from '@microsoft/sp-lodash-subset';
+import { IBillProcessingFormProps } from './IBillProcessingFormProps';
 import { SPHttpClient } from '@microsoft/sp-http';
-interface IState {
-  BPRequestNo: string;
-  BPRequestErrorNo: string;
-  POsigned: boolean
-  ProjcetCode: string
-  vendorCode: string;
-  vendorName: string;
-  projectTitle: string;
-  Comments: string;
-  PORequestNo: string;
-  BillNo: string;
-  BillDate: Date;
-  BillAmount: number;
-  CalculatedTaxes: number;
-  TotalAmount: number;
-  UploadDocument: string;
-  files: FileList | null;
-}
-export default class BillProcessingForm extends React.Component<IBillProcessingFormProps, IState> {
+import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
+import SharePointService from '../service/Service';
+import { PageContext } from '@microsoft/sp-page-context';
+import { Spinner, SpinnerSize } from '@fluentui/react';
+const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
 
-  constructor(props: IBillProcessingFormProps) {
-    super(props);
+  // State
+  const [form, setForm] = React.useState({
+    BPRequestNo: '',
+    BPRequestErrorNo: '',
+    POsigned: false,
+    ProjcetCode: '',
+    vendorCode: '',
+    vendorName: '',
+    projectTitle: '',
+    Comments: '',
+    PORequestNo: '',
+    BillNo: '',
+    BillDate: new Date(),
+    BillAmount: 0,
+    CalculatedTaxes: 0,
+    TotalAmount: 0,
+    UploadDocument: '',
+    files: []
+  });
+  const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const [FinanceController, setApprover2ID] = React.useState<number | null>(null);
+  const [AssignedID, setAssignedID] = React.useState<number | null>(null);
+  const [Departmenthead, setDepartmentHead] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+  const [attachments, setAttachments] = React.useState<any[]>([]);
+  const [occupiedAmount, setoccupiedAmount] = React.useState(0);
+  const [loading, setLoading] = React.useState(false);
+  const MAX_TOTAL_SIZE_MB = 25;
+  const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
 
-    this.state = {
-      BPRequestNo: '',
-      BPRequestErrorNo: '',
-      POsigned: true,
-      ProjcetCode: '',
-      vendorCode: '',
-      vendorName: '',
-      projectTitle: '',
-      Comments: '',
-      PORequestNo: '',
-      BillNo: '',
-      BillDate: new Date(),
-      BillAmount: 0,
-      CalculatedTaxes: 0,
-      TotalAmount: 0,
-      UploadDocument: '',
-      files: null
-    };
-  }
 
-  private handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    this.setState({ ...this.state, [name]: value });
+
+  // --- 1️⃣ Get ID from query string ---
+  const getIdFromQueryString = (): number | null => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('RequestId');
+    return id ? parseInt(id, 10) : null;
   };
 
-  private getRequestDetails = async (requestNo: string) => {
+  // --- 3️⃣ Load data on mount ---
+  React.useEffect(() => {
+    const id = getIdFromQueryString();
+    if (id) {
+      handleFetchById(id);
+    }
+  }, []);
 
-    const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
 
-    console.log("URL:", url)
-    const response = await this.props.context.spHttpClient.get(
-      url,
-      SPHttpClient.configurations.v1
-    );
-
-    const data = await response.json();
-
-    if (data.value.length > 0) {
-      this.setState({
-        BPRequestNo: data.value[0].BPRequestNo,
-        POsigned: data.value[0].POsigned,
-        ProjcetCode: data.value[0].ProjcetCode,
-        vendorCode: data.value[0].vendorCode,
-        vendorName: data.value[0].vendorName,
-        projectTitle: data.value[0].projectTitle,
-        Comments: data.value[0].Comments,
-        PORequestNo: data.value[0].PORequestNo,
-        BillNo: data.value[0].BillNo,
-        BillDate: new Date(data.value[0].BillDate),
-        BillAmount: data.value[0].BillAmount,
-        CalculatedTaxes: data.value[0].CalculatedTaxes,
-        TotalAmount: data.value[0].TotalAmount,
-        UploadDocument: data.value[0].UploadDocument
-      });
-    } else {
-
-      this.setState({
-
-        POsigned: true,
-        vendorCode: '',
-        vendorName: '',
-        projectTitle: '',
-        Comments: '',
-        PORequestNo: '',
-        BillNo: '',
-        BillDate: new Date(),
-        BillAmount: 0,
-        CalculatedTaxes: 0,
-        TotalAmount: 0,
-        UploadDocument: '',
-        files: null
-      });
+  const loadAttachments = async (id: number) => {
+    try {
+      const files = await service.getAttachments(id);
+      console.log("Attachments:", files);
+      setAttachments(files);
+    } catch (error) {
+      console.error(error);
     }
   };
-
-  validateProjectCode = (value: string): string => {
-    if (!value) return 'Project Code is required';
-    if (!/^[a-zA-Z0-9-]+$/.test(value)) return 'Project Code must be alphanumeric';
-    if (value.length > 10) return 'Project Code must be at most 10 characters';
-    return '';
-  }
-
-  private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const errorMsg = this.validateProjectCode(value);
-
-    this.setState({ BPRequestNo: value, BPRequestErrorNo: errorMsg });
-
-    if (!errorMsg) {
-      this.getRequestDetails(value);
-    } else {
-      this.setState({ projectTitle: '', vendorCode: '', vendorName: '' });
+  React.useEffect(() => {
+    if (itemId) {
+      loadAttachments(itemId);
+      //getApprover();
     }
-  };;
+  }, [itemId]);
 
+  //FETCH DATA-----
+  const handleFetchById = async (id: number) => {
+    try {
+      setLoading(true);
+      console.log("Calling API with ID:", id);
 
-  private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ files: e.target.files });
-  };
-  private saveData = async () => {
+      const result = await service.getItemByRequestNo(id);
 
-    const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
+      console.log("Result:", result);
 
-    const body = {
-      BPRequestNo: this.state.BPRequestNo,
-    };
+      if (result.CurrentStatus === 'Draft') {
+        setItemId(result.Id);
 
-    const response = await this.props.context.spHttpClient.post(
-      url, SPHttpClient.configurations.v1,
-      {
-        headers: {
-          "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/json;odata=nometadata"
-        },
-        body: JSON.stringify(body)
+        const selectedOption = poOptions.find(
+          opt => opt.text === result.PoMaster
+        );
+        setForm(prev => ({
+          ...prev,
+
+          projectCode: result.ProjectCode || '',
+          Department: result.Department || '',
+          projectTitle: result.ProjectTitle || '',
+          vendorName: result.VendorName || '',
+          VendorNameID: result.VendorNameID || '',
+          RemainingAmount: result.RemainingAmount || '',
+          TotalAmount: result.TotalAmount || '',
+          OccupiedAmount: result.OccupiedAmount || 0,
+          POAmount: result.POAmount || 0,
+          ApplicableTaxes: result.ApplicableTaxes || 0,
+          Comments: result.ProjectDescription || '',
+          POCategory: selectedOption?.text || ''
+        }));
+        const data = await service.GetApprover(result.Department);
+        if (data?.Id > 0) {
+          setDepartmentHead(data.Departmenthead?.Id || null);
+          const User = await service.getUserById(data.Departmenthead.Id);
+          if (User?.Id) {
+            setAssignedID(User.Title);
+          }
+          const dataApprover = await service.GetApproverFromFinance(result.PoMaster);
+          if (dataApprover?.Id) {
+            setApprover2ID(dataApprover.FinanceController?.Id || null);
+          }
+        }
+
+      } else {
+        alert("No Data Found");
       }
-    );
-    const result = await response.json();
-    console.log("Response:", result);
 
-    if (response.ok) {
-      alert("Data Saved Successfully ✅");
-    } else {
-      alert("Error saving data ❌");
+    } catch (error) {
+      console.error("Error Occurred,Please Contact To System Administrator.:", error);
+    }
+    finally {
+      setLoading(false);
     }
   };
 
 
-  private handleSubmit = () => {
-    console.log("Form Data:", this.state);
-    alert("Form Submitted");
+  const handleCancel = () => {
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    window.location.assign(url);
+  };
+  const handleDownload = () => {
+    const url = `${props.context.pageContext.web.absoluteUrl}/sites/DigiflowUAT/Shared%20Documents/PO_Format%20(1).xlsx?d=w7b16074a3861495c96494464b6b1818d&csf=1&web=1&e=rkBQLk`;
+    window.location.assign(url);
+  };
+  const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event?.target?.files;
+    if (!files) return;
+
+    const allowedExtensions = ['pdf', 'xlsx', 'docx'];
+    const filesArray = Array.from(files);
+
+    // 🔹 Check each file
+    for (let file of filesArray) {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
+        alert(`File Type Not Allowed: ${file.name}. Only PDF, XLSX, DOCX are Allowed.`);
+        return; // stop execution
+      }
+    }
+
+    // 🔹 Total size check
+    const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
+    if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
+      alert(`Total File Sie Must Not Exceed ${MAX_TOTAL_SIZE_MB} MB`);
+      return;
+    }
+
+    // 🔹 Invalid filename check
+    const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
+    if (invalidFiles.length > 0) {
+      alert(`File Names Cannot Have Special Characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+      return;
+    }
+
+    // ✅ Add valid files to form state
+    setForm((prev: any) => ({
+      ...prev,
+      files: [...prev.files, ...filesArray]
+    }));
+  };
+  const removeFile = (index: number) => {
+    setForm((prev: any) => ({
+      ...prev,
+      files: prev.files.filter((_: File, i: number) => i !== index)
+    }));
   };
 
-  private handleSave = () => {
-    console.log("Saved Data:", this.state);
-    alert("Saved");
+  const removeExistingFile = async (index: number) => {
+    const file = attachments[index];
+
+
+    await service.deleteAttachmentFromSP(file);
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+  const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase();
+    setForm(prev => ({
+      ...prev,
+      projectCode: value
+    }));
+    if (!value) {
+      return;
+    }
+
+    try {
+      const result = await service.getRequestDetails(value);
+      if (result.length > 0) {
+        const item = result[0];
+        const OccupiedAmount = await service.getTotaloccupiedAmount(value);
+        let total = 0;
+        if (OccupiedAmount.length > 0) {
+          total = OccupiedAmount.reduce((sum: number, items: any) => {
+            return sum + Number(items.POAmount || 0);
+          }, 0);
+        }
+        if (item.Status === 'Approved') {
+          // 👉 Form fields update
+          setForm(prev => ({
+            ...prev,
+            Department: item.Department || '',
+            projectTitle: item.ProjectTitle || '',
+            vendorName: item.Selectedvendor || '',
+            TotalAmount: item.TotalProjectAmount || 0,
+            OccupiedAmount: total || 0,
+            RemainingAmount: item.TotalProjectAmount - total
+          }));
+
+          // 👉 Approver API call
+          const data = await service.GetApprover(item.Department);
+          if (data?.Id > 0) {
+            setDepartmentHead(data.Departmenthead?.Id || null);
+            const User = await service.getUserById(data.Departmenthead.Id);
+            if (User?.Id) {
+              setAssignedID(User.Title);
+            }
+            const dataApprover = await service.GetApproverFromFinance(item.PoMaster);
+            if (dataApprover?.Id) {
+              setApprover2ID(dataApprover.FinanceController?.Id || null);
+            }
+          }
+        }
+        else {
+          alert("This Request is Not Approved ✅");
+        }
+      }
+      else {
+
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      
+    }
   };
 
-  public render(): React.ReactElement<IBillProcessingFormProps> {
-
-    return (
-      <div className={styles.container}>
-
-        {/* LEFT FORM */}
-        <div className={styles.leftPanel}>
-          <h2>Bill Processing Form</h2>
-          <h4>Bill Processing / Request Form</h4>
-
-          <label>Bill Signed</label>
-          <input type="checkbox" checked={this.state.POsigned} onChange={this.handleRequestNoChange} />
-
-          <label>Project Code <span className={styles.required}>*</span></label>
-          <input
-            name="PorequestNo"
-            value={this.state.BPRequestNo}
-            onChange={this.handleRequestNoChange}
-            className={this.state.BPRequestErrorNo ? styles.buttonGroup : ''}
-          />
-          {this.state.BPRequestErrorNo && <span className={styles.error}>{this.state.BPRequestErrorNo}</span>}
+  // 🔹 PO Category Options
+  const poOptions: IChoiceGroupOption[] = [
+    { key: '1', text: 'Issue To Vendor' },
+    { key: '2', text: 'Internal Compliance' }
+  ];
 
 
-          <label>Select Vendor Code</label>
-          <input name="vendorCode" value={this.state.vendorCode}   >
-          </input>
+  const loadDepartments = async () => {
+    const data = await service.getDepartments();
+    const options = data.map((item: any) => ({
+      key: item.Id,
+      text: item.DepartmentName
+    }));
 
-          <label>Select Vendor Name</label>
-          <input name="vendorName" value={this.state.vendorName}   >
-          </input>
+    setDepartmentOptions(options);
+  };
+  // 🔹 Load data
+  React.useEffect(() => {
+    loadDepartments();
+  }, []);
 
-          <label>Project Title</label>
-          <input name="projectTitle" value={this.state.projectTitle} />
+  // // 🔹 Handle input change
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
 
-          <label>Additional Information & Remarks</label>
-          <input name="comments" value={this.state.Comments}   >
-          </input>
+    setForm({
+      ...form,
+      [name]: value
+    });
+  };
 
-          <label>PO Request No</label>
-          <input name="PORequestNo" value={this.state.PORequestNo} />
 
-          <label>Bill No</label>
-          <input name="BillNo" value={this.state.BillNo}   >
-          </input>
+  const handleSaveHistory = async (id: number) => {
 
-          <label>Bill Date</label>
-          <input name="BillDate" type="date" value={this.state.BillDate.toISOString().split('T')[0]}   >
-          </input>
+    const currentuser = await service.getUser();
 
-          <label>Bill Amount</label>
-          <input name="BillAmount" value={this.state.BillAmount}   >
-          </input>
+    const payload = {
+      Title: 'PO',
+      FID: id,
+      UserName: currentuser.Title,
+      UserAction: 'Request Initiator',
+      ActionDate: new Date().toISOString(),
+      Designation: 'Request Initiator',
+    };
 
-          <label>Calculated Taxes</label>
-          <input name="CalculatedTaxes" value={this.state.CalculatedTaxes}   >
-          </input>
+    await service.createHistoryItem(payload);
+  };
 
-          <label>Total Amount</label>
-          <input name="TotalAmount" value={this.state.TotalAmount}   >
-          </input>
 
-          <label>Select Uploaded Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} />
+  //SAVE DRAFT DATA
 
-          {/* Buttons */}
-          <div className={styles.buttonGroup}>
-            <button className={styles.ApproveBtn} onClick={this.handleSubmit}>Submit</button>
-            <button className={styles.ApproveBtn} onClick={this.saveData}>Save</button>
-            <button className={styles.cancelBtn}>Cancel</button>
+  const handleSaveOrUpdate = async () => {
+    setLoading(true);
+    if (
+      (!form.files || form.files.length === 0) &&
+      (!attachments || attachments.length === 0)
+    ) {
+      return alert("Please Attach files");
+    }
+    // 🔹 Payload (common)
+    const payload = {
+      CurrentStatus: 'Draft'
+    };
+    try {
+      if (!itemId) {
+        // 🔹 CREATE
+        const res = await service.createItem(payload);
+        setItemId(res.Id); // store ID for future updates
+        if (res.Id > 0 && form.files.length > 0) {
+          for (let i = 0; i < form.files.length; i++) {
+            await service.uploadFile(res.Id, form.files[i]);
+          }
+        }
+        alert("Saved Successfully.✅");
+        await service.updateItem(res.Id, {
+          RequestNo: `CKBCSL/25-26/IV/Finance/${res.Id}`
+        });
+      } else {
+        // 🔹 UPDATE
+        await service.updateItem(itemId, payload);
+
+        if (form.files.length > 0) {
+          for (let i = 0; i < form.files.length; i++) {
+            await service.uploadFile(itemId, form.files[i]);
+          }
+        }
+        alert(" Updated Successfully ✅");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error Occurred,Please Contact To System Administrator.❌");
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
+
+
+  // Update
+  const handleUpdate = async () => {
+    try {
+      setLoading(true);     
+    }
+    catch (error) {
+      console.error(error);
+      alert("Error Occurred,Please Contact To System Administrator.");
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+  const validatePO = (value: string) => {
+    if (!value) return "Project Code is required";
+    if (!/^[a-zA-Z0-9-]+$/.test(value)) return "Only alphanumeric allowed";
+    return "";
+  };
+
+
+  // 🔹 UI
+  return (
+    <section>
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.6)',
+          zIndex: 9999
+        }}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+            <Spinner label="Processing..." size={SpinnerSize.large} />
           </div>
         </div>
+      )}
+      <div className={styles.container}>
+        <div className={styles.row}>
+          <div className={styles['col-md-9']}>
+            <div className={styles.leftPanel}>
+              <h2>Bill Processing Form</h2>
+              <h4>Bill Processing / Request Form</h4>
+              <label>Bill Signed</label>
+              <input type="checkbox" checked={form.POsigned} onChange={handleRequestNoChange} />
+              <label>Project Code <span className={styles.required}>*</span></label>
+              <input
+                name="PorequestNo"
+                value={form.BPRequestNo}
+                onChange={handleRequestNoChange}
+                className={form.BPRequestErrorNo ? styles.buttonGroup : ''}
+              />
+              {form.BPRequestErrorNo && <span className={styles.error}>{form.BPRequestErrorNo}</span>}
+              <label>Select Vendor Code</label>
+              <input name="vendorCode" value={form.vendorCode}   >
+              </input>
+              <label>Select Vendor Name</label>
+              <input name="vendorName" value={form.vendorName}   >
+              </input>
+              <label>Project Title</label>
+              <input name="projectTitle" value={form.projectTitle} />
+              <label>Additional Information & Remarks</label>
+              <input name="comments" value={form.Comments}   >
+              </input>
+              <label>PO Request No</label>
+              <input name="PORequestNo" value={form.PORequestNo} />
+              <label>Bill No</label>
+              <input name="BillNo" value={form.BillNo}   >
+              </input>
+              <label>Bill Date</label>
+              <input name="BillDate" type="date" value={form.BillDate.toISOString().split('T')[0]}   >
+              </input>
 
-        {/* RIGHT PANEL */}
-        <div className='col-md-3'>
-          <div className={styles.leftPanel}>
-            <h6>My Document List / Upload New Document</h6>
-          </div>
-          <div className={styles.rightPanel}>
-            {/* Templates */}
-            <div className={styles.card}>
-              <div>
-                <h6>Templates</h6>
+              <label>Bill Amount</label>
+              <input name="BillAmount" value={form.BillAmount} />
+
+              <label>Calculated Taxes</label>
+              <input name="CalculatedTaxes" value={form.CalculatedTaxes} />
+
+              <label>Total Amount</label>
+              <input name="TotalAmount" value={form.TotalAmount} />
+              <label>Attachments <span className={styles.required}>*</span></label>
+              <input type="file" multiple onChange={handleFileChange} />
+              {/*  Existing Files (API se) */}
+              {attachments?.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0 }}>
+                  {attachments.map((file, index) => (
+                    <li
+                      key={index}
+                      style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                    >
+                      {/* ❌ Remove Button */}
+                      <span
+                        style={{
+                          color: "red",
+                          cursor: "pointer",
+                          fontWeight: "bold"
+                        }}
+                        onClick={() => removeExistingFile(index)}
+                      >
+                        ✕
+                      </span>
+
+                      {/* 📄 File Link */}
+                      <a
+                        href={file.ServerRelativeUrl}
+
+                        rel="noopener noreferrer"
+                      >
+                        {file.FileName}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* Selected Files */}
+              {form.files.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0 }}>
+                  {form.files.map((file: File, index: number) => (
+                    <li key={index} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+
+                      {/* ❌ Remove */}
+                      <span
+                        style={{ cursor: "pointer", color: "red", fontWeight: "bold" }}
+                        onClick={() => removeFile(index)}
+                      >
+                        ✕
+                      </span>
+
+                      {/* File Name */}
+                      <span>{file.name}</span>
+
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className={styles.buttonGroup}>
+                <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
+                <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
+                <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
               </div>
             </div>
-            {/* Guidelines */}
-            <div className={styles.card}>
-              <div>
-                <h6>Importance Guidelines</h6>
+          </div>
+          <div className={styles['col-md-3']}>
+            <div className={styles.leftPanelHeader}>
+            </div>
+            <div className={styles.rightPanel}>
+              {/* Templates */}
+              <div className={styles.card}>
+                <div>
+                  <h6>Templates</h6>
+                </div>
+                <ol>
+                  <li>
+                  </li>
+                </ol>
               </div>
-              <ol>
-                <li>Select approval path carefully.</li>
-                <li>Use project reference if needed.</li>
-                <li>Attach all documents (Max 25 MB).</li>
-                <li>Avoid special characters in file names.</li>
-              </ol>
+              {/* Guidelines */}
+              <div className={styles.card}>
+                <div>
+                  <h6>Importance Guidelines</h6>
+                </div>
+                <ol>
+                  <li>Select approval path carefully.</li>
+                  <li>Use project reference if needed.</li>
+                  <li>Attach all documents (Max 25 MB).</li>
+                  <li>Avoid special characters in file names.</li>
+                </ol>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    );
-  }
-}
-
+    </section>
+  );
+};
+export default BillProcessingForm;
