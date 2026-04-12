@@ -11,6 +11,7 @@ const HomeIcon = require('../assets/Home.png');
 const FormIcon = require('../assets/Form.png');
 const ReportIcon = require('../assets/Report.png');
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './HideTopBar.css';
 
 interface IDigiflowMenuState {
   items:any[];
