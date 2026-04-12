@@ -147,3 +147,18 @@
   margin-bottom: 10px;
   padding: 3px 15px;
 }
+.required {
+  color: red;
+  margin-left: 2px;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.inputError {
+  border: 1px solid red;
+}

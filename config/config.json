@@ -206,8 +206,7 @@
       "components": [
         {
           "entrypoint": "./lib/webparts/vendorRegistrationSearch/VendorRegistrationSearchWebPart.js",
-          "manifest": "./src/webparts/vendorRegistrationSearch/VendorRegistrationSearchWebPart.manifest.json"
-        }
+          "manifest": "./src/webparts/vendorRegistrationSearch/VendorRegistrationSearchWebPart.manifest.json"}
       ]
     },
     "qa-request-approval-form-web-part": {
@@ -223,14 +222,6 @@
         {
           "entrypoint": "./lib/webparts/qrDetailsStatus/QrDetailsStatusWebPart.js",
           "manifest": "./src/webparts/qrDetailsStatus/QrDetailsStatusWebPart.manifest.json"
-        }
-      ]
-    },
-    "manage-approvers-web-part": {
-      "components": [
-        {
-          "entrypoint": "./lib/webparts/manageApprovers/ManageApproversWebPart.js",
-          "manifest": "./src/webparts/manageApprovers/ManageApproversWebPart.manifest.json"
         }
       ]
     }
@@ -264,8 +255,6 @@
     "VendorRegistrationDetailWebPartStrings": "lib/webparts/vendorRegistrationDetail/loc/{locale}.js",
     "VendorRegistrationSearchWebPartStrings": "lib/webparts/vendorRegistrationSearch/loc/{locale}.js",
     "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js",
-    "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js",
-    "ManageApproversWebPartStrings": "lib/webparts/manageApprovers/loc/{locale}.js",
-    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
+    "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js"
   }
 }

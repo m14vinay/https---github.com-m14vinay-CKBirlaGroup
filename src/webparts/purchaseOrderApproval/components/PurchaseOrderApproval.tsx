@@ -161,19 +161,26 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
             //approver2:
           }
 
-        } else {
-          alert("❌ This action has already taken.Please wait for queue");
-        }
+      if (!result.ActionDate1 || !result.ActionDate2) {
+  setIsDisabled(false);  // enable
+} else {
+  setIsDisabled(true);   // disable
+}
+     } else {
+        alert("No Data Found");
       }
+
     }
-    catch (error) {
-      console.error("Error:", error);
+ else {
+      alert("❌ This Action Has Already Taken.Please Wait For Queue");
+    }
+    } catch (error) {
+      console.error("Error Occurred,Please Contact To System Administrator.:", error);
     }
     finally {
       setLoading(false);
     }
   };
-
 
 
   const handleSaveApproveHistory = async (id: number) => {
@@ -214,35 +221,29 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     try {
       // setActionType('approve');
       setLoading(true);
-      if (!approverComment) return alert("Approver Comment required");
-
+      if (!approverComment) return alert("Enter Approver Comment");
+      
       if (!itemId) return;
-      if (form.ActionDate1 === '') {
-        await service.updateItemdata(itemId, "Approved", approverComment, form.Approver2EmailId, form.approver2 || '');
+     if(form.ActionDate1==='')
+     {
+      await service.updateItemdata(itemId, "Approved", approverComment,form.Approver2EmailId,form.approver2 || '');
+         await handleSaveApproveHistory(itemId);
+      alert("✅ First Level Approved Successfully.");
+ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+     window.location.assign(url); 
+      return; 
+     }
+     else if(form.ActionDate2==='')
+     {
+       await service.updateItemdata2(itemId, "Approved",approverComment,'Approved');
         await handleSaveApproveHistory(itemId);
-        alert("✅ First level approved");
-        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
-        window.location.assign(url);
-        return;
-      }
-      else if (form.ActionDate2 === '') {
-        await service.updateItemdata2(itemId, "Approved", approverComment, 'Approved');
-        await handleSaveApproveHistory(itemId);
-        alert("✅ First level approved");
-        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
-        window.location.assign(url);
-        return;
-      }
-      else if (form.ActionDate2 === '') {
-        await service.updateItemdata2(itemId, "Approved", approverComment, 'Approved');
-        await handleSaveApproveHistory(itemId);
-        alert("✅ Final approval done");
-        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
-        window.location.assign(url);
-        return; // 🔥 stop again
-      }
-
-
+       alert("✅ Final Level Approved Successfully.");
+       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+     window.location.assign(url); 
+      return; // 🔥 stop again
+    }
+     
+     
       setApproverComment('');
     } catch (error) {
       console.error(error);
@@ -254,9 +255,9 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
 
   const handleReject = async () => {
     try {
-      //setActionType('reject');
-      setLoading(true);
-      if (!approverComment) return alert("Approver Comment required");
+       //setActionType('reject');
+        setLoading(true);
+      if (!approverComment) return alert("Enter Approver Comment");
       if (!itemId) return;
 
       if (!approverComment) {

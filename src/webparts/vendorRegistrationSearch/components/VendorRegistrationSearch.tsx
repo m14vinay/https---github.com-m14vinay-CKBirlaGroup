@@ -112,7 +112,7 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
   const handlesearch = async () => {
     _setData([]);
     if (!form.Title && !form.GST && !form.Pan && !form.VendorCode && !form.Tin) {
-      alert("Please select any one fields to search");
+      alert("Please Select Any One Fields To Search");
       return;
     }
     await getDatafromListByTitle(form.Title, form.GST, form.Pan, form.VendorCode, form.Tin);
@@ -126,7 +126,7 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
       }
     } catch (error) {
       console.error(error);
-      alert("Error occurred");
+      alert("Error Occurred,Please Contact To System Administrator.");
     }
     finally {
       setLoading(false);
