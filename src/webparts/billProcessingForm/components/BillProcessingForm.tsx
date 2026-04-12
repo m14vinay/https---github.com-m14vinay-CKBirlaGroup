@@ -4,21 +4,21 @@ import type { IBillProcessingFormProps } from './IBillProcessingFormProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import { SPHttpClient } from '@microsoft/sp-http';
 interface IState {
-  BPRequestNo:string;
-  BPRequestErrorNo:string;
-  POsigned:boolean
-  ProjcetCode:string
+  BPRequestNo: string;
+  BPRequestErrorNo: string;
+  POsigned: boolean
+  ProjcetCode: string
   vendorCode: string;
   vendorName: string;
   projectTitle: string;
   Comments: string;
-  PORequestNo:string;
-  BillNo:string;
-  BillDate:Date;
-  BillAmount: number;  
-  CalculatedTaxes:number;
-  TotalAmount: number;  
-  UploadDocument:string;
+  PORequestNo: string;
+  BillNo: string;
+  BillDate: Date;
+  BillAmount: number;
+  CalculatedTaxes: number;
+  TotalAmount: number;
+  UploadDocument: string;
   files: FileList | null;
 }
 export default class BillProcessingForm extends React.Component<IBillProcessingFormProps, IState> {
@@ -27,22 +27,22 @@ export default class BillProcessingForm extends React.Component<IBillProcessingF
     super(props);
 
     this.state = {
-      BPRequestNo:'',
-      BPRequestErrorNo:'',
+      BPRequestNo: '',
+      BPRequestErrorNo: '',
       POsigned: true,
-      ProjcetCode:'',
+      ProjcetCode: '',
       vendorCode: '',
       vendorName: '',
       projectTitle: '',
       Comments: '',
-      PORequestNo:'',
-      BillNo:'',
+      PORequestNo: '',
+      BillNo: '',
       BillDate: new Date(),
       BillAmount: 0,
       CalculatedTaxes: 0,
       TotalAmount: 0,
       UploadDocument: '',
-     files:  null
+      files: null
     };
   }
 
@@ -51,64 +51,64 @@ export default class BillProcessingForm extends React.Component<IBillProcessingF
     this.setState({ ...this.state, [name]: value });
   };
 
- private getRequestDetails = async (requestNo: string) => {
- 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
+  private getRequestDetails = async (requestNo: string) => {
 
-    console.log("URL:",url)  
-  const response = await this.props.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-  
- const data = await response.json();
+    const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items?$filter=RequestNo eq '${requestNo}'`;
 
-  if (data.value.length > 0) {
-    this.setState({
-      BPRequestNo: data.value[0].BPRequestNo,
-      POsigned: data.value[0].POsigned,
-      ProjcetCode: data.value[0].ProjcetCode,
-      vendorCode: data.value[0].vendorCode,
-      vendorName: data.value[0].vendorName,
-      projectTitle: data.value[0].projectTitle,
-      Comments: data.value[0].Comments,
-      PORequestNo: data.value[0].PORequestNo,
-      BillNo: data.value[0].BillNo,
-      BillDate: new Date(data.value[0].BillDate),
-      BillAmount: data.value[0].BillAmount,
-      CalculatedTaxes: data.value[0].CalculatedTaxes,
-      TotalAmount: data.value[0].TotalAmount,
-      UploadDocument: data.value[0].UploadDocument      
-    });
-  } else {
-   
-    this.setState({
+    console.log("URL:", url)
+    const response = await this.props.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
 
-      POsigned: true,
-      vendorCode: '',
-      vendorName: '',
-      projectTitle: '',
-      Comments: '', 
-      PORequestNo:'',
-      BillNo:'',
-      BillDate: new Date(),
-      BillAmount: 0,
-      CalculatedTaxes: 0,
-      TotalAmount: 0,
-      UploadDocument: '',
-     files:  null
-    });
-  }
-};
- 
- validateProjectCode = (value: string): string => {
+    const data = await response.json();
+
+    if (data.value.length > 0) {
+      this.setState({
+        BPRequestNo: data.value[0].BPRequestNo,
+        POsigned: data.value[0].POsigned,
+        ProjcetCode: data.value[0].ProjcetCode,
+        vendorCode: data.value[0].vendorCode,
+        vendorName: data.value[0].vendorName,
+        projectTitle: data.value[0].projectTitle,
+        Comments: data.value[0].Comments,
+        PORequestNo: data.value[0].PORequestNo,
+        BillNo: data.value[0].BillNo,
+        BillDate: new Date(data.value[0].BillDate),
+        BillAmount: data.value[0].BillAmount,
+        CalculatedTaxes: data.value[0].CalculatedTaxes,
+        TotalAmount: data.value[0].TotalAmount,
+        UploadDocument: data.value[0].UploadDocument
+      });
+    } else {
+
+      this.setState({
+
+        POsigned: true,
+        vendorCode: '',
+        vendorName: '',
+        projectTitle: '',
+        Comments: '',
+        PORequestNo: '',
+        BillNo: '',
+        BillDate: new Date(),
+        BillAmount: 0,
+        CalculatedTaxes: 0,
+        TotalAmount: 0,
+        UploadDocument: '',
+        files: null
+      });
+    }
+  };
+
+  validateProjectCode = (value: string): string => {
     if (!value) return 'Project Code is required';
     if (!/^[a-zA-Z0-9-]+$/.test(value)) return 'Project Code must be alphanumeric';
     if (value.length > 10) return 'Project Code must be at most 10 characters';
     return '';
   }
 
-private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const errorMsg = this.validateProjectCode(value);
 
@@ -117,7 +117,7 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!errorMsg) {
       this.getRequestDetails(value);
     } else {
-      this.setState({ projectTitle:'',vendorCode:'',vendorName:'' });
+      this.setState({ projectTitle: '', vendorCode: '', vendorName: '' });
     }
   };;
 
@@ -127,33 +127,33 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   };
   private saveData = async () => {
 
-  const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
+    const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items?$format=json`;
 
-  const body = {
-  BPRequestNo: this.state.  BPRequestNo,      
-     };
-  
-  const response = await this.props.context.spHttpClient.post(
-    url,SPHttpClient.configurations.v1,
-   {
-      headers: {
-        "Accept": "application/json;odata=nometadata",
-        "Content-Type": "application/json;odata=nometadata"
-      },
-      body: JSON.stringify(body)
+    const body = {
+      BPRequestNo: this.state.BPRequestNo,
+    };
+
+    const response = await this.props.context.spHttpClient.post(
+      url, SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;odata=nometadata",
+          "Content-Type": "application/json;odata=nometadata"
+        },
+        body: JSON.stringify(body)
+      }
+    );
+    const result = await response.json();
+    console.log("Response:", result);
+
+    if (response.ok) {
+      alert("Data Saved Successfully ✅");
+    } else {
+      alert("Error saving data ❌");
     }
-  );
-   const result = await response.json();
-  console.log("Response:", result);
+  };
 
-   if (response.ok) {
-    alert("Data Saved Successfully ✅");
-  } else {
-    alert("Error saving data ❌");
-  }
-};
-  
-  
+
   private handleSubmit = () => {
     console.log("Form Data:", this.state);
     alert("Form Submitted");
@@ -175,7 +175,7 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           <h4>Bill Processing / Request Form</h4>
 
           <label>Bill Signed</label>
-          <input type="checkbox" checked={this.state.POsigned}  onChange={this.handleRequestNoChange}  />
+          <input type="checkbox" checked={this.state.POsigned} onChange={this.handleRequestNoChange} />
 
           <label>Project Code <span className={styles.required}>*</span></label>
           <input
@@ -185,8 +185,8 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             className={this.state.BPRequestErrorNo ? styles.buttonGroup : ''}
           />
           {this.state.BPRequestErrorNo && <span className={styles.error}>{this.state.BPRequestErrorNo}</span>}
-         
-        
+
+
           <label>Select Vendor Code</label>
           <input name="vendorCode" value={this.state.vendorCode}   >
           </input>
@@ -196,14 +196,14 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           </input>
 
           <label>Project Title</label>
-          <input name="projectTitle" value={this.state.projectTitle}  />
+          <input name="projectTitle" value={this.state.projectTitle} />
 
           <label>Additional Information & Remarks</label>
           <input name="comments" value={this.state.Comments}   >
           </input>
 
           <label>PO Request No</label>
-          <input name="PORequestNo" value={this.state.PORequestNo}  />
+          <input name="PORequestNo" value={this.state.PORequestNo} />
 
           <label>Bill No</label>
           <input name="BillNo" value={this.state.BillNo}   >
@@ -223,10 +223,10 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
           <label>Total Amount</label>
           <input name="TotalAmount" value={this.state.TotalAmount}   >
-          </input>          
+          </input>
 
           <label>Select Uploaded Documents</label>
-          <input type="file" multiple onChange={this.handleFileChange} /> 
+          <input type="file" multiple onChange={this.handleFileChange} />
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>
@@ -237,26 +237,29 @@ private handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         </div>
 
         {/* RIGHT PANEL */}
-        <div className={styles.rightPanel}>
-          {/* Templates */}
-          <div className={styles.card}>
-            <h4>Templates</h4>
-            <ul>
-              <li>Cheque_Payment_Form_v1.0.xlsx</li>
-              <li>SOP_Procurement_of_Goods_Services.pdf</li>
-              <li>DigiFlow_Training_Manual.pdf</li>
-            </ul>
+        <div className='col-md-3'>
+          <div className={styles.leftPanel}>
+            <h6>My Document List / Upload New Document</h6>
           </div>
-
-          {/* Guidelines */}
-          <div className={styles.card}>
-            <h4>Important Guidelines</h4>
-            <ol>
-              <li>Select approval path carefully.</li>
-              <li>Use project reference if needed.</li>
-              <li>Attach all documents (Max 25 MB).</li>
-              <li>Avoid special characters in file names.</li>
-            </ol>
+          <div className={styles.rightPanel}>
+            {/* Templates */}
+            <div className={styles.card}>
+              <div>
+                <h6>Templates</h6>
+              </div>
+            </div>
+            {/* Guidelines */}
+            <div className={styles.card}>
+              <div>
+                <h6>Importance Guidelines</h6>
+              </div>
+              <ol>
+                <li>Select approval path carefully.</li>
+                <li>Use project reference if needed.</li>
+                <li>Attach all documents (Max 25 MB).</li>
+                <li>Avoid special characters in file names.</li>
+              </ol>
+            </div>
           </div>
         </div>
       </div>
