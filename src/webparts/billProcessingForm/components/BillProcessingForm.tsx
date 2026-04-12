@@ -230,8 +230,8 @@ export default class BillProcessingForm extends React.Component<IBillProcessingF
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>
-            <button className={styles.submitBtn} onClick={this.handleSubmit}>Submit</button>
-            <button className={styles.saveBtn} onClick={this.saveData}>Save</button>
+            <button className={styles.ApproveBtn} onClick={this.handleSubmit}>Submit</button>
+            <button className={styles.ApproveBtn} onClick={this.saveData}>Save</button>
             <button className={styles.cancelBtn}>Cancel</button>
           </div>
         </div>
