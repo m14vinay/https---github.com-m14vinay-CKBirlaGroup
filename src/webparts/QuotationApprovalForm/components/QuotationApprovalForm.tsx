@@ -40,6 +40,18 @@ type TDepartmentOption = {
   text: string;
 };
 
+const MESSAGES = {
+  catch: 'Error Occurred,Please Contact To System Administrator.',
+  submit: 'Submitted Successfully.',
+  save: 'Saved Successfully.',
+  update: 'Updated Successfully.',
+  file: 'File Uploaded Successfully.',
+  dropdown: 'Please Select',
+  input: 'Please Enter',
+  queue: 'Please Wait For Your Queue.'
+} as const;
+
+const SUCCESS_MESSAGES = [MESSAGES.submit, MESSAGES.save, MESSAGES.update, MESSAGES.file] as const;
 
 const INITIAL_FORM: TFormState = {
   ID: 0,
@@ -175,7 +187,7 @@ const QuotationApprovalForm: React.FC<IQuotationApprovalFormProps> = (props) => 
       await loadPurchaseOrderDetails(result.Id);
     } catch (error) {
       console.error('Draft load failed:', error);
-      setStatusMessage('Unable to load the saved request.');
+      setStatusMessage(MESSAGES.catch);
     }
   }, [loadAttachments, loadPurchaseOrderDetails, service]);
 
@@ -199,7 +211,9 @@ const QuotationApprovalForm: React.FC<IQuotationApprovalFormProps> = (props) => 
       );
     };
 
-    loadDepartments();
+    loadDepartments().catch(() => {
+      setStatusMessage(MESSAGES.catch);
+    });
   }, [service]);
 
   // Load department options for the dropdown on initial render.
@@ -223,7 +237,7 @@ const handleDepartmentChange = React.useCallback(async (departmentValue: string)
     const data = await service.getApproversByDepartment(dept);
 
     if (!data) {
-      setStatusMessage(`No approvers found in DepartmentMaster for ${dept}`);
+      setStatusMessage(MESSAGES.queue);
       return;
     }
 
@@ -276,7 +290,7 @@ const handleDepartmentChange = React.useCallback(async (departmentValue: string)
 
   } catch (error) {
     console.error(error);
-    setStatusMessage('Error fetching approvers');
+    setStatusMessage(MESSAGES.catch);
   }
 
 }, [service, form.TotalProjectAmount]);
@@ -300,9 +314,12 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   setForm((prev) => ({ ...prev, [name]: value }));
   // IMPORTANT: Amount change hone par logic dobara run hoga
   if (name === "TotalProjectAmount" && form.Department) {
-setTimeout(() => {
-  handleDepartmentChange(form.Department);
-}, 0);  }
+    setTimeout(() => {
+      handleDepartmentChange(form.Department).catch(() => {
+        setStatusMessage(MESSAGES.catch);
+      });
+    }, 0);
+  }
 };
 
   // Validate selected files before staging them for upload.
@@ -318,20 +335,20 @@ setTimeout(() => {
     for (const file of filesArray) {
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
       if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
-        setStatusMessage(`File type not allowed: ${file.name}`);
+        setStatusMessage(`${MESSAGES.file} Please Select pdf, xlsx or docx.`);
         return;
       }
     }
 
     const totalSizeBytes = [...form.files, ...filesArray].reduce((acc, file) => acc + file.size, 0);
     if (totalSizeBytes / (1024 * 1024) > MAX_TOTAL_SIZE_MB) {
-      setStatusMessage(`Total file size must not exceed ${MAX_TOTAL_SIZE_MB} MB`);
+      setStatusMessage(MESSAGES.catch);
       return;
     }
 
     const invalidFiles = filesArray.filter((file) => INVALID_FILENAME_REGEX.test(file.name));
     if (invalidFiles.length > 0) {
-      setStatusMessage(`Invalid file names: ${invalidFiles.map((file) => file.name).join(', ')}`);
+      setStatusMessage(MESSAGES.catch);
       return;
     }
 
@@ -339,7 +356,7 @@ setTimeout(() => {
       ...prev,
       files: [...prev.files, ...filesArray]
     }));
-    setStatusMessage('');
+    setStatusMessage(MESSAGES.file);
   };
 
   // Remove a staged local file.
@@ -358,7 +375,7 @@ setTimeout(() => {
       setAttachments((prev) => prev.filter((_, i) => i !== index));
     } catch (error) {
       console.error('Attachment delete failed:', error);
-      setStatusMessage('Unable to delete attachment.');
+      setStatusMessage(MESSAGES.catch);
     }
   };
 
@@ -407,17 +424,17 @@ setTimeout(() => {
 
   // Validate the minimum required data before save or submit.
   const validateDraft = (): string | null => {
-    if (!form.ProjectTitle.trim()) return 'Project Title required';
-    if (!form.Vendor1.trim()) return 'Vendor 1 required';
-    if (!form.Quote1.trim()) return 'Quote 1 required';
-    if (!form.Selectedvendor.trim()) return 'Selected Vendor required';
-    if (!form.SelectedQuote.trim()) return 'Selected Quote required';
-    if (!form.Department) return 'Select Department';
-    if (!form.Advancepayment) return 'Select Advance Payment';
+    if (!form.ProjectTitle.trim()) return `${MESSAGES.input} Project Title.`;
+    if (!form.Vendor1.trim()) return `${MESSAGES.input} Vendor 1.`;
+    if (!form.Quote1.trim()) return `${MESSAGES.input} Quote 1.`;
+    if (!form.Selectedvendor.trim()) return `${MESSAGES.input} Selected Vendor.`;
+    if (!form.SelectedQuote.trim()) return `${MESSAGES.input} Selected Quote.`;
+    if (!form.Department) return `${MESSAGES.dropdown} Department.`;
+    if (!form.Advancepayment) return `${MESSAGES.dropdown} Advance Payment.`;
     if (Number(form.TotalProjectAmount) > 200000 && !selectedApprover) {
-      return 'Select Approver';
+      return `${MESSAGES.dropdown} Approver.`;
     }
-    if (!poItems.some((item) => item.description.trim())) return 'Enter at least one purchase order detail';
+    if (!poItems.some((item) => item.description.trim())) return `${MESSAGES.input} Purchase Order Details.`;
     return null;
   };
 
@@ -536,16 +553,18 @@ setTimeout(() => {
     }
 
     setIsSaving(true);
-    setStatusMessage('Saving draft...');
+    setStatusMessage(itemId ? MESSAGES.update : MESSAGES.save);
 
     try {
       const currentId = await persistForm('Draft');
-      const successMessage = `Save Successfully. Request No: PRJ-${currentId}`;
+      const successMessage = itemId
+        ? `${MESSAGES.update} Request No: PRJ-${currentId}`
+        : `${MESSAGES.save} Request No: PRJ-${currentId}`;
       setStatusMessage(successMessage);
       window.alert(successMessage);
     } catch (error: any) {
       console.error('SAVE ERROR:', error);
-      setStatusMessage(error?.message || 'Error while saving draft');
+      setStatusMessage(error?.message || MESSAGES.catch);
     } finally {
       setIsSaving(false);
     }
@@ -560,7 +579,7 @@ setTimeout(() => {
     }
 
     setIsSaving(true);
-    setStatusMessage('Submitting...');
+    setStatusMessage(MESSAGES.queue);
 
     try {
       const currentId = await persistForm('Pending');
@@ -570,13 +589,13 @@ setTimeout(() => {
         console.error('History save failed:', historyError);
       }
 
-      const successMessage = 'Submitted Successfully';
+      const successMessage = MESSAGES.submit;
       setStatusMessage(successMessage);
       window.alert(successMessage);
       window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
     } catch (error: any) {
       console.error('SUBMIT ERROR:', error);
-      setStatusMessage(error?.message || 'Error while submitting');
+      setStatusMessage(error?.message || MESSAGES.catch);
     } finally {
       setIsSaving(false);
     }
@@ -596,7 +615,12 @@ setTimeout(() => {
       </div>
 
       {statusMessage && (
-        <div style={{ marginBottom: '12px', color: statusMessage.toLowerCase().indexOf('error') !== -1 ? '#a80000' : '#107c10' }}>
+        <div
+          style={{
+            marginBottom: '12px',
+            color: SUCCESS_MESSAGES.some((message) => statusMessage.indexOf(message) === 0) ? '#107c10' : '#a80000'
+          }}
+        >
           {statusMessage}
         </div>
       )}
@@ -683,30 +707,13 @@ setTimeout(() => {
               value={form.Department || ''}
               onChange={(e) => { handleDepartmentChange(e.target.value).catch(() => undefined); }}
             >
-              <option value="">Select Department</option>
+              <option value="">{`${MESSAGES.dropdown} Department`}</option>
               {departmentOptions.map((option) => (
                 <option key={option.key} value={option.text}>
                   {option.text}
                 </option>
               ))}
             </select>
-
-            {Number(form.TotalProjectAmount || 0) > 200000 && approverOptions.length > 0 && (
-  <>
-    <label>Select Approver <span className={styles.required}>*</span></label>
-    <select
-      value={selectedApprover}
-      onChange={(e) => handleApproverSelect(e.target.value)}
-    >
-      <option value="">Select Approver</option>
-      {approverOptions.map((opt, i) => (
-        <option key={i} value={opt}>
-          {opt}
-        </option>
-      ))}
-    </select>
-  </>
-)}
 
             <ChoiceGroup
               label="Advance Payment"
@@ -723,6 +730,31 @@ setTimeout(() => {
 
             <label>Approval Path<span className={styles.required}>*</span></label>
             <input value={form.ApprovalPath} readOnly />
+
+
+                        {Number(form.TotalProjectAmount || 0) > 200000 && approverOptions.length > 0 && (
+  <>
+    <label>Select Approver <span className={styles.required}>*</span></label>
+    <select
+      value={selectedApprover}
+      onChange={(e) => handleApproverSelect(e.target.value)}
+    >
+      <option value="">{`${MESSAGES.dropdown} Approver`}</option>
+      {approverOptions.map((opt, i) => (
+        <option key={i} value={opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
+  </>
+)}
+
+              {form.RequestNo && (
+              <>
+                <label>Request No</label>
+                <input value={form.RequestNo} readOnly />
+              </>
+            )}
 
             {/* Attachments section */}
             <label>Attachments <span className={styles.required}>*</span></label>
