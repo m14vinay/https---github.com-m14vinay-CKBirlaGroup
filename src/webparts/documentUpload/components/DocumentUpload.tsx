@@ -148,6 +148,22 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 };
   // 🔹 UI
   return (
+    <section>
+      {loading && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: 'rgba(255,255,255,0.6)',
+                zIndex: 9999
+              }}>
+                <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                  <Spinner label="Processing..." size={SpinnerSize.large} />
+                </div>
+              </div>
+            )}
     <div className={styles.container}>
       <div className={styles.header}>
         <h4>Upload New Document</h4>          
@@ -255,6 +271,7 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       </div>
     </div>
     </div>
+    </section>
   );
 };
 

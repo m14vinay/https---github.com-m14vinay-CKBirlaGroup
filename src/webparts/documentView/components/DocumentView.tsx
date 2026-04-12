@@ -35,6 +35,7 @@ const handleCancel = () => {
 const getDatafromListByTitle = async (parm_Title:number) => {
   try
   {
+    setLoading(true);
   const data = await service.getItemByTitle(parm_Title);
 if(data.Id>0)
       {
@@ -63,6 +64,22 @@ if(data.Id>0)
 };
   // 🔹 UI
   return (
+    <section>
+      {loading && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: 'rgba(255,255,255,0.6)',
+                zIndex: 9999
+              }}>
+                <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                  <Spinner label="Processing..." size={SpinnerSize.large} />
+                </div>
+              </div>
+            )}
     <div className={styles.container}>
       <div className={styles.header}>
         <h4>Document Detail-{form.Title}</h4>          
@@ -155,6 +172,7 @@ if(data.Id>0)
       </div>
     </div>
     </div>
+    </section>
   );
 };
 
