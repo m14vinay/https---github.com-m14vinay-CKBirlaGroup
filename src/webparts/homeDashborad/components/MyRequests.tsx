@@ -32,17 +32,23 @@ export default function MyRequests() {
         if(row["@odata.type"]){
             switch(row["@odata.type"]){
                 case '#SP.Data.QuotationApprovalListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationView.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Quotation-Details.aspx?RequestId=" + row.Id,"_blank");
+                    break;
                 case '#SP.Data.PoApprovalListItem':
                     window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchaseOrderView.aspx?RequestId=" + row.Id,"_blank");
+                    break;
                 case '#SP.Data.VendorMappingListItem':
                     window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingDetails.aspx?RequestId=" + row.Id,"_blank");
-                case '#SP.Data.Remb_ExpanseMasterListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementDetails.aspx?RequestId=" + row.Id,"_blank");  
+                    break;
+                case '#SP.Data.Remb_x005f_ExpanseMasterListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementDetails.aspx?RequestId=" + row.Id,"_blank");
+                    break;  
                 case '#SP.Data.BillProcessingListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/BillProcessingDetails.aspx?RequestId=" + row.Id,"_blank");  
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Bill-Processing-Detail.aspx?RequestId=" + row.Id,"_blank");
+                    break;  
                 case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationNEIBTAdminDetails.aspx?RequestId=" + row.Id,"_blank");            
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Detail.aspx?RequestId=" + row.Id,"_blank");
+                    break;         
                 default:
                     alert("Page not found");
                     break;
@@ -72,10 +78,6 @@ export default function MyRequests() {
         }),
         columnHelper.accessor('Created', {
             header: 'Approved Date',
-            cell: (info) => <span>TBD</span>
-        }),
-        columnHelper.accessor('Created', {
-            header: 'Approval History',
             cell: (info) => <span>TBD</span>
         }),
         columnHelper.accessor('Created', {
