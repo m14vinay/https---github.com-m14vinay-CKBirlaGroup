@@ -2,188 +2,148 @@
 @import "~bootstrap/scss/bootstrap";
 
 .container {
-  // display: flex;
-  // gap: 20px;
   padding: 10px;
 }
 
 .header {
   margin-bottom: 15px;
 }
-
-.leftPanel {
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  flex: 2;
-  padding: 10px;
-}
-
-.leftPanelHeader {
-  border-bottom: 1px solid #848484;
+.header h2 {
+  align-items: center;
   display: flex;
+  font-size: 16px;
+  font-weight: 600;
   justify-content: space-between;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
 }
 
-.leftPanelHeader h4 {
-  font-size: 16px;
-  margin: 0;
-}
-.status {
-  color: red;
-  font-weight: bold;
+.searchBox {
+  background-color: #fff;
+  box-shadow: 0 3px 3px #8e8e8e;
 }
 
-.leftPanelStatusHeader {
-  display: flex;
-  padding: 20px 0;
-}
-
-.statusBox {
-  background-color: #225a22;
-  color: #fff;
-  padding: 16px;
-  position: relative;
-  width: 200px;
-}
-.statusBox::after {
-  border-bottom: 46px solid transparent;
-  border-left: 46px solid #225a22;
-  border-right: 46px solid transparent;
-  border-top: 46px solid transparent;
-  content: "";
-  display: block;
-  position: absolute;
-  right: -46%;
-  top: 0;
-}
-.pendingBox {
-  background-color: #8b7e32;
-}
-.pendingBox::after {
-  border-left-color: #8b7e32;
-}
-.pendingBox::before {
-  border-bottom: 46px solid transparent;
-  border-left: 46px solid #225a22;
-  border-right: 46px solid transparent;
-  border-top: 46px solid transparent;
-  content: "";
-  display: block;
-  left: 0;
-  position: absolute;
-  top: 0;
-}
-
-.rejectedBox {
-  background-color: #8b3222;
-}
-.rejectedBox::after {
-  border-left-color: #8b3222;
-}
-.rejectedBox::before {
-  border-bottom: 46px solid transparent;
-  border-left: 46px solid #8b3222;
-  border-right: 46px solid transparent;
-  border-top: 46px solid transparent;
-  content: "";
-  display: block;
-  left: 0;
-  position: absolute;
-  top: 0;
-}
-
-.statusBox h5 {
-  margin: 0;
+.searchBox h3 {
+  border-bottom: 1px solid #b7b7b7;
   font-size: 14px;
-}
-
-.statusBox h6 {
-  margin: 0;
-  font-size: 12px;
-}
-
-.statusBox h4 {
-  margin: 10px 0 0;
-  font-size: 16px;
-}
-
-.pendingBox .content {
-  padding-left: 40px;
-}
-
-.formGroup {
-  margin-bottom: 10px;
-}
-
-.rightPanel {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  flex: 1;
-  padding: 10px;
-}
-
-.card {
-  background: #fff;
-  padding: 15px;
+  font-weight: 600;
   margin-bottom: 15px;
-  border-radius: 6px;
+  padding: 10px 15px 10px;
 }
 
-label {
-  display: block;
-  margin-bottom: 5px;
-
-}
-
-input,
-textarea,
-select {
-  width: 100%;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.buttonGroup {
+.btnBox {
+  align-items: center;
   display: flex;
+  margin-bottom: 20px;
+}
+
+.btnUpload {
+  align-items: center;
+  background-color: #b7b7b7;
+  color: #fff;
+  display: flex;
+  font-size: 20px;
+  font-weight: 600;
   gap: 10px;
+  line-height: 24px;
+  padding: 15px;
 }
 
-.RejectBtn {
-  background: red;
-  color: white;
+.btnFill {
+  align-items: center;
+  background-color: #460cda;
+  color: #fff;
+  display: flex;
+  font-size: 20px;
+  font-weight: 600;
+  gap: 10px;
+  line-height: 24px;
+  padding: 15px;
 }
 
-.ApproveBtn {
-  background: orange;
-  color: white;
-}
-
-.cancelBtn {
-  background: gray;
-  color: white;
-}
-
-button {
-  padding: 8px 16px;
+.accordion-item {
   border: none;
-  cursor: pointer;
+  margin-bottom: 15px;
 }
 
-.required {
-  color: red;
-  margin-left: 2px;
+.accordion-item .accordion-button:not(.collapsed) {
+  background: none;
+  color: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0 0px 10px;
 }
 
-.error {
-  color: red;
-  font-size: 12px;
-  margin-top: 4px;
-  display: block;
+.accordion-button:focus {
+  box-shadow: none;
 }
 
 .inputError {
   border: 1px solid red;
+}
+
+.searchBox {
+  background-color: #fff;
+  box-shadow: 0 3px 3px #8e8e8e;
+  margin-bottom: 20px;
+
+}
+.searchBox ol{
+  padding: 1px 0px 2px 20px;
+}
+
+.searchBox h3 {
+  align-items: center;
+  border-bottom: 1px solid #b7b7b7;
+  display: flex;
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding: 10px 15px 10px;
+}
+
+.searchBox h3 .btnAdd {
+  background-color: #da2525;
+  border: none;
+  border-radius: 30px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  padding: 8px 30px;
+}
+
+.searchBox .btnSearch {
+  background-color: #25da67;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 15px;
+}
+.RejectBtn {
+ background-color:red;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 15px;
+}
+
+.ApproveBtn {
+  background-color: #25da67;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 15px;
+}
+
+.cancelBtn {
+  background-color:gray;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 15px;
+}
+.formGroup
+{
+  display: flex;
+  margin-bottom: 10px;
+  padding: 3px 15px;
 }

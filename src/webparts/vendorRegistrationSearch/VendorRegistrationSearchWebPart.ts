@@ -120,9 +120,7 @@ export default class VendorRegistrationSearchWebPart extends BaseClientSideWebPa
    }
  
    private _dataVersion: Version = Version.parse('1.0');
-   protected get dataVersion(): Version {
-     return this._dataVersion;
-   }
+   
    
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {

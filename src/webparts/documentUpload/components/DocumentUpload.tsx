@@ -39,7 +39,7 @@ const [loading, setLoading] = React.useState(false);
   return Object.keys(newErrors).length === 0;
 };
 const handleCancel = () => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
   window.location.assign(url);
 };
 const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,7 +107,7 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   try {    
     setLoading(true);
       // CREATE
-      const resutldata=await service.getItemByTitle(form.Title+'_'+dateOnly);
+      const resutldata=await service.getItemByTitle(form.BillNumber,form.BillDate);
       if(resutldata==0)
       {
       const res = await service.createItem(payload);
@@ -136,7 +136,7 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   }
       }
       else{
-        alert("Record already exists with the Document ID : "+form.Title+'_'+dateOnly);
+        alert("Record already exists with the BillNumber : "+form.BillNumber+' and BillDate '+form.BillDate);
       }
   } catch (error) {
     console.error(error);
@@ -148,9 +148,25 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 };
   // 🔹 UI
   return (
+    <section>
+      {loading && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: 'rgba(255,255,255,0.6)',
+                zIndex: 9999
+              }}>
+                <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                  <Spinner label="Processing..." size={SpinnerSize.large} />
+                </div>
+              </div>
+            )}
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>Upload New Document</h2>          
+        <h4>Upload New Document</h4>          
       </div>
       <div className={styles.row}>
         <div className={styles["col-md-9"]}>
@@ -236,13 +252,13 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           {/* Templates */}
           <div className={styles.card}>
              <div>
-              <h4>Templates</h4>              
+              <h6>Templates</h6>              
             </div>
           </div>
           {/* Guidelines */}
           <div className={styles.card}>
              <div>
-              <h4>Importance Guidelines</h4>              
+              <h6>Importance Guidelines</h6>              
             </div>
             <ol>
               <li>Select approval path carefully.</li>
@@ -255,6 +271,7 @@ const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       </div>
     </div>
     </div>
+    </section>
   );
 };
 

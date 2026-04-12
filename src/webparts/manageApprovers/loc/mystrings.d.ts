@@ -1,4 +1,4 @@
-declare interface IVendorRegistrationWebPartStrings {
+declare interface IManageApproversWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
   DescriptionFieldLabel: string;
@@ -13,7 +13,7 @@ declare interface IVendorRegistrationWebPartStrings {
   UnknownEnvironment: string;
 }
 
-declare module 'VendorRegistrationWebPartStrings' {
-  const strings: IVendorRegistrationWebPartStrings;
+declare module 'ManageApproversWebPartStrings' {
+  const strings: IManageApproversWebPartStrings;
   export = strings;
 }
