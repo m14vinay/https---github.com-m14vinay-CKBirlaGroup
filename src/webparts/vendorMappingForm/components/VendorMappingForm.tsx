@@ -5,7 +5,8 @@ import styles from './VendorMappingForm.module.scss';
 import { IVendorMappingFormProps } from './IVendorMappingFormProps';
 import SharePointService from '../service/Service';
 import Service from '../service/Service';
-import { Spinner, SpinnerSize } from '@fluentui/react';
+import { Spinner, SpinnerSize,IDropdownOption,Dropdown } from '@fluentui/react';
+//import { Dropdown } from 'react-bootstrap';
 
 
 const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
@@ -42,6 +43,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
    const [attachments, setAttachments] = React.useState<any[]>([]);
    const [loading, setLoading] = React.useState(false);
+  const [vendorOptions, setVendorOptions] = React.useState<IDropdownOption[]>([]);
 
 
 
@@ -74,7 +76,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
      React.useEffect(() => {
        if (itemId) {
          loadAttachments(itemId);
-        
+        loadVendors();
        }
      }, [itemId]);
     const handleFetchById = async (id: number) => {
@@ -120,6 +122,19 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   };
 
 
+  
+const loadVendors = async () => {
+      const data = await service.getVendor();
+      const options = data.map((item: any) => ({
+        key: item.Title,
+        text: item.Title
+      }));
+      setVendorOptions(options);
+    }
+
+     React.useEffect(() => {
+          loadVendors();     
+        }, []);
   // --- VALIDATIONS ---
   const validateProjectCode = (value: string): string => {
     if (!value) return 'Project Code is required';
@@ -455,13 +470,18 @@ const item = users?.Approver?.Id;
         <input name="projectDescription" value={form.projectDescription} readOnly style={{backgroundColor:"lightgray"}}  />
 
 
-        <label>Select Vendor <span className={styles.required}>*</span></label>
-      <select name="vendorName" value={form.vendorName} onChange={(e) =>setForm(prev => ({
-      ...prev,vendorName: e.target.value}))} >
-       <option value="">Select Vendor</option>
-  <option value="Vendor1">Vendor 1</option>
-  <option value="Vendor2">Vendor 2</option>
-</select>
+         <label>Select Vendor <span className={styles.required}>*</span></label>
+      <Dropdown
+                placeholder="Select Vendor"
+                options={vendorOptions}
+                selectedKey={form.vendorName}
+        onChange={(e, option) =>
+          setForm(prev => ({
+            ...prev,
+            vendorName: option?.key as string // safe default empty string
+          }))
+        }
+      /> 
         <label>Additional Information & Remarks</label>
         <input name="vendorDescription" value={form.vendorDescription} onChange={handleChange}  />
         

@@ -978,13 +978,13 @@ finally
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                                <div className={styles["formGroup"]}>
+                                <div className="form-group">
                                   <label style={{width: '50%'}}>Factory License</label>
                                   <input style={{width: '100%'}} name="filesLicenseManual" type="file" multiple onChange={handleFileChange} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                                <div className={styles["formGroup"]}>
+                                <div className="form-group">
                                   <label style={{width: '50%'}}>ISO 9001 Certificates</label>
                                   <input style={{width: '100%'}} name="filesISOManual" type="file" multiple onChange={handleFileChange}  />
                                 </div>
@@ -1078,13 +1078,13 @@ finally
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                                <div className={styles["formGroup"]}>
+                                <div className="formGroup">
                                   <label style={{width: '50%'}}>Factory License</label>
                                   <input style={{width: '100%'}} name="filesLicenseExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesLicenseExcel")} />
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                                <div className={styles["formGroup"]}>
+                                <div className="formGroup">
                                   <label style={{width: '50%'}}>ISO 9001 Certificates</label>
                                   <input style={{width: '100%'}} name="filesISOExcel" type="file" multiple onChange={handleFileChange}  />
                                 </div>
@@ -1102,7 +1102,7 @@ finally
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                                <div className={styles["formGroup"]}>
+                                <div className="form-group">
                                   <label style={{width: '50%'}}>Service Tax Registration</label>
                                   <input style={{width: '100%'}} name="filesServiceExcel" type="file" multiple onChange={handleFileChange}  />
                                 </div>
@@ -1114,7 +1114,7 @@ finally
                                 </div>
                               </div>
                               <div className={styles['col-md-12']}>
-                                <div className={styles["formGroup"]}>
+                                <div className="form-group">
                                   <label style={{width: '50%'}}>Telephone and Electricity Bill</label>
                                   <input style={{width: '100%'}} name="filesTelephoneExcel" type="file" multiple onChange={handleFileChange} />
                                 </div>
