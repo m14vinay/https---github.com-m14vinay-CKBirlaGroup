@@ -49,7 +49,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('RequestID');
+    const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
   // Get Data After Selection the Document
@@ -226,28 +226,28 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         Remarks: form.Remarks,
         DepartmentName: form.DepartmentName,
         CurrentStatus: 'Pending',
-        AssignedToEmailId: Number(dataApprover.Departmenthead?.Id || 0),
-        DepartmentHead: dataApprover.Departmenthead?.Title.toString() || "",
+        AssignedToEmailId: Number(dataApprover.DepartmentHead?.Id || 0),
+        DepartmentHead: dataApprover.DepartmentHead?.Title.toString() || "",
         FIApporver: dataApproverFI.ApproverName?.Title.toString() || "",
         FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         ComplianceHeadEmailId: 0,
         CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
-        AssignedTo: dataApprover.Departmenthead?.Title.toString() || ""
+        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || ""
       }
     }
-    else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') &&form.TotalAmount > 100000) {      
+    else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') &&form.TotalAmount < 100000) {      
         payload = {
         TotalClaimAmount: form.TotalAmount,
         Remarks: form.Remarks,
         DepartmentName: form.DepartmentName,
         CurrentStatus: 'Pending',
-        AssignedToEmailId: Number(dataApprover.Departmenthead?.Id || 0),
-        DepartmentHead: dataApprover.Departmenthead?.Title.toString() || "",
+        AssignedToEmailId: Number(dataApprover.DepartmentHead?.Id || 0),
+        DepartmentHead: dataApprover.DepartmentHead?.Title.toString() || "",
         FIApporver: dataApproverFI.ApproverName?.Title.toString() || "",
         FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
         CFOEmailId: 0,
-        AssignedTo: dataApprover.Departmenthead?.Title.toString() || ""
+        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || ""
       }
     }
     try {

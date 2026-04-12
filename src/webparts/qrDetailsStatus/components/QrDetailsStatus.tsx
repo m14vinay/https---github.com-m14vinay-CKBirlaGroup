@@ -11,7 +11,7 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
   const [loading, setLoading] = useState(true);
 
   const params = new URLSearchParams(window.location.search);
-  const itemId = Number(params.get('id'));
+  const itemId = Number(params.get('RequestId'));
 
   const fetchData = async () => {
     try {

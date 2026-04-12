@@ -42,7 +42,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
   //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('RequestID');
+    const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
   React.useEffect(() => {

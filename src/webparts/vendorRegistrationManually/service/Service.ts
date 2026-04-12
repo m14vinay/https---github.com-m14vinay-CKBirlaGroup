@@ -25,7 +25,7 @@ export default class Service {
   }
   // Fetch the Record
   public async getItemByID(ID: number): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=ID eq ${ID} and CurrentStatus='Draft'`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=ID eq ${ID} and CurrentStatus eq 'Draft'`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
