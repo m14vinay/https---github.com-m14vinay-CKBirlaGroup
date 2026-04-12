@@ -55,9 +55,10 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
             return <NavDropdown title={
                   <span><span><img className={styles.iconImg} src={b.Icon}></img></span><span className={styles.menuHaeding}>{b.Title}</span></span>
                 } id="basic-nav-dropdown">
-                  {childItems.map(c => {
+                  {childItems.map((c,i) => {
                     return <><NavDropdown.Item href={c.Link}>{c.Title}</NavDropdown.Item>
-                  <NavDropdown.Divider /></>
+                    {i < childItems.length -1 && <NavDropdown.Divider />}
+                  </>
                   })}
                 </NavDropdown>
           }
