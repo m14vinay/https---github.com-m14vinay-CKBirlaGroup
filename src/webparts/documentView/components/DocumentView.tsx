@@ -23,7 +23,7 @@ const DocumentView: React.FC<IDocumentViewProps> = (props) => {
   const params = new URLSearchParams(window.location.search);
   const service = new SharePointService(props.context);
 const handleCancel = () => {
-  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/DocumentSearch.aspx`;
   window.location.assign(url);
 };
   // 🔹 Load data
@@ -149,14 +149,7 @@ if(data.Id>0)
         <div className={styles.leftPanelHeader}>
         <h6>My Document List / View Document</h6>          
         </div>        
-      <div className={styles.rightPanel}>        
-          {/* Templates */}
-          <div className={styles.card}>
-             <div>
-              <h6>Templates</h6>              
-            </div>
-          </div>
-          {/* Guidelines */}
+      <div className={styles.rightPanel}>      
           <div className={styles.card}>
              <div>
               <h6>Importance Guidelines</h6>              

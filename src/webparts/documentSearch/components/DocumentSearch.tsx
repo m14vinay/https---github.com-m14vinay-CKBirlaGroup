@@ -144,7 +144,7 @@ const DocumentSearch: React.FC<IDocumentSearchProps> = (props) => {
     window.location.assign(url);
   };
   const handleView = (documentId: string) => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/DocumentView.aspx?ID=${documentId}`;
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/DocumentView.aspx?RequestId=${documentId}`;
     window.location.assign(url);
   };
   const handlesearch = async () => {

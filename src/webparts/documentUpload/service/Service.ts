@@ -39,8 +39,23 @@ export default class Service {
     return response.json();
   }
   // Fetch the Record
-  public async getItemByTitle(BillNumber: string,BillDate:Date): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=BillNumber eq '${BillNumber}' or BillDate eq '${BillDate}'`;
+  public async getItemByTitle(BillNumber: string,BillDate:string): Promise<any> {
+    let filters: string[] = [];
+    if (BillDate) {
+    // start of day
+    const start = new Date(BillDate);
+    start.setHours(0, 0, 0, 0);
+    // end of day
+    const end = new Date(BillDate);
+    end.setHours(23, 59, 59, 999);
+    filters.push(
+      `Created ge datetime'${start.toISOString()}' and Created lt datetime'${end.toISOString()}'`
+    );
+  }
+
+  // Combine filters
+    const filterQuery = filters.length > 0 ? `$filter= BillNumber eq '${BillNumber}' and ${filters.join(" or ")}` : "";
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?${filterQuery}`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
