@@ -137,7 +137,7 @@ const VendorRegistrationDetail: React.FC<IVendorRegistrationDetailProps> = (prop
     }
   };
   const handleCancel = async () => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationSearch.aspx`;
     window.location.assign(url);
   };
   return (
@@ -499,7 +499,7 @@ const VendorRegistrationDetail: React.FC<IVendorRegistrationDetailProps> = (prop
                       </div>
                     </div>
                     <div className={styles['btn-group']}>
-                      <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
+                      <button className={styles.RejectBtn} onClick={handleCancel}>Cancel</button>
                     </div>
                   </div>
                 </div>

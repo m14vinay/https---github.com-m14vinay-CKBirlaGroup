@@ -106,7 +106,7 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
     window.location.assign(url);
   };
   const handleView = (documentId: string) => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationDetail.aspx?ID=${documentId}`;
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationDetails.aspx?RequestId=${documentId}`;
     window.location.assign(url);
   };
   const handlesearch = async () => {
