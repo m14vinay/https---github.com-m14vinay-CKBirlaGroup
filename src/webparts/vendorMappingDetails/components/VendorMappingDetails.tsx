@@ -187,7 +187,7 @@ const handleFetchById = async (id: number) => {
   })}
              </div>
           <div className={styles.formGroup}>
-                      <label>Project Code</label>
+                      <label>Project Code<span className={styles.required}>*</span></label>
                     <input name="projectCode" value={form.projectCode}   readOnly style={{backgroundColor:"lightgray"}} />
                     </div>
          <div className={styles.formGroup}>
