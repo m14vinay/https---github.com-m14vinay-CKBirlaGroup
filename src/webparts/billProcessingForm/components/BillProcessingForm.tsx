@@ -10,24 +10,23 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
 
   // State
   const [form, setForm] = React.useState({
-    BPRequestNo: '',
-    BPRequestErrorNo: '',
+    ProjectCode: '',
+    RequestNo: '',
     POsigned: false,
-    ProjcetCode: '',
-    vendorCode: '',
-    vendorName: '',
+    vendorcode: '',
+    VendorName: '',
     projectTitle: '',
     Comments: '',
-    PORequestNo: '',
     BillNo: '',
     BillDate: new Date(),
     BillAmount: 0,
     CalculatedTaxes: 0,
     TotalAmount: 0,
     UploadDocument: '',
-    files: []
+    files: [],
+    CurrentStatus:''
   });
-  const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
+  const [POOptions, setPOOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
   const [FinanceController, setApprover2ID] = React.useState<number | null>(null);
   const [AssignedID, setAssignedID] = React.useState<number | null>(null);
@@ -38,8 +37,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   const [loading, setLoading] = React.useState(false);
   const MAX_TOTAL_SIZE_MB = 25;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
-
-
 
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
@@ -88,11 +85,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         setForm(prev => ({
           ...prev,
 
-          projectCode: result.ProjectCode || '',
+          ProjectCode: result.ProjectCode || '',
           Department: result.Department || '',
           projectTitle: result.ProjectTitle || '',
           vendorName: result.VendorName || '',
-          VendorNameID: result.VendorNameID || '',
           RemainingAmount: result.RemainingAmount || '',
           TotalAmount: result.TotalAmount || '',
           OccupiedAmount: result.OccupiedAmount || 0,
@@ -188,15 +184,26 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     const value = e.target.value.toUpperCase();
     setForm(prev => ({
       ...prev,
-      projectCode: value
+      ProjectCode: value
     }));
     if (!value) {
       return;
     }
-
     try {
       const result = await service.getRequestDetails(value);
       if (result.length > 0) {
+        setForm(prev => ({
+          ...prev,
+          ProjectCode: value,
+          vendorCode: result[0].vendorcode,
+          VendorName: result[0].VendorName,
+          projectTitle: result[0].ProjectTitle
+        }));
+        const options = result.map((item: any) => ({
+          key: item.Id,
+          text: item.RequestNo
+        }));
+        setPOOptions(options);
         const item = result[0];
         const OccupiedAmount = await service.getTotaloccupiedAmount(value);
         let total = 0;
@@ -205,13 +212,13 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
             return sum + Number(items.POAmount || 0);
           }, 0);
         }
-        if (item.Status === 'Approved') {
+        if (item.CurrentStatus === 'Approved') {
           // 👉 Form fields update
           setForm(prev => ({
             ...prev,
             Department: item.Department || '',
-            projectTitle: item.ProjectTitle || '',
-            vendorName: item.Selectedvendor || '',
+            ProjectCode: item.ProjectCode || '',
+            VendorName: item.VendorName || '',
             TotalAmount: item.TotalProjectAmount || 0,
             OccupiedAmount: total || 0,
             RemainingAmount: item.TotalProjectAmount - total
@@ -240,28 +247,16 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-      
+
     }
-  };
-
-  const loadDepartments = async () => {
-    const data = await service.getDepartments();
-    const options = data.map((item: any) => ({
-      key: item.Id,
-      text: item.DepartmentName
-    }));
-
-    setDepartmentOptions(options);
   };
   // 🔹 Load data
   React.useEffect(() => {
-    loadDepartments();
   }, []);
 
   // // 🔹 Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
     setForm({
       ...form,
       [name]: value
@@ -339,7 +334,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   // Update
   const handleUpdate = async () => {
     try {
-      setLoading(true);     
+      setLoading(true);
     }
     catch (error) {
       console.error(error);
@@ -381,43 +376,51 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               <h2>Bill Processing Form</h2>
               <h4>Bill Processing / Request Form</h4>
               <label>Bill Signed</label>
-              <input type="checkbox" checked={form.POsigned} onChange={handleRequestNoChange} />
+              <input type="checkbox" name='POsigned' checked={form.POsigned} onChange={handleChange} />
               <label>Project Code <span className={styles.required}>*</span></label>
-              <input
-                name="PorequestNo"
-                value={form.BPRequestNo}
+              <input type='text'
+                name="ProjectCode"
+                value={form.ProjectCode}
                 onChange={handleRequestNoChange}
-                className={form.BPRequestErrorNo ? styles.buttonGroup : ''}
               />
-              {form.BPRequestErrorNo && <span className={styles.error}>{form.BPRequestErrorNo}</span>}
               <label>Select Vendor Code</label>
-              <input name="vendorCode" value={form.vendorCode}   >
+              <input name="vendorcode" value={form.vendorcode} type='text' readOnly>
               </input>
               <label>Select Vendor Name</label>
-              <input name="vendorName" value={form.vendorName}   >
+              <input name="VendorName" value={form.VendorName} type='text' readOnly>
               </input>
               <label>Project Title</label>
-              <input name="projectTitle" value={form.projectTitle} />
+              <input name="projectTitle" value={form.projectTitle} readOnly />
               <label>Additional Information & Remarks</label>
-              <input name="comments" value={form.Comments}   >
+              <input name="Comments" value={form.Comments} onChange={handleChange}  >
               </input>
               <label>PO Request No</label>
-              <input name="PORequestNo" value={form.PORequestNo} />
+              <Dropdown
+                placeholder="Select Request No"
+                options={POOptions}
+                selectedKey={form.RequestNo}
+                onChange={(e, option) =>
+                  setForm(prev => ({
+                    ...prev,
+                    RequestNo: option?.key as string // safe default empty string
+                  }))
+                }
+              />
               <label>Bill No</label>
-              <input name="BillNo" value={form.BillNo}   >
+              <input name="BillNo" value={form.BillNo} type='text' onChange={handleChange}>
               </input>
               <label>Bill Date</label>
-              <input name="BillDate" type="date" value={form.BillDate.toISOString().split('T')[0]}   >
+              <input name="BillDate" type="date" value={form.BillDate.toISOString().split('T')[0]} onChange={handleChange}>
               </input>
 
               <label>Bill Amount</label>
-              <input name="BillAmount" value={form.BillAmount} />
+              <input name="BillAmount" value={form.BillAmount} type='number' onChange={handleChange} />
 
               <label>Calculated Taxes</label>
-              <input name="CalculatedTaxes" value={form.CalculatedTaxes} />
+              <input name="CalculatedTaxes" value={form.CalculatedTaxes} type='number' onChange={handleChange}/>
 
               <label>Total Amount</label>
-              <input name="TotalAmount" value={form.TotalAmount} />
+              <input name="TotalAmount" value={form.TotalAmount} readOnly type='text'/>
               <label>Attachments <span className={styles.required}>*</span></label>
               <input type="file" multiple onChange={handleFileChange} />
               {/*  Existing Files (API se) */}

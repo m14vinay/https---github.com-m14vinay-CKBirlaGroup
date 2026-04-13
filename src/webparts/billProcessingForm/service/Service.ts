@@ -99,13 +99,10 @@ private async getListItemType(): Promise<string> {
    return item;
    
   } 
-
-  
-
   //Get ProjectCode Data
  public async getRequestDetails (requestNo: string) :Promise<any> {
  
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.FetchList}')/items?$filter=RequestNo eq '${requestNo}'`;
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=ProjectCode eq '${requestNo}' and CurrentStatus eq 'Approved'`;
 
     console.log("URL:",url)  
   const response = await this.context.spHttpClient.get(
