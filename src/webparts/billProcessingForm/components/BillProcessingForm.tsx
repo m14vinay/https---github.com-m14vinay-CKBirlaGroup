@@ -85,10 +85,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
 
       if (result.CurrentStatus === 'Draft') {
         setItemId(result.Id);
-
-        const selectedOption = poOptions.find(
-          opt => opt.text === result.PoMaster
-        );
         setForm(prev => ({
           ...prev,
 
@@ -103,7 +99,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           POAmount: result.POAmount || 0,
           ApplicableTaxes: result.ApplicableTaxes || 0,
           Comments: result.ProjectDescription || '',
-          POCategory: selectedOption?.text || ''
         }));
         const data = await service.GetApprover(result.Department);
         if (data?.Id > 0) {
@@ -248,13 +243,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       
     }
   };
-
-  // 🔹 PO Category Options
-  const poOptions: IChoiceGroupOption[] = [
-    { key: '1', text: 'Issue To Vendor' },
-    { key: '2', text: 'Internal Compliance' }
-  ];
-
 
   const loadDepartments = async () => {
     const data = await service.getDepartments();

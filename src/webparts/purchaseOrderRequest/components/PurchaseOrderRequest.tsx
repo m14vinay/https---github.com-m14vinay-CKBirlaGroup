@@ -132,7 +132,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       }
 
     } catch (error) {
-      console.error("Error Occurred,Please Contact To System Administrator.:", error);
+      console.error("Error Occurred.:", error);
     }
     finally
   {
@@ -147,8 +147,8 @@ const handleCancel = () => {
 };
 const handleDownload = () => {
   const url = `${props.context.pageContext.web.absoluteUrl}/sites/DigiflowUAT/Shared%20Documents/PO_Format%20(1).xlsx?d=w7b16074a3861495c96494464b6b1818d&csf=1&web=1&e=rkBQLk`;
-  window.location.assign(url);
-};
+  window.open(url, '_blank');
+}
  const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
   const files = event?.target?.files;
   if (!files) return;
