@@ -489,7 +489,10 @@ const handleUpdate = async () => {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id , form.files[i]);
       }
-      alert("Submitted Successfully.✅");    
+      alert("Submitted Successfully.✅"); 
+       await service.updateItem(res.Id, {
+          RequestNo: `CKBCSL/25-26/IV/Finance/${res.Id}`
+        });   
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
      }
@@ -538,7 +541,7 @@ const validatePO = (value: string) => {
    )}
     <div className={styles.container}>
           <div className={styles.header}>
-            <h4>PO Approval Form </h4>          
+            <h4>PO Approval Request Form </h4>          
           </div>
           <div className={styles.row}>
             <div className={styles['col-md-9']}>
