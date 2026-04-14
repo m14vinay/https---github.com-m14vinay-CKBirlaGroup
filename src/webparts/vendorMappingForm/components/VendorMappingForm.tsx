@@ -124,13 +124,17 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
 
   
 const loadVendors = async () => {
+  try{
       const data = await service.getVendor();
       const options = data.map((item: any) => ({
         key: item.Title,
         text: item.Title
       }));
       setVendorOptions(options);
-    }
+     } catch (error) {
+    console.error("Error loading vendors:", error);
+  }
+};
 
      React.useEffect(() => {
           loadVendors();     
@@ -408,7 +412,10 @@ const item = users?.Approver?.Id;
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id , form.files[i]);
       }
-      alert("Submitted Successfully.✅");    
+      alert("Submitted Successfully.✅");   
+      await service.updateItem(res.Id, {
+       RequestNo: `VMR-${res.Id}`
+  }); 
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
      }

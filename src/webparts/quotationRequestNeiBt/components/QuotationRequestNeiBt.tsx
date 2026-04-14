@@ -363,7 +363,7 @@ const User=await service.getUserById(Number(form.Approval1Id));
       }
       alert("Saved Successfully.✅");
        await service.updateItem(res.Id, {
-       RequestNo: `VMR-${res.Id}`
+       RequestNo: `NEI-${res.Id}`
   });
 
     } else {
@@ -453,7 +453,10 @@ const handleUpdate = async () => {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id , form.files[i]);
       }
-      alert("Submitted Successfully.✅");    
+      alert("Submitted Successfully.✅");  
+      await service.updateItem(res.Id, {
+       RequestNo: `NEI-${res.Id}`
+  });
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
      }
@@ -499,13 +502,13 @@ setForm(prev => ({
       )}
      <div className={styles.container}>
                <div className={styles.header}>
-                 <h4>Quotation Approval Form - NEI BT Admin </h4>          
+                 <h4>Quotation Request Approval Form - NEI BT Admin </h4>          
                </div>
                <div className={styles.row}>
                  <div className={styles["col-md-9"]}>
                    <div className={styles.leftPanel}>
                      <div className={styles.leftPanelHeader}>
-                       <h4>Quotation Approval Form - NEI BT Admin </h4>              
+                       <h4>Quotation Request Approval Form - NEI BT Admin </h4>              
                      </div>
         
           <label>Project Title <span className={styles.required}>*</span></label>
