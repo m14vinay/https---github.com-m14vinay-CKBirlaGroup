@@ -110,11 +110,13 @@ const loadAttachments = async (id:number) => {
     try {
        setLoading(true);
       console.log("Calling API with ID:", id);
-     const currentuser= await service.getUser();
-      const result = await service.getItemByRequestNo(id);
-
+     const result = await service.getItemByRequestNo(id);
+ const currentUser = await service.getUser();
       console.log("Result:", result);
-
+    if(result.AuthorId!== currentUser.Id)
+      {
+         alert("You Are Not Authorized ❌ ");
+      } 
          if (result.CurrentStatus==='Draft') {
       setItemId(result.Id);
 

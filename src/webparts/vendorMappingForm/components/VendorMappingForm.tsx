@@ -53,6 +53,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
       const id = params.get('RequestId');
       return id ? parseInt(id, 10) : null;
     };
+    
   
     // --- 3️⃣ Load data on mount ---
     React.useEffect(() => {
@@ -84,10 +85,14 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
      setLoading(true);
       console.log("Calling API with ID:", id);
 
-      const result = await service.getItemByRequestNo(id);
-
+       const result = await service.getItemByRequestNo(id);
+       const currentUser = await service.getUser();
       console.log("Result:", result);
-
+    if(result.AuthorId!== currentUser.Id)
+      {
+         alert("You Are Not Authorized ❌ ");
+      } 
+      
       if (result.CurrentStatus==='Draft') {
         setItemId(result.Id);
 
@@ -127,8 +132,8 @@ const loadVendors = async () => {
   try{
       const data = await service.getVendor();
       const options = data.map((item: any) => ({
-        key: item.Title,
-        text: item.Title
+        key: item.Title+'_' + 'VENDOR_' + item.ID,
+        text:item.Title+'_' + 'VENDOR_' + item.ID,
       }));
       setVendorOptions(options);
      } catch (error) {
