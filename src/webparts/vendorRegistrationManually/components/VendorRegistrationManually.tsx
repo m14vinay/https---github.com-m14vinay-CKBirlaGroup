@@ -120,6 +120,12 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
     try {
       console.log("Calling API with ID:", id);
       const result = await service.getItemByID(id);
+        const currentUser = await service.getUser();
+      console.log("Result:", result);
+    if(result.AuthorId!== currentUser.Id)
+      {
+         alert("You Are Not Authorized ❌ ");
+      } 
       console.log("Result:", result);
       if (result) {
         setItemId(result.Id);

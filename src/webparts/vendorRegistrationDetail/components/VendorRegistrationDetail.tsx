@@ -80,6 +80,8 @@ const VendorRegistrationDetail: React.FC<IVendorRegistrationDetailProps> = (prop
       console.log("Calling API with ID:", id);
       const result = await service.getItemByID(id);
       console.log("Result:", result);
+     
+      
       if (result) {
         setItemId(result.Id);
         const files = await service.getAttachments(result.Id);
