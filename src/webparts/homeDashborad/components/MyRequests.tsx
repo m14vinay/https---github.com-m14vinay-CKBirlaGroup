@@ -26,7 +26,7 @@ export default function MyRequests() {
     let data1:any[] = [];
     let counter = 0;
 
-    const openForm = (row:any) => {
+    const openViewForm = (row:any) => {
         console.log(row);
 
         if(row["@odata.type"]){
@@ -48,6 +48,36 @@ export default function MyRequests() {
                     break;  
                 case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
                     window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Detail.aspx?RequestId=" + row.Id,"_blank");
+                    break;         
+                default:
+                    alert("Page not found");
+                    break;
+            }
+        }
+    }
+
+    const openEditForm = (row:any) => {
+        console.log(row);
+
+        if(row["@odata.type"]){
+            switch(row["@odata.type"]){
+                case '#SP.Data.QuotationApprovalListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationForm.aspx?RequestId=" + row.Id,"_blank");
+                    break;
+                case '#SP.Data.PoApprovalListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchsaseOrderRequest.aspx?RequestId=" + row.Id,"_blank");
+                    break;
+                case '#SP.Data.VendorMappingListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingForm.aspx?RequestId=" + row.Id,"_blank");
+                    break;
+                case '#SP.Data.Remb_x005f_ExpanseMasterListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementRequestForm.aspx?RequestId=" + row.Id,"_blank");
+                    break;  
+                case '#SP.Data.BillProcessingListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Bill.aspx?RequestId=" + row.Id,"_blank");
+                    break;  
+                case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Request.aspx?RequestId=" + row.Id,"_blank");
                     break;         
                 default:
                     alert("Page not found");
@@ -83,7 +113,10 @@ export default function MyRequests() {
         }),
         columnHelper.accessor('Created', {
             header: 'View',
-            cell: (info) => <span style={{cursor:"pointer"}}><Icon iconName="RedEye" onClick={() => openForm(info.row.original)}></Icon></span>
+            cell: (info) => <span style={{cursor:"pointer"}}>
+                {info.row.original.CurrentStatus === "Draft"? <Icon iconName="Edit" onClick={() => openEditForm(info.row.original)}></Icon>:
+                <Icon iconName="RedEye" onClick={() => openViewForm(info.row.original)}></Icon>}
+            </span>
         })
     ]
     const [data, _setData] = useState<any[]>(() => []);
