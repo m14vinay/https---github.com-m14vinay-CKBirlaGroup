@@ -263,7 +263,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
           return sum + Number(items.POAmount || 0);
         }, 0);
       }
-        if (item.Status === 'Approved') {
+        if (item.CurrentStatus === 'Approved') {
       // 👉 Form fields update
       setForm(prev => ({
         ...prev,

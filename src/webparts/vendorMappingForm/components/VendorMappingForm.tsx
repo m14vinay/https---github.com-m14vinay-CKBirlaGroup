@@ -247,7 +247,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
     if (result.length > 0) {
      
-      if (result[0].Status === 'Approved') {
+      if (result[0].CurrentStatus === 'Approved') {
         setForm(prev => ({
           ...prev,
           projectTitle: result[0].ProjectTitle || '',
