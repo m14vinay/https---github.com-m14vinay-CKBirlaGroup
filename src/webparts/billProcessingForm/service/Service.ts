@@ -2,17 +2,14 @@ import { SPHttpClient } from '@microsoft/sp-http';
 export default class Service {
 
   private context: any;
-  private listname="PoApproval";
+  private PoApproval="PoApproval";
   private Departmentmaster ="DepartmentMaster";
-  private FetchList ="QuotationApproval";
-  private VendorList="";
   private FinanceController="FinanceController";
   private HistoryList="History";
-   private Approver="VendorMappingApproval";
+  private BillProcessing="BillProcessing";
   constructor(context: any) {
     this.context = context;
   }
-  
   //Get Department Data
   public async getDepartments(): Promise<any[]> {
 
@@ -25,34 +22,9 @@ export default class Service {
     const data = await res.json();
     return data.value;
   }
-
-  //Get Vendor Data
-  public async getVendor(): Promise<any[]> {
-
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.VendorList}')/items`;
-
-    const res = await this.context.spHttpClient.get(
-      url,
-      SPHttpClient.configurations.v1
-    );
-    const data = await res.json();
-    return data.value;
-  }
-  // GetList Item
-private async getListItemType(): Promise<string> {
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')?$select=ListItemEntityTypeFullName`;
-
-  const res = await this.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-
-  const data = await res.json();
-  return data.ListItemEntityTypeFullName;
-}
   // Save the Record
   public async createItem(data: any): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;   
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items`;   
     const response = await this.context.spHttpClient.post(
       url,
      SPHttpClient.configurations.v1,
@@ -69,7 +41,7 @@ private async getListItemType(): Promise<string> {
 
   // Update the Record (Submit)
   public async updateItem(id: number, data: any): Promise<void> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items(${id})`;
 
     await this.context.spHttpClient.post(
       url,
@@ -88,7 +60,7 @@ private async getListItemType(): Promise<string> {
 
   public async getItemByRequestNo(ID: Number): Promise<any> {
 
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})?$expand=AttachmentFiles`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.PoApproval}')/items(${ID})?$select=*,Author/Id,Author/Title,AttachmentFiles&$expand=Author,AttachmentFiles`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
@@ -98,26 +70,23 @@ private async getListItemType(): Promise<string> {
    
    return item;
    
-  } 
+  }
+  // Get Data using PO Request No
+  public async getDocumentDetailsID(RequestNo: string): Promise<any[]> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.PoApproval}')/items?$top=5000&$select=*&$filter=RequestNo eq '${RequestNo}'`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data.value;
+  }
   //Get ProjectCode Data
  public async getRequestDetails (requestNo: string) :Promise<any> {
  
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=ProjectCode eq '${requestNo}' and CurrentStatus eq 'Approved'`;
-
-    console.log("URL:",url)  
-  const response = await this.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-
- const data = await response.json();
-
- return data.value;
-}
-// Get Total Occupied Amount
-public async getTotaloccupiedAmount (requestNo: string) :Promise<any> {
- 
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=ProjectCode eq '${requestNo}'`;
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.PoApproval}')/items?$filter=ProjectCode eq '${requestNo}' and CurrentStatus eq 'Approved'`;
 
     console.log("URL:",url)  
   const response = await this.context.spHttpClient.get(
@@ -133,7 +102,7 @@ public async getTotaloccupiedAmount (requestNo: string) :Promise<any> {
   // Upload Files
 
   public async uploadFile(itemId: number, file: File): Promise<void> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
 
     const buffer = await file.arrayBuffer();
 
@@ -174,7 +143,7 @@ Departmenthead/Id,Departmenthead/Title
 // Fetch the Files from List
   public async getAttachments(itemId: number): Promise<any[]> {
 
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items(${itemId})/AttachmentFiles`;
 
   const res = await this.context.spHttpClient.get(
     url,
@@ -225,8 +194,8 @@ public async getUserById(userId: number): Promise<any> {
 
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.FinanceController}')/items
 ?$select=Id,Title,
-FinanceController/Id,FinanceController/Title
-&$expand=FinanceController&$filter=FinananceControllerUser eq '${Category}'`;
+FinanceController/Id,FinanceController/Title,Billing2ndApprover/Id,Billing2ndApprover/Title
+&$expand=FinanceController,Billing2ndApprover&$filter=DepartmentName eq '${Category}'`;
 
     const res = await this.context.spHttpClient.get(
       url,
@@ -235,21 +204,7 @@ FinanceController/Id,FinanceController/Title
 
     const data = await res.json();
     return data.value.length > 0 ? data.value[0] : null;
-  }
-
-  public async getVendorApprover(): Promise<any[]> {
-
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Approver}')/items?$select=Id,Title,
-Approver/Id,Approver/Title&$expand=Approver`;
-
-    const res = await this.context.spHttpClient.get(
-      url,
-      SPHttpClient.configurations.v1
-    );
-    const data = await res.json();
-    return data.value.length > 0 ? data.value[0] : [];
-  }
-  
+  }  
   public async getUser(): Promise<any> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
     const res = await this.context.spHttpClient.get(
@@ -261,7 +216,6 @@ Approver/Id,Approver/Title&$expand=Approver`;
   }
     // Save the Hitory Record
       public async createHistoryItem(data: any): Promise<any> {
-        const itemType = await this.getListItemType();
         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items`;   
         const response = await this.context.spHttpClient.post(
           url,
@@ -277,8 +231,7 @@ Approver/Id,Approver/Title&$expand=Approver`;
         return response.json();
       }
       // Get the History Record
-      public async GetHistoryItem(ID:Number,FormCode:string): Promise<any> {
-        const itemType = await this.getListItemType();
+      public async GetHistoryItem(ID:Number,FormCode:string): Promise<any> {        
         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items$filter=FID eq ${ID} and Title eq '${FormCode}'`;   
         console.log("URL:",url)  
       const response = await this.context.spHttpClient.get(
