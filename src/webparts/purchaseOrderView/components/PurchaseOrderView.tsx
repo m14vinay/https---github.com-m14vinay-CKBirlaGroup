@@ -123,7 +123,11 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
       const historydata = await service.GetHistoryItem(id, "PO");
       setHistory(historydata);
       console.log("Result:", result);
-
+       const currentUser = await service.getUser();
+       if(result.AuthorId!== currentUser.Id)
+      {
+         alert("You Are Not Authorized ❌ ");
+      } 
       if (result) {
         setItemId(result.Id);
 
