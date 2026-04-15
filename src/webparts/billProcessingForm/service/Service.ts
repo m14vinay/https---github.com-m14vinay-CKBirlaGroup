@@ -60,7 +60,7 @@ export default class Service {
 
   public async getItemByRequestNo(ID: Number): Promise<any> {
 
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.PoApproval}')/items(${ID})?$select=*,Author/Id,Author/Title,AttachmentFiles&$expand=Author,AttachmentFiles`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items(${ID})?$select=*,Author/Id,Author/Title&$expand=Author`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1

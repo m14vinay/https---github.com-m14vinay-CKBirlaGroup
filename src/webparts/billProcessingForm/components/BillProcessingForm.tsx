@@ -10,6 +10,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   const [form, setForm] = React.useState({
     ProjectCode: '',
     PORequestNo: '',
+    PORequestNoID: '',
     vendorcode: '',
     VendorName: '',
     projectTitle: '',
@@ -70,30 +71,28 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           setItemId(result.Id);
           const resultdata = await service.getRequestDetails(result.ProjectCode);
           if (resultdata.length > 0) {
-            const options = result.map((item: any) => ({
-              key: item.Id,
+            const options = resultdata.map((item: any) => ({
+              key: item.RequestNo,
               text: item.RequestNo
             }));
             setPOOptions(options);
             setForm(prev => ({
               ...prev,
-              vendorCode: result[0].vendorcode,
-              VendorName: result[0].VendorName,
-              projectTitle: result[0].ProjectTitle,
-              DepartmentName: result[0].Department,
+              VendorName: result.VendorName || '',
+              projectTitle: result.ProjectTitle || '',
+              DepartmentName: result.Department || '',
               ProjectCode: result.ProjectCode || '',
-              Department: result.Department || '',
               vendorName: result.VendorName || '',
               TotalAmount: result.TotalAmount || '',
-              ApplicableTaxes: result.ApplicableTaxes || 0,
               Comments: result.ProjectDescription || '',
-              vendorcode: result.vendorcode,
-              ProjectTitle: result.projectTitle,
-              BillNo: result.BillNo,
+              vendorcode: result.Vendorcode || '',
+              BillNo: result.BillNo || '',
               BillDate: result.BillDate,
-              BillAmount: result.BillAmount,
-              CalculatedTaxes: result.CalculatedTaxes,
-              BillDescription: result.Comments,
+              BillAmount: result.BillAmount || 0,
+              CalculatedTaxes: result.CalculatedTaxes || 0,
+              PORequestNo: result.PORequestNo || '',
+              PORequestNoID: result.PORequestNo || '',
+              AttachedSignedPO: result.AttachedSignedPO == "True" ? true : false
             }));
           }
 
@@ -121,7 +120,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     setPOAmount(data[0].POAmount);
     setForm(prev => ({
       ...prev,
-      PORequestNo: option?.text as string
+      PORequestNo: option?.text as string,
+      PORequestNoID: option.key as string
     }))
     setLoading(false);
   };
@@ -266,10 +266,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   // Save
   const handleSaveOrUpdate = async () => {
     setLoading(true);
-    if (!form.files || form.files.length === 0) {
-      setLoading(false);
-      return alert("Please Attach files");
-    }
     const payload = {
       Vendorcode: form.vendorcode,
       VendorName: form.VendorName,
@@ -308,9 +304,9 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         if (form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(itemId, form.files[i]);
-          }
-          alert(" Updated Successfully ✅");
+          }          
         }
+        alert(" Updated Successfully ✅");
       }
     } catch (error) {
       console.error(error);
@@ -328,7 +324,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         alert("Please check PO Signed.");
         return;
       }
-      if (!form.files || form.files.length === 0) {
+      if ((!form.files || form.files.length === 0) && (attachments.length <= 0)) {
         setLoading(false);
         return alert("Please Attach files");
       }
@@ -384,12 +380,12 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         if (form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(itemId, form.files[i]);
-          }
-          alert("Submitted Successfully.");
+          }          
+        }        
           await handleSaveHistory(itemId);
+          alert("Submitted Successfully.");
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
-        }
       }
     }
     catch (error) {
@@ -447,14 +443,18 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               <Dropdown
                 placeholder="Select Request No"
                 options={POOptions}
-                selectedKey={form.PORequestNo}
+                selectedKey={form.PORequestNoID}
                 onChange={(e, option) => handleDocumentChange(option)}
               />
               <label>Bill No</label>
               <input name="BillNo" value={form.BillNo} type='text' onChange={handleChange}>
               </input>
               <label>Bill Date</label>
-              <input name="BillDate" type="date" value={form.BillDate.toISOString().split('T')[0]} onChange={handleChange}>
+              <input name="BillDate" type="date" value={
+                form.BillDate
+                  ? new Date(form.BillDate).toISOString().split('T')[0]
+                  : ''
+              } onChange={handleChange}>
               </input>
 
               <label>Bill Amount</label>
