@@ -1,17 +1,15 @@
 import * as React from 'react';
 import styles from './BillProcessingForm.module.scss';
 import { IBillProcessingFormProps } from './IBillProcessingFormProps';
-import { SPHttpClient } from '@microsoft/sp-http';
 import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
 import SharePointService from '../service/Service';
-import { PageContext } from '@microsoft/sp-page-context';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
 
   // State
   const [form, setForm] = React.useState({
     ProjectCode: '',
-    RequestNo: '',
+    PORequestNo: '',
     vendorcode: '',
     VendorName: '',
     projectTitle: '',
@@ -67,7 +65,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       const result = await service.getItemByRequestNo(id);
       console.log("Result:", result);
       const currentuser = await service.getUser();
-      if (result.AuthorId == currentuser.Id) {
+      if (result.Author.Id == currentuser.Id) {
         if (result.CurrentStatus === 'Draft') {
           setItemId(result.Id);
           const resultdata = await service.getRequestDetails(result.ProjectCode);
@@ -123,7 +121,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     setPOAmount(data[0].POAmount);
     setForm(prev => ({
       ...prev,
-      RequestNo: option?.key as string
+      PORequestNo: option?.text as string
     }))
     setLoading(false);
   };
@@ -277,7 +275,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       VendorName: form.VendorName,
       ProjectTitle: form.projectTitle,
       ProjectCode: form.ProjectCode,
-      RequestNo: form.RequestNo,
+      PORequestNo: form.PORequestNo,
       BillNo: form.BillNo,
       BillDate: form.BillDate,
       BillAmount: form.BillAmount,
@@ -347,7 +345,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         Vendorcode: form.vendorcode,
         VendorName: form.VendorName,
         ProjectTitle: form.projectTitle,
-        RequestNo: form.RequestNo,
+        RequestNo: form.PORequestNo,
         BillNo: form.BillNo,
         BillDate: form.BillDate,
         BillDescription: form.Comments,
@@ -376,7 +374,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           await service.updateItem(res.Id, {
             RequestNo: `FBP-${res.Id}`
           });
-          handleSaveHistory(res.Id);
+          await handleSaveHistory(res.Id);
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
         }
@@ -388,7 +386,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
             await service.uploadFile(itemId, form.files[i]);
           }
           alert("Submitted Successfully.");
-          handleSaveHistory(itemId);
+          await handleSaveHistory(itemId);
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
         }
@@ -449,7 +447,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               <Dropdown
                 placeholder="Select Request No"
                 options={POOptions}
-                selectedKey={form.RequestNo}
+                selectedKey={form.PORequestNo}
                 onChange={(e, option) => handleDocumentChange(option)}
               />
               <label>Bill No</label>
