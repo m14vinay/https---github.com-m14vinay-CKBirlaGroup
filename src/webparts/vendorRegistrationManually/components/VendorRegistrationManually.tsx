@@ -537,7 +537,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
   };
   // Button click cancel
   const handleCancel = async () => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationSearch.aspx`;
     window.location.assign(url);
   };
   return (
