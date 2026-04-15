@@ -279,6 +279,16 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
     setIsActiveManual(true);
     setForm({ ...form });
   };
+  const getFinancialYear = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1; // Jan = 0
+
+    let startYear = month >= 4 ? year : year - 1;
+    let endYear = startYear + 1;
+
+    return `${startYear.toString().slice(-2)}-${endYear.toString().slice(-2)}`;
+  };
   // Button click save
   const handleSaveManual = async () => {
     const gst = form.GST?.toString().trim();
@@ -345,6 +355,9 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
               await service.uploadFile(res.Id, form.files[i]);
             }
           }
+          await service.updateItem(res.Id, {
+            VendorCode: `CKBCSL/${res.Id}`
+          });
           alert("Saved Successfully.✅");
         }
         else {
@@ -457,6 +470,9 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
             for (let i = 0; i < form.files.length; i++) {
               await service.uploadFile(res.Id, form.files[i]);
             }
+            await service.updateItem(res.Id, {
+              VendorCode: `CKBCSL/${res.Id}`
+            });
             alert("Submitted Successfully.✅");
             const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
             window.location.assign(url);
@@ -523,7 +539,9 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
             await service.uploadFile(firstId, form.files[i]);
           }
         }
-
+        await service.updateItem(res[0].Id, {
+          VendorCode: `CKBCSL/${res[0].Id}`
+        });
         alert("Submitted Successfully.✅");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);

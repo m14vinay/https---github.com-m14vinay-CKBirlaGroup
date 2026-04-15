@@ -38,11 +38,7 @@ if (parm_GST) {
 }
 
 if (parm_VendorCode) {
-  const id = parm_VendorCode.includes('_')
-    ? parm_VendorCode.split('_')[1]
-    : parm_VendorCode;
-
-  filters.push(`ID eq ${id}`); // ID should remain exact
+  filters.push(`substringof('${parm_VendorCode}', VendorCode)`);
 }
 
 if (parm_Tin) {

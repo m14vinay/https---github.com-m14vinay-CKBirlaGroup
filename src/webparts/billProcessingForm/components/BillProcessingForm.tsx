@@ -191,7 +191,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         setForm(prev => ({
           ...prev,
           ProjectCode: value,
-          vendorCode: result[0].vendorcode,
+          vendorcode: result[0].vendorcode,
           VendorName: result[0].VendorName,
           projectTitle: result[0].ProjectTitle,
           DepartmentName: result[0].Department
@@ -202,7 +202,19 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         }));
         setPOOptions(options);
       }
-    } catch (error) {
+      else{
+        setForm(prev => ({
+          ...prev,
+          ProjectCode: value,
+          vendorCode: '',
+          VendorName: '',
+          projectTitle: '',
+          DepartmentName: ''
+        }));
+      }
+    } 
+    
+    catch (error) {
       console.error("Error fetching data:", error);
 
     }
@@ -428,11 +440,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                 value={form.ProjectCode}
                 onChange={handleRequestNoChange}
               />
-              <label>Select Vendor Code</label>
-              <input name="vendorcode" value={form.vendorcode} type='text' readOnly>
-              </input>
-              <label>Select Vendor Name</label>
-              <input name="VendorName" value={form.VendorName} type='text' readOnly>
+              <label>Vendor Name</label>
+              <input name="VendorName" value={form.vendorcode+"-"+form.VendorName} type='text' readOnly>
               </input>
               <label>Project Title</label>
               <input name="projectTitle" value={form.projectTitle} readOnly />

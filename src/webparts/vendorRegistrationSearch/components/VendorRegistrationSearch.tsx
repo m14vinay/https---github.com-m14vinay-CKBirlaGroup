@@ -92,6 +92,7 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
   // Load data
   React.useEffect(() => {
     getUser();
+    handlesearch();
   }, []);
   // Load the User Details
   const getUser = async () => {
@@ -111,10 +112,6 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
   };
   const handlesearch = async () => {
     _setData([]);
-    if (!form.Title && !form.GST && !form.Pan && !form.VendorCode && !form.Tin) {
-      alert("Please Select Any One Fields To Search");
-      return;
-    }
     await getDatafromListByTitle(form.Title, form.GST, form.Pan, form.VendorCode, form.Tin);
   };
   const getDatafromListByTitle = async (parm_Title: string, parm_GST: string, parm_Pan: string, parm_VendorCode: string, parm_Tin: string) => {
@@ -182,7 +179,7 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
               </div>
               <div className={styles['col-md-4']}>
                 <label>Vendor Code</label>
-                <input placeholder='VENDOR_123' style={{ width: '100%' }} name='VendorCode' value={form.VendorCode} onChange={handleChange} className='form-control' type='text' />
+                <input style={{ width: '100%' }} name='VendorCode' value={form.VendorCode} onChange={handleChange} className='form-control' type='text' />
               </div>
               <div className={styles['col-md-4']}>
                 <label>TIN Number</label>

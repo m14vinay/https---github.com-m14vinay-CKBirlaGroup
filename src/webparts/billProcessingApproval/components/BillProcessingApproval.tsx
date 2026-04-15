@@ -480,12 +480,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
               <label>Bill Signed</label>
               <input type="checkbox" name='POsigned' checked={form.AttachedSignedPO} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Project Code</label>
-              <input type='text' name="ProjectCode" value={form.ProjectCode} readOnly />
-              <label>Select Vendor Code</label>
-              <input name="vendorcode" value={form.vendorcode} type='text' readOnly style={{ backgroundColor: "lightgray" }}>
-              </input>
-              <label>Select Vendor Name</label>
-              <input name="VendorName" value={form.VendorName} type='text' readOnly style={{ backgroundColor: "lightgray" }}>
+              <input type='text' name="ProjectCode" value={form.ProjectCode} readOnly />              
+              <label>Vendor Name</label>
+              <input name="VendorName" value={form.vendorcode+"-"+form.VendorName} type='text' readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
               <label>Project Title</label>
               <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
