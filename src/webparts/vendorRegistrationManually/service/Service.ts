@@ -33,6 +33,16 @@ export default class Service {
     const data = await res.json();
     return data.value.length > 0 ? 1 : 0;
   }
+
+  public async getUser(): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data;
+  }
   // UPdate the Item
   public async updateItem(id: number, data: any): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;

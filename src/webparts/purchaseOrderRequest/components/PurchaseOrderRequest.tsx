@@ -87,9 +87,12 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       console.log("Calling API with ID:", id);
       
       const result = await service.getItemByRequestNo(id);
-
+ const currentUser = await service.getUser();
       console.log("Result:", result);
-
+    if(result.AuthorId!== currentUser.Id)
+      {
+         alert("You Are Not Authorized ❌ ");
+      } 
       if (result.CurrentStatus==='Draft') {
       setItemId(result.Id);
 

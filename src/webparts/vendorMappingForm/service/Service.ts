@@ -115,20 +115,9 @@ Approver/Id,Approver/Title&$expand=Approver`;
   
       const item = await res.json();
      
-     if (item && item.Id) {
-      return {
-        Id: item.Id,
-        ProjectCode: item.ProjectCode,
-        ProjectTitle: item.ProjectTitle,
-        ProjectDescription: item.ProjectDescription,
-        VendorName: item.VendorName,
-        VendorDescription: item.VendorDescription, // 👈 check column name
-        Attachments: item.AttachmentFiles || [],
-        CurrentStatus:item.CurrentStatus  // 👈 important
-      };
-    }
-  
-    return null;
+     
+    
+    return item;
   }
 
 

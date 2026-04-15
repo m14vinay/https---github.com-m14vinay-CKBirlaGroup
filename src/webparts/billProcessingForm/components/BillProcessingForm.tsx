@@ -1,18 +1,16 @@
 import * as React from 'react';
 import styles from './BillProcessingForm.module.scss';
 import { IBillProcessingFormProps } from './IBillProcessingFormProps';
-import { SPHttpClient } from '@microsoft/sp-http';
 import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
 import SharePointService from '../service/Service';
-import { PageContext } from '@microsoft/sp-page-context';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
 
   // State
   const [form, setForm] = React.useState({
     ProjectCode: '',
-    RequestNo: '',
-    POsigned: false,
+    PORequestNo: '',
+    PORequestNoID: '',
     vendorcode: '',
     VendorName: '',
     projectTitle: '',
@@ -24,17 +22,17 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     TotalAmount: 0,
     UploadDocument: '',
     files: [],
-    CurrentStatus:''
+    CurrentStatus: '',
+    DepartmentName: '',
+    POAmount: 0
   });
   const [POOptions, setPOOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
-  const [FinanceController, setApprover2ID] = React.useState<number | null>(null);
-  const [AssignedID, setAssignedID] = React.useState<number | null>(null);
-  const [Departmenthead, setDepartmentHead] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
   const [attachments, setAttachments] = React.useState<any[]>([]);
-  const [occupiedAmount, setoccupiedAmount] = React.useState(0);
+  const [POAmount, setPOAmount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
+  const [isChecked, setIsChecked] = React.useState(false);
   const MAX_TOTAL_SIZE_MB = 25;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
 
@@ -44,16 +42,13 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
-
-  // --- 3️⃣ Load data on mount ---
   React.useEffect(() => {
     const id = getIdFromQueryString();
     if (id) {
       handleFetchById(id);
+      loadAttachments(id);
     }
   }, []);
-
-
   const loadAttachments = async (id: number) => {
     try {
       const files = await service.getAttachments(id);
@@ -63,71 +58,75 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       console.error(error);
     }
   };
-  React.useEffect(() => {
-    if (itemId) {
-      loadAttachments(itemId);
-      //getApprover();
-    }
-  }, [itemId]);
-
   //FETCH DATA-----
   const handleFetchById = async (id: number) => {
     try {
       setLoading(true);
       console.log("Calling API with ID:", id);
-
       const result = await service.getItemByRequestNo(id);
-
       console.log("Result:", result);
-
-      if (result.CurrentStatus === 'Draft') {
-        setItemId(result.Id);
-        setForm(prev => ({
-          ...prev,
-
-          ProjectCode: result.ProjectCode || '',
-          Department: result.Department || '',
-          projectTitle: result.ProjectTitle || '',
-          vendorName: result.VendorName || '',
-          RemainingAmount: result.RemainingAmount || '',
-          TotalAmount: result.TotalAmount || '',
-          OccupiedAmount: result.OccupiedAmount || 0,
-          POAmount: result.POAmount || 0,
-          ApplicableTaxes: result.ApplicableTaxes || 0,
-          Comments: result.ProjectDescription || '',
-        }));
-        const data = await service.GetApprover(result.Department);
-        if (data?.Id > 0) {
-          setDepartmentHead(data.Departmenthead?.Id || null);
-          const User = await service.getUserById(data.Departmenthead.Id);
-          if (User?.Id) {
-            setAssignedID(User.Title);
+      const currentuser = await service.getUser();
+      if (result.Author.Id == currentuser.Id) {
+        if (result.CurrentStatus === 'Draft') {
+          setItemId(result.Id);
+          const resultdata = await service.getRequestDetails(result.ProjectCode);
+          if (resultdata.length > 0) {
+            const options = resultdata.map((item: any) => ({
+              key: item.RequestNo,
+              text: item.RequestNo
+            }));
+            setPOOptions(options);
+            setForm(prev => ({
+              ...prev,
+              VendorName: result.VendorName || '',
+              projectTitle: result.ProjectTitle || '',
+              DepartmentName: result.Department || '',
+              ProjectCode: result.ProjectCode || '',
+              vendorName: result.VendorName || '',
+              TotalAmount: result.TotalAmount || '',
+              Comments: result.ProjectDescription || '',
+              vendorcode: result.Vendorcode || '',
+              BillNo: result.BillNo || '',
+              BillDate: result.BillDate,
+              BillAmount: result.BillAmount || 0,
+              CalculatedTaxes: result.CalculatedTaxes || 0,
+              PORequestNo: result.PORequestNo || '',
+              PORequestNoID: result.PORequestNo || '',
+              AttachedSignedPO: result.AttachedSignedPO == "True" ? true : false
+            }));
           }
-          const dataApprover = await service.GetApproverFromFinance(result.PoMaster);
-          if (dataApprover?.Id) {
-            setApprover2ID(dataApprover.FinanceController?.Id || null);
-          }
+
+        } else {
+          alert("Record is already successfully submitted.");
         }
-
-      } else {
-        alert("No Data Found");
+      }
+      else {
+        alert("You are not an authorized user.");
       }
 
     } catch (error) {
-      console.error("Error Occurred,Please Contact To System Administrator.:", error);
+      console.error("Error Occurred: ", error);
     }
     finally {
       setLoading(false);
     }
   };
-
-
+  // Get Data Using PO Request Change
+  const handleDocumentChange = async (option?: IDropdownOption) => {
+    setLoading(true);
+    if (!option) return;
+    const data = await service.getDocumentDetailsID(option.text);
+    console.log(data);
+    setPOAmount(data[0].POAmount);
+    setForm(prev => ({
+      ...prev,
+      PORequestNo: option?.text as string,
+      PORequestNoID: option.key as string
+    }))
+    setLoading(false);
+  };
   const handleCancel = () => {
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-    window.location.assign(url);
-  };
-  const handleDownload = () => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/sites/DigiflowUAT/Shared%20Documents/PO_Format%20(1).xlsx?d=w7b16074a3861495c96494464b6b1818d&csf=1&web=1&e=rkBQLk`;
     window.location.assign(url);
   };
   const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,11 +171,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       files: prev.files.filter((_: File, i: number) => i !== index)
     }));
   };
-
   const removeExistingFile = async (index: number) => {
     const file = attachments[index];
-
-
     await service.deleteAttachmentFromSP(file);
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
@@ -197,53 +193,14 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           ProjectCode: value,
           vendorCode: result[0].vendorcode,
           VendorName: result[0].VendorName,
-          projectTitle: result[0].ProjectTitle
+          projectTitle: result[0].ProjectTitle,
+          DepartmentName: result[0].Department
         }));
         const options = result.map((item: any) => ({
           key: item.Id,
           text: item.RequestNo
         }));
         setPOOptions(options);
-        const item = result[0];
-        const OccupiedAmount = await service.getTotaloccupiedAmount(value);
-        let total = 0;
-        if (OccupiedAmount.length > 0) {
-          total = OccupiedAmount.reduce((sum: number, items: any) => {
-            return sum + Number(items.POAmount || 0);
-          }, 0);
-        }
-        if (item.CurrentStatus === 'Approved') {
-          // 👉 Form fields update
-          setForm(prev => ({
-            ...prev,
-            Department: item.Department || '',
-            ProjectCode: item.ProjectCode || '',
-            VendorName: item.VendorName || '',
-            TotalAmount: item.TotalProjectAmount || 0,
-            OccupiedAmount: total || 0,
-            RemainingAmount: item.TotalProjectAmount - total
-          }));
-
-          // 👉 Approver API call
-          const data = await service.GetApprover(item.Department);
-          if (data?.Id > 0) {
-            setDepartmentHead(data.Departmenthead?.Id || null);
-            const User = await service.getUserById(data.Departmenthead.Id);
-            if (User?.Id) {
-              setAssignedID(User.Title);
-            }
-            const dataApprover = await service.GetApproverFromFinance(item.PoMaster);
-            if (dataApprover?.Id) {
-              setApprover2ID(dataApprover.FinanceController?.Id || null);
-            }
-          }
-        }
-        else {
-          alert("This Request is Not Approved ✅");
-        }
-      }
-      else {
-
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -263,13 +220,40 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     });
   };
 
-
+  const handleAmountCalculateChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: value
+    });
+    if (Number(value) > Number(POAmount)) {
+      setForm(prev => ({
+        ...prev,
+        BillAmount: 0
+      }));
+      alert("Bill Amount must be less than PO Amount.");
+      return;
+    }
+    else {
+      setForm(prev => ({
+        ...prev,
+        TotalAmount: Number(value) + Number(form.CalculatedTaxes)
+      }));
+    }
+  };
+  // HandleTaxes
+  const handleTaxCalculateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: value,
+      TotalAmount: Number(form.BillAmount) + Number(value)
+    });
+  };
   const handleSaveHistory = async (id: number) => {
-
     const currentuser = await service.getUser();
-
     const payload = {
-      Title: 'PO',
+      Title: 'FBP',
       FID: id,
       UserName: currentuser.Title,
       UserAction: 'Request Initiator',
@@ -279,21 +263,26 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
 
     await service.createHistoryItem(payload);
   };
-
-
-  //SAVE DRAFT DATA
-
+  // Save
   const handleSaveOrUpdate = async () => {
     setLoading(true);
-    if (
-      (!form.files || form.files.length === 0) &&
-      (!attachments || attachments.length === 0)
-    ) {
-      return alert("Please Attach files");
-    }
-    // 🔹 Payload (common)
     const payload = {
-      CurrentStatus: 'Draft'
+      Vendorcode: form.vendorcode,
+      VendorName: form.VendorName,
+      ProjectTitle: form.projectTitle,
+      ProjectCode: form.ProjectCode,
+      PORequestNo: form.PORequestNo,
+      BillNo: form.BillNo,
+      BillDate: form.BillDate,
+      BillAmount: form.BillAmount,
+      CalculatedTaxes: form.CalculatedTaxes,
+      TotalAmount: form.TotalAmount.toString(),
+      Department: form.DepartmentName,
+      CurrentStatus: 'Draft',
+      BillDescription: form.Comments,
+      PODescription: form.Comments,
+      ProjectDescription: form.Comments,
+      AttachedSignedPO: isChecked ? "True" : "False"
     };
     try {
       if (!itemId) {
@@ -304,19 +293,18 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
           }
+          alert("Saved Successfully.✅");
+          await service.updateItem(res.Id, {
+            RequestNo: `FBP-${res.Id}`
+          });
         }
-        alert("Saved Successfully.✅");
-        await service.updateItem(res.Id, {
-          RequestNo: `CKBCSL/25-26/IV/Finance/${res.Id}`
-        });
       } else {
         // 🔹 UPDATE
         await service.updateItem(itemId, payload);
-
         if (form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(itemId, form.files[i]);
-          }
+          }          
         }
         alert(" Updated Successfully ✅");
       }
@@ -328,30 +316,87 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       setLoading(false);
     }
   };
-
-
-
   // Update
   const handleUpdate = async () => {
     try {
       setLoading(true);
+      if (!isChecked) {
+        alert("Please check PO Signed.");
+        return;
+      }
+      if ((!form.files || form.files.length === 0) && (attachments.length <= 0)) {
+        setLoading(false);
+        return alert("Please Attach files");
+      }
+      const data = await service.GetApprover(form.DepartmentName);
+      const User = await service.getUserById(data.Departmenthead.Id);
+      const dataFinanceApprover = await service.GetApproverFromFinance(form.DepartmentName);
+      const databillingApprover = await service.GetApproverFromFinance(form.DepartmentName);
+
+      let payload = {};
+      payload = {
+        CurrentStatus: 'Pending',
+        ProjectCode: form.ProjectCode,
+        AttachedSignedPO: isChecked ? "True" : "False",
+        Vendorcode: form.vendorcode,
+        VendorName: form.VendorName,
+        ProjectTitle: form.projectTitle,
+        RequestNo: form.PORequestNo,
+        BillNo: form.BillNo,
+        BillDate: form.BillDate,
+        BillDescription: form.Comments,
+        PODescription: form.Comments,
+        ProjectDescription: form.Comments,
+        BillAmount: form.BillAmount,
+        CalculatedTaxes: form.CalculatedTaxes,
+        TotalAmount: form.TotalAmount.toString(),
+        Department: form.DepartmentName,
+        AssignedTo: User?.Title,
+        AssignedToEmailId: User?.Id,
+        DepartmentHeadId: data.Departmenthead?.Id,
+        Approver2Id: databillingApprover.Billing2ndApprover?.Id,
+        Approver3Id: dataFinanceApprover.FinanceController?.Id,
+        Approver5Id: databillingApprover.Billing2ndApprover?.Id
+      };
+      if (!itemId) {
+        // 🔹 CREATE
+        const res = await service.createItem(payload);
+        setItemId(res.Id); // store ID for future updates
+        if (res.Id > 0 && form.files.length > 0) {
+          for (let i = 0; i < form.files.length; i++) {
+            await service.uploadFile(res.Id, form.files[i]);
+          }
+          alert("Submitted Successfully.");
+          await service.updateItem(res.Id, {
+            RequestNo: `FBP-${res.Id}`
+          });
+          await handleSaveHistory(res.Id);
+          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+          window.location.assign(url);
+        }
+      } else {
+        // 🔹 UPDATE
+        await service.updateItem(itemId, payload);
+        if (form.files.length > 0) {
+          for (let i = 0; i < form.files.length; i++) {
+            await service.uploadFile(itemId, form.files[i]);
+          }          
+        }        
+          await handleSaveHistory(itemId);
+          alert("Submitted Successfully.");
+          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+          window.location.assign(url);
+      }
     }
     catch (error) {
       console.error(error);
-      alert("Error Occurred,Please Contact To System Administrator.");
+      alert("Error Occurred:" + error);
     }
     finally {
       setLoading(false);
     }
   };
-  const validatePO = (value: string) => {
-    if (!value) return "Project Code is required";
-    if (!/^[a-zA-Z0-9-]+$/.test(value)) return "Only alphanumeric allowed";
-    return "";
-  };
 
-
-  // 🔹 UI
   return (
     <section>
       {loading && (
@@ -376,7 +421,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               <h2>Bill Processing Form</h2>
               <h4>Bill Processing / Request Form</h4>
               <label>Bill Signed</label>
-              <input type="checkbox" name='POsigned' checked={form.POsigned} onChange={handleChange} />
+              <input type="checkbox" name='POsigned' checked={isChecked} onChange={(e) => setIsChecked(e.target.checked)} />
               <label>Project Code <span className={styles.required}>*</span></label>
               <input type='text'
                 name="ProjectCode"
@@ -398,29 +443,28 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               <Dropdown
                 placeholder="Select Request No"
                 options={POOptions}
-                selectedKey={form.RequestNo}
-                onChange={(e, option) =>
-                  setForm(prev => ({
-                    ...prev,
-                    RequestNo: option?.key as string // safe default empty string
-                  }))
-                }
+                selectedKey={form.PORequestNoID}
+                onChange={(e, option) => handleDocumentChange(option)}
               />
               <label>Bill No</label>
               <input name="BillNo" value={form.BillNo} type='text' onChange={handleChange}>
               </input>
               <label>Bill Date</label>
-              <input name="BillDate" type="date" value={form.BillDate.toISOString().split('T')[0]} onChange={handleChange}>
+              <input name="BillDate" type="date" value={
+                form.BillDate
+                  ? new Date(form.BillDate).toISOString().split('T')[0]
+                  : ''
+              } onChange={handleChange}>
               </input>
 
               <label>Bill Amount</label>
-              <input name="BillAmount" value={form.BillAmount} type='number' onChange={handleChange} />
+              <input name="BillAmount" value={form.BillAmount} type='number' onChange={handleAmountCalculateChange} />
 
               <label>Calculated Taxes</label>
-              <input name="CalculatedTaxes" value={form.CalculatedTaxes} type='number' onChange={handleChange}/>
+              <input name="CalculatedTaxes" value={form.CalculatedTaxes} type='number' onChange={handleTaxCalculateChange} />
 
               <label>Total Amount</label>
-              <input name="TotalAmount" value={form.TotalAmount} readOnly type='text'/>
+              <input name="TotalAmount" value={form.TotalAmount} readOnly type='text' />
               <label>Attachments <span className={styles.required}>*</span></label>
               <input type="file" multiple onChange={handleFileChange} />
               {/*  Existing Files (API se) */}
