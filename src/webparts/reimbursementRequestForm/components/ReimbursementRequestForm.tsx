@@ -124,6 +124,11 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
 
   const getRequestDetails = async (requestNo: number) => {
     const data = await service.getItemByRequestNo(requestNo);
+     const currentUser = await service.getUser();
+       if(data.AuthorId!== currentUser.Id)
+      {
+         alert("You Are Not Authorized ❌ ");
+      } 
     if (data.CurrentStatus === 'Draft') {
       setItemId(data.Id);
       setForm({

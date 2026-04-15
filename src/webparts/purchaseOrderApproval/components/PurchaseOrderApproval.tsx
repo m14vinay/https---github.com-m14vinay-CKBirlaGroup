@@ -226,7 +226,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
       if (!itemId) return;
      if(form.ActionDate1==='')
      {
-      await service.updateItemdata(itemId, "Approved", approverComment,form.Approver2EmailId,form.approver2 || '');
+      await service.updateItemdata(itemId, "Pending", approverComment,form.Approver2EmailId,form.approver2 || '');
          await handleSaveApproveHistory(itemId);
       alert("✅ First Level Approved Successfully.");
  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;

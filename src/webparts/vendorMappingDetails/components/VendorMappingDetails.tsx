@@ -90,7 +90,13 @@ const handleFetchById = async (id: number) => {
      const user = await service.getUser();
      const historydata=await service.GetHistoryItem(id,"VMR");
      setHistory(historydata);
-    console.log("Result:", result);
+       console.log("Result:", result);
+       const currentUser = await service.getUser();
+       if(result.AuthorId!== currentUser.Id)
+      {
+         alert("You Are Not Authorized ❌ ");
+      } 
+  
 
       if (result) {
         setItemId(result.Id);
