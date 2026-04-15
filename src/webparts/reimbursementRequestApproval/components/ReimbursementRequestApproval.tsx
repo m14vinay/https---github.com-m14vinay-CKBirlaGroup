@@ -165,7 +165,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment1: form.Comments,
             CurrentStatus: 'Approved',
-            ActionDate1: new Date().toISOString(),
+            ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Approved',
             AssignedToEmailId: 0
           };
@@ -176,8 +176,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval2 = await service.getUserById(form.FIApproverEmailId);
           payload = {
             ApproverComment1: form.Comments,
-            CurrentStatus: 'Approved',
-            ActionDate1: new Date().toISOString(),
+            CurrentStatus: 'Pending',
+            ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
@@ -186,8 +186,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval3 = await service.getUserById(form.CFOEmailId);
           payload = {
             ApproverComment2: form.Comments,
-            CurrentStatus: 'Approved',
-            ActionDate2: new Date().toISOString(),
+            CurrentStatus: 'Pending',
+            ActionDate2: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
@@ -196,8 +196,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
           payload = {
             ApproverComment3: form.Comments,
-            CurrentStatus: 'Approved',
-            ActionDate3: new Date().toISOString(),
+            CurrentStatus: 'Pending',
+            ActionDate3: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
@@ -206,7 +206,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment4: form.Comments,
             CurrentStatus: 'Approved',
-            ActionDate4: new Date().toISOString(),
+            ActionDate4: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Approved',
             AssignedToEmailId:0
           };
@@ -217,8 +217,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval2 = await service.getUserById(form.FIApproverEmailId);
           payload = {
             ApproverComment1: form.Comments,
-            CurrentStatus: 'Approved',
-            ActionDate1: new Date().toISOString(),
+            CurrentStatus: 'Pending',
+            ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
@@ -227,8 +227,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval3 = await service.getUserById(form.ComplianceHeadEmailId);
           payload = {
             ApproverComment2: form.Comments,
-            CurrentStatus: 'Approved',
-            ActionDate2: new Date().toISOString(),
+            CurrentStatus: 'Pending',
+            ActionDate2: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
@@ -237,8 +237,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
           payload = {
             ApproverComment4: form.Comments,
-            CurrentStatus: 'Approved',
-            ActionDate3: new Date().toISOString(),
+            CurrentStatus: 'Pending',
+            ActionDate3: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
@@ -247,7 +247,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment4: form.Comments,
             CurrentStatus: 'Approved',
-            ActionDate4: new Date().toISOString(),
+            ActionDate4: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Approved',
             AssignedToEmailId: 0
           };
@@ -255,14 +255,12 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
       }
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
-        if (updatedData.length > 0) {
           await handleSaveApproveHistory(itemId, form.Comments, 'Approved');
           alert("Approved Successfully.");
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
           setComment('');
           return;
-        }
       }
     } catch (error) {
       console.error(error);
@@ -295,7 +293,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment1: form.Comments,
             CurrentStatus: 'Rejected',
-            ActionDate1: new Date().toISOString(),
+            ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };
@@ -307,7 +305,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment1: form.Comments,
             CurrentStatus: 'Rejected',
-            ActionDate1: new Date().toISOString(),
+            ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
@@ -317,7 +315,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment2: form.Comments,
             CurrentStatus: 'Rejected',
-            ActionDate2: new Date().toISOString(),
+            ActionDate2: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
@@ -327,7 +325,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment3: form.Comments,
             CurrentStatus: 'Rejected',
-            ActionDate3: new Date().toISOString(),
+            ActionDate3: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
@@ -336,7 +334,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment4: form.Comments,
             CurrentStatus: 'Rejected',
-            ActionDate4: new Date().toISOString(),
+            ActionDate4: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };
@@ -348,7 +346,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment1: form.Comments,
             CurrentStatus: 'Rejected',
-            ActionDate1: new Date().toISOString(),
+            ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
@@ -358,7 +356,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment2: form.Comments,
             CurrentStatus: 'Rejected',
-            ActionDate2: new Date().toISOString(),
+            ActionDate2: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
@@ -368,7 +366,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment3: form.Comments,
             CurrentStatus: 'Rejected',
-            ActionDate3: new Date().toISOString(),
+            ActionDate3: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
@@ -377,7 +375,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           payload = {
             ApproverComment4: form.Comments,
             CurrentStatus: 'Rejected',
-            ActionDate4: new Date().toISOString(),
+            ActionDate4: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };
@@ -385,14 +383,12 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
       }
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
-        if (updatedData.length > 0) {
           await handleSaveApproveHistory(itemId, form.Comments, 'Rejected');
           alert("Rejected Successfully.");
           setComment('');
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
           return;
-        }
       }
     } catch (error) {
       console.error(error);
