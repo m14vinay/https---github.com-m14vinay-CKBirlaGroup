@@ -213,7 +213,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
         const UserApproval2 = await service.getUserById(form.Approver2Id);
         payload = {
           ApproverComment1: form.Comments,
-          CurrentStatus: 'Approved',
+          CurrentStatus: 'Pending',
           ActionDate1: new Date().toLocaleDateString('en-GB'),
           AssignedTo: UserApproval2?.Title,
           AssignedToEmailId: Number(UserApproval2?.Id)
@@ -223,7 +223,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
         const UserApproval3 = await service.getUserById(form.Approver3Id);
         payload = {
           ApproverComment2: form.Comments,
-          CurrentStatus: 'Approved',
+          CurrentStatus: 'Pending',
           ActionDate2: new Date().toLocaleDateString('en-GB'),
           AssignedTo: UserApproval3?.Title,
           AssignedToEmailId: Number(UserApproval3?.Id)
@@ -233,7 +233,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
         const UserApproval5 = await service.getUserById(form.Approver5Id);
         payload = {
           ApproverComment3: form.Comments,
-          CurrentStatus: 'Approved',
+          CurrentStatus: 'Pending',
           ActionDate3: new Date().toLocaleDateString('en-GB'),
           AssignedTo: UserApproval5?.Title,
           AssignedToEmailId: Number(UserApproval5?.Id)

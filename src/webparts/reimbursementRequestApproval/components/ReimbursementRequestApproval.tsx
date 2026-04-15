@@ -176,7 +176,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval2 = await service.getUserById(form.FIApproverEmailId);
           payload = {
             ApproverComment1: form.Comments,
-            CurrentStatus: 'Approved',
+            CurrentStatus: 'Pending',
             ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
@@ -186,7 +186,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval3 = await service.getUserById(form.CFOEmailId);
           payload = {
             ApproverComment2: form.Comments,
-            CurrentStatus: 'Approved',
+            CurrentStatus: 'Pending',
             ActionDate2: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
@@ -196,7 +196,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
           payload = {
             ApproverComment3: form.Comments,
-            CurrentStatus: 'Approved',
+            CurrentStatus: 'Pending',
             ActionDate3: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
@@ -217,7 +217,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval2 = await service.getUserById(form.FIApproverEmailId);
           payload = {
             ApproverComment1: form.Comments,
-            CurrentStatus: 'Approved',
+            CurrentStatus: 'Pending',
             ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
@@ -227,7 +227,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval3 = await service.getUserById(form.ComplianceHeadEmailId);
           payload = {
             ApproverComment2: form.Comments,
-            CurrentStatus: 'Approved',
+            CurrentStatus: 'Pending',
             ActionDate2: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
@@ -237,7 +237,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
           payload = {
             ApproverComment4: form.Comments,
-            CurrentStatus: 'Approved',
+            CurrentStatus: 'Pending',
             ActionDate3: new Date().toLocaleDateString('en-GB'),
             AssignedTo: Number(UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
