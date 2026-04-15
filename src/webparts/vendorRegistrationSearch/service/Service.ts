@@ -28,30 +28,42 @@ export default class Service {
   parm_Tin: string
 ): Promise<any[]> {
   let filters: string[] = [];
-  if (parm_Title) {
-    filters.push(`Title eq '${parm_Title}'`);
-  }
-  if (parm_GST) {
-    filters.push(`GST eq '${parm_GST}'`);
-  }
-  if (parm_VendorCode) {
-    filters.push(`ID eq ${parm_VendorCode.includes('_')?parm_VendorCode.split('_')[1]:parm_VendorCode}`);
-  }
-  if (parm_Tin) {
-    filters.push(`Tin eq '${parm_Tin}'`);
-  }
-  if (parm_Pan) {
-    filters.push(`Pan eq '${parm_Pan}'`);
-  }
-  // Combine filters
-  const filterQuery = filters.length > 0 ? `$filter=${filters.join(" or ")}` : "";
+
+if (parm_Title) {
+  filters.push(`substringof('${parm_Title}', Title)`);
+}
+
+if (parm_GST) {
+  filters.push(`substringof('${parm_GST}', GST)`);
+}
+
+if (parm_VendorCode) {
+  const id = parm_VendorCode.includes('_')
+    ? parm_VendorCode.split('_')[1]
+    : parm_VendorCode;
+
+  filters.push(`ID eq ${id}`); // ID should remain exact
+}
+
+if (parm_Tin) {
+  filters.push(`substringof('${parm_Tin}', Tin)`);
+}
+
+if (parm_Pan) {
+  filters.push(`substringof('${parm_Pan}', Pan)`);
+}
+
+// Combine filters
+const filterQuery = filters.length > 0
+  ? `$filter=${filters.join(" or ")}`
+  : "";
   const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?${filterQuery}`;
   const res = await this.context.spHttpClient.get(
     url,
     SPHttpClient.configurations.v1
   );
   const data = await res.json();
-  return data ? data.value[0]: []; // Return array of results or empty array if no matches
+  return data ? data.value: []; // Return array of results or empty array if no matches
 }
   // Get the Attachments from List
    public async getAttachments(itemId: number): Promise<any[]> {
