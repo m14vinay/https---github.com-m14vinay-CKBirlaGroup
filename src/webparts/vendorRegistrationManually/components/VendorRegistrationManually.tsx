@@ -993,7 +993,10 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                             <div className={styles['col-md-12']}>
                               <div className={styles.formGroup}>
                                 <label style={{ width: '50%' }}>Do you have MSME Registration Certificate?</label>
-                                <input style={{ width: '5%' }} type='checkbox' checked={isManualChecked} name='manualMSME' onChange={handleManualChange}></input>
+                                <input style={{ width: '5%' }} type='checkbox' checked={isManualChecked} name='manualMSME' onChange={handleManualChange}>
+                                </input>&nbsp;&nbsp;
+                                <span style={{ color:"blue", display: isManualChecked ? "contents" : "none" }}>Yes</span>
+                                <span style={{ color:"blue",display: !isManualChecked ? "contents" : "none" }}>No</span>
                               </div>
                               <div className={styles.formGroup}>
                                 <label style={{ width: '50%' }}>MSME Registration Certificate<span className={styles.required} style={{ display: isManualChecked ? "contents" : "none" }}>*</span></label>
@@ -1073,7 +1076,9 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                         <div className={styles['col-md-12']}>
                           <div className={styles.formGroup}>
                             <label style={{ width: '50%' }}>Have MSME certificate?</label>
-                            <input style={{ width: '5%' }} type='checkbox' checked={isExcelChecked} name='manualMSME' onChange={handleExcelChange}></input>
+                            <input style={{ width: '5%' }} type='checkbox' checked={isExcelChecked} name='manualMSME' onChange={handleExcelChange}></input>&nbsp;&nbsp;
+                            <span style={{ color:"blue", display: isExcelChecked ? "contents" : "none" }}>Yes</span>
+                            <span style={{ color:"blue",display: !isExcelChecked ? "contents" : "none" }}>No</span>
                           </div>
                           <div className={styles.formGroup}>
                             <label style={{ width: '50%' }}>MSME Registration Certificate<span className={styles.required} style={{ display: isExcelChecked ? "contents" : "none" }}>*</span></label>
