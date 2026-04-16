@@ -206,7 +206,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
   const handleApprove = async () => {
     try {
       setLoading(true);
-      if (!form.Comments) return alert("Comment is required.");
+      if (!form.ApprovalComment) return alert("Comment is required.");
       let payload = {};
       let Sequence=0;
       if (!itemId) return;
@@ -344,7 +344,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
   const handleHold = async () => {
     try {
       setLoading(true);
-      if (!form.Comments) return alert("Comment is required.");
+      if (!form.ApprovalComment) return alert("Comment is required.");
       let payload = {};
       let Sequence=4;
       if (!itemId) return;
@@ -373,7 +373,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
   const handleResume = async () => {
     try {
       setLoading(true);
-      if (!form.Comments) return alert("Comment is required.");
+      if (!form.ApprovalComment) return alert("Comment is required.");
       let payload = {};
       let Sequence=4;
       if (!itemId) return;
@@ -402,7 +402,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
   const handlePaid = async () => {
     try {
       setLoading(true);
-      if (!form.Comments) return alert("Comment is required.");
+      if (!form.ApprovalComment) return alert("Comment is required.");
       let payload = {};
       let Sequence=4;
       if (!itemId) return;
