@@ -92,9 +92,9 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
           AttachedSignedPO: result.AttachedSignedPO == "True" ? true : false,
           RequestNo: result.RequestNo,
           CurrentStatus: result.CurrentStatus
-        }));     
-        const historydata = await service.GetHistoryItem(Number(id), "FBP");        
-        setHistory(historydata);           
+        }));
+        const historydata = await service.GetHistoryItem(Number(id), "FBP");
+        setHistory(historydata);
       }
       else {
         alert("You are not an authorized user.");
@@ -152,6 +152,9 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                   else if (item.UserAction === "Rejected") {
                     statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
                   }
+                  else if (item.UserAction === "Upcoming") {
+                    statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
+                  }
                   return (
                     <div className={statusClass} key={index}>
                       <div className={styles.content}>
@@ -163,17 +166,21 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                   );
                 })}
               </div>
-              <label>Bill Signed</label>
-              <input type="checkbox" name='POsigned' checked={form.AttachedSignedPO} readOnly style={{ backgroundColor: "lightgray" }} />
+              <div className={styles['col-md-12']}>
+                <div className={styles["formGroup"]}>
+                  <label className='form-control' style={{ display: "inline-flex" }}>Bill Signed</label>
+                  <input className='form-control' style={{ width: "15%", backgroundColor: "lightgray" }} type="checkbox" name='POsigned' checked={form.AttachedSignedPO} readOnly />
+                </div>
+              </div>
               <label>Project Code</label>
-              <input type='text' name="ProjectCode" value={form.ProjectCode} readOnly />
+              <input type='text' name="ProjectCode" value={form.ProjectCode} readOnly style={{ backgroundColor: "lightgray" }}/>
               <label>Vendor Name</label>
-              <input name="VendorName" value={form.vendorcode+"-"+form.VendorName} type='text' readOnly style={{ backgroundColor: "lightgray" }}>
+              <input name="VendorName" value={form.vendorcode + "-" + form.VendorName} type='text' readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
               <label>Project Title</label>
               <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Additional Information & Remarks</label>
-              <input name="Comments" value={form.Comments} readOnly >
+              <input name="Comments" value={form.Comments} readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
               <label>PO Request No</label>
               <input name="PORequestNo" value={form.PORequestNo} readOnly style={{ backgroundColor: "lightgray" }} />
@@ -223,6 +230,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                   const isApproved = item.UserAction === "Approved";
                   const isRejected = item.UserAction === "Rejected";
                   const isInitiated = item.UserAction === "Request Initiator";
+                  const isUpcoming = item.UserAction === "Upcoming";
                   return (
                     <li
                       key={index}
@@ -231,7 +239,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                           ? styles.tickIcon
                           : isRejected
                             ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : ""
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
                       }
                     >
                       <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
@@ -245,7 +253,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : ""
+                                  : isUpcoming ? styles.upcomingstatus : ""
                             }
                           >
                             {item.UserAction}
