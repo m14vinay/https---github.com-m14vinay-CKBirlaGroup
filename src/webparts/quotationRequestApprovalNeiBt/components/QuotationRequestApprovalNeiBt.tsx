@@ -251,7 +251,7 @@ if(form.ActionDate1==='')
       // const user2 = await service.getUserById(User);
       // const Approve2=user2?.Title;
       
-      await service.updateItemdata(itemId, "Approved", approverComment,AssignedID2,form.Approver2EmailId);
+      await service.updateItemdata(itemId,"Pending",approverComment,AssignedID2,form.Approver2EmailId);
         await handleSaveApproveHistory(itemId);
         alert("✅ First Level Approved Successfully");
  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -260,7 +260,7 @@ if(form.ActionDate1==='')
      }
      else if(form.ActionDate2==='')
      {
-       await service.updateItemdata2(itemId, "Approved",approverComment,AssignedID3,form.Approver3EmailId);
+       await service.updateItemdata2(itemId,"Pending",approverComment,AssignedID3,form.Approver3EmailId);
        await handleSaveApproveHistory(itemId);
        alert("✅ Second Level Approved Successfully");
        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -303,7 +303,7 @@ const handleReject = async () => {
 
    if(form.ActionDate1==='')
       {
-      await service.updateItemdata(itemId, "Rejected", approverComment,"Rejected",form.Approver2EmailId);
+      await service.updateItemdata(itemId,"Rejected", approverComment,"Rejected",form.Approver2EmailId);
         await handleSaveRejectedHistory(itemId);
         alert("✅ First Level Rejected Successfully");
          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
