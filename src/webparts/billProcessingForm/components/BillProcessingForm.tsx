@@ -368,6 +368,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         ProjectTitle: form.projectTitle,
         RequestNo: form.PORequestNo,
         BillNo: form.BillNo,
+        PORequestNo: form.PORequestNo,
         BillDate: form.BillDate,
         BillDescription: form.Comments,
         PODescription: form.Comments,
