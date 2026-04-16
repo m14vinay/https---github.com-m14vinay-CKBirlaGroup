@@ -45,7 +45,7 @@
 .statusBox {
   background-color: #225a22;
   color: #fff;
-  padding: 19px 5px 8px;
+  padding: 19px 10px 8px;
   position: relative;
   width: 150px;
 }
@@ -112,7 +112,7 @@
 
 .upcomingBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid orange;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
