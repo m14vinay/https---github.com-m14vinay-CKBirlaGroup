@@ -5,6 +5,7 @@ export default class Service {
     private listname = 'QuotationApproval';
     private purchaseOrderDetailsList = 'PurchaseOrderDetails';
     private HistoryList = 'History';
+    private Department = 'DepartmentMaster';
 
     constructor(context: any) {
         this.context = context;
@@ -29,22 +30,26 @@ export default class Service {
 
     // Create the main quotation item.
     public async createItem(data: any): Promise<any> {
-        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;
-        const response = await this.context.spHttpClient.post(
-            url,
-            SPHttpClient.configurations.v1,
-            {
-                headers: this.getJsonHeaders({
-                    'Content-Type': 'application/json;odata=nometadata'
-                }),
-body: JSON.stringify({
-  ...data,
-  CurrentStep: 1 
-})            }
-        );
-        await this.throwIfNotOk(response as unknown as Response, 'Create item failed');
-        return response.json();
-    }
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;   
+    const response = await this.context.spHttpClient.post(
+      url,
+     SPHttpClient.configurations.v1,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        }
+    );
+    if (!response.ok) {
+  const error = await response.text();
+  console.error("API ERROR:", error);
+  throw new Error(error);
+}
+
+return await response.json();
+  }
 
     public async getPurchaseOrderDetails(quotationId: number): Promise<any[]> {
         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.purchaseOrderDetailsList}')/items?$filter=QuotationIdId eq ${quotationId}`;
@@ -98,24 +103,23 @@ body: JSON.stringify({
     }
 
     // Update the main quotation item.
-    public async updateItem(ID: number, data: any): Promise<void> {
-        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})`;
+    public async updateItem(id: number, data: any): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
-        const response = await this.context.spHttpClient.post(
-            url,
-            SPHttpClient.configurations.v1,
-            {
-                headers: this.getJsonHeaders({
-                    "Content-Type": "application/json;odata=nometadata",
-                    "IF-MATCH": "*",
-                    "X-HTTP-Method": "MERGE"
-                }),
-                body: JSON.stringify(data)
-            }
-        );
-        await this.throwIfNotOk(response as unknown as Response, 'Update item failed');
-    }
-
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+            'IF-MATCH': '*',
+            'X-HTTP-Method': 'MERGE',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+        body: JSON.stringify(data)
+      }
+    );
+  }
     // Load one quotation item by list ID.
     public async getItemByRequestNo(ID: number): Promise<any> {
 
@@ -133,25 +137,57 @@ body: JSON.stringify({
         return item;
 
     }
+public async getDepartmentApprovers(department: string): Promise<any[]> {
+ const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Department}')/items
+?$select=Id,Title,
+Approval1/Id,Approval1/Title,
+Approval2/Id,Approval2/Title,
+Approval3/Id,Approval3/Title,
+Approval4/Id,Approval4/Title,
+Approval5/Id,Approval5/Title,
+Departmenthead/Id,Departmenthead/Title
+&$expand=Approval1,Approval2,Approval3,Approval4,Approval5,Departmenthead
+&$filter=DepartmentName eq '${department}'`;
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
 
-    // Upload a new attachment to the quotation item.
-    public async uploadFile(itemId: number, file: File): Promise<void> {
-        const encodedFileName = encodeURIComponent(file.name);
-        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${encodedFileName}')`;
+  const data = await res.json();
 
-        const buffer = await file.arrayBuffer();
+  return data.value || [];
+}
 
-        const response = await this.context.spHttpClient.post(
-            url,
-            SPHttpClient.configurations.v1,
-            {
-                headers: this.getJsonHeaders(),
-                body: buffer
-            }
-        );
 
-        await this.throwIfNotOk(response as unknown as Response, 'Upload file failed');
+ public async getUserById(userId: number): Promise<any> {
+  
+      const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getuserbyid(${userId})`;
+      const response = await this.context.spHttpClient.get(
+        url,
+        SPHttpClient.configurations.v1
+      );
+  
+    const user = await response.json();
+    return user;
     }
+    public async uploadFile(itemId: number, file: File): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
+
+    const buffer = await file.arrayBuffer();
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;"
+        },
+        body: buffer
+      }
+    );
+  }
+    // Upload a new attachment to the quotation item.
+   
     // Load attachments linked to the quotation item.
     public async getAttachments(itemId: number): Promise<any[]> {
 
@@ -218,17 +254,26 @@ body: JSON.stringify({
     }
 
     // Load approvers for the given department from DepartmentMaster list.
-public async getApproversByDepartment(department: string): Promise<any> {
+public async getApproversByDepartment(department: string): Promise<any[]> {
 
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?$select=DepartmentName,Departmenthead/Title,Approval1/Title,Approval2/Title,Approval3/Title,Approval4/Title&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4&$filter=DepartmentName eq '${department}'`;
+  const dept = department.trim().toLowerCase();
 
-  const res = await this.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
+const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items
+?$select=DepartmentName,
+Approval1/Title,Approval1/Id,
+Approval2/Title,Approval2/Id,
+Approval3/Title,Approval3/Id,
+Approval4/Title,Approval4/Id
+&$expand=Approval1,Approval2,Approval3,Approval4`;
 
+  console.log("FINAL API URL:", url);
+
+  const res = await this.context.spHttpClient.get(url, SPHttpClient.configurations.v1);
   const data = await res.json();
-  return data.value?.[0];
+
+  console.log("FINAL API RESULT:", data);
+
+  return data.value || [];
 }
 
     // Load all departments from DepartmentMaster list for dropdown options.
@@ -243,5 +288,32 @@ public async getApproversByDepartment(department: string): Promise<any> {
 
   const data = await res.json();
   return data.value || [];
+}
+
+// Resolve a user by email, used for setting approver fields in the list item.
+public async getUserByEmail(email: string): Promise<any> {
+
+  const body = JSON.stringify({
+    logonName: email
+  });
+
+  const res = await this.context.spHttpClient.post(
+    `${this.context.pageContext.web.absoluteUrl}/_api/web/ensureuser`,
+    SPHttpClient.configurations.v1,
+    {
+      headers: {
+        'Accept': 'application/json;odata=nometadata',
+        'Content-type': 'application/json'
+      },
+      body: body
+    }
+  );
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || "Failed to resolve user");
+  }
+
+  return await res.json();
 }
 }

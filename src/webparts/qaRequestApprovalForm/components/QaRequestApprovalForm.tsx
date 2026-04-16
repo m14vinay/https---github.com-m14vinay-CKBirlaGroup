@@ -32,6 +32,9 @@ interface IApprovalItem {
   ApproverComment1?: string;
   AttachmentFiles?: IAttachmentFile[];
   [key: string]: unknown;
+  ActionDate1?: string;
+  ActionDate2?: string;
+  ActionDate3?: string;
 }
 
 interface IPurchaseOrderItem {
@@ -93,9 +96,10 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
   const requestLabel = `PRJ-${itemId}`;
 
   const isReadOnly =
-    isActionDone ||
-    data?.Status === 'Approved' ||
-    data?.Status === 'Rejected';
+  isActionDone ||
+  data?.Status === 'Approved' ||
+  data?.Status === 'Rejected' ||
+  statusMsg.includes("successfully");
 
   const fetchFromList = React.useCallback(async <T,>(url: string): Promise<T> => {
     const response = await props.spHttpClient.get(url, SPHttpClient.configurations.v1);
@@ -228,22 +232,101 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
     }
 
     try {
-      await props.spHttpClient.post(
-        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
-        SPHttpClient.configurations.v1,
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'IF-MATCH': '*',
-            'X-HTTP-Method': 'MERGE'
-          },
-          body: JSON.stringify({
-            Status: status,
-            ApproverComment1: comment
-          })
-        }
-      );
+const handleApprove = async () => {
+  try {
+    setLoading(true);
+
+    if (!comment) return alert("Comment is required.");
+    if (!itemId || !data) return;
+
+    // 🔹 CURRENT USER
+    const currentUser = await props.spHttpClient.get(
+      `${props.siteUrl}/_api/web/currentuser`,
+      SPHttpClient.configurations.v1
+    ).then(res => res.json());
+
+    // 🔐 SECURITY CHECK (IMPORTANT)
+    if (Number(data.AssignedToId) !== currentUser.Id) {
+      alert("You are not authorized ❌");
+      return;
+    }
+
+    let payload: any = {};
+
+    // 🔥 STEP DETECTION BASED ON AssignedTo (BEST)
+    
+    // STEP 1
+    if (data.AssignedToId === data.Approval1Id) {
+      payload = {
+        ApproverComment1: comment,
+        ActionDate1: new Date().toISOString(),
+        AssignedToId: Number(data.Approval2Id) || null,
+        Status: "Pending"
+      };
+    }
+
+    // STEP 2
+    else if (data.AssignedToId === data.Approval2Id) {
+      payload = {
+        ApproverComment2: comment,
+        ActionDate2: new Date().toISOString(),
+        AssignedToId: Number(data.Approval3Id) || null,
+        Status: "Pending"
+      };
+    }
+
+    // FINAL STEP
+    else if (data.AssignedToId === data.Approval3Id) {
+      payload = {
+        ApproverComment3: comment,
+        ActionDate3: new Date().toISOString(),
+        AssignedToId: null,
+        Status: "Approved"
+      };
+    }
+
+    if (Object.keys(payload).length === 0) {
+      alert("No approval action available ❌");
+      return;
+    }
+
+    console.log("FINAL PAYLOAD:", payload);
+
+    // 🔹 UPDATE ITEM
+    await props.spHttpClient.post(
+      `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'IF-MATCH': '*',
+          'X-HTTP-Method': 'MERGE'
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    // 🔹 HISTORY SAVE
+    await handleSaveHistory(itemId, "Approved");
+
+    alert("Approved Successfully ✅");
+
+    // 🔹 UI UPDATE (IMPORTANT)
+    setData(prev => prev ? { ...prev, ...payload } : prev);
+    setIsActionDone(true);
+
+    // 🔹 REDIRECT
+ window.location.assign(
+  `${props.siteUrl}/SitePages/Dashboard.aspx`
+);
+
+  } catch (error) {
+    console.error("APPROVE ERROR:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
       await handleSaveHistory(itemId, status);
 
@@ -277,7 +360,9 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
       console.error('Status update failed:', error);
       setStatusMsg(error?.message || 'Unable to update the request.');
     }
-  }, [comment, currentStep, fetchHistory, handleSaveHistory, itemId, props.listName, props.siteUrl, props.spHttpClient]);
+  }, 
+  
+  [comment, currentStep, fetchHistory, handleSaveHistory, itemId, props.listName, props.siteUrl, props.spHttpClient]);
 
   React.useEffect(() => {
     fetchData().catch(() => undefined);
@@ -311,6 +396,90 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
   if (!data) {
     return <div>No data found.</div>;
   }
+
+  //********** */
+
+  //************Handle Approver**************
+// const handleApprove = async () => {
+//   try {
+//     setLoading(true);
+
+//     if (!form.Comments) return alert("Comment is required.");
+//     if (!itemId) return;
+
+//     const currentUser = await service.getUser();
+
+//     // 🔐 SECURITY CHECK
+//     if (!form.AssignedTo || Number(form.AssignedTo) !== currentUser.Id) {
+//       alert("You are not authorized ❌");
+//       return;
+//     }
+
+//     let payload: any = {};
+
+//     // * STEP BASED APPROVAL (NO BUG LOGIC)
+
+//     // STEP 1
+//     if (!form.ActionDate1) {
+//       payload = {
+//         ApproverComment1: form.Comments,
+//         ActionDate1: new Date().toISOString(), // ✅ date always set
+//         CurrentStatus: "Pending",
+//         AssignedToId: Number(form.Approval2Id) || null
+//       };
+//     }
+
+//     // STEP 2
+//     else if (!form.ActionDate2) {
+//       payload = {
+//         ApproverComment2: form.Comments,
+//         ActionDate2: new Date().toLocaleString(),
+//         CurrentStatus: "Pending",
+//         AssignedToId: Number(form.Approval3Id) || null
+//       };
+//     }
+
+//     // FINAL STEP
+//     else if (!form.ActionDate3) {
+//       payload = {
+//         ApproverComment3: form.Comments,
+//         ActionDate3: new Date().toLocaleString(),
+//         CurrentStatus: "Approved",
+//         AssignedToId: null
+//       };
+//     }
+
+//     // ❌ SAFETY CHECK
+//     if (Object.keys(payload).length === 0) {
+//       alert("No approval action available ❌");
+//       return;
+//     }
+
+//     console.log("FINAL APPROVE PAYLOAD:", payload);
+
+//     // 🔹 UPDATE MAIN LIST
+//     await service.updateItem(itemId, payload);
+
+//     // 🔹 SAVE HISTORY
+//     await handleSaveHistory(itemId);
+
+//     alert("Approved Successfully ✅");
+
+//     // 🔹 REDIRECT
+//     window.location.assign(
+//       `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`
+//     );
+
+//     // 🔹 RESET COMMENT ONLY
+//     setForm(prev => ({ ...prev, Comments: "" }));
+
+//   } catch (error) {
+//     console.error("APPROVE ERROR:", error);
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
 
   return (
     <div className={styles.container}>

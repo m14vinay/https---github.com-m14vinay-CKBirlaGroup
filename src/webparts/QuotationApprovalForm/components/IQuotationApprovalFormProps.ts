@@ -7,7 +7,6 @@ export interface IQuotationApprovalFormProps {
   hasTeamsContext: boolean;
   userDisplayName: string;
 
-  // 🔥 ADD THESE (Important)
   siteUrl: string;
   spHttpClient: SPHttpClient;
   listName: string;
