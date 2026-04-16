@@ -39,6 +39,8 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     ActionDate1:'',
     ActionDate2:'',
      ActionDate3:'',
+      Approval2: '',
+       Approval3: '',
     DepartmentHead: '',
     RequestNo:'',
     Approver2EmailId:0,
@@ -167,10 +169,10 @@ if (result.Approval3Id) {
       Advancepayment: result.Advancepayment || 0,
       ApprovalPath: result.ApprovalPath || '',
       RequestNo : result.RequestNo || '',
-       ActionDate1:result.ActionDate1 || '',
-          ActionDate2:result.ActionDate2 || '',
-          ActionDate3:result.ActionDate3 || '',
-            Approver2EmailId: result.Approval2Id,
+      ActionDate1:result.ActionDate1 || '',
+      ActionDate2:result.ActionDate2 || '',
+      ActionDate3:result.ActionDate3 || '',
+          Approver2EmailId: result.Approval2Id,
           Approver3EmailId: result.Approval3Id,
            ApproverTwoId: result.Approval2Id,
 
@@ -245,28 +247,45 @@ const handleSaveRejectedHistory = async (id: number) => {
       setLoading(true);
        if (!approverComment) return alert("Enter Approver Comment.");
     if (!itemId) return;
-if(form.ActionDate1==='')
-     {
-      // const User=form.ApproverTwoId;
-      // const user2 = await service.getUserById(User);
-      // const Approve2=user2?.Title;
-      
-      await service.updateItemdata(itemId,"Pending",approverComment,AssignedID2,form.Approver2EmailId);
+if(form.ActionDate1===''&& form.Approval2==='')
+     {     
+      await service.updateItemdata(itemId,"Approved",approverComment,AssignedID2,form.Approver2EmailId);
+        await handleSaveApproveHistory(itemId);
+        alert("✅ Final Level Approved Successfully");
+ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+     window.location.assign(url); 
+      return; 
+     }
+     else
+      if(form.ActionDate1==='')
+        {
+          await service.updateItemdata(itemId,"Pending",approverComment,AssignedID2,form.Approver2EmailId);
         await handleSaveApproveHistory(itemId);
         alert("✅ First Level Approved Successfully");
  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url); 
       return; 
-     }
-     else if(form.ActionDate2==='')
+        }
+      
+     else if(form.ActionDate2===''&& form.Approval3==='')
      {
-       await service.updateItemdata2(itemId,"Pending",approverComment,AssignedID3,form.Approver3EmailId);
+       await service.updateItemdata2(itemId,"Approved",approverComment,AssignedID3,form.Approver3EmailId);
+       await handleSaveApproveHistory(itemId);
+       alert("✅ Final Level Approved Successfully");
+       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+     window.location.assign(url); 
+      return; // 🔥 stop again
+    }
+    else if(form.ActionDate2==='')
+      {
+        await service.updateItemdata2(itemId,"Pending",approverComment,AssignedID3,form.Approver3EmailId);
        await handleSaveApproveHistory(itemId);
        alert("✅ Second Level Approved Successfully");
        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url); 
       return; // 🔥 stop again
-    }
+      }
+    
     else if(form.ActionDate3==='')
      {
        await service.updateItemdata3(itemId, "Approved",approverComment,"Approved");
