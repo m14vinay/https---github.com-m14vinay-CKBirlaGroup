@@ -96,12 +96,10 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
     return (
       <div>
         <Navbar expand="lg" bg='light' className="bg-body-tertiary">
-          <Container>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
               {this.menuBar()}
             </Navbar.Collapse>
-          </Container>
         </Navbar>
       </div>
     );
