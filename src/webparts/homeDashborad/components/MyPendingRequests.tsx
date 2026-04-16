@@ -93,7 +93,7 @@ export default function MyPendingRequests() {
     const [globalFilter, setGlobalFilter] = useState("");
     const [sorting, setSorting] = useState<any>([]);
     const webUrl = context.pageContext.web.absoluteUrl;
-    const lists = ["QuotationApproval","PoApproval","ITApproval","ReimburseExpenseMaster","BillProcessing","VendorMapping"];
+    const lists = ["QuotationApproval","PoApproval","ITApproval","ReimburseExpenseMaster","BillProcessing","VendorMapping","QuotationApprovalNEIBTAdmin"];
 
     const getUser = () => {
         console.log("context user : ", context);
