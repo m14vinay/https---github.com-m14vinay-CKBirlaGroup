@@ -257,6 +257,9 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
   try {
     const result = await service.getRequestDetails(value);
+    const data= result[0].RequestNo
+      const Vendor = await service.getRequestVendorDetails(data);
+      
     if (result.length > 0) {
       const item = result[0];
       const OccupiedAmount = await service.getTotaloccupiedAmount(value);
@@ -272,7 +275,8 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
         ...prev,
         Department: item.Department || '',
         projectTitle: item.ProjectTitle || '',
-        vendorName: item.Selectedvendor || '',
+       // vendorName: item.Selectedvendor || '',
+         vendorName: Vendor[0].VendorName || '',
         TotalAmount:item.TotalProjectAmount || 0,
         OccupiedAmount:total||0,
         RemainingAmount:item.TotalProjectAmount-total
@@ -314,7 +318,26 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     { key: '1', text: 'Issue To Vendor' },
     { key: '2', text: 'Internal Compliance' }
   ];
+const getShortName = (value: string) => {
+  switch (value) {
+    case "Issue To Vendor":
+      return "IV";
+    case "Internal Compliance":
+      return "IC";
+    default:
+      return "";
+  }
+};
+  const getFinancialYear = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1; // Jan = 0
 
+    let startYear = month >= 4 ? year : year - 1;
+    let endYear = startYear + 1;
+
+    return `${startYear.toString().slice(-2)}-${endYear.toString().slice(-2)}`;
+  };
   
   const loadDepartments = async () => {
     const data = await service.getDepartments();
@@ -355,6 +378,51 @@ const handleSaveHistory = async (id: number) => {
   };
 
   await service.createHistoryItem(payload);
+};
+
+const CounterfyPOCategory = async () => {
+
+ const fy = getFinancialYear();
+const type = getShortName(form.PoMaster);
+
+
+let counterItem = await service.getCounterByFY(fy);
+let newCounter = 0;
+
+if (!counterItem) {
+  const res = await service.createCounter(fy, type);
+
+  counterItem = {
+    ID: res?.ID || res?.Id || res?.data?.ID,
+    IV: type === "IV" ? 1 : 0,
+    IC: type === "IC" ? 1 : 0
+  };
+
+  newCounter = 1;
+} else {
+  const itemId = counterItem[0].ID || counterItem[0].Id;
+
+  if (type === "IV") {
+    newCounter = Number(counterItem[0].IV || 0) + 1;
+
+    await service.updateCounter(itemId, {
+      IV: newCounter
+    });
+  } else {
+    newCounter = Number(counterItem[0].IC || 0) + 1;
+
+    await service.updateCounter(itemId, {
+      IC: newCounter
+    });
+  }
+}
+
+const requestNo = `CKBCSL/${fy}/${type}/${form.Department}/${newCounter}`;
+
+return {
+  counter: newCounter,
+  requestNo
+};
 };
 
 
@@ -403,9 +471,11 @@ const handleSaveHistory = async (id: number) => {
       }
     }
       alert("Saved Successfully.✅");
+      const counterResult = await CounterfyPOCategory();
       await service.updateItem(res.Id, {
-          RequestNo: `CKBCSL/25-26/IV/Finance/${res.Id}`
-        });
+        RequestNo: counterResult.requestNo
+          //RequestNo : `CKBCSL/${getFinancialYear()}/${getShortName(form.PoMaster)}/${form.Department}/${res.Id}`
+        });  
     } else {
       // 🔹 UPDATE
       await service.updateItem(itemId, payload);
@@ -493,8 +563,10 @@ const handleUpdate = async () => {
         await service.uploadFile(res.Id , form.files[i]);
       }
       alert("Submitted Successfully.✅"); 
+        const counterResult = await CounterfyPOCategory();
        await service.updateItem(res.Id, {
-          RequestNo: `CKBCSL/25-26/IV/Finance/${res.Id}`
+          RequestNo: counterResult.requestNo
+          
         });   
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  

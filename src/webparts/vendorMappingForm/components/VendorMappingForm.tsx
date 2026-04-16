@@ -23,6 +23,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     Title:'',
     FID:'',
     Designation:'',
+    Department:'',
     UserName:'',
     UserAction:'',
     UserComment:'',
@@ -131,9 +132,10 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
 const loadVendors = async () => {
   try{
       const data = await service.getVendor();
-      const options = data.map((item: any) => ({
-        key: item.Title+'_' + 'VENDOR_' + item.ID,
-        text:item.Title+'_' + 'VENDOR_' + item.ID,
+      const options = data.map((item: any) => ({ 
+         key: 'CKBCSL/' + item.ID +'-'+item.Title,
+        text:'CKBCSL/' + item.ID +'-'+item.Title,
+       
       }));
       setVendorOptions(options);
      } catch (error) {
@@ -256,14 +258,16 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
         setForm(prev => ({
           ...prev,
           projectTitle: result[0].ProjectTitle || '',
-          projectDescription: result[0].ProjectDescription || ''
+          projectDescription: result[0].ProjectDescription || '',
+          Department: result[0].Department || ''
         }));
       } else {
         alert("This request is Not Approved.✅");
         setForm(prev => ({
           ...prev,
           projectTitle: '',
-          projectDescription: ''
+          projectDescription: '',
+          Department:''
         }));
       }
     
@@ -308,12 +312,6 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
    setLoading(true);
   if (!form.projectCode) return alert("Enter Project Code");
   if (!form.vendorName) return alert("Please Select Vendor");
- if (
-  (!form.files || form.files.length === 0) &&
-  (!attachments || attachments.length === 0)
-) {
-  return alert("Please Attach Files");
-}
  
 
   // 🔹 Payload (common)
@@ -322,6 +320,7 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     ProjectCode: form.projectCode,
     ProjectTitle: form.projectTitle,
     ProjectDescription: form.projectDescription,
+    Department:form.Department,
     VendorName: form.vendorName,
     VendorDescription: form.vendorDescription,
     CurrentStatus: 'Draft',
@@ -373,12 +372,7 @@ const handleUpdate = async () => {
     try {
    if (!form.projectCode) return alert("Enter Project Code");
     if (!form.vendorName) return alert("Please Select Vendor");
-    if (
-  (!form.files || form.files.length === 0) &&
-  (!attachments || attachments.length === 0)
-) {
-  return alert("Please Attach files");
-}
+    
  const users = await service.getVendorApprover();
 const item = users?.Approver?.Id;
 
@@ -388,6 +382,7 @@ const item = users?.Approver?.Id;
     ProjectCode: form.projectCode,
      ProjectDescription: form.projectDescription,
     ProjectTitle: form.projectTitle,
+    Department:form.Department,
     VendorName:  form.vendorName, 
     VendorDescription: form.vendorDescription,
     CurrentStatus: 'Pending',
@@ -481,6 +476,8 @@ const item = users?.Approver?.Id;
         <label>Project Description</label>
         <input name="projectDescription" value={form.projectDescription} readOnly style={{backgroundColor:"lightgray"}}  />
 
+      
+        <input name="Department" value={form.Department} readOnly style={{backgroundColor:"lightgray"}}  type="hidden" />
 
          <label>Select Vendor <span className={styles.required}>*</span></label>
       <Dropdown
@@ -494,11 +491,21 @@ const item = users?.Approver?.Id;
           }))
         }
       /> 
+
+    <p>If You Want To Add New Vendor.
+     <a 
+        href="https://ckbcsl.sharepoint.com/:u:/r/sites/DigiflowUAT/SitePages/VendorRegistrationSearch.aspx"
+      target="_blank"
+      rel="noopener noreferrer"
+      >
+    Click Here
+      </a>
+    </p>
         <label>Additional Information & Remarks</label>
         <input name="vendorDescription" value={form.vendorDescription} onChange={handleChange}  />
         
 
-        <label>Attachments <span className={styles.required}>*</span></label>
+        <label>Attachments </label>
        <input type="file" multiple onChange={handleFileChange}  />
 
        {/*  Existing Files (API se) */}

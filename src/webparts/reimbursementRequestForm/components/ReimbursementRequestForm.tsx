@@ -1,11 +1,12 @@
 import * as React from 'react';
 import styles from './ReimbursementRequestForm.module.scss';
 import type { IReimbursementRequestFormProps } from './IReimbursementRequestFormProps';
-import { allowScrollOnElement, Checkbox, Modal, PrimaryButton,Button } from '@fluentui/react';
+import { allowScrollOnElement, Checkbox, Modal, PrimaryButton, Button } from '@fluentui/react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import { Dropdown, IDropdownOption } from '@fluentui/react';
 import SharePointService from '../service/Service';
+import { files } from '@microsoft/teams-js';
 const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (props) => {
 
   const [form, setForm] = React.useState({
@@ -26,7 +27,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     ExpenseName: '',
     ExpenseID: '',
     DocumentName: '',
-    DocumentID: ''
+    DocumentID: '',
+    files: []
   });
   const [loading, setLoading] = React.useState(false);
   const [isOpen, setisOpen] = React.useState(false);
@@ -35,8 +37,10 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   const [DocumentOption, setDocumentOption] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(0);
   const [BillAmount, setBillAmount] = React.useState<number | null>(0);
+  const MAX_TOTAL_SIZE_MB = 25;
+  const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
   const [Expenseform, setExpenseForm] = React.useState<{
-    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string }[];
+    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string, files: [] }[];
   }>({
     expenses: []
   });
@@ -51,6 +55,12 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     const params = new URLSearchParams(window.location.search);
     const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
+  };
+  const removeFile = (index: number) => {
+    setForm((prev: any) => ({
+      ...prev,
+      files: prev.files.filter((_: File, i: number) => i !== index)
+    }));
   };
   // Get Data After Selection the Document
   const handleDocumentChange = async (option?: IDropdownOption) => {
@@ -76,7 +86,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   };
   const handleClaimAmountChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    if (Number(BillAmount) < Number(value)) {
+    if (Number(form.BillAmount) < Number(value)) {
       setForm({ ...form, [name]: 0 });
       alert("Claim amount must be less then bill amount.");
     }
@@ -121,14 +131,48 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       }
     }
   };
+  const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event?.target?.files;
+    if (!files) return;
 
+    const allowedExtensions = ['pdf', 'xlsx', 'docx'];
+    const filesArray = Array.from(files);
+
+    // 🔹 Check each file
+    for (let file of filesArray) {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
+        alert(`File Type Not Allowed: ${file.name}. Only PDF, XLSX, DOCX are Allowed.`);
+        return; // stop execution
+      }
+    }
+
+    // 🔹 Total size check
+    const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
+    if (totalSizeMB > MAX_TOTAL_SIZE_MB) {
+      alert(`Total File Sie Must Not Exceed ${MAX_TOTAL_SIZE_MB} MB`);
+      return;
+    }
+
+    // 🔹 Invalid filename check
+    const invalidFiles = filesArray.filter(file => INVALID_FILENAME_REGEX.test(file.name));
+    if (invalidFiles.length > 0) {
+      alert(`File Names Cannot Have Special Characters: ${invalidFiles.map(f => f.name).join(", ")}`);
+      return;
+    }
+
+    // ✅ Add valid files to form state
+    setForm((prev: any) => ({
+      ...prev,
+      files: [...prev.files, ...filesArray]
+    }));
+  };
   const getRequestDetails = async (requestNo: number) => {
     const data = await service.getItemByRequestNo(requestNo);
-     const currentUser = await service.getUser();
-       if(data.AuthorId!== currentUser.Id)
-      {
-         alert("You Are Not Authorized ❌ ");
-      } 
+    const currentUser = await service.getUser();
+    if (data.AuthorId !== currentUser.Id) {
+      alert("You Are Not Authorized ❌ ");
+    }
     if (data.CurrentStatus === 'Draft') {
       setItemId(data.Id);
       setForm({
@@ -171,6 +215,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         DocumentName: '',
         DocumentID: '',
         ID: 0,
+        files: []
       });
     }
   };
@@ -190,9 +235,10 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       BillAmount: form.BillAmount,
       BillDate: form.BillDate,
       BillNo: form.BillNo,
-      DocumentName: form.DocumentName,
+      DocumentName: form.ExpenseName,
       ClaimAmount: form.ClaimAmount,
-      ExpanseType: form.ExpenseName
+      ExpanseType: form.ExpenseName,
+      files: form.files
     };
     addExpense(newExpense);
     setForm(prev => ({
@@ -240,8 +286,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         AssignedTo: dataApprover.DepartmentHead?.Title.toString() || ""
       }
     }
-    else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') &&form.TotalAmount < 100000) {      
-        payload = {
+    else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
+      payload = {
         TotalClaimAmount: form.TotalAmount,
         Remarks: form.Remarks,
         DepartmentName: form.DepartmentName,
@@ -281,6 +327,11 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 };
                 const resExpense = await service.createExpenseItem(Expensepayload);
                 if (resExpense.Id > 0) {
+                  if (resExpense.Id > 0 && Expenseform.expenses[i].files.length > 0) {
+                    for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
+                      await service.uploadFile(res.Id, Expenseform.expenses[i].files[i]);
+                    }
+                  }
                   const payload = {
                     Title: 'REM',
                     FID: Number(res.Id),
@@ -315,8 +366,13 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                   DocumentName: Expenseform.expenses[i].DocumentName,
                   ReimursementLookupId: Number(itemId)
                 };
-                const res = await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);
-              }
+                const res = await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);    
+                if (Number(Expenseform.expenses[i].Id) > 0 && Expenseform.expenses[i].files.length > 0) {
+                    for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
+                      await service.uploadFile(Number(Expenseform.expenses[i].Id), Expenseform.expenses[i].files[i]);
+                    }
+                  }     
+              }              
             }
             const payload = {
               Title: 'REM',
@@ -382,7 +438,11 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 };
                 const Expenseres = await service.createExpenseItem(Expensepayload);
                 if (Expenseres.Id > 0) {
-                  console.log("Successfully Transaction Saved:-" + Expenseres.ID);
+                  if (Expenseres.Id > 0 && Expenseform.expenses[i].files.length > 0) {
+                    for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
+                      await service.uploadFile(Expenseres.Id, Expenseform.expenses[i].files[i]);
+                    }
+                  }  
                 }
               }
               setExpenseForm({
@@ -417,9 +477,23 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               };
               if (Number(Expenseform.expenses[i].Id) > 0) {
                 const res = await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);
+                if (Number(Expenseform.expenses[i].Id) > 0) {
+                  if (Number(Expenseform.expenses[i].Id) > 0 && Expenseform.expenses[i].files.length > 0) {
+                    for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
+                      await service.uploadFile(Number(Expenseform.expenses[i].Id), Expenseform.expenses[i].files[i]);
+                    }
+                  }  
+                }
               }
               else {
                 const res = await service.createExpenseItem(Expensepayload);
+                if (res.Id > 0) {
+                  if (res.Id > 0 && Expenseform.expenses[i].files.length > 0) {
+                    for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
+                      await service.uploadFile(res.Id, Expenseform.expenses[i].files[i]);
+                    }
+                  }  
+                }
               }
             }
             const Expensedata = await service.getItemByExpenseData(Number(itemId));
@@ -633,27 +707,44 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               />
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Select Document</label>
-              <Dropdown className="form-control" style={{ width: '100%' }}
-                options={DocumentOption}
-                selectedKey={form.DocumentID}
-                onChange={(e, option) => handleDocumentChange(option)}
-              />
+              <label style={{ width: '45%' }}>Select Document</label>
+              <input type="file" style={{ width: '100%' }} multiple onChange={handleFileChange} />
+              {/* Selected Files */}
+              {form.files.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0 }}>
+                  {form.files.map((file: File, index: number) => (
+                    <li key={index} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+
+                      {/* ❌ Remove */}
+                      <span
+                        style={{ cursor: "pointer", color: "red", fontWeight: "bold" }}
+                        onClick={() => removeFile(index)}
+                      >
+                        ✕
+                      </span>
+
+                      {/* File Name */}
+                      <span>{file.name}</span>
+
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className={styles.formGroup}>
               <label style={{ width: '30%' }}>Bill Number</label>
-              <input className="form-control" style={{ width: '100%', backgroundColor: "lightgray" }} name="BillNo" value={form.BillNo} readOnly />
+              <input className="form-control" style={{ width: '100%' }} name="BillNo" value={form.BillNo} onChange={handleChange} />
             </div>
             <div className={styles.formGroup}>
               <label style={{ width: '30%' }}>Bill Amount</label>
-              <input className="form-control" style={{ width: '100%', backgroundColor: "lightgray" }} name="BillAmount" value={form.BillAmount} readOnly>
+              <input className="form-control" style={{ width: '100%' }} name="BillAmount" value={form.BillAmount} onChange={handleChange}>
               </input>
             </div>
             <div className={styles.formGroup}>
               <label style={{ width: '30%' }}>Bill Date</label>
-              <input className="form-control" style={{ width: '100%', backgroundColor: "lightgray" }} name="BillDate" value={form.BillDate
+              <input className="form-control" style={{ width: '100%' }} type='Date' name="BillDate" value={form.BillDate
                 ? new Date(form.BillDate).toISOString().split('T')[0]
-                : ''} readOnly>
+                : ''} onChange={handleChange}>
               </input>
             </div>
             <div className={styles.formGroup}>

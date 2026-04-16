@@ -9,6 +9,7 @@ export default class Service {
   private FinanceController="FinanceController";
   private HistoryList="History";
    private Approver="VendorMappingApproval";
+    private VendorMapping="VendorMapping";
   constructor(context: any) {
     this.context = context;
   }
@@ -106,6 +107,21 @@ private async getListItemType(): Promise<string> {
  public async getRequestDetails (requestNo: string) :Promise<any> {
  
   const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.FetchList}')/items?$filter=RequestNo eq '${requestNo}'`;
+
+    console.log("URL:",url)  
+  const response = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+
+ const data = await response.json();
+
+ return data.value;
+}
+
+public async getRequestVendorDetails (requestNo: string) :Promise<any> {
+ 
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.VendorMapping}')/items?$filter=ProjectCode eq '${requestNo}'`;
 
     console.log("URL:",url)  
   const response = await this.context.spHttpClient.get(
@@ -292,7 +308,59 @@ Approver/Id,Approver/Title&$expand=Approver`;
      return data.value;
       }
     
-    
+    public async getCounterByFY(fy: string): Promise<any> {
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('CounterFyPoCategory')/items?$filter=FinencialYear eq '${fy}'`;
+
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1
+  );
+
+  const data = await res.json();
+  return data.value; // single record
+}
+
+public async createCounter(fy: string, type: string): Promise<any> {
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('CounterFyPoCategory')/items`;
+
+  const body = {
+    FinancialYear: fy,
+    IV: type === "IV" ? 1 : 0,
+    IC: type === "IC" ? 1 : 0
+  };
+
+  const res = await this.context.spHttpClient.post(
+    url,
+    SPHttpClient.configurations.v1,
+    {
+      headers: {
+        "Accept": "application/json",
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(body)
+    }
+  );
+
+  return await res.json();
+}
+
+public async updateCounter(id: number, data: any): Promise<void> {
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('CounterFyPoCategory')/items(${id})`;
+
+  await this.context.spHttpClient.post(
+    url,
+    SPHttpClient.configurations.v1,
+    {
+      headers: {
+        "Accept": "application/json",
+        "Content-type": "application/json",
+        "IF-MATCH": "*",
+        "X-HTTP-Method": "MERGE"
+      },
+      body: JSON.stringify(data)
+    }
+  );
+}
   };
 
 

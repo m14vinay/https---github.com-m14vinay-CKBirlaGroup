@@ -45,7 +45,7 @@
 .statusBox {
   background-color: #225a22;
   color: #fff;
-  padding: 19px 10px 8px;
+  padding: 19px 5px 8px;
   position: relative;
   width: 150px;
 }
@@ -112,7 +112,7 @@
 
 .upcomingBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #8b3222;
+  border-left: 46px solid orange;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -213,6 +213,12 @@
   font-size: 20px;
 }
 
+.rightPanel ul li.upcomingIcon::before {
+  background-color: orange;
+  content: "\f105";
+  font-size: 20px;
+}
+
 .rightPanel ul li span {
   display: block;
   font-size: 12px;
@@ -229,6 +235,10 @@
 
 .rightPanel ul li span.rejStatus {
   color: #9a1111;
+  font-weight: bold;
+}
+.rightPanel ul li span.upcomingstatus {
+  color: orange;
   font-weight: bold;
 }
 
