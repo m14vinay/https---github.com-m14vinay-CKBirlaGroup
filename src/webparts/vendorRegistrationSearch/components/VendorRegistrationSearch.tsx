@@ -161,7 +161,7 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
         </div>
         <div className={styles.searchBox}>
           <h3>Search Vendor
-            <button className={styles.btnAdd} onClick={handleAddNewDocument}>Add New Document</button>
+            <button className={styles.btnAdd} onClick={handleAddNewDocument}>Add New Vendor</button>
           </h3>
           <div className={styles.container}>
             <div className={styles.row}>

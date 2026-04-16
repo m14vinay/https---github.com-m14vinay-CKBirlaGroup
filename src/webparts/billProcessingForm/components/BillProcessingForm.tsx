@@ -202,7 +202,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         }));
         setPOOptions(options);
       }
-      else{
+      else {
         setForm(prev => ({
           ...prev,
           ProjectCode: value,
@@ -212,8 +212,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           DepartmentName: ''
         }));
       }
-    } 
-    
+    }
+
     catch (error) {
       console.error("Error fetching data:", error);
 
@@ -262,16 +262,29 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       TotalAmount: Number(form.BillAmount) + Number(value)
     });
   };
-  const handleSaveHistory = async (id: number) => {
-    const currentuser = await service.getUser();
-    const payload = {
-      Title: 'FBP',
-      FID: id,
-      UserName: currentuser.Title,
-      UserAction: 'Request Initiator',
-      ActionDate: new Date().toISOString(),
-      Designation: 'Request Initiator',
-    };
+  const handleSaveHistory = async (id: number, Title: string, UserName: string, UserAction: string, Designation: string, ActionDate: Date, Sequence: number) => {
+    let payload: {};
+    if (Sequence == 0) {
+      payload = {
+        Title: Title,
+        FID: id,
+        UserName: UserName,
+        UserAction: UserAction,
+        ActionDate: ActionDate,
+        Designation: Designation,
+        Sequence: Sequence
+      };
+    }
+    else {
+      payload = {
+        Title: Title,
+        FID: id,
+        UserName: UserName,
+        UserAction: UserAction,
+        Designation: Designation,
+        Sequence: Sequence
+      };
+    }
 
     await service.createHistoryItem(payload);
   };
@@ -287,7 +300,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       BillNo: form.BillNo,
       BillDate: form.BillDate,
       BillAmount: form.BillAmount,
-      CalculatedTaxes: form.CalculatedTaxes,
+      CalculatedTaxes: form.CalculatedTaxes.toString(),
       TotalAmount: form.TotalAmount.toString(),
       Department: form.DepartmentName,
       CurrentStatus: 'Draft',
@@ -316,7 +329,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         if (form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(itemId, form.files[i]);
-          }          
+          }
         }
         alert(" Updated Successfully ✅");
       }
@@ -344,7 +357,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       const User = await service.getUserById(data.Departmenthead.Id);
       const dataFinanceApprover = await service.GetApproverFromFinance(form.DepartmentName);
       const databillingApprover = await service.GetApproverFromFinance(form.DepartmentName);
-
+      const currentuser = await service.getUser();
       let payload = {};
       payload = {
         CurrentStatus: 'Pending',
@@ -353,14 +366,14 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         Vendorcode: form.vendorcode,
         VendorName: form.VendorName,
         ProjectTitle: form.projectTitle,
-        RequestNo: form.PORequestNo,
         BillNo: form.BillNo,
+        PORequestNo: form.PORequestNo,
         BillDate: form.BillDate,
         BillDescription: form.Comments,
         PODescription: form.Comments,
         ProjectDescription: form.Comments,
         BillAmount: form.BillAmount,
-        CalculatedTaxes: form.CalculatedTaxes,
+        CalculatedTaxes: form.CalculatedTaxes.toString(),
         TotalAmount: form.TotalAmount.toString(),
         Department: form.DepartmentName,
         AssignedTo: User?.Title,
@@ -382,7 +395,11 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           await service.updateItem(res.Id, {
             RequestNo: `FBP-${res.Id}`
           });
-          await handleSaveHistory(res.Id);
+          await handleSaveHistory(res.Id, 'FBP', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(res.Id, 'FBP', data.Departmenthead?.Title, '', 'Department Head', new Date(), 1);
+          await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 2);
+          await handleSaveHistory(res.Id, 'FBP', dataFinanceApprover.FinanceController?.Title, '', 'Finance Controller', new Date(), 3);
+          await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 4);
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
         }
@@ -392,12 +409,16 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         if (form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(itemId, form.files[i]);
-          }          
-        }        
-          await handleSaveHistory(itemId);
-          alert("Submitted Successfully.");
-          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-          window.location.assign(url);
+          }
+        }
+        await handleSaveHistory(itemId, 'FBP', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+        await handleSaveHistory(itemId, 'FBP', data.Departmenthead?.Title, '', 'Department Head', new Date(), 1);
+        await handleSaveHistory(itemId, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 2);
+        await handleSaveHistory(itemId, 'FBP', dataFinanceApprover.FinanceController?.Title, '', 'Finance Controller', new Date(), 3);
+        await handleSaveHistory(itemId, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 4);
+        alert("Submitted Successfully.");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       }
     }
     catch (error) {
@@ -432,8 +453,12 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
             <div className={styles.leftPanel}>
               <h2>Bill Processing Form</h2>
               <h4>Bill Processing / Request Form</h4>
-              <label>Bill Signed</label>
-              <input type="checkbox" name='POsigned' checked={isChecked} onChange={(e) => setIsChecked(e.target.checked)} />
+              <div className={styles['col-md-12']}>
+                <div className={styles["formGroup"]}>
+                  <label className='form-control' style={{ display: "inline-flex" }}>Bill Signed<span className={styles.required}>*</span></label>
+                  <input className='form-control' style={{ width: "15%" }} type="checkbox" name='POsigned' checked={isChecked} onChange={(e) => setIsChecked(e.target.checked)} />
+                </div>
+              </div>
               <label>Project Code <span className={styles.required}>*</span></label>
               <input type='text'
                 name="ProjectCode"
@@ -441,7 +466,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                 onChange={handleRequestNoChange}
               />
               <label>Vendor Name</label>
-              <input name="VendorName" value={form.vendorcode+"-"+form.VendorName} type='text' readOnly>
+              <input name="VendorName" value={form.vendorcode + "-" + form.VendorName} type='text' readOnly>
               </input>
               <label>Project Title</label>
               <input name="projectTitle" value={form.projectTitle} readOnly />
