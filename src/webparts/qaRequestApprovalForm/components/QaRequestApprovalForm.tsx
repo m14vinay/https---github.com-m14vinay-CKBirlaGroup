@@ -232,101 +232,51 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
     }
 
     try {
-const handleApprove = async () => {
-  try {
-    setLoading(true);
+let payload: any = {};
 
-    if (!comment) return alert("Comment is required.");
-    if (!itemId || !data) return;
+// STEP 1
+if (!data?.ActionDate1) {
+  payload = {
+    ApproverComment1: comment,
+    ActionDate1: new Date().toISOString(),
+    Status: "Pending"
+  };
+}
 
-    // 🔹 CURRENT USER
-    const currentUser = await props.spHttpClient.get(
-      `${props.siteUrl}/_api/web/currentuser`,
-      SPHttpClient.configurations.v1
-    ).then(res => res.json());
+// STEP 2
+else if (!data?.ActionDate2) {
+  payload = {
+    ApproverComment2: comment,
+    ActionDate2: new Date().toISOString(),
+    Status: "Pending"
+  };
+}
 
-    // 🔐 SECURITY CHECK (IMPORTANT)
-    if (Number(data.AssignedToId) !== currentUser.Id) {
-      alert("You are not authorized ❌");
-      return;
-    }
+// FINAL
+else if (!data?.ActionDate3) {
+  payload = {
+    ApproverComment3: comment,
+    ActionDate3: new Date().toISOString(),
+    Status: "Approved"
+  };
+}
 
-    let payload: any = {};
+console.log("FINAL PAYLOAD:", payload);
 
-    // 🔥 STEP DETECTION BASED ON AssignedTo (BEST)
-    
-    // STEP 1
-    if (data.AssignedToId === data.Approval1Id) {
-      payload = {
-        ApproverComment1: comment,
-        ActionDate1: new Date().toISOString(),
-        AssignedToId: Number(data.Approval2Id) || null,
-        Status: "Pending"
-      };
-    }
-
-    // STEP 2
-    else if (data.AssignedToId === data.Approval2Id) {
-      payload = {
-        ApproverComment2: comment,
-        ActionDate2: new Date().toISOString(),
-        AssignedToId: Number(data.Approval3Id) || null,
-        Status: "Pending"
-      };
-    }
-
-    // FINAL STEP
-    else if (data.AssignedToId === data.Approval3Id) {
-      payload = {
-        ApproverComment3: comment,
-        ActionDate3: new Date().toISOString(),
-        AssignedToId: null,
-        Status: "Approved"
-      };
-    }
-
-    if (Object.keys(payload).length === 0) {
-      alert("No approval action available ❌");
-      return;
-    }
-
-    console.log("FINAL PAYLOAD:", payload);
-
-    // 🔹 UPDATE ITEM
-    await props.spHttpClient.post(
-      `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
-      SPHttpClient.configurations.v1,
-      {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'IF-MATCH': '*',
-          'X-HTTP-Method': 'MERGE'
-        },
-        body: JSON.stringify(payload)
-      }
-    );
-
-    // 🔹 HISTORY SAVE
-    await handleSaveHistory(itemId, "Approved");
-
-    alert("Approved Successfully ✅");
-
-    // 🔹 UI UPDATE (IMPORTANT)
-    setData(prev => prev ? { ...prev, ...payload } : prev);
-    setIsActionDone(true);
-
-    // 🔹 REDIRECT
- window.location.assign(
-  `${props.siteUrl}/SitePages/Dashboard.aspx`
-);
-
-  } catch (error) {
-    console.error("APPROVE ERROR:", error);
-  } finally {
-    setLoading(false);
+//  UPDATE LIST
+await props.spHttpClient.post(
+  `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+  SPHttpClient.configurations.v1,
+  {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'IF-MATCH': '*',
+      'X-HTTP-Method': 'MERGE'
+    },
+    body: JSON.stringify(payload)
   }
-};
+);
 
       await handleSaveHistory(itemId, status);
 
@@ -352,7 +302,7 @@ const handleApprove = async () => {
         );
       }
 
-      setData((previous) => previous ? { ...previous, Status: status, ApproverComment1: comment } : previous);
+      setData(prev => prev ? { ...prev, ...payload } : prev);
       setStatusMsg(`${status} successfully.`);
       setIsActionDone(true);
       await fetchHistory();
