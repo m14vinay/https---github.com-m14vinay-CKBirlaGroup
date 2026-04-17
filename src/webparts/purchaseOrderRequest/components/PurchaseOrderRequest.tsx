@@ -600,6 +600,9 @@ else
           RequestNo: counterResult.requestNo
           //RequestNo : `CKBCSL/${getFinancialYear()}/${getShortName(form.PoMaster)}/${form.Department}/${res.Id}`
         });
+         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    window.location.assign(url);  
+    
      }
     }
   } 
