@@ -74,10 +74,12 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
       if (Expensedata.value.length > 0) {
         for (let i = 0; i < Expensedata.value.length; i++) {
           {
-            setExpenseForm({
-              ...Expenseform,
-              expenses: [...Expenseform.expenses, Expensedata.value[i]]
-            });
+             setExpenseForm(prev => {
+      return {
+        ...prev,
+        expenses: [...prev.expenses, Expensedata.value[i]]
+      };
+    });
           }
         }
       }
