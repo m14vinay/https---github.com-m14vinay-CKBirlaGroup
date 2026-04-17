@@ -41,7 +41,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
   const [AssignedID, setAssignedID] = React.useState<number | null>(null);
   const [AssignedToEmail, setAssignedToEmail] = React.useState<number | null>(null);
   const [Expenseform, setExpenseForm] = React.useState<{
-    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string }[];
+    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string, files: [] }[];
   }>({
     expenses: []
   });
@@ -178,7 +178,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment1: form.Comments,
             CurrentStatus: 'Pending',
             ActionDate1: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval2?.Title),
+            AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
         }
@@ -188,7 +188,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment2: form.Comments,
             CurrentStatus: 'Pending',
             ActionDate2: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval3?.Title),
+            AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
         }
@@ -198,7 +198,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment3: form.Comments,
             CurrentStatus: 'Pending',
             ActionDate3: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval4?.Title),
+            AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
         }
@@ -208,7 +208,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             CurrentStatus: 'Approved',
             ActionDate4: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Approved',
-            AssignedToEmailId:0
+            AssignedToEmailId: 0
           };
         }
       }
@@ -219,7 +219,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment1: form.Comments,
             CurrentStatus: 'Pending',
             ActionDate1: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval2?.Title),
+            AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
         }
@@ -229,7 +229,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment2: form.Comments,
             CurrentStatus: 'Pending',
             ActionDate2: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval3?.Title),
+            AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
         }
@@ -239,7 +239,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment4: form.Comments,
             CurrentStatus: 'Pending',
             ActionDate3: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval4?.Title),
+            AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
         }
@@ -255,12 +255,12 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
       }
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
-          await handleSaveApproveHistory(itemId, form.Comments, 'Approved');
-          alert("Approved Successfully.");
-          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-          window.location.assign(url);
-          setComment('');
-          return;
+        await handleSaveApproveHistory(itemId, form.Comments, 'Approved');
+        alert("Approved Successfully.");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
+        setComment('');
+        return;
       }
     } catch (error) {
       console.error(error);
@@ -306,7 +306,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment1: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate1: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval2?.Title),
+            AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
         }
@@ -316,7 +316,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment2: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate2: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval3?.Title),
+            AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
         }
@@ -326,7 +326,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment3: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate3: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval4?.Title),
+            AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
         }
@@ -347,7 +347,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment1: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate1: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval2?.Title),
+            AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
         }
@@ -357,7 +357,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment2: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate2: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval3?.Title),
+            AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
         }
@@ -367,7 +367,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment3: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate3: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: Number(UserApproval4?.Title),
+            AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
         }
@@ -383,12 +383,12 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
       }
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
-          await handleSaveApproveHistory(itemId, form.Comments, 'Rejected');
-          alert("Rejected Successfully.");
-          setComment('');
-          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-          window.location.assign(url);
-          return;
+        await handleSaveApproveHistory(itemId, form.Comments, 'Rejected');
+        alert("Rejected Successfully.");
+        setComment('');
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
+        return;
       }
     } catch (error) {
       console.error(error);

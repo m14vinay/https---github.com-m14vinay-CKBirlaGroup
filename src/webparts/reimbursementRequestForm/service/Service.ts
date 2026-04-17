@@ -226,8 +226,7 @@ DepartmentHead/Id,DepartmentHead/Title
       SPHttpClient.configurations.v1,
       {
         headers: {
-          "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/octet-stream"
+           "Accept": "application/json;odata=nometadata"
         },
         body: buffer
       }
