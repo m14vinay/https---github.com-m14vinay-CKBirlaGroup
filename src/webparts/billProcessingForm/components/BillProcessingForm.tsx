@@ -212,6 +212,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           projectTitle: '',
           DepartmentName: ''
         }));
+        alert("Request is not approved.");
       }
     }
 
@@ -394,7 +395,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         Approver2Id: databillingApprover.Billing2ndApprover?.Id,
         Approver3Id: dataFinanceApprover.FinanceController?.Id,
         Approver5Id: databillingApprover.Billing2ndApprover?.Id,
-        ApprovalPath:'1.'+User?.Title.toString()+' 2.'+databillingApprover.Billing2ndApprover?.Title.toString()+' 3.'+databillingApprover.Billing2ndApprover?.Title.tostring()
+        ApprovalPath:'1.'+User?.Title+' 2.'+databillingApprover.Billing2ndApprover?.Title+' 3.'+databillingApprover.Billing2ndApprover?.Title
       };
       if (!itemId) {
         // 🔹 CREATE
