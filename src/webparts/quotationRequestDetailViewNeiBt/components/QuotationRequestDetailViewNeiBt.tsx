@@ -210,35 +210,41 @@ const handleFetchById = async (id: number) => {
           <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly style={{backgroundColor:"lightgray"}}  />
           </div>
 
-           <div className={styles.formGroup}>
-          <label>Vendor 1</label>
-          <input name="Vendor1" value={form.Vendor1} readOnly style={{backgroundColor:"lightgray"}}/>
-          </div>
-
-             <div className={styles.formGroup}>
-          <label>Vendor 2</label>
-          <input name="Vendor2" value={form.Vendor2} readOnly style={{backgroundColor:"lightgray"}} />
-          </div>
-
-           <div className={styles.formGroup}>
-          <label>Vendor 3</label>
-          <input name="Vendor3" value={form.Vendor3} readOnly style={{backgroundColor:"lightgray"}}/>
-          </div>
-        <div className={styles.formGroup}>
-          <label>Quote 1</label>
-          <input name="Quote1" value={form.Quote1} readOnly style={{backgroundColor:"lightgray"}}/>
-          </div>
+         <div className={styles.twoColumnRow}>
+                       <div className={styles.fieldBlock}>
+                         <label>Vendor 1 <span className={styles.required}>*</span></label>
+                          <input name="Vendor1" value={form.Vendor1} readOnly style={{backgroundColor:"lightgray"}}/>
+                       </div>
+                       <div className={styles.fieldBlock}>
+                         <label>Quote 1 <span className={styles.required}>*</span></label>
+                          <input name="Quote1" value={form.Quote1} readOnly style={{backgroundColor:"lightgray"}} />
+                       </div>
+                     </div>
          
-           <div className={styles.formGroup}>
-          <label>Quote 2</label>
-          <input name="Quote2" value={form.Quote2} readOnly  style={{backgroundColor:"lightgray"}}/>
-          </div>
-
-           <div className={styles.formGroup}>
-          <label>Quote 3</label>
-          <input name="Quote3" value={form.Quote3} readOnly style={{backgroundColor:"lightgray"}}/>
-           </div>
-
+                      <div className={styles.twoColumnRow}>
+                                   <div className={styles.fieldBlock}>
+                                     <label>Vendor 2</label>
+                                   <input name="Vendor2" value={form.Vendor2} readOnly style={{backgroundColor:"lightgray"}} />
+         
+                                   </div>
+                                   <div className={styles.fieldBlock}>
+                                     <label>Quote 2</label>
+                                     <input name="Quote2" value={form.Quote2} readOnly style={{backgroundColor:"lightgray"}} />
+                                   </div>
+                                 </div>
+         
+                         <div className={styles.twoColumnRow}>
+                       <div className={styles.fieldBlock}>
+                         <label>Vendor 3</label>
+                        <input name="Quote2" value={form.Quote3} readOnly style={{backgroundColor:"lightgray"}} />
+                       </div>
+                         
+                       <div className={styles.fieldBlock}>
+                          <label>Quote 3</label>
+                         <input name="Quote3" value={form.Quote3} readOnly style={{backgroundColor:"lightgray"}} />
+         
+                       </div>
+                     </div>
              <div className={styles.formGroup}>
           <label>Select Vendor</label>
           <input name="Selectedvendor" value={form.Selectedvendor} style={{backgroundColor:"lightgray"}} />

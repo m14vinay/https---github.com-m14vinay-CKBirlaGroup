@@ -23,6 +23,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     ApplicableTaxes: 0,
     AssignedTo: '',
     PoMaster: '',
+    ApprovalPath:'',
      POCategory: '',
     Comments: '',
    files: [] as File[],
@@ -244,6 +245,7 @@ const handlecheckamount=async (e: React.ChangeEvent<HTMLInputElement>) => {
     alert("Please Enter PO Amount Less or Equal To Remaining Amount.");
   }
 }
+
 const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const value = e.target.value.toUpperCase();
   setForm(prev => ({
@@ -257,9 +259,12 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
 
   try {
     const result = await service.getRequestDetails(value);
-    const data= result[0].RequestNo
+    const data= result[0].RequestNo 
       const Vendor = await service.getRequestVendorDetails(data);
-      
+      const matchedVendor = Vendor
+  .filter((v: any) => v.CurrentStatus === "Approved")
+  .sort((a: any, b: any) => b.Id - a.Id)[0];
+
     if (result.length > 0) {
       const item = result[0];
       const OccupiedAmount = await service.getTotaloccupiedAmount(value);
@@ -269,13 +274,13 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
           return sum + Number(items.POAmount || 0);
         }, 0);
       }
-        if (item.CurrentStatus === 'Approved') {
+        if (matchedVendor) {
       // 👉 Form fields update
       setForm(prev => ({
         ...prev,
         Department: item.Department || '',
         projectTitle: item.ProjectTitle || '',
-       // vendorName: item.Selectedvendor || '',
+        //vendorName: item.Selectedvendor || '',
          vendorName: Vendor[0].VendorName || '',
         TotalAmount:item.TotalProjectAmount || 0,
         OccupiedAmount:total||0,
@@ -312,6 +317,11 @@ const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => 
     resetFields();
   }
 };
+
+
+
+
+
  
   // 🔹 PO Category Options
   const poOptions: IChoiceGroupOption[] = [
@@ -362,6 +372,9 @@ const getShortName = (value: string) => {
     [name]: value
   });
 };
+
+
+
 
 
 const handleSaveHistory = async (id: number) => {
@@ -426,6 +439,8 @@ return {
 };
 
 
+
+
 //SAVE DRAFT DATA
 
   const handleSaveOrUpdate = async () => {
@@ -453,6 +468,7 @@ return {
     RemainingAmount: Number(form.RemainingAmount),
     POAmount: form.POAmount,
     ApplicableTaxes: form.ApplicableTaxes,
+    
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
     CurrentStatus:'Draft'
@@ -497,6 +513,8 @@ return {
   }
 };
 
+
+
   
 
 // Update
@@ -513,14 +531,38 @@ const handleUpdate = async () => {
 ) {
   return alert("Please Attach files");
 }
+
+       const finApprover = await service.GetApproverFromFinancecontroller(); 
+    
         const dataApprover = await service.GetApproverFromFinance(form.PoMaster);
+        const approvalPathIC = [
+  { name: AssignedID },
+  { name: dataApprover?.FinanceController?.Title, }
+ 
+];
+      //  if(form.PoMaster==='Internal Compliance')
+      //  {
+      //   if(dataApprover?.Id)
+      //   {
+      //     setDepartmentHead(dataApprover.FinanceController?.Id || null);
+      //     //const item = dataApprover?.FinanceController?.Id;
+      //     //setApprover2ID(dataApprover.FinanceController?.Id || null);
+      //   }
+      //   else{
+      //      setApprover2ID(dataApprover.FinanceController?.Id || null);
+      //   }
+      // }
+         let payload = {};
+         if(form.PoMaster==='Internal Compliance')
+       {
         if(dataApprover?.Id)
         {
+          setDepartmentHead(dataApprover.FinanceController?.Id || null);
           //const item = dataApprover?.FinanceController?.Id;
-          setApprover2ID(dataApprover.FinanceController?.Id || null);
+          //setApprover2ID(dataApprover.FinanceController?.Id || null);
         }
-       
-  const payload = {
+   payload = {
+    
     Title:"Testing",
     ProjectCode: form.projectCode,
     ProjectTitle: form.projectTitle,
@@ -534,12 +576,36 @@ const handleUpdate = async () => {
     PoMaster:form.PoMaster,
     ProjectDescription: form.Comments,
     CurrentStatus:'Pending',
+    AssignedTo: dataApprover?.FinanceController?.Title,
+    ApprovalPath: dataApprover?.FinanceController?.Title,
+    DepartmentHeadId: dataApprover?.FinanceController?.Id,
+    AssignedToEmailId: dataApprover?.FinanceController?.Id
+    //Approver2Id: dataApprover?.FinanceController?.Id
+  };
+       }
+else
+  payload = {
+    
+    Title:"Testing",
+    ProjectCode: form.projectCode,
+    ProjectTitle: form.projectTitle,
+    VendorName: form.vendorName,
+   TotalAmount:Number(form.TotalAmount),
+    OccupiedAmount: Number(form.OccupiedAmount),
+    RemainingAmount: Number(form.RemainingAmount),
+    Department: form.Department,
+    POAmount: form.POAmount,
+    ApplicableTaxes: form.ApplicableTaxes,
+    PoMaster:form.PoMaster,
+    ProjectDescription: form.Comments,
+    CurrentStatus:'Pending',
+    ApprovalPath: approvalPathIC.map(a => a.name).join(" > "),
     AssignedTo: AssignedID,
     DepartmentHeadId: Number(Departmenthead),
     AssignedToEmailId:Number(Departmenthead),
     Approver2Id: dataApprover?.FinanceController?.Id
-  };
-  
+  }
+
     if (itemId) {       
      await service.updateItem(itemId, payload);
      await handleSaveHistory(itemId);
@@ -549,8 +615,8 @@ const handleUpdate = async () => {
       }
     }
     alert("Submitted Successfully.✅");    
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-    window.location.assign(url);  
+    // const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    // window.location.assign(url);  
     }
     else{
      const res= await service.createItem(payload);

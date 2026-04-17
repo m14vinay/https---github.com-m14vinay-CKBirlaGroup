@@ -36,6 +36,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     DepartmentHead: '',
     CurrentStatus: '',
     Approver2Id: '',
+    ApprovalPath:'',
     ApproverToEmail: '',
     Approver2EmailId: 0,
     RequestNo: ''
@@ -149,6 +150,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
             ProjectDescription: result.ProjectDescription || '',
             ActionDate1: result.ActionDate1 || '',
             ActionDate2: result.ActionDate2 || '',
+         ApprovalPath: result.ApprovalPath || '',
             approver2: User?.Title || '',
             Approver2EmailId: result.Approver2Id,
             RequestNo: result.RequestNo,
@@ -224,6 +226,16 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
       if (!approverComment) return alert("Enter Approver Comment");
       
       if (!itemId) return;
+      if (!form.Approver2EmailId) {
+      await service.updateItemdata(itemId, "Approved", approverComment,0,"");
+
+      await handleSaveApproveHistory(itemId);
+      alert("✅ Final Approved");
+
+      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+      return;
+    }
+
      if(form.ActionDate1==='')
      {
       await service.updateItemdata(itemId, "Pending", approverComment,form.Approver2EmailId,form.approver2 || '');
@@ -264,6 +276,16 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
         alert("Comment is required for rejection ❗");
         return;
       }
+
+        if (!form.Approver2Id) {
+      await service.updateItemdata(itemId, "Rejected", approverComment,0,"");
+
+      await handleSaveApproveHistory(itemId);
+      alert("✅ Final Rejected successfully");
+
+      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+      return;
+    }
       if (form.ActionDate1 === '') {
         await service.updateItemdata(itemId, "Rejected", approverComment, form.Approver2EmailId, "Rejected",);
         await handleSaveRejectedHistory(itemId);
@@ -348,6 +370,10 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
                 <label>PO Category</label>
                 <input name="POCategory" value={form.PoMaster} readOnly style={{ backgroundColor: "lightgray" }} />
               </div>
+               <div className={styles.formGroup}>
+              <label>Approval Path</label>
+          <input name="ApprovalPath" value={form.ApprovalPath}  readOnly style={{backgroundColor:"lightgray"}} />
+          </div>
               <div className={styles.formGroup}>
                 <label>Additional Information & Remarks</label>
                 <input name="comments" value={form.ProjectDescription} readOnly style={{ backgroundColor: "lightgray" }} />

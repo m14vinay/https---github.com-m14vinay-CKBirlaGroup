@@ -32,6 +32,7 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
     approver4: '',
     approver5: '',
     DepartmentHead: '',
+    ApprovalPath:'',
     CurrentStatus: '',
     RequestNo: ''
 
@@ -141,6 +142,7 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
           POAmount: result.POAmount || 0,
          PoMaster: result.PoMaster || '',
           ApplicableTaxes: result.ApplicableTaxes || 0,
+           ApprovalPath: result.ApprovalPath || '',
           ProjectDescription: result.ProjectDescription || '',
           RequestNo: result.RequestNo,
           CurrentStatus: result.CurrentStatus,
@@ -252,6 +254,10 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
                 <label>PO Category</label>
                 <input name="POCategory" value={form.PoMaster} readOnly style={{ backgroundColor: "lightgray" }} />
               </div>
+                    <div className={styles.formGroup}>
+                            <label>Approval Path</label>
+                        <input name="ApprovalPath" value={form.ApprovalPath}  readOnly style={{backgroundColor:"lightgray"}} />
+                        </div>
               <div className={styles.formGroup}>
                 <label>Additional Information & Remarks</label>
                 <input name="comments" value={form.ProjectDescription} readOnly style={{ backgroundColor: "lightgray" }} />

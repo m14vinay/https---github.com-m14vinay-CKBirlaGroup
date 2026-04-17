@@ -403,26 +403,24 @@ const item = users?.Approver?.Id;
     window.location.assign(url);  
     }
     else{
-     const res= await service.createItem(payload);
-      setItemId(res.Id);
-     await handleSaveHistory(res.Id);
-     if(res.Id>0)
-     {
-     if (res.Id > 0 && form.files.length > 0) {
+         const res = await service.createItem(payload);
+        setItemId(res.Id);
+         await handleSaveHistory(res.Id);
+               // store ID for future update
+       if (res.Id > 0 && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id , form.files[i]);
+        }
       }
-      alert("Submitted Successfully.✅");   
-      await service.updateItem(res.Id, {
+      alert("Submitted Successfully.✅");
+       await service.updateItem(res.Id, {
        RequestNo: `VMR-${res.Id}`
-  }); 
+  });    
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
      }
     }    
-    }
-
-  }
+  
        
    catch (error) {
     console.error(error);
