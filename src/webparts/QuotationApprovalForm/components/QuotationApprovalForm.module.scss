@@ -270,6 +270,21 @@ button {
   color: #fff;
 }
 
+/* 🔥 TWO COLUMN FORM ROW */
+.twoColumnRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+/* Each field block */
+.fieldBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+
 .required {
   color: red;
   margin-left: 2px;
