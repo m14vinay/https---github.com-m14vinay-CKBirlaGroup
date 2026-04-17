@@ -252,9 +252,9 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         DepartmentName: form.DepartmentName,
         CurrentStatus: 'Pending',
         AssignedToEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
-        AssignedTo: dataApproverFI.ApproverName?.Title.toString() || "",
-        DepartmentHead: dataApproverFI.ApproverName?.Title.toString() || "",
-        ApprovalPath:'1.'+dataApproverFI.ApproverName?.Title.toString()
+        AssignedTo: dataApproverFI.ApproverName?.Title || "",
+        DepartmentHead: dataApproverFI.ApproverName?.Title || "",
+        ApprovalPath:'1.'+dataApproverFI.ApproverName?.Title
       };
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -264,13 +264,13 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         DepartmentName: form.DepartmentName,
         CurrentStatus: 'Pending',
         AssignedToEmailId: Number(dataApprover.DepartmentHead?.Id || 0),
-        DepartmentHead: dataApprover.DepartmentHead?.Title.toString() || "",
-        FIApporver: dataApproverFI.ApproverName?.Title.toString() || "",
+        DepartmentHead: dataApprover.DepartmentHead?.Title || "",
+        FIApporver: dataApproverFI.ApproverName?.Title || "",
         FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         ComplianceHeadEmailId: 0,
         CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
-        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || "",
-        ApprovalPath:'1.'+dataApprover.DepartmentHead?.Title.toString()+' 2.'+dataApproverFI.ApproverName?.Title.toString()+' 3.'+dataApproverCFO.ApproverName?.Title.tostring()
+        AssignedTo: dataApprover.DepartmentHead?.Title || "",
+        ApprovalPath:'1.'+dataApprover.DepartmentHead?.Title+' 2.'+dataApproverFI.ApproverName?.Title+' 3.'+dataApproverCFO.ApproverName?.Title
       }
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -280,13 +280,13 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         DepartmentName: form.DepartmentName,
         CurrentStatus: 'Pending',
         AssignedToEmailId: Number(dataApprover.DepartmentHead?.Id || 0),
-        DepartmentHead: dataApprover.DepartmentHead?.Title.toString() || "",
-        FIApporver: dataApproverFI.ApproverName?.Title.toString() || "",
+        DepartmentHead: dataApprover.DepartmentHead?.Title || "",
+        FIApporver: dataApproverFI.ApproverName?.Title || "",
         FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
         CFOEmailId: 0,
-        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || "",
-        ApprovalPath:'1.'+dataApprover.DepartmentHead?.Title.toString()+' 2.'+dataApproverFI.ApproverName?.Title.toString()+' 3.'+dataApproverCompliance.ApproverName?.Title.tostring()
+        AssignedTo: dataApprover.DepartmentHead?.Title || "",
+        ApprovalPath:'1.'+dataApprover.DepartmentHead?.Title+' 2.'+dataApproverFI.ApproverName?.Title+' 3.'+dataApproverCompliance.ApproverName?.Title
       }
     }
     try {
