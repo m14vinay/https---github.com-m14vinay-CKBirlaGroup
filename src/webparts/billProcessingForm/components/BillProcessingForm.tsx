@@ -231,6 +231,21 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       [name]: value
     });
   };
+  const handleBillDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const selectedDate = new Date(value);
+  const today = new Date();
+  // remove time part
+  today.setHours(0, 0, 0, 0);
+  if (selectedDate > today) {
+    alert("Bill date cannot be greater than current date");
+    return; // ❌ stop updating state
+  }
+  setForm({
+    ...form,
+    [name]: value
+  });
+  };
 
   const handleAmountCalculateChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -488,7 +503,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                 form.BillDate
                   ? new Date(form.BillDate).toISOString().split('T')[0]
                   : ''
-              } onChange={handleChange}>
+              } onChange={handleBillDateChange}>
               </input>
 
               <label>Bill Amount</label>

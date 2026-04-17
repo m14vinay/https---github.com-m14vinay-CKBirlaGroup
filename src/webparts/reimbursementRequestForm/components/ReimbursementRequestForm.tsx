@@ -28,7 +28,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     ExpenseID: '',
     DocumentName: '',
     DocumentID: '',
-    files: []
+    files: [],
+    ApprovalPath:''
   });
   const [loading, setLoading] = React.useState(false);
   const [isOpen, setisOpen] = React.useState(false);
@@ -197,7 +198,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         DocumentName: '',
         DocumentID: '',
         ID: 0,
-        files: []
+        files: [],
+        ApprovalPath:''
       });
     }
   };
@@ -252,6 +254,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         AssignedToEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         AssignedTo: dataApproverFI.ApproverName?.Title.toString() || "",
         DepartmentHead: dataApproverFI.ApproverName?.Title.toString() || "",
+        ApprovalPath:'1.'+dataApproverFI.ApproverName?.Title.toString()
       };
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -266,7 +269,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         ComplianceHeadEmailId: 0,
         CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
-        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || ""
+        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || "",
+        ApprovalPath:'1.'+dataApprover.DepartmentHead?.Title.toString()+' 2.'+dataApproverFI.ApproverName?.Title.toString()+' 3.'+dataApproverCFO.ApproverName?.Title.tostring()
       }
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -281,7 +285,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
         CFOEmailId: 0,
-        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || ""
+        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || "",
+        ApprovalPath:'1.'+dataApprover.DepartmentHead?.Title.toString()+' 2.'+dataApproverFI.ApproverName?.Title.toString()+' 3.'+dataApproverCompliance.ApproverName?.Title.tostring()
       }
     }
     try {

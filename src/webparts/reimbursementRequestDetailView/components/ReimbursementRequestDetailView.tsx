@@ -25,7 +25,8 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
     ExpenseID: '',
     DocumentName: '',
     DocumentID: '',
-    CurrentStatus: ''
+    CurrentStatus: '',
+    ApprovalPath:''
   });
   const [loading, setLoading] = React.useState(false);
   const [History, setHistory] = React.useState<any[]>([]);
@@ -68,7 +69,8 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
         DepartmentName: data.DepartmentName,
         Remarks: data.Remarks,
         TotalAmount: data.TotalClaimAmount,
-        CurrentStatus:data.CurrentStatus
+        CurrentStatus:data.CurrentStatus,
+        ApprovalPath:data.ApprovalPath
       });
       const Expensedata = await service.getItemByExpenseData(requestNo);
       if (Expensedata.value.length > 0) {
@@ -105,7 +107,8 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
         DocumentName: '',
         DocumentID: '',
         ID: 0,
-        CurrentStatus: ''
+        CurrentStatus: '',
+        ApprovalPath:''
       });
     }
   };
@@ -212,6 +215,10 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                 ))}
               </div>
               <div className={styles.form}>
+                <div className={styles['form-group']}>
+                  <label>Approval Path</label>
+                  <input type='text' className="form-control" name="ApprovalPath" value={form.ApprovalPath} readOnly style={{ backgroundColor: "lightgray" }} />
+                </div>
                 <div className={styles['form-group']}>
                   <label>Total Amount</label>
                   <input type='number' className="form-control" name="TotalAmount" value={form.TotalAmount} readOnly style={{ backgroundColor: "lightgray" }} />

@@ -33,7 +33,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
     ActionDate4: '',
     FIApproverEmailId: 0,
     ComplianceHeadEmailId: 0,
-    CFOEmailId: 0
+    CFOEmailId: 0,
+    ApprovalPath:''
   });
   const [loading, setLoading] = React.useState(false);
   const [History, setHistory] = React.useState<any[]>([]);
@@ -93,8 +94,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate4: data.ActionDate4 || '',
             FIApproverEmailId: data.FIApproverEmailId || 0,
             ComplianceHeadEmailId: data.ComplianceHeadEmailId || 0,
-            CFOEmailId: data.CFOEmailId || 0
-
+            CFOEmailId: data.CFOEmailId || 0,
+            ApprovalPath:data.ApprovalPath
           });
           if (User?.Id) {
             setAssignedID(User.Title);
@@ -143,7 +144,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate4: '',
             FIApproverEmailId: 0,
             ComplianceHeadEmailId: 0,
-            CFOEmailId: 0
+            CFOEmailId: 0,
+            ApprovalPath:''
           });
           alert("Record is already Rejected.");
           return;
@@ -502,6 +504,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                 ))}
               </div>
               <div className={styles.form}>
+                <div className={styles['form-group']}>
+                  <label>Approval Path</label>
+                  <input type='text' className="form-control" name="ApprovalPath" value={form.ApprovalPath} readOnly style={{ backgroundColor: "lightgray" }} />
+                </div>
                 <div className={styles['form-group']}>
                   <label>Total Amount</label>
                   <input type='number' className="form-control" name="TotalAmount" value={form.TotalAmount} readOnly style={{ backgroundColor: "lightgray" }} />
