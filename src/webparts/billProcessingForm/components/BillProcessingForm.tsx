@@ -24,7 +24,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     files: [],
     CurrentStatus: '',
     DepartmentName: '',
-    POAmount: 0
+    POAmount: 0,
+    ApprovalPath:''
   });
   const [POOptions, setPOOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
@@ -219,10 +220,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
 
     }
   };
-  // 🔹 Load data
-  React.useEffect(() => {
-  }, []);
-
   // // 🔹 Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -396,7 +393,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         DepartmentHeadId: data.Departmenthead?.Id,
         Approver2Id: databillingApprover.Billing2ndApprover?.Id,
         Approver3Id: dataFinanceApprover.FinanceController?.Id,
-        Approver5Id: databillingApprover.Billing2ndApprover?.Id
+        Approver5Id: databillingApprover.Billing2ndApprover?.Id,
+        ApprovalPath:'1.'+User?.Title.toString()+' 2.'+databillingApprover.Billing2ndApprover?.Title.toString()+' 3.'+databillingApprover.Billing2ndApprover?.Title.tostring()
       };
       if (!itemId) {
         // 🔹 CREATE
