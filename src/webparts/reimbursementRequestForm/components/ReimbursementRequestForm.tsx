@@ -229,6 +229,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     });
   };
   const handleExpenseSubmit = () => {
+     if(form.files.length<0)
+  {alert("Please upload file.")}
     const newExpense = {
       Id: 0,
       Description: form.Description,
@@ -371,7 +373,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                     for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
                       await service.uploadFile(Number(Expenseform.expenses[i].Id), Expenseform.expenses[i].files[i]);
                     }
-                  }     
+                  }
               }              
             }
             const payload = {
@@ -477,13 +479,6 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               };
               if (Number(Expenseform.expenses[i].Id) > 0) {
                 const res = await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);
-                if (Number(Expenseform.expenses[i].Id) > 0) {
-                  if (Number(Expenseform.expenses[i].Id) > 0 && Expenseform.expenses[i].files.length > 0) {
-                    for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
-                      await service.uploadFile(Number(Expenseform.expenses[i].Id), Expenseform.expenses[i].files[i]);
-                    }
-                  }  
-                }
               }
               else {
                 const res = await service.createExpenseItem(Expensepayload);
@@ -540,7 +535,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         ExpenseID: '',
         ExpenseName: '',
         DocumentName: '',
-        DocumentID: ''
+        DocumentID: '',
+        files:[]
       }));
     setisOpen(true);
     setLoading(false);
