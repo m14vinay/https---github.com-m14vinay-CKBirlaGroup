@@ -455,8 +455,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               <h4>Bill Processing / Request Form</h4>
               <div className={styles['col-md-12']}>
                 <div className={styles["formGroup"]}>
-                  <label className='form-control' style={{ display: "inline-flex" }}>Bill Signed<span className={styles.required}>*</span></label>
-                  <input className='form-control' style={{ width: "15%" }} type="checkbox" name='POsigned' checked={isChecked} onChange={(e) => setIsChecked(e.target.checked)} />
+                  <label style={{ display: "inline-flex" }}>Bill Signed<span className={styles.required}>*</span></label>
+                  <input style={{ width: "15%" }} type="checkbox" name='POsigned' checked={isChecked} onChange={(e) => setIsChecked(e.target.checked)} />
                 </div>
               </div>
               <label>Project Code <span className={styles.required}>*</span></label>
