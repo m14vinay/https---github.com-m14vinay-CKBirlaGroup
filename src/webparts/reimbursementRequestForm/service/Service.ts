@@ -204,7 +204,7 @@ DepartmentHead/Id,DepartmentHead/Title
   }
   public async getItemByExpenseData(ID: number): Promise<any> {
 
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$filter=ReimursementLookup eq ${ID}`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$filter=ReimursementLookup eq ${ID}&$expand=AttachmentFiles`;
 
     const res = await this.context.spHttpClient.get(
       url,
@@ -216,7 +216,9 @@ DepartmentHead/Id,DepartmentHead/Title
   }
   // Upload Files
   public async uploadFile(itemId: number, file: File): Promise<void> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
+    try
+    {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
 
     const buffer = await file.arrayBuffer();
     await this.context.spHttpClient.post(
@@ -224,11 +226,15 @@ DepartmentHead/Id,DepartmentHead/Title
       SPHttpClient.configurations.v1,
       {
         headers: {
-          "Accept": "application/json;odata=nometadata"
+           "Accept": "application/json;odata=nometadata"
         },
         body: buffer
       }
     );
+  }catch(error)
+  {
+
+  }
   }
   // Delete by ID
   public async deleteExpense(ID: number): Promise<boolean> {

@@ -28,7 +28,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     ExpenseID: '',
     DocumentName: '',
     DocumentID: '',
-    files: []
+    files: [],
+    ApprovalPath:''
   });
   const [loading, setLoading] = React.useState(false);
   const [isOpen, setisOpen] = React.useState(false);
@@ -62,24 +63,6 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       files: prev.files.filter((_: File, i: number) => i !== index)
     }));
   };
-  // Get Data After Selection the Document
-  const handleDocumentChange = async (option?: IDropdownOption) => {
-    setLoading(true);
-    if (!option) return;
-    const data = await service.getDocumentDetailsID(Number(option.key));
-    console.log(data);
-    setBillAmount(data[0].BillAmount);
-    setForm({
-      ...form,
-      BillAmount: data[0].BillAmount,
-      BillNo: data[0].BillNumber,
-      BillDate: data[0].BillDate,
-      DocumentName: option.text,
-      DocumentID: option.key as string
-    });
-    setLoading(false);
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
@@ -215,7 +198,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         DocumentName: '',
         DocumentID: '',
         ID: 0,
-        files: []
+        files: [],
+        ApprovalPath:''
       });
     }
   };
@@ -229,6 +213,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     });
   };
   const handleExpenseSubmit = () => {
+    if (form.files.length < 0) { alert("Please upload file.") }
     const newExpense = {
       Id: 0,
       Description: form.Description,
@@ -269,6 +254,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         AssignedToEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         AssignedTo: dataApproverFI.ApproverName?.Title.toString() || "",
         DepartmentHead: dataApproverFI.ApproverName?.Title.toString() || "",
+        ApprovalPath:'1.'+dataApproverFI.ApproverName?.Title.toString()
       };
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -283,7 +269,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         ComplianceHeadEmailId: 0,
         CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
-        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || ""
+        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || "",
+        ApprovalPath:'1.'+dataApprover.DepartmentHead?.Title.toString()+' 2.'+dataApproverFI.ApproverName?.Title.toString()+' 3.'+dataApproverCFO.ApproverName?.Title.tostring()
       }
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -298,7 +285,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         FIApproverEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
         CFOEmailId: 0,
-        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || ""
+        AssignedTo: dataApprover.DepartmentHead?.Title.toString() || "",
+        ApprovalPath:'1.'+dataApprover.DepartmentHead?.Title.toString()+' 2.'+dataApproverFI.ApproverName?.Title.toString()+' 3.'+dataApproverCompliance.ApproverName?.Title.tostring()
       }
     }
     try {
@@ -328,8 +316,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 const resExpense = await service.createExpenseItem(Expensepayload);
                 if (resExpense.Id > 0) {
                   if (resExpense.Id > 0 && Expenseform.expenses[i].files.length > 0) {
-                    for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
-                      await service.uploadFile(res.Id, Expenseform.expenses[i].files[i]);
+                    for (let k = 0; k < Expenseform.expenses[i].files.length; k++) {
+                      await service.uploadFile(res.Id, Expenseform.expenses[i].files[k]);
                     }
                   }
                   const payload = {
@@ -366,26 +354,31 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                   DocumentName: Expenseform.expenses[i].DocumentName,
                   ReimursementLookupId: Number(itemId)
                 };
-                const res = await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);    
-                if (Number(Expenseform.expenses[i].Id) > 0 && Expenseform.expenses[i].files.length > 0) {
-                    for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
-                      await service.uploadFile(Number(Expenseform.expenses[i].Id), Expenseform.expenses[i].files[i]);
+                if (Number(Expenseform.expenses[i].Id) > 0) {
+                  await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);                 
+                }
+                else {
+                  const resExpense = await service.createExpenseItem(Expensepayload);                 
+                    if (resExpense.Id > 0 && Expenseform.expenses[i].files.length > 0) {
+                      for (let L = 0; L < Expenseform.expenses[i].files.length; L++) {
+                        await service.uploadFile(resExpense.Id, Expenseform.expenses[i].files[L]);
+                      }
                     }
-                  }     
-              }              
+                 }
+              }
+              const payload = {
+                Title: 'REM',
+                FID: itemId,
+                UserName: currentuser.Title,
+                UserAction: 'Request Initiator',
+                ActionDate: new Date().toISOString(),
+                Designation: 'Request Initiator',
+              };
+              await service.createHistoryItem(payload);
+              alert("Data Submitted Successfully ✅");
+              const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+              window.location.assign(url);
             }
-            const payload = {
-              Title: 'REM',
-              FID: itemId,
-              UserName: currentuser.Title,
-              UserAction: 'Request Initiator',
-              ActionDate: new Date().toISOString(),
-              Designation: 'Request Initiator',
-            };
-            await service.createHistoryItem(payload);
-            alert("Data Submitted Successfully ✅");
-            const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-            window.location.assign(url);
           }
         }
       }
@@ -416,49 +409,47 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       setLoading(true);
       if (Expenseform.expenses.length > 0) {
         if (!itemId) {
-          // 🔹 CREATE
           const res = await service.createItem(payload);
           if (res.Id > 0) {
-            setItemId(res.Id); // store ID for future updates   
-            const Updateres = await service.updateItem(res.Id, {
+            setItemId(res.Id);  
+            await service.updateItem(res.Id, {
               RequestNo: `REM-${res.Id}`
             });
-            if (res.Id > 0 && Expenseform.expenses.length > 0) {
-              for (let i = 0; i < Expenseform.expenses.length; i++) {
-                const Expensepayload = {
-                  ExpanseType: Expenseform.expenses[i].ExpanseType,
-                  BillNo: Expenseform.expenses[i].BillNo,
-                  BillAmount: Expenseform.expenses[i].BillAmount,
-                  BillDate: new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
-                  Description: Expenseform.expenses[i].Description,
-                  ClaimAmount: Expenseform.expenses[i].ClaimAmount,
-                  SupportedAttachment: 'Y',
-                  DocumentName: Expenseform.expenses[i].DocumentName,
-                  ReimursementLookupId: Number(res.Id)
-                };
-                const Expenseres = await service.createExpenseItem(Expensepayload);
-                if (Expenseres.Id > 0) {
-                  if (Expenseres.Id > 0 && Expenseform.expenses[i].files.length > 0) {
-                    for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
-                      await service.uploadFile(Expenseres.Id, Expenseform.expenses[i].files[i]);
-                    }
-                  }  
+            for (let i = 0; i < Expenseform.expenses.length; i++) {
+              const Expensepayload = {
+                ExpanseType: Expenseform.expenses[i].ExpanseType,
+                BillNo: Expenseform.expenses[i].BillNo,
+                BillAmount: Expenseform.expenses[i].BillAmount,
+                BillDate: new Date(Expenseform.expenses[i].BillDate).toISOString().split('T')[0],
+                Description: Expenseform.expenses[i].Description,
+                ClaimAmount: Expenseform.expenses[i].ClaimAmount,
+                SupportedAttachment: 'Y',
+                DocumentName: Expenseform.expenses[i].DocumentName,
+                ReimursementLookupId: Number(res.Id)
+              };
+              const Expenseres = await service.createExpenseItem(Expensepayload);
+              if (Expenseres.Id > 0) {
+                if (Expenseform.expenses[i].files.length > 0) {
+                  for (let k = 0; k < Expenseform.expenses[i].files.length; k++) {
+                    await service.uploadFile(Expenseres.Id, Expenseform.expenses[i].files[k]);
+                  }
                 }
               }
+            }
+            setExpenseForm({
+              ...Expenseform,
+              expenses: []
+            });
+            const Expensedata = await service.getItemByExpenseData(Number(res.Id));
+            if (Expensedata.value[0].Id > 0) {
               setExpenseForm({
                 ...Expenseform,
-                expenses: []
+                expenses: Expensedata.value
               });
-              const Expensedata = await service.getItemByExpenseData(Number(res.Id));
-              if (Expensedata.value[0].Id > 0) {
-                setExpenseForm({
-                  ...Expenseform,
-                  expenses: Expensedata.value
-                });
-                alert("Data Saved Successfully ✅");
-              }
+              alert("Data Saved Successfully ✅");
             }
           }
+
         } else {
           // 🔹 UPDATE
           await service.updateItem(itemId, payload);
@@ -476,23 +467,16 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 ReimursementLookupId: itemId
               };
               if (Number(Expenseform.expenses[i].Id) > 0) {
-                const res = await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);
-                if (Number(Expenseform.expenses[i].Id) > 0) {
-                  if (Number(Expenseform.expenses[i].Id) > 0 && Expenseform.expenses[i].files.length > 0) {
-                    for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
-                      await service.uploadFile(Number(Expenseform.expenses[i].Id), Expenseform.expenses[i].files[i]);
-                    }
-                  }  
-                }
+                await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);
               }
               else {
                 const res = await service.createExpenseItem(Expensepayload);
                 if (res.Id > 0) {
                   if (res.Id > 0 && Expenseform.expenses[i].files.length > 0) {
-                    for (let i = 0; i < Expenseform.expenses[i].files.length; i++) {
-                      await service.uploadFile(res.Id, Expenseform.expenses[i].files[i]);
+                    for (let L = 0; L < Expenseform.expenses[i].files.length; L++) {
+                      await service.uploadFile(res.Id, Expenseform.expenses[i].files[L]);
                     }
-                  }  
+                  }
                 }
               }
             }
@@ -540,7 +524,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         ExpenseID: '',
         ExpenseName: '',
         DocumentName: '',
-        DocumentID: ''
+        DocumentID: '',
+        files: []
       }));
     setisOpen(true);
     setLoading(false);

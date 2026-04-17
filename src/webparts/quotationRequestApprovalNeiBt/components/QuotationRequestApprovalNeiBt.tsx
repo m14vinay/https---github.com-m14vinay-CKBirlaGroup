@@ -240,70 +240,82 @@ const handleSaveRejectedHistory = async (id: number) => {
 };
 
 
-
-  const handleApprove = async () => {
+const handleApprove = async () => {
   try {
-     //setActionType('approve');
-      setLoading(true);
-       if (!approverComment) return alert("Enter Approver Comment.");
-    if (!itemId) return;
-if(form.ActionDate1===''&& form.Approval2==='')
-     {     
-      await service.updateItemdata(itemId,"Approved",approverComment,AssignedID2,form.Approver2EmailId);
-        await handleSaveApproveHistory(itemId);
-        alert("✅ Final Level Approved Successfully");
- const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-     window.location.assign(url); 
-      return; 
-     }
-     else
-      if(form.ActionDate1==='')
-        {
-          await service.updateItemdata(itemId,"Pending",approverComment,AssignedID2,form.Approver2EmailId);
-        await handleSaveApproveHistory(itemId);
-        alert("✅ First Level Approved Successfully");
- const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-     window.location.assign(url); 
-      return; 
-        }
-      
-     else if(form.ActionDate2===''&& form.Approval3==='')
-     {
-       await service.updateItemdata2(itemId,"Approved",approverComment,AssignedID3,form.Approver3EmailId);
-       await handleSaveApproveHistory(itemId);
-       alert("✅ Final Level Approved Successfully");
-       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-     window.location.assign(url); 
-      return; // 🔥 stop again
-    }
-    else if(form.ActionDate2==='')
-      {
-        await service.updateItemdata2(itemId,"Pending",approverComment,AssignedID3,form.Approver3EmailId);
-       await handleSaveApproveHistory(itemId);
-       alert("✅ Second Level Approved Successfully");
-       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-     window.location.assign(url); 
-      return; // 🔥 stop again
-      }
-    
-    else if(form.ActionDate3==='')
-     {
-       await service.updateItemdata3(itemId, "Approved",approverComment,"Approved");
-       await handleSaveApproveHistory(itemId);
-       alert("✅ Final Approval Successfully");
-       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-     window.location.assign(url); 
-      return; // 🔥 stop again
-    }
-   
+    setLoading(true);
 
-    
-    setApproverComment('');
+    if (!approverComment) return alert("Enter Approver Comment.");
+    if (!itemId) return;
+
+    // 🔥 CASE 1: Only 1 approver
+    if (!form.Approver2EmailId && !form.Approver3EmailId) {
+      await service.updateItemdata(itemId, "Approved", approverComment, "", 0);
+
+      await handleSaveApproveHistory(itemId);
+      alert("✅ Final Approved");
+
+      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+      return;
+    }
+
+    // 🔥 CASE 2: First Approver
+    if (!form.ActionDate1) {
+      await service.updateItemdata(
+        itemId,
+        "Pending",
+        approverComment,
+        AssignedID2,
+        form.Approver2EmailId
+      );
+
+      await handleSaveApproveHistory(itemId);
+      alert("✅ First Level Approved");
+
+      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+      return;
+    }
+
+    // 🔥 CASE 3: Second Approver
+    if (!form.ActionDate2) {
+
+      // agar 3rd approver nahi hai → FINAL
+      if (!form.Approver3EmailId) {
+        await service.updateItemdata2(itemId, "Approved", approverComment, "", 0);
+
+        await handleSaveApproveHistory(itemId);
+        alert("✅ Final Approved");
+      } else {
+        // agar 3rd approver hai → Pending
+        await service.updateItemdata2(
+          itemId,
+          "Pending",
+          approverComment,
+          AssignedID3,
+          form.Approver3EmailId
+        );
+
+        await handleSaveApproveHistory(itemId);
+        alert("✅ Second Level Approved");
+      }
+
+      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+      return;
+    }
+
+    // 🔥 CASE 4: Third Approver (FINAL)
+    if (!form.ActionDate3) {
+      await service.updateItemdata3(itemId, "Approved", approverComment, "Approved");
+
+      await handleSaveApproveHistory(itemId);
+      alert("✅ Final Approved");
+
+      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+      return;
+    }
+
   } catch (error) {
     console.error(error);
-  }
-  finally
-  {
+  } finally {
     setLoading(false);
   }
 };
