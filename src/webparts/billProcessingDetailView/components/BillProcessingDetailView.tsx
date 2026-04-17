@@ -170,8 +170,8 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
               </div>
               <div className={styles['col-md-12']}>
                 <div className={styles["formGroup"]}>
-                  <label className='form-control' style={{ display: "inline-flex" }}>Bill Signed</label>
-                  <input className='form-control' style={{ width: "15%", backgroundColor: "lightgray" }} type="checkbox" name='POsigned' checked={form.AttachedSignedPO} readOnly />
+                  <label style={{ display: "inline-flex" }}>Bill Signed</label>
+                  <input style={{ width: "15%", backgroundColor: "lightgray" }} type="checkbox" name='POsigned' checked={form.AttachedSignedPO} readOnly />
                 </div>
               </div>
               <label>Project Code</label>
