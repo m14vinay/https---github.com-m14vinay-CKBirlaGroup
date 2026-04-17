@@ -38,7 +38,8 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     Approver2Id: 0,
     Approver3Id: 0,
     Approver5Id: 0,
-    ApprovalComment: ''
+    ApprovalComment: '',
+    ApprovalPath:''
   });
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
@@ -117,7 +118,8 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             DepartmentHeadId: result.DepartmentHeadId || 0,
             Approver2Id: result.Approver2Id || 0,
             Approver3Id: result.Approver3Id || 0,
-            Approver5Id: result.Approver5Id || 0
+            Approver5Id: result.Approver5Id || 0,
+            ApprovalPath:result.ApprovalPath
           }));
           if (User?.Id) {
             setAssignedID(User.Title);
@@ -181,7 +183,8 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             Approver2Id: 0,
             Approver3Id: 0,
             Approver5Id: 0,
-            ApprovalComment: ''
+            ApprovalComment: '',
+            ApprovalPath:''
           });
           alert("Record is already Rejected.");
           return;
@@ -490,8 +493,8 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
               </div>
               <div className={styles['col-md-12']}>
                 <div className={styles["formGroup"]}>
-                  <label className='form-control' style={{ display: "inline-flex" }}>Bill Signed</label>
-                  <input className='form-control' style={{ width: "15%", backgroundColor: "lightgray" }} type="checkbox" name='POsigned' checked={form.AttachedSignedPO} readOnly />
+                  <label style={{ display: "inline-flex" }}>Bill Signed</label>
+                  <input style={{ width: "15%", backgroundColor: "lightgray" }} type="checkbox" name='POsigned' checked={form.AttachedSignedPO} readOnly />
                 </div>
               </div>
               <label>Project Code</label>
@@ -521,6 +524,8 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
               <input name="CalculatedTaxes" value={form.CalculatedTaxes} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Total Amount</label>
               <input name="TotalAmount" value={form.TotalAmount} readOnly style={{ backgroundColor: "lightgray" }} />
+              <label>Approval Path</label>
+              <input name="ApprovalPath" value={form.ApprovalPath} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Attachments</label>
               {attachments?.length > 0 && (
                 <ul style={{ listStyle: "none", padding: 0 }}>

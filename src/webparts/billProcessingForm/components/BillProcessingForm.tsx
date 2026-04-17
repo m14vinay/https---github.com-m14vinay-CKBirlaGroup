@@ -24,7 +24,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     files: [],
     CurrentStatus: '',
     DepartmentName: '',
-    POAmount: 0
+    POAmount: 0,
+    ApprovalPath:''
   });
   const [POOptions, setPOOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
@@ -211,6 +212,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           projectTitle: '',
           DepartmentName: ''
         }));
+        alert("Request is not approved.");
       }
     }
 
@@ -219,10 +221,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
 
     }
   };
-  // 🔹 Load data
-  React.useEffect(() => {
-  }, []);
-
   // // 🔹 Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -230,6 +228,21 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       ...form,
       [name]: value
     });
+  };
+  const handleBillDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const selectedDate = new Date(value);
+  const today = new Date();
+  // remove time part
+  today.setHours(0, 0, 0, 0);
+  if (selectedDate > today) {
+    alert("Bill date cannot be greater than current date");
+    return; // ❌ stop updating state
+  }
+  setForm({
+    ...form,
+    [name]: value
+  });
   };
 
   const handleAmountCalculateChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -381,7 +394,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         DepartmentHeadId: data.Departmenthead?.Id,
         Approver2Id: databillingApprover.Billing2ndApprover?.Id,
         Approver3Id: dataFinanceApprover.FinanceController?.Id,
-        Approver5Id: databillingApprover.Billing2ndApprover?.Id
+        Approver5Id: databillingApprover.Billing2ndApprover?.Id,
+        ApprovalPath:'1.'+User?.Title+' 2.'+databillingApprover.Billing2ndApprover?.Title+' 3.' +dataFinanceApprover.FinanceController?.Title+' 4.'+databillingApprover.Billing2ndApprover?.Title
       };
       if (!itemId) {
         // 🔹 CREATE
@@ -455,8 +469,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               <h4>Bill Processing / Request Form</h4>
               <div className={styles['col-md-12']}>
                 <div className={styles["formGroup"]}>
-                  <label className='form-control' style={{ display: "inline-flex" }}>Bill Signed<span className={styles.required}>*</span></label>
-                  <input className='form-control' style={{ width: "15%" }} type="checkbox" name='POsigned' checked={isChecked} onChange={(e) => setIsChecked(e.target.checked)} />
+                  <label style={{ display: "inline-flex" }}>Bill Signed<span className={styles.required}>*</span></label>
+                  <input style={{ width: "15%" }} type="checkbox" name='POsigned' checked={isChecked} onChange={(e) => setIsChecked(e.target.checked)} />
                 </div>
               </div>
               <label>Project Code <span className={styles.required}>*</span></label>
@@ -488,7 +502,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                 form.BillDate
                   ? new Date(form.BillDate).toISOString().split('T')[0]
                   : ''
-              } onChange={handleChange}>
+              } onChange={handleBillDateChange}>
               </input>
 
               <label>Bill Amount</label>

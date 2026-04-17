@@ -30,7 +30,8 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
     CurrentStatus: '',
     DepartmentName: '',
     POAmount: 0,
-    AttachedSignedPO: false
+    AttachedSignedPO: false,
+    ApprovalPath:''
   });
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
@@ -91,7 +92,8 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
           PORequestNoID: result.PORequestNo || '',
           AttachedSignedPO: result.AttachedSignedPO == "True" ? true : false,
           RequestNo: result.RequestNo,
-          CurrentStatus: result.CurrentStatus
+          CurrentStatus: result.CurrentStatus,
+          ApprovalPath:result.ApprovalPath
         }));
         const historydata = await service.GetHistoryItem(Number(id), "FBP");
         setHistory(historydata);
@@ -168,8 +170,8 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
               </div>
               <div className={styles['col-md-12']}>
                 <div className={styles["formGroup"]}>
-                  <label className='form-control' style={{ display: "inline-flex" }}>Bill Signed</label>
-                  <input className='form-control' style={{ width: "15%", backgroundColor: "lightgray" }} type="checkbox" name='POsigned' checked={form.AttachedSignedPO} readOnly />
+                  <label style={{ display: "inline-flex" }}>Bill Signed</label>
+                  <input style={{ width: "15%", backgroundColor: "lightgray" }} type="checkbox" name='POsigned' checked={form.AttachedSignedPO} readOnly />
                 </div>
               </div>
               <label>Project Code</label>
@@ -199,6 +201,8 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
               <input name="CalculatedTaxes" value={form.CalculatedTaxes} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Total Amount</label>
               <input name="TotalAmount" value={form.TotalAmount} readOnly style={{ backgroundColor: "lightgray" }} />
+              <label>Approval Path</label>
+              <input name="ApprovalPath" value={form.ApprovalPath} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Attachments</label>
               {attachments?.length > 0 && (
                 <ul style={{ listStyle: "none", padding: 0 }}>
