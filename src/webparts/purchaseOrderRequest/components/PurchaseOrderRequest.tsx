@@ -254,7 +254,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       const result = await service.getRequestDetails(value);
       const data = result[0].RequestNo
       const Vendor = await service.getRequestVendorDetails(data);
-      if (Vendor.Id > 0) {
+      if (Vendor.length > 0) {
         if (result.length > 0) {
           const item = result[0];
           const OccupiedAmount = await service.getTotaloccupiedAmount(value);

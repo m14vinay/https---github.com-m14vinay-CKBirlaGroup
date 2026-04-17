@@ -212,6 +212,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           projectTitle: '',
           DepartmentName: ''
         }));
+        alert("Request is not approved.");
       }
     }
 
