@@ -785,7 +785,12 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           }
         }
 
+        //alert("Submitted Successfully ✅");
         alert("Submitted Successfully ✅");
+
+setTimeout(() => {
+  window.location.href = "https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/Dashboard.aspx";
+}, 800);
 
         await service.updateItem(res.Id, {
           RequestNo: `PRJ-${res.Id}`
