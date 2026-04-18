@@ -71,7 +71,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     amount: ''
   };
 
-
   const [AssignedID, setAssignedID] = React.useState<string | null>(null);
   const [itemId, setItemId] = React.useState<number | null>(null);
   const [poItems, setPoItems] = React.useState<TPurchaseOrderRow[]>([INITIAL_PO_ROW]);
@@ -505,9 +504,9 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
           //Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-          Approval1Id: (dataApprover[0].Approval1?.Id || 0),
-          Approval2Id: (dataApprover[0].Approval2?.Id || 0),
-          Approval3Id: (dataApprover[0].Approval3?.Id || 0),
+          Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
+          Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
+          Approval3Id: (approvalChain.length > 2 ? approvalChain[3].id : null),
           CurrentStatus: "Draft"
         };
 
@@ -533,12 +532,11 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           AssignedTo: approver?.Approval1.Title || 0,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
-          Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-          Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
-          Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
+          Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
+          Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
+          Approval3Id: (approvalChain.length > 2 ? approvalChain[3].id : null),
           CurrentStatus: "Pending"
         };
-
       }
       else {
         payload = {
@@ -562,9 +560,9 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           AssignedTo: approver?.Approval1?.Title || 0,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
-          Approval1Id: dataApprover[0].Approval1.Id || 0,
-          Approval2Id: dataApprover[0].Approval2.Id || 0,
-          Approval3Id: dataApprover[0].Approval3.Id || 0,
+          Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
+          Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
+          Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
           CurrentStatus: "Draft"
         };
 
