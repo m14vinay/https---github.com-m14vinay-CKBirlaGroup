@@ -126,7 +126,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       console.log("Result:", result);
       if (
         result.AuthorId !== currentUser.Id &&
-        result.AssignedToId !== currentUser.Id
+        result.AssignedToEmailId !== currentUser.Id
       ) {
         alert("You Are Not Authorized ❌");
         return;
@@ -501,14 +501,14 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedToId: approver?.Approval1?.Id || 0,
+          AssignedTo: approver?.Approval1?.Title || 0,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
           //Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
           Approval1Id: (dataApprover[0].Approval1?.Id || 0),
           Approval2Id: (dataApprover[0].Approval2?.Id || 0),
           Approval3Id: (dataApprover[0].Approval3?.Id || 0),
-          CurrentStatus: "Pending"
+          CurrentStatus: "Draft"
         };
 
       else if (form.TotalProjectAmount > 200000 && form.Department === "Branding") {
@@ -530,7 +530,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedToId: approver?.Approval1.Id || 0,
+          AssignedTo: approver?.Approval1.Title || 0,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
           Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
@@ -559,7 +559,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedToId: approver?.Approval1?.Id || 0,
+          AssignedTo: approver?.Approval1?.Title || 0,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
           Approval1Id: dataApprover[0].Approval1.Id || 0,
@@ -685,7 +685,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedToId: Number(dataApprover[0].Approval1.Id || 0),
+          AssignedTo: dataApprover[0].Approval1.Title,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
           Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
@@ -715,7 +715,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             Department: form.Department || "",
             Advancepayment: form.Advancepayment || "",
             ApprovalPath: form.ApprovalPath || "",
-            AssignedToId: Number(dataApprover[0].Approval1.Id || 0),
+            AssignedTo: dataApprover[0].Approval1.Title,
             AssignedToEmailId: approver?.Approval1?.Id || 0,
             Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
             Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
@@ -744,7 +744,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedToId: Number(dataApprover[0].Approval1.Id || 0),
+          AssignedTo: dataApprover[0].Approval1.Title,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
           Approval1Id: dataApprover[0].Approval1.Id || 0,
@@ -813,6 +813,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
         }
         alert("Submitted Successfully ✅");
       }
+      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+      window.location.assign(url); 
     } catch (error: any) {
       console.error(error);
       alert(error?.message || "Error occurred");

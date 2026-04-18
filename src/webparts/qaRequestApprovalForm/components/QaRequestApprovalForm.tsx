@@ -31,7 +31,7 @@ interface IApprovalItem {
   ApprovalPath?: string;
   ApproverComment1?: string;
   AttachmentFiles?: IAttachmentFile[];
-  [key: string]: unknown;
+  [key: string]: any;
   ActionDate1?: string;
   ActionDate2?: string;
   ActionDate3?: string;
@@ -246,7 +246,7 @@ const handleApprove = async () => {
     ).then(res => res.json());
 
     // 🔐 SECURITY CHECK (IMPORTANT)
-    if (Number(data.AssignedToId) !== currentUser.Id) {
+    if (Number(data.AssignedToEmailId) !== currentUser.Id) {
       alert("You are not authorized ❌");
       return;
     }
@@ -256,31 +256,34 @@ const handleApprove = async () => {
     // 🔥 STEP DETECTION BASED ON AssignedTo (BEST)
     
     // STEP 1
-    if (data.AssignedToId === data.Approval1Id) {
+    if (data.AssignedToEmailId === data.Approval1Id) {
       payload = {
         ApproverComment1: comment,
         ActionDate1: new Date().toISOString(),
-        AssignedToId: Number(data.Approval2Id) || null,
+        AssignedToEmailId: Number(data.Approval2Id) || null,
+        AssignedTo: data.Approval2?.Title,
         Status: "Pending"
       };
     }
 
     // STEP 2
-    else if (data.AssignedToId === data.Approval2Id) {
+    else if (data.AssignedToEmailId === data.Approval2Id) {
       payload = {
         ApproverComment2: comment,
         ActionDate2: new Date().toISOString(),
-        AssignedToId: Number(data.Approval3Id) || null,
+        AssignedToEmailId: Number(data.Approval3Id) || null,
+        AssignedTo: data.Approval3?.Title,
         Status: "Pending"
       };
     }
 
     // FINAL STEP
-    else if (data.AssignedToId === data.Approval3Id) {
+    else if (data.AssignedToEmailId === data.Approval3Id) {
       payload = {
         ApproverComment3: comment,
         ActionDate3: new Date().toISOString(),
-        AssignedToId: null,
+        AssignedToEmailId: null,
+        AssignedTo: "Approved",
         Status: "Approved"
       };
     }
@@ -346,7 +349,44 @@ const handleApprove = async () => {
               'X-HTTP-Method': 'MERGE'
             },
             body: JSON.stringify({
-              Status: 'Approved'
+              Status: 'Approved',
+              CurrentStatus:'Approved'
+            })
+          }
+        );
+      }
+      else if (status === 'Approved') {
+        await props.spHttpClient.post(
+          `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+          SPHttpClient.configurations.v1,
+          {
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              'IF-MATCH': '*',
+              'X-HTTP-Method': 'MERGE'
+            },
+            body: JSON.stringify({
+              Status: 'Pending',
+              CurrentStatus:'Pending'
+            })
+          }
+        );
+      }
+      else if (status === 'Rejected') {
+        await props.spHttpClient.post(
+          `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+          SPHttpClient.configurations.v1,
+          {
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              'IF-MATCH': '*',
+              'X-HTTP-Method': 'MERGE'
+            },
+            body: JSON.stringify({
+              Status: 'Pending',
+              CurrentStatus:'Rejected'
             })
           }
         );
