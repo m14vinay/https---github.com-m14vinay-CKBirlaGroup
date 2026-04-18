@@ -256,6 +256,19 @@ FinanceController/Id,FinanceController/Title
     return data.value.length > 0 ? data.value[0] : null;
   }
 
+   public async GetApproverFromFinancecontroller():Promise<any[]> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.FinanceController}')/items`
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+    return data;
+  }
+
   public async getVendorApprover(): Promise<any[]> {
 
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Approver}')/items?$select=Id,Title,

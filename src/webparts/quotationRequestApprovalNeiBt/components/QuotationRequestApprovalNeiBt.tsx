@@ -332,21 +332,33 @@ const handleReject = async () => {
       return;
     }
 
+    if (!form.Approver2EmailId && !form.Approver3EmailId) {
+      await service.updateItemdata(itemId, "Rejected", approverComment, "", 0);
+
+      await handleSaveApproveHistory(itemId);
+      alert("✅ Final Rejected");
+
+      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+      return;
+    }
+
    if(form.ActionDate1==='')
       {
       await service.updateItemdata(itemId,"Rejected", approverComment,"Rejected",form.Approver2EmailId);
         await handleSaveRejectedHistory(itemId);
-        alert("✅ First Level Rejected Successfully");
+        alert("✅ Rejected Successfully");
          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url); 
         return;
 
       }
+
+      
        else if(form.ActionDate2==='')
      {
        await service.updateItemdata2(itemId, "Rejected", approverComment,'Rejected',form.Approver3EmailId);
          await handleSaveRejectedHistory(itemId);
-        alert("✅ Second Level Rejected Successfully");
+        alert("✅ Rejected Successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url); 
       return; // 🔥 stop again
@@ -356,7 +368,7 @@ const handleReject = async () => {
      {
        await service.updateItemdata3(itemId, "Rejected", approverComment,"Rejected");
          await handleSaveRejectedHistory(itemId);
-        alert("✅ Final Level Rejected Successfully");
+        alert("✅  Rejected Successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url); 
       return; // 🔥 stop again
@@ -425,24 +437,43 @@ const handleReject = async () => {
           <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly style={{backgroundColor:"lightgray"}}  >
           </input>
 
-          <label>Vendor 1</label>
-          <input name="Vendor1" value={form.Vendor1} readOnly style={{backgroundColor:"lightgray"}}/>
 
-          <label>Vendor 2</label>
-          <input name="Vendor2" value={form.Vendor2} readOnly style={{backgroundColor:"lightgray"}} />
+    <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Vendor 1 <span className={styles.required}>*</span></label>
+                 <input name="Vendor1" value={form.Vendor1} readOnly style={{backgroundColor:"lightgray"}}/>
+              </div>
+              <div className={styles.fieldBlock}>
+                <label>Quote 1 <span className={styles.required}>*</span></label>
+                 <input name="Quote1" value={form.Quote1} readOnly style={{backgroundColor:"lightgray"}} />
+              </div>
+            </div>
 
-          <label>Vendor 3</label>
-          <input name="Vendor3" value={form.Vendor3} readOnly style={{backgroundColor:"lightgray"}} />
+             <div className={styles.twoColumnRow}>
+                          <div className={styles.fieldBlock}>
+                            <label>Vendor 2</label>
+                          <input name="Vendor2" value={form.Vendor2} readOnly style={{backgroundColor:"lightgray"}} />
 
-          <label>Quote 1</label>
-          <input name="Quote1" value={form.Quote1} readOnly style={{backgroundColor:"lightgray"}} />
+                          </div>
+                          <div className={styles.fieldBlock}>
+                            <label>Quote 2</label>
+                            <input name="Quote2" value={form.Quote2} readOnly style={{backgroundColor:"lightgray"}} />
+                          </div>
+                        </div>
 
-          <label>Quote 2</label>
-          <input name="Quote2" value={form.Quote2} readOnly style={{backgroundColor:"lightgray"}} />
+                <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Vendor 3</label>
+               <input name="Quote2" value={form.Quote3} readOnly style={{backgroundColor:"lightgray"}} />
+              </div>
+                
+              <div className={styles.fieldBlock}>
+                 <label>Quote 3</label>
+                <input name="Quote3" value={form.Quote3} readOnly style={{backgroundColor:"lightgray"}} />
 
-          <label>Quote 3</label>
-          <input name="Quote3" value={form.Quote3} readOnly style={{backgroundColor:"lightgray"}} />
-
+              </div>
+            </div>
+          
           <label>Select Vendor</label>
           <input name="Selectedvendor" value={form.Selectedvendor} readOnly style={{backgroundColor:"lightgray"}} />
 

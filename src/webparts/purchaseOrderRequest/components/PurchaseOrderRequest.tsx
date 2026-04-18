@@ -23,7 +23,8 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     ApplicableTaxes: 0,
     AssignedTo: '',
     PoMaster: '',
-    POCategory: '',
+    ApprovalPath:'',
+     POCategory: '',
     Comments: '',
     files: [] as File[],
     Attachments: [],
@@ -153,7 +154,11 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
     const allowedExtensions = ['pdf', 'xlsx', 'docx'];
     const filesArray = Array.from(files);
-
+ const validatePO = (value: string) => {
+    if (!value) return "Project Code is required";
+    if (!/^[a-zA-Z0-9-]+$/.test(value)) return "Only alphanumeric allowed";
+    return "";
+  };
     // 🔹 Check each file
     for (let file of filesArray) {
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
@@ -432,27 +437,27 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     if (!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
     if (!form.POAmount) return alert("Please Choose POCategory");
     if (
-      (!form.files || form.files.length === 0) &&
-      (!attachments || attachments.length === 0)
-    ) {
-      return alert("Please Attach files");
-    }
+  (!form.files || form.files.length === 0) &&
+  (!attachments || attachments.length === 0)
+) {
+  return alert("Please Attach files");
+}
 
-    // 🔹 Payload (common)
-    const payload = {
-      ProjectCode: form.projectCode,
-      Department: form.Department,
-      ProjectTitle: form.projectTitle,
-      VendorName: form.vendorName,
-      TotalAmount: Number(form.TotalAmount),
-      OccupiedAmount: Number(form.OccupiedAmount),
-      RemainingAmount: Number(form.RemainingAmount),
-      POAmount: form.POAmount,
-      ApplicableTaxes: form.ApplicableTaxes,
-      PoMaster: form.PoMaster,
-      ProjectDescription: form.Comments,
-      CurrentStatus: 'Draft'
-    };
+  // 🔹 Payload (common)
+  const payload = {
+    ProjectCode: form.projectCode,
+    Department: form.Department,
+    ProjectTitle: form.projectTitle,
+    VendorName: form.vendorName,
+    TotalAmount:Number(form.TotalAmount),
+    OccupiedAmount: Number(form.OccupiedAmount),
+    RemainingAmount: Number(form.RemainingAmount),
+    POAmount: form.POAmount,
+    ApplicableTaxes: form.ApplicableTaxes,
+    PoMaster:form.PoMaster,
+    ProjectDescription: form.Comments,
+    CurrentStatus:'Draft'
+  };
 
     try {
       if (!itemId) {
@@ -493,85 +498,120 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   };
 
 
-
-  // Update
-  const handleUpdate = async () => {
-    try {
-      setLoading(true);
-      if (!form.projectCode) return alert("Enter Project Code ");
-      if (!form.POAmount) return alert("Enter POAmount");
-      if (!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
-      if (!form.PoMaster) return alert("Please Choose POCategory");
-      if (
-        (!form.files || form.files.length === 0) &&
-        (!attachments || attachments.length === 0)
-      ) {
-        return alert("Please Attach files");
-      }
-      const dataApprover = await service.GetApproverFromFinance(form.PoMaster);
-      if (dataApprover?.Id) {
-        //const item = dataApprover?.FinanceController?.Id;
-        setApprover2ID(dataApprover.FinanceController?.Id || null);
-      }
-
-      const payload = {
-        Title: "Testing",
-        ProjectCode: form.projectCode,
-        ProjectTitle: form.projectTitle,
-        VendorName: form.vendorName,
-        TotalAmount: Number(form.TotalAmount),
-        OccupiedAmount: Number(form.OccupiedAmount),
-        RemainingAmount: Number(form.RemainingAmount),
-        Department: form.Department,
-        POAmount: form.POAmount,
-        ApplicableTaxes: form.ApplicableTaxes,
-        PoMaster: form.PoMaster,
-        ProjectDescription: form.Comments,
-        CurrentStatus: 'Pending',
-        AssignedTo: AssignedID,
-        DepartmentHeadId: Number(Departmenthead),
-        AssignedToEmailId: Number(Departmenthead),
-        Approver2Id: dataApprover?.FinanceController?.Id
-      };
-
-      if (itemId) {
-        await service.updateItem(itemId, payload);
-        await handleSaveHistory(itemId);
-        if (form.files && form.files.length > 0) {
-          for (let i = 0; i < form.files.length; i++) {
-            await service.uploadFile(itemId, form.files[i]);
-          }
+const handleUpdate = async () => {
+  try {
+  setLoading(true);
+   if(!form.projectCode) return alert("Enter Project Code ");
+  if(!form.POAmount) return alert("Enter POAmount");
+    if(!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
+    if(!form.PoMaster) return alert("Please Choose POCategory");
+     if (
+(!form.files || form.files.length === 0) &&
+  (!attachments || attachments.length === 0)
+) {
+  return alert("Please Attach files");
+}
+     
+        const dataApprover = await service.GetApproverFromFinance(form.PoMaster);
+        const approvalPathIC = [
+  { name: AssignedID },
+  { name: dataApprover?.FinanceController?.Title, }
+ 
+];
+      
+         let payload = {};
+         
+        // if(dataApprover?.Id)
+        // {
+        //   setDepartmentHead(dataApprover.FinanceController?.Id || null);
+        // }
+        if(form.PoMaster==='Internal Compliance'){
+   payload = {
+    
+    Title:"Testing",
+    ProjectCode: form.projectCode,
+    ProjectTitle: form.projectTitle,
+    VendorName: form.vendorName,
+   TotalAmount:Number(form.TotalAmount),
+    OccupiedAmount: Number(form.OccupiedAmount),
+    RemainingAmount: Number(form.RemainingAmount),
+    Department: form.Department,
+    POAmount: form.POAmount,
+    ApplicableTaxes: form.ApplicableTaxes,
+    PoMaster:form.PoMaster,
+    ProjectDescription: form.Comments,
+    CurrentStatus:'Pending',
+    AssignedTo: dataApprover?.FinanceController?.Title,
+    ApprovalPath: dataApprover?.FinanceController?.Title,
+    DepartmentHeadId: dataApprover?.FinanceController?.Id,
+    AssignedToEmailId: dataApprover?.FinanceController?.Id
+    //Approver2Id: dataApprover?.FinanceController?.Id
+  }
         }
-        alert("Submitted Successfully.✅");
-        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-        window.location.assign(url);
-      }
-      else {
-        const res = await service.createItem(payload);
-        setItemId(res.Id);
-        await handleSaveHistory(res.Id);
-        if (res.Id > 0) {
-          if (res.Id > 0 && form.files.length > 0) {
-            for (let i = 0; i < form.files.length; i++) {
-              await service.uploadFile(res.Id, form.files[i]);
-            }
-            alert("Submitted Successfully.✅");
-            const counterResult = await CounterfyPOCategory();
-            await service.updateItem(res.Id, {
-              RequestNo: counterResult.requestNo
+else
+  payload = {
+    
+    Title:"Testing",
+    ProjectCode: form.projectCode,
+    ProjectTitle: form.projectTitle,
+    VendorName: form.vendorName,
+   TotalAmount:Number(form.TotalAmount),
+    OccupiedAmount: Number(form.OccupiedAmount),
+    RemainingAmount: Number(form.RemainingAmount),
+    Department: form.Department,
+    POAmount: form.POAmount,
+    ApplicableTaxes: form.ApplicableTaxes,
+    PoMaster:form.PoMaster,
+    ProjectDescription: form.Comments,
+    CurrentStatus:'Pending',
+    ApprovalPath: approvalPathIC.map(a => a.name).join(" > "),
+    AssignedTo: AssignedID,
+    DepartmentHeadId: Number(Departmenthead),
+    AssignedToEmailId:Number(Departmenthead),
+    Approver2Id: dataApprover?.FinanceController?.Id
+  }
+  
 
-            });
-            const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-            window.location.assign(url);
-          }
-        }
+    if (itemId) {       
+     await service.updateItem(itemId, payload);
+     await handleSaveHistory(itemId);
+     if (form.files && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(itemId, form.files[i]);
       }
-
     }
-
+    alert("Submitted Successfully.✅");    
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    window.location.assign(url);  
+    }
+    else{
+     const res= await service.createItem(payload);
+      setItemId(res.Id);
+     await handleSaveHistory(res.Id);
+     if(res.Id>0)
+     {
+     if (res.Id > 0 && form.files.length > 0) {
+      for (let i = 0; i < form.files.length; i++) {
+        await service.uploadFile(res.Id , form.files[i]);
+      }
+      alert("Submitted Successfully.✅"); 
+        const counterResult = await CounterfyPOCategory();
+        await service.updateItem(res.Id, {
+          RequestNo: counterResult.requestNo
+          //RequestNo : `CKBCSL/${getFinancialYear()}/${getShortName(form.PoMaster)}/${form.Department}/${res.Id}`
+        });
+         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    window.location.assign(url);  
+    
+     }
+    }
+  } 
+    } 
+    
+    
     catch (error) {
       console.error(error);
-      alert("Error Occurred,Please Contact To System Administrator.");
+      alert("Error Occurred,Please Contact To System Administrator.❌");
     }
     finally {
       setLoading(false);
@@ -580,12 +620,6 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
 
 
-
-  const validatePO = (value: string) => {
-    if (!value) return "Project Code is required";
-    if (!/^[a-zA-Z0-9-]+$/.test(value)) return "Only alphanumeric allowed";
-    return "";
-  };
 
 
   // 🔹 UI
