@@ -261,6 +261,11 @@ rightPanel {
   font-size: 20px;
 }
 
+.rightPanel ul li.upcomingIcon::before {
+  background-color: orange;
+  content: "\f105";
+  font-size: 20px;
+}
 .rightPanel ul li span {
   display: block;
   font-size: 12px;
@@ -272,6 +277,10 @@ rightPanel {
 
 .rightPanel ul li span.apprStatus {
   color: #0e9e0e;
+  font-weight: bold;
+}
+.rightPanel ul li span.upcomingstatus {
+  color: orange;
   font-weight: bold;
 }
 
@@ -355,6 +364,25 @@ rightPanel {
 .rejectedBox::before {
   border-bottom: 46px solid transparent;
   border-left: 46px solid #cdcd17;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+.upcomingBox {
+  background-color: #ee7606;
+}
+
+.upcomingBox::after {
+  border-left-color: #ee7606;
+}
+
+.upcomingBox::before {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";

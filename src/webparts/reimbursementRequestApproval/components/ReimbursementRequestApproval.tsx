@@ -34,7 +34,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
     FIApproverEmailId: 0,
     ComplianceHeadEmailId: 0,
     CFOEmailId: 0,
-    ApprovalPath:''
+    ApprovalPath: ''
   });
   const [loading, setLoading] = React.useState(false);
   const [History, setHistory] = React.useState<any[]>([]);
@@ -95,7 +95,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             FIApproverEmailId: data.FIApproverEmailId || 0,
             ComplianceHeadEmailId: data.ComplianceHeadEmailId || 0,
             CFOEmailId: data.CFOEmailId || 0,
-            ApprovalPath:data.ApprovalPath
+            ApprovalPath: data.ApprovalPath
           });
           if (User?.Id) {
             setAssignedID(User.Title);
@@ -105,12 +105,12 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           if (Expensedata.value.length > 0) {
             for (let i = 0; i < Expensedata.value.length; i++) {
               {
-                 setExpenseForm(prev => {
-      return {
-        ...prev,
-        expenses: [...prev.expenses, Expensedata.value[i]]
-      };
-    });
+                setExpenseForm(prev => {
+                  return {
+                    ...prev,
+                    expenses: [...prev.expenses, Expensedata.value[i]]
+                  };
+                });
               }
             }
           }
@@ -145,7 +145,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             FIApproverEmailId: 0,
             ComplianceHeadEmailId: 0,
             CFOEmailId: 0,
-            ApprovalPath:''
+            ApprovalPath: ''
           });
           alert("Record is already Rejected.");
           return;
@@ -444,7 +444,9 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                 else if (item.UserAction === "Rejected") {
                   statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
                 }
-
+                else if (item.UserAction === "Upcoming") {
+                  statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
+                }
                 return (
                   <div className={statusClass} key={index}>
                     <div className={styles.content}>
@@ -539,6 +541,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                   const isApproved = item.UserAction === "Approved";
                   const isRejected = item.UserAction === "Rejected";
                   const isInitiated = item.UserAction === "Request Initiator";
+                  const isUpcoming = item.UserAction === "Upcoming";
                   return (
                     <li
                       key={index}
@@ -547,7 +550,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                           ? styles.tickIcon
                           : isRejected
                             ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : ""
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
                       }
                     >
                       <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
@@ -561,7 +564,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : ""
+                                  : isUpcoming ? styles.upcomingstatus : ""
                             }
                           >
                             {item.UserAction}
