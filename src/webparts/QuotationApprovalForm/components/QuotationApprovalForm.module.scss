@@ -1,226 +1,250 @@
-/* ========================= */
-/* 🔥 SHAREPOINT FIX         */
-/* ========================= */
-
-:global(.CanvasComponent.LCS .CanvasZone) {
-  max-width: 100% !important;
-  padding: 0 !important;
-}
-
-/* ========================= */
-/* 🔥 MAIN CONTAINER         */
-/* ========================= */
+@import '~@fluentui/react/dist/sass/References.scss';
+@import "~bootstrap/scss/bootstrap";
 
 .container {
-  max-width: 950px;
-  margin: 20px auto;
-  padding: 20px;
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  font-family: "Segoe UI", Arial, sans-serif;
+  // display: flex;
+  // gap: 20px;
+  padding: 10px;
 }
 
-/* ========================= */
-/* 🔥 HEADER                 */
-/* ========================= */
-
-.poHeader h4 {
-  margin-bottom: 20px;
-  font-size: 20px;
-  font-weight: 600;
-  color: #2d2d2d;
+.header {
+  margin-bottom: 15px;
 }
-
-/* ========================= */
-/* 🔥 FORM STRUCTURE         */
-/* ========================= */
 
 .leftPanel {
-  width: 100%;
-}
-
-/* Labels */
-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  margin-top: 12px;
-  margin-bottom: 5px;
-  color: #333;
-}
-
-/* Required star */
-.required {
-  color: red;
-}
-
-/* ========================= */
-/* 🔥 INPUTS                 */
-/* ========================= */
-
-input,
-select {
-  width: 100%;
-  height: 36px;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 13px;
   background: #fff;
-  box-sizing: border-box;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex: 2;
+  padding: 10px;
 }
 
-/* Dropdown fix */
-:global(.ms-Dropdown-container) {
-  width: 100%;
-}
-
-/* Focus */
-input:focus,
-select:focus {
-  border-color: #0078d4;
-  outline: none;
-}
-
-/* ========================= */
-/* 🔥 CHOICE GROUP (RADIO)   */
-/* ========================= */
-
-:global(.ms-ChoiceFieldGroup) {
-  margin-top: 10px;
-}
-
-:global(.ms-ChoiceField) {
-  margin-right: 20px;
-}
-
-/* ========================= */
-/* 🔥 FILE INPUT             */
-/* ========================= */
-
-input[type="file"] {
-  padding: 6px;
-  background: #fff;
-}
-
-/* ========================= */
-/* 🔥 FILE LIST              */
-/* ========================= */
-
-ul {
-  margin-top: 8px;
-  padding-left: 0;
-}
-
-li {
+.leftPanelHeader {
+  border-bottom: 1px solid #848484;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  margin-bottom: 5px;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
 }
 
-/* Delete icon */
-li span {
+.leftPanelHeader h4 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.status {
   color: red;
-  cursor: pointer;
   font-weight: bold;
 }
 
-/* ========================= */
-/* 🔥 BUTTONS                */
-/* ========================= */
-
-.buttonRow {
-  margin-top: 25px;
+.leftPanelStatusHeader {
   display: flex;
-  justify-content: center;
-  gap: 15px;
+  padding: 20px 0;
 }
 
-.poSection {
-  margin-top: 24px;
+.statusBox {
+  background-color: #225a22;
+  color: #fff;
+  padding: 19px 10px 8px;
+  position: relative;
+  width: 150px;
 }
 
-.poSectionHeader {
+.statusBox::after {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #225a22;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  position: absolute;
+  right: -61%;
+  top: 0;
+}
+
+.pendingBox {
+  background-color: #cdcd17;
+}
+
+.pendingBox::after {
+  border-left-color: #cdcd17;
+}
+
+.pendingBox::before {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #225a22;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.rejectedBox {
+  background-color: #8b3222;
+}
+
+.rejectedBox::after {
+  border-left-color: #8b3222;
+}
+
+.rejectedBox::before {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #cdcd17;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.upcomingBox {
+  background-color: #ee7606;
+}
+
+.upcomingBox::after {
+  border-left-color: #ee7606;
+}
+
+.upcomingBox::before {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #8b3222;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.statusBox h5 {
+  margin: 0;
+  font-size: 12px;
+}
+
+.statusBox h6 {
+  margin: 0;
+  font-size: 10px;
+}
+
+.statusBox h4 {
+  margin: 5px 0 0;
+  font-size: 14px;
+}
+
+.pendingBox .content,
+.rejectedBox .content,
+.upcomingBox .content {
+  padding-left: 40px;
+}
+
+.formGroup {
+  margin-bottom: 10px;
+}
+
+.rightPanel {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  padding: 10px;
+}
+
+.rightPanelHeader {
+  border-bottom: 1px solid #848484;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-top: 20px;
-  margin-bottom: 10px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #e3dff5;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
 }
 
-.poSectionHeader label {
+.rightPanelHeader h4 {
+  font-size: 16px;
   margin: 0;
-  font-size: 14px;
-  color: #343741;
 }
 
-.poTable {
-  border: 1px solid #d7d9ea;
-  border-radius: 6px;
-  overflow: hidden;
-  background: #fcfcff;
+.rightPanel ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 35px;
+  position: relative;
 }
 
-.poRowHeader {
-  display: grid;
-  grid-template-columns: 2fr 140px 140px 140px 40px;
-  gap: 6px;
-  padding: 10px 10px;
-  background: #f7f7fb;
-  border-bottom: 1px solid #d7d9ea;
-  font-size: 12px;
-  font-weight: 500;
-  color: #2f3441;
+.rightPanel ul::before {
+  border: 0.5px dotted #13ab13;
+  content: "";
+  display: inline-block;
+  height: 100%;
+  left: 13px;
+  position: absolute;
+  width: 0.5px;
 }
 
-.poRow {
-  display: grid;
-  grid-template-columns: 2fr 140px 140px 140px 40px;
-  gap: 6px;
-  padding: 9px 10px;
+.rightPanel ul li {
+  margin-bottom: 5px;
+  position: relative;
+}
+
+.rightPanel ul li::before {
   align-items: center;
-  border-bottom: 1px solid #dfe3f0;
-}
-
-.poRow:last-child {
-  border-bottom: none;
-}
-
-.poRow input {
-  width: 100%;
-  min-width: 0;
-  height: 34px;
-  border: 1px solid #d7d9ea;
-  border-radius: 5px;
-  background: #fff;
-}
-
-.poDeleteBtn {
-  background: #ff4a3d;
-  color: #fff;
-  width: 34px;
-  height: 34px;
-  padding: 0;
   border-radius: 50%;
-  font-size: 22px;
-  line-height: 1;
+  color: #fff;
   display: inline-flex;
-  align-items: center;
+  font-weight: bold;
+  height: 25px;
   justify-content: center;
+  left: -35px;
+  position: absolute;
+  top: -3px;
+  width: 25px;
 }
 
-.poAddBtn {
-  background: #f05b57;
-  color: #fff;
-  padding: 10px 24px;
-  border-radius: 999px;
-  border: 1px solid #d94743;
+.rightPanel ul li.tickIcon::before {
+  background-color: #13ab13;
+  content: "\2713";
+}
+
+.rightPanel ul li.crossIcon::before {
+  background-color: #e64e4e;
+  content: "\00d7";
+  font-size: 20px;
+}
+
+.rightPanel ul li span {
+  display: block;
+  font-size: 12px;
+}
+
+.rightPanel ul li span.spanHeader {
+  font-weight: 600;
+}
+
+.rightPanel ul li span.apprStatus {
+  color: #0e9e0e;
+  font-weight: bold;
+}
+
+.rightPanel ul li span.rejStatus {
+  color: #9a1111;
+  font-weight: bold;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 button {
@@ -246,127 +270,175 @@ button {
   color: #fff;
 }
 
-/* ========================= */
-/* 🔥 RIGHT PANEL (TIMELINE) */
-/* ========================= */
+.required {
+  color: red;
+  margin-left: 2px;
+}
 
-.row {
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.inputError {
+  border: 1px solid red;
+}
+.Approved {
+  color: green;
+  font-weight: bold;
+}
+
+.Rejected {
+  color: red;
+  font-weight: bold;
+}
+
+.Pending {
+  color: yellow;
+  font-weight: bold;
+}
+
+
+.buttonRow {
+  margin-top: 25px;
   display: flex;
-  gap: 20px;
+  justify-content: center;
+  gap: 15px;
 }
 
-.colMd9 {
-  flex: 2;
+/* ************ PO SECTION ************ */
+
+.poSection {
+  margin-top: 20px;
 }
 
-.row > div:last-child {
-  flex: 1;
-  background: #fafafa;
-  border: 1px solid #eee;
+/* Header (Title + Add button) */
+.poSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.required {
+  color: red;
+}
+
+/* Add button */
+.poAddBtn {
+  background-color: #ff5c5c;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.poAddBtn:hover {
+  background-color: #e04b4b;
+}
+
+/* Table container */
+.poTable {
+  border: 1px solid #ddd;
   border-radius: 6px;
-  padding: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow-x: auto;
+  background: #fff;
 }
 
-/* Heading */
-.row > div:last-child h6 {
-  font-size: 14px;
+/* ************ HEADER ROW ************ */
+
+.poRowHeader {
+  display: grid;
+  grid-template-columns: minmax(300px, 2fr) 120px 120px 120px 40px;
+  gap: 4px;
+  background: #f3f3f3;
+  padding: 5px;
   font-weight: 600;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #848484;
-  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
 }
 
-/* Timeline List */
-.row > div:last-child ul {
-  list-style: none;
-  margin: 0;
-  padding-left: 35px;
-  position: relative;
-}
-
-/* Vertical dotted line */
-.row > div:last-child ul::before {
-  content: "";
-  position: absolute;
-  left: 13px;
-  top: 0;
-  height: 100%;
-  width: 1px;
-  border-left: 1px dotted #13ab13;
-}
-
-/* List Item */
-.row > div:last-child ul li {
-  position: relative;
-  margin-bottom: 10px;
-}
-
-/* Circle Icon */
-.row > div:last-child ul li::before {
-  position: absolute;
-  left: -35px;
-  top: -3px;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
+/* Header alignment */
+.poRowHeader div {
   display: flex;
   align-items: center;
+}
+
+/* Center numeric headers */
+.poRowHeader div:nth-child(2),
+.poRowHeader div:nth-child(3),
+.poRowHeader div:nth-child(4) {
   justify-content: center;
+}
+
+/* ************ DATA ROW ************ */
+
+.poRow {
+  display: grid;
+  grid-template-columns: minmax(300px, 2fr) 120px 120px 120px 40px;
+  gap: 8px;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Inputs */
+.poRow input {
+  width: 100%;
+  height: 36px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Description textbox */
+.poDescriptionInput {
+  min-width: 300px;
+}
+
+/* Center numeric fields */
+.poRow input:nth-child(2),
+.poRow input:nth-child(3),
+.poRow input:nth-child(4) {
+  text-align: center;
+}
+
+/* Readonly amount */
+.poRow input[readonly] {
+  background-color: #f9f9f9;
+  font-weight: 500;
+}
+
+/* Delete button */
+.poDeleteBtn {
+  background-color: #ff4d4d;
+  border: none;
   color: #fff;
-  font-weight: bold;
+  font-size: 16px;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
 }
 
-/* Approved */
-.row > div:last-child ul li.tickIcon::before {
-  background-color: #13ab13;
-  content: "\2713";
+.poDeleteBtn:hover {
+  background-color: #d93636;
 }
 
-/* Rejected */
-.row > div:last-child ul li.crossIcon::before {
-  background-color: #e64e4e;
-  content: "\00d7";
-  font-size: 18px;
-}
-
-/* Text */
-.row > div:last-child ul li span {
-  display: block;
-  font-size: 12px;
-}
-
-.row > div:last-child ul li span.spanHeader {
-  font-weight: 600;
-}
-
-.row > div:last-child ul li span.apprStatus {
-  color: #0e9e0e;
-  font-weight: bold;
-}
-
-.row > div:last-child ul li span.rejStatus {
-  color: #9a1111;
-  font-weight: bold;
-}
-
-/* ========================= */
-/* 🔥 RESPONSIVE             */
-/* ========================= */
+/* ************ RESPONSIVE ************ */
 
 @media (max-width: 768px) {
-  .row {
-    flex-direction: column;
-  }
-
   .poRowHeader,
   .poRow {
     grid-template-columns: 1fr;
   }
 
-  .poSectionHeader {
-    flex-direction: column;
-    align-items: stretch;
+  .poRowHeader div,
+  .poRow input {
+    justify-content: flex-start;
+    text-align: left;
   }
 }
 /* 🔥 TWO COLUMN FORM ROW */
