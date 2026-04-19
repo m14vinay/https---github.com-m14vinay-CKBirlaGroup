@@ -683,12 +683,12 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedTo: dataApprover[0].Approval1.Title,
+          AssignedTo: approver?.Approval1?.Title,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
-          Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-          Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
-          Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
+          Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
+          Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
+          Approval3Id: (approvalChain.length > 2 ? approvalChain[3].id : null),
           //Approval3Id: approver3Id? Number(approver3Id)  : null,
           CurrentStatus: "Pending"
         };
@@ -713,11 +713,11 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             Department: form.Department || "",
             Advancepayment: form.Advancepayment || "",
             ApprovalPath: form.ApprovalPath || "",
-            AssignedTo: dataApprover[0].Approval1.Title,
+            AssignedTo: approver?.Approval1?.Title,
             AssignedToEmailId: approver?.Approval1?.Id || 0,
-            Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-            Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
-            Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
+            Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
+            Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
+            Approval3Id: (approvalChain.length > 2 ? approvalChain[3].id : null),
             CurrentStatus: "Pending"
           };
 
@@ -742,12 +742,12 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedTo: dataApprover[0].Approval1.Title,
+          AssignedTo: approver?.Approval1?.Title,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
-          Approval1Id: dataApprover[0].Approval1.Id || 0,
-          Approval2Id: dataApprover[0].Approval2.Id || 0,
-          Approval3Id: dataApprover[0].Approval3.Id || 0,
+          Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
+          Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
+          Approval3Id: (approvalChain.length > 2 ? approvalChain[3].id : null),
           CurrentStatus: "Pending"
         };
 
