@@ -302,3 +302,12 @@ button {
   color: rgb(162, 234, 17);
   font-weight: bold;
 }
+.rightPanel ul li span.upcomingstatus {
+  color: orange;
+  font-weight: bold;
+}
+.rightPanel ul li.upcomingIcon::before {
+  background-color: orange;
+  content: "\f105";
+  font-size: 20px;
+}
