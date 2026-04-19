@@ -451,29 +451,6 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                     ? styles.Rejected
                     : styles.Pending}>{form.CurrentStatus}</span></h4>
             </div>
-            <div className={styles.leftPanelStatusHeader}>
-              {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-                let statusClass = styles.statusBox;
-                if (item.UserAction === "Approved") {
-                  statusClass = `${styles.statusBox}`;
-                }
-                else if (item.UserAction === "Rejected") {
-                  statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-                }
-                else if (item.UserAction === "Upcoming") {
-                  statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
-                }
-                return (
-                  <div className={statusClass} key={index}>
-                    <div className={styles.content}>
-                      <h5>{item.UserName}</h5>
-                      <h6>{item.Designation}</h6>
-                      <h4>{item.UserAction}</h4>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
             <div className={styles.content}>
               <div className={styles.selectDep}>
                 <div className={styles.selectDepInner}>

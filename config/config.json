@@ -10,11 +10,11 @@
         }
       ]
     },
-    "ouotation-approval-form-web-part": {
+    "quotation-approval-form-web-part": {
       "components": [
         {
-          "entrypoint": "./lib/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.js",
-          "manifest": "./src/webparts/ouotationApprovalForm/OuotationApprovalFormWebPart.manifest.json"
+          "entrypoint": "./lib/webparts/QuotationApprovalForm/QuotationApprovalFormWebPart.js",
+          "manifest": "./src/webparts/QuotationApprovalForm/QuotationApprovalFormWebPart.manifest.json"
         }
       ]
     },
@@ -226,6 +226,22 @@
         }
       ]
     },
+    "digiflow-menu-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/digiflowMenu/DigiflowMenuWebPart.js",
+          "manifest": "./src/webparts/digiflowMenu/DigiflowMenuWebPart.manifest.json"
+        }
+      ]
+    },
+    "manage-approvers-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/manageApprovers/ManageApproversWebPart.js",
+          "manifest": "./src/webparts/manageApprovers/ManageApproversWebPart.manifest.json"
+        }
+      ]
+    },
     "signed-po-repository-web-part": {
       "components": [
         {
@@ -286,7 +302,7 @@
   "externals": {},
   "localizedResources": {
     "HomeDashboradWebPartStrings": "lib/webparts/homeDashborad/loc/{locale}.js",
-    "OuotationApprovalFormWebPartStrings": "lib/webparts/ouotationApprovalForm/loc/{locale}.js",
+    "QuotationApprovalFormWebPartStrings": "lib/webparts/QuotationApprovalForm/loc/{locale}.js",
     "VendorMappingFormWebPartStrings": "lib/webparts/vendorMappingForm/loc/{locale}.js",
     "PurchaseOrderRequestWebPartStrings": "lib/webparts/purchaseOrderRequest/loc/{locale}.js",
     "PurchaseOrderApprovalWebPartStrings": "lib/webparts/purchaseOrderApproval/loc/{locale}.js",
@@ -313,6 +329,8 @@
     "VendorRegistrationSearchWebPartStrings": "lib/webparts/vendorRegistrationSearch/loc/{locale}.js",
     "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js",
     "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js",
+    "DigiflowMenuWebPartStrings": "lib/webparts/digiflowMenu/loc/{locale}.js",
+    "ManageApproversWebPartStrings": "lib/webparts/manageApprovers/loc/{locale}.js",
     "SignedPoRepositoryWebPartStrings": "lib/webparts/signedPoRepository/loc/{locale}.js",
     "BillPaymentRepositoryWebPartStrings": "lib/webparts/billPaymentRepository/loc/{locale}.js",
     "SummaryReportNeibtWebPartStrings": "lib/webparts/summaryReportNeibt/loc/{locale}.js",

@@ -299,7 +299,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction: UserAction,
+        UserAction: 'Upcoming',
         Designation: Designation,
         Sequence: Sequence
       };
