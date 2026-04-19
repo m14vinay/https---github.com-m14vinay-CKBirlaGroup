@@ -871,26 +871,36 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
               {/* 
           <label>Vendor 1 <span className={styles.required}>*</span></label>
           <input name="Vendor1" value={form.Vendor1} onChange={handleChange}  /> */}
-
-              <label>Vendor1 <span className={styles.required}>*</span></label>
-              <input name="Vendor1" value={form.Vendor1} onChange={handleChange} />
-
-              <label>Vendor2 <span className={styles.required}>*</span></label>
-              <input name="Vendor2" value={form.Vendor2} onChange={handleChange} />
-
-              <label>Vendor3 <span className={styles.required}>*</span></label>
-              <input name="Vendor3" value={form.Vendor3} onChange={handleChange} />
-
-
-              <label>Quote 1 <span className={styles.required}>*</span></label>
-              <input name="Quote1" value={form.Quote1} type='number' onChange={handleChange} />
-
-              <label>Quote 2</label>
-              <input name="Quote2" value={form.Quote2} type='number' onChange={handleChange} />
-
-              <label>Quote 3</label>
-              <input name="Quote3" value={form.Quote3} type='number' onChange={handleChange} />
-
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor1 <span className={styles.required}>*</span></label>
+                  <input name="Vendor1" value={form.Vendor1} onChange={handleChange} />
+                </div>
+                <div className={styles.fieldBlock}>
+                  <label>Quote 1 <span className={styles.required}>*</span></label>
+                  <input name="Quote1" value={form.Quote1} type='number' onChange={handleChange} />
+                </div>
+              </div>
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor2 <span className={styles.required}>*</span></label>
+                  <input name="Vendor2" value={form.Vendor2} onChange={handleChange} />
+                </div>
+                <div className={styles.fieldBlock}>
+                  <label>Quote 2</label>
+                  <input name="Quote2" value={form.Quote2} type='number' onChange={handleChange} />
+                </div>
+              </div>
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor3 <span className={styles.required}>*</span></label>
+                  <input name="Vendor3" value={form.Vendor3} onChange={handleChange} />
+                </div>
+                <div className={styles.fieldBlock}>
+                  <label>Quote 3</label>
+                  <input name="Quote3" value={form.Quote3} type='number' onChange={handleChange} />
+                </div>
+              </div>
               <label>Select Vendor <span className={styles.required}>*</span></label>
               <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
 
