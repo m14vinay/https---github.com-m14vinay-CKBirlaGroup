@@ -163,6 +163,10 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
 
         }));
+
+        if(result.Department){
+          handleDepartmentChange(result.Department);
+        }
       } else {
         alert("No Data Found");
       }
@@ -500,13 +504,13 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedTo: approver?.Approval1?.Title || 0,
-          AssignedToEmailId: approver?.Approval1?.Id || 0,
-          //AssignedTo: User.Title,
-          //Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-          Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-          Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          Approval3Id: (approvalChain.length > 2 ? approvalChain[3].id : null),
+          // AssignedTo: approver?.Approval1?.Title || 0,
+          // AssignedToEmailId: approver?.Approval1?.Id || 0,
+          // //AssignedTo: User.Title,
+          // //Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
+          // Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
+          // Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
+          // Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
           CurrentStatus: "Draft"
         };
 
@@ -529,12 +533,12 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedTo: approver?.Approval1.Title || 0,
-          AssignedToEmailId: approver?.Approval1?.Id || 0,
-          //AssignedTo: User.Title,
-          Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-          Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          Approval3Id: (approvalChain.length > 2 ? approvalChain[3].id : null),
+          // AssignedTo: approver?.Approval1.Title || 0,
+          // AssignedToEmailId: approver?.Approval1?.Id || 0,
+          // //AssignedTo: User.Title,
+          // Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
+          // Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
+          // Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
           CurrentStatus: "Pending"
         };
       }
@@ -557,12 +561,12 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedTo: approver?.Approval1?.Title || 0,
-          AssignedToEmailId: approver?.Approval1?.Id || 0,
-          //AssignedTo: User.Title,
-          Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-          Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
+          // AssignedTo: approver?.Approval1?.Title || 0,
+          // AssignedToEmailId: approver?.Approval1?.Id || 0,
+          // //AssignedTo: User.Title,
+          // Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
+          // Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
+          // Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
           CurrentStatus: "Draft"
         };
 
@@ -654,7 +658,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
       if (!form.Advancepayment) return alert("Please Select Advance Payment");
-      if (!form.files || form.files.length === 0) return alert("Attach files");
+      if ((!form.files || form.files.length === 0) && (!attachments || attachments.length === 0)) return alert("Attach files");
       const dataApprover = await service.getDepartmentApprovers(form.Department);
 
       const approver = dataApprover[0];
@@ -688,7 +692,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           //AssignedTo: User.Title,
           Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
           Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          Approval3Id: (approvalChain.length > 2 ? approvalChain[3].id : null),
+          Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
           //Approval3Id: approver3Id? Number(approver3Id)  : null,
           CurrentStatus: "Pending"
         };
@@ -717,7 +721,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             AssignedToEmailId: approver?.Approval1?.Id || 0,
             Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
             Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-            Approval3Id: (approvalChain.length > 2 ? approvalChain[3].id : null),
+            Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
             CurrentStatus: "Pending"
           };
 
@@ -747,7 +751,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           //AssignedTo: User.Title,
           Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
           Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          Approval3Id: (approvalChain.length > 2 ? approvalChain[3].id : null),
+          Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
           CurrentStatus: "Pending"
         };
 
