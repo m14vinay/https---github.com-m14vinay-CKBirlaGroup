@@ -32,6 +32,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   const service = new SharePointService(props.context);
   const [attachments, setAttachments] = React.useState<any[]>([]);
   const [POAmount, setPOAmount] = React.useState(0);
+  const [TotalAmount, setTotalAmount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
   const [isChecked, setIsChecked] = React.useState(false);
   const MAX_TOTAL_SIZE_MB = 25;
@@ -117,8 +118,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     setLoading(true);
     if (!option) return;
     const data = await service.getDocumentDetailsID(option.text);
+    const TotalAmount=await service.getTotalAmountFromBillProcessingByPO(option.text);
     console.log(data);
     setPOAmount(data[0].POAmount);
+    setTotalAmount(TotalAmount);
     setForm(prev => ({
       ...prev,
       PORequestNo: option?.text as string,
@@ -251,7 +254,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       ...form,
       [name]: value
     });
-    if (Number(value) > Number(POAmount)) {
+    if (Number(TotalAmount+Number(value)) > Number(POAmount)) {
       setForm(prev => ({
         ...prev,
         BillAmount: 0
