@@ -10,19 +10,19 @@ import { IQuotationRequestNeiBtProps } from '../../quotationRequestNeiBt/compone
 const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
   // State
-  const [form, setForm] = React.useState({
+  const [form, setForm] = React.useState<any>({
     ID: 0,
     ProjectTitle: '',
     ProjectReffNo: '',
     ProjectDescription: '',
-    TotalProjectAmount: 0,
-    ApplicableTaxes: 0,
+    TotalProjectAmount: null,
+    ApplicableTaxes: null,
     Vendor1: '',
     Vendor2: '',
     Vendor3: '',
-    Quote1: 0,
-    Quote2: 0,
-    Quote3: 0,
+    Quote1: null,
+    Quote2: null,
+    Quote3: null,
     Selectedvendor: '',
     SelectedQuote: '',
     Department: '',
@@ -133,7 +133,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       if (result) {
         setItemId(result.Id);
 
-        setForm(prev => ({
+        setForm((prev:any) => ({
           ...prev,
           ProjectTitle: result.ProjectTitle || '',
           ProjectReffNo: result.ProjectReffNo || '',
@@ -289,7 +289,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           return;
         }
         setApprovalChain(approvers);
-        setForm(prev => ({
+        setForm((prev:any) => ({
           ...prev,
           Department: dept,
           DepartmentHead: approvers[0]?.name || '',
@@ -321,7 +321,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             text: a.name
           }))
         );
-        setForm(prev => ({
+        setForm((prev:any) => ({
           ...prev,
           Department: dept,
           DepartmentHead: approvers[0]?.name || '',
@@ -344,7 +344,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
         }
         setApprovalChain(approvers);
         const path = approvers.map(a => a.name).join(" > ");
-        setForm(prev => ({
+        setForm((prev:any) => ({
           ...prev,
           Department: dept,
           DepartmentHead: approvers[0]?.name || '',
@@ -374,7 +374,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
     const selected = approverOptions.find(a => a.key === id);
 
-    setForm(prev => ({
+    setForm((prev:any) => ({
       ...prev,
       ApprovalPath: prev.DepartmentHead + ' > ' + (selected?.text || '')
     }));
@@ -434,10 +434,10 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    setForm(prev => ({
+    setForm((prev:any) => ({
       ...prev,
       [name]: name.includes("Amount") || name.includes("Quote")
-        ? Number(value)
+        ? value === "" ? null : Number(value)
         : value
     }));
   };
@@ -916,7 +916,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
                 onChange={(e) => {
                   const value = e.target.value;
 
-                  setForm(prev => ({
+                  setForm((prev:any) => ({
                     ...prev,
                     Department: value
                   }));
@@ -938,7 +938,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
                 options={poOptions}
                 selectedKey={poOptions.find(opt => opt.text === form.Advancepayment)?.text} // selectedKey ko key set karo based on text match
                 onChange={(_, option) => {
-                  setForm(prev => ({
+                  setForm((prev:any) => ({
                     ...prev,
                     Advancepayment: option?.text || ""  // text store karo
                   }));
