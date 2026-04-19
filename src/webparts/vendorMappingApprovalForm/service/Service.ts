@@ -184,22 +184,32 @@ export default class Service {
     return data;
   }
   // Save the Hitory Record
-   public async createHistoryItem(data: any): Promise<any> {
-         const itemType = await this.getListItemType();
-         const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items`;   
-         const response = await this.context.spHttpClient.post(
-           url,
-          SPHttpClient.configurations.v1,
-             {
-               headers: {
-                 'Accept': 'application/json',
-                 'Content-Type': 'application/json'
-               },
-               body: JSON.stringify(data)
-             }
-         );
-         return response.json();
-       }
+    // Update History Item
+    public async UpdateHistoryItem(id: number, data: any, Title: string, Sequence: number): Promise<any[]> {
+    const getUrl = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${id} and Title eq '${Title}' and Sequence eq ${Sequence}`;
+
+    const getResponse = await this.context.spHttpClient.get(
+      getUrl,
+      SPHttpClient.configurations.v1
+    );
+    const result = await getResponse.json();
+    const itemId = result.value[0].Id;
+    const updateUrl = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items(${itemId})`;
+    const updateResponse = await this.context.spHttpClient.post(
+      updateUrl,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;odata=nometadata",
+          "Content-Type": "application/json;odata=nometadata",
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "MERGE"
+        },
+        body: JSON.stringify(data)
+      }
+    );
+    return updateResponse.json();
+  }
     // Get the History Record
     public async GetHistoryItem(ID:Number,FormCode:string): Promise<any> {
       const itemType = await this.getListItemType();

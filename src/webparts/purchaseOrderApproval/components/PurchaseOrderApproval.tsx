@@ -184,38 +184,13 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     }
   };
 
-
-  const handleSaveApproveHistory = async (id: number) => {
-
-    const currentuser = await service.getUser();
-
+const handleUpdateApproveHistory = async (id: number, UserAction: string, Sequence: number, comment: string) => {
     const payload = {
-      Title: 'PO',
-      FID: id,
-      UserName: currentuser.Title,
-      UserAction: 'Approved',
+      UserAction: UserAction,
       ActionDate: new Date().toISOString(),
-      Designation: currentuser.JobTitle,
-      UserComment: approverComment
+      UserComment: comment
     };
-
-    await service.createHistoryItem(payload);
-  };
-  const handleSaveRejectedHistory = async (id: number) => {
-
-    const currentuser = await service.getUser();
-
-    const payload = {
-      Title: 'PO',
-      FID: id,
-      UserName: currentuser.Title,
-      UserAction: 'Rejected',
-      ActionDate: new Date().toISOString(),
-      Designation: currentuser.JobTitle,
-      UserComment: approverComment
-    };
-
-    await service.createHistoryItem(payload);
+    await service.UpdateHistoryItem(id, payload, 'VMR', Sequence);
   };
 
 
@@ -228,8 +203,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
       if (!itemId) return;
       if (!form.Approver2EmailId) {
       await service.updateItemdata(itemId, "Approved", approverComment,0,"");
-
-      await handleSaveApproveHistory(itemId);
+      await handleUpdateApproveHistory(itemId, 'Approved', 1, approverComment);
       alert("✅ Final Approved");
 
       window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
@@ -239,7 +213,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
      if(form.ActionDate1==='')
      {
       await service.updateItemdata(itemId, "Pending", approverComment,form.Approver2EmailId,form.approver2 || '');
-         await handleSaveApproveHistory(itemId);
+      await handleUpdateApproveHistory(itemId, 'Approved', 1, approverComment);
       alert("✅ First Level Approved Successfully.");
  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url); 
@@ -248,7 +222,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
      else if(form.ActionDate2==='')
      {
        await service.updateItemdata2(itemId, "Approved",approverComment,'Approved');
-        await handleSaveApproveHistory(itemId);
+      await handleUpdateApproveHistory(itemId, 'Approved', 2, approverComment);
        alert("✅ Final Level Approved Successfully.");
        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
      window.location.assign(url); 
@@ -280,7 +254,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
         if (!form.Approver2Id) {
       await service.updateItemdata(itemId, "Rejected", approverComment,0,"");
 
-      await handleSaveApproveHistory(itemId);
+      await handleUpdateApproveHistory(itemId, 'Rejected', 1, approverComment);
       alert("✅ Final Rejected successfully");
 
       window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
@@ -288,7 +262,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
     }
       if (form.ActionDate1 === '') {
         await service.updateItemdata(itemId, "Rejected", approverComment, form.Approver2EmailId, "Rejected",);
-        await handleSaveRejectedHistory(itemId);
+        await handleUpdateApproveHistory(itemId, 'Rejected', 1, approverComment);
         alert("✅ First level Rejected successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
         window.location.assign(url);
@@ -297,7 +271,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
       }
       else if (form.ActionDate2 === '') {
         await service.updateItemdata2(itemId, "Rejected", approverComment, "Rejected");
-        await handleSaveRejectedHistory(itemId);
+        await handleUpdateApproveHistory(itemId, 'Rejected', 2, approverComment);
         alert("✅ Final Rejection done");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
         window.location.assign(url);
@@ -419,6 +393,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
                   const isApproved = item.UserAction === "Approved";
                   const isRejected = item.UserAction === "Rejected";
                   const isInitiated = item.UserAction === "Request Initiator";
+                  const isUpcoming = item.UserAction === "Upcoming";
                   return (
                     <li
                       key={index}
@@ -427,7 +402,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
                           ? styles.tickIcon
                           : isRejected
                             ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : ""
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
                       }
                     >
                       <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
@@ -441,7 +416,7 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : ""
+                                  : isUpcoming ? styles.upcomingstatus : ""
                             }
                           >
                             {item.UserAction}

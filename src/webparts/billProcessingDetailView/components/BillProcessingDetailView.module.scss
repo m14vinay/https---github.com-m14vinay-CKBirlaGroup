@@ -92,7 +92,7 @@
 
 .rejectedBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #cdcd17;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -326,6 +326,6 @@ button {
 }
 
 .Pending {
-  color: yellow;
+  color: rgb(162, 234, 17);
   font-weight: bold;
 }

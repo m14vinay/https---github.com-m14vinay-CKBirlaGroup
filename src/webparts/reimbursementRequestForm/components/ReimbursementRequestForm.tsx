@@ -29,7 +29,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     DocumentName: '',
     DocumentID: '',
     files: [],
-    ApprovalPath:''
+    ApprovalPath: ''
   });
   const [loading, setLoading] = React.useState(false);
   const [isOpen, setisOpen] = React.useState(false);
@@ -199,7 +199,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         DocumentID: '',
         ID: 0,
         files: [],
-        ApprovalPath:''
+        ApprovalPath: ''
       });
     }
   };
@@ -232,6 +232,32 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     }));
     setisOpen(false);
   };
+  const handleSaveHistory = async (id: number, Title: string, UserName: string, UserAction: string, Designation: string, ActionDate: Date, Sequence: number) => {
+    let payload: {};
+    if (Sequence == 0) {
+      payload = {
+        Title: Title,
+        FID: id,
+        UserName: UserName,
+        UserAction: UserAction,
+        ActionDate: ActionDate,
+        Designation: Designation,
+        Sequence: Sequence
+      };
+    }
+    else {
+      payload = {
+        Title: Title,
+        FID: id,
+        UserName: UserName,
+        UserAction: UserAction,
+        Designation: Designation,
+        Sequence: Sequence
+      };
+    }
+
+    await service.createHistoryItem(payload);
+  };
   const handleSubmit = async () => {
     if (!form.DepartmentName) {
       alert("Please select a Department");
@@ -254,7 +280,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         AssignedToEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         AssignedTo: dataApproverFI.ApproverName?.Title || "",
         DepartmentHead: dataApproverFI.ApproverName?.Title || "",
-        ApprovalPath:'1.'+dataApproverFI.ApproverName?.Title
+        ApprovalPath: '1.' + dataApproverFI.ApproverName?.Title
       };
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -270,7 +296,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         ComplianceHeadEmailId: 0,
         CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
-        ApprovalPath:'1.'+dataApprover.DepartmentHead?.Title+' 2.'+dataApproverFI.ApproverName?.Title+' 3.'+dataApproverCFO.ApproverName?.Title
+        ApprovalPath: '1.' + dataApprover.DepartmentHead?.Title + ' 2.' + dataApproverFI.ApproverName?.Title + ' 3.' + dataApproverCFO.ApproverName?.Title
       }
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -286,7 +312,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
         CFOEmailId: 0,
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
-        ApprovalPath:'1.'+dataApprover.DepartmentHead?.Title+' 2.'+dataApproverFI.ApproverName?.Title+' 3.'+dataApproverCompliance.ApproverName?.Title
+        ApprovalPath: '1.' + dataApprover.DepartmentHead?.Title + ' 2.' + dataApproverFI.ApproverName?.Title + ' 3.' + dataApproverCompliance.ApproverName?.Title
       }
     }
     try {
@@ -320,15 +346,22 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                       await service.uploadFile(res.Id, Expenseform.expenses[i].files[k]);
                     }
                   }
-                  const payload = {
-                    Title: 'REM',
-                    FID: Number(res.Id),
-                    UserName: currentuser.Title,
-                    UserAction: 'Request Initiator',
-                    ActionDate: new Date().toISOString(),
-                    Designation: 'Request Initiator',
-                  };
-                  await service.createHistoryItem(payload);
+                  if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
+                    await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 1);
+                  }
+                  else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
+                    await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverCFO.ApproverName?.Title, '', 'CFO Approver', new Date(), 3);
+                  }
+                  else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
+                    await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverCompliance.ApproverName?.Title, '', 'Compliance Head', new Date(), 3);
+                  }
                   alert("Data Submitted Successfully ✅");
                   console.log("Successfully Transaction Saved:-" + resExpense.Id);
                   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -355,26 +388,33 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                   ReimursementLookupId: Number(itemId)
                 };
                 if (Number(Expenseform.expenses[i].Id) > 0) {
-                  await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);                 
+                  await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);
                 }
                 else {
-                  const resExpense = await service.createExpenseItem(Expensepayload);                 
-                    if (resExpense.Id > 0 && Expenseform.expenses[i].files.length > 0) {
-                      for (let L = 0; L < Expenseform.expenses[i].files.length; L++) {
-                        await service.uploadFile(resExpense.Id, Expenseform.expenses[i].files[L]);
-                      }
+                  const resExpense = await service.createExpenseItem(Expensepayload);
+                  if (resExpense.Id > 0 && Expenseform.expenses[i].files.length > 0) {
+                    for (let L = 0; L < Expenseform.expenses[i].files.length; L++) {
+                      await service.uploadFile(resExpense.Id, Expenseform.expenses[i].files[L]);
                     }
-                 }
+                  }
+                }
               }
-              const payload = {
-                Title: 'REM',
-                FID: itemId,
-                UserName: currentuser.Title,
-                UserAction: 'Request Initiator',
-                ActionDate: new Date().toISOString(),
-                Designation: 'Request Initiator',
-              };
-              await service.createHistoryItem(payload);
+              if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
+                await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 1);
+              }
+              else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
+                await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+                await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
+                await handleSaveHistory(itemId, 'REM', dataApproverCFO.ApproverName?.Title, '', 'CFO Approver', new Date(), 3);
+              }
+              else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
+                await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+                await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
+                await handleSaveHistory(itemId, 'REM', dataApproverCompliance.ApproverName?.Title, '', 'Compliance Head', new Date(), 3);
+              }
               alert("Data Submitted Successfully ✅");
               const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
               window.location.assign(url);
@@ -411,7 +451,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         if (!itemId) {
           const res = await service.createItem(payload);
           if (res.Id > 0) {
-            setItemId(res.Id);  
+            setItemId(res.Id);
             await service.updateItem(res.Id, {
               RequestNo: `REM-${res.Id}`
             });

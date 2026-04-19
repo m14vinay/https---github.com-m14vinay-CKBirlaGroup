@@ -454,7 +454,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       )}
       <div className={styles.container}>
         <div className={styles.header}>
-          <h4>Bill Processing Details & Status</h4>
+          <h4>Bill Processing Approval</h4>
         </div>
         <div className={styles.row}>
           <div className={styles['col-md-9']}>

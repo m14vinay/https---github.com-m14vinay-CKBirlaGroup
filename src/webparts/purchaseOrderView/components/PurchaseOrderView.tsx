@@ -214,7 +214,9 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
                   else if (item.UserAction === "Rejected") {
                     statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
                   }
-
+                  else if (item.UserAction === "Upcoming") {
+                    statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
+                  }
                   return (
                     <div className={statusClass} key={index}>
                       <div className={styles.content}>
@@ -288,6 +290,7 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
                   const isApproved = item.UserAction === "Approved";
                   const isRejected = item.UserAction === "Rejected";
                   const isInitiated = item.UserAction === "Request Initiator";
+                  const isUpcoming = item.UserAction === "Upcoming";
                   return (
                     <li
                       key={index}
@@ -296,7 +299,7 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
                           ? styles.tickIcon
                           : isRejected
                             ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : ""
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
                       }
                     >
                       <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
@@ -310,7 +313,7 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : ""
+                                  : isUpcoming ? styles.upcomingstatus : ""
                             }
                           >
                             {item.UserAction}

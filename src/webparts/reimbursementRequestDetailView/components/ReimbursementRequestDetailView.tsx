@@ -148,24 +148,26 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
             </div>
             <div className={styles.leftPanelStatusHeader}>
               {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-                let statusClass = styles.statusBox;
-                if (item.UserAction === "Approved") {
-                  statusClass = `${styles.statusBox}`;
-                }
-                else if (item.UserAction === "Rejected") {
-                  statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-                }
-
-                return (
-                  <div className={statusClass} key={index}>
-                    <div className={styles.content}>
-                      <h5>{item.UserName}</h5>
-                      <h6>{item.Designation}</h6>
-                      <h4>{item.UserAction}</h4>
+                  let statusClass = styles.statusBox;
+                  if (item.UserAction === "Approved") {
+                    statusClass = `${styles.statusBox}`;
+                  }
+                  else if (item.UserAction === "Rejected") {
+                    statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+                  }
+                  else if (item.UserAction === "Upcoming") {
+                    statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
+                  }
+                  return (
+                    <div className={statusClass} key={index}>
+                      <div className={styles.content}>
+                        <h5>{item.UserName}</h5>
+                        <h6>{item.Designation}</h6>
+                        <h4>{item.UserAction}</h4>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
             <div className={styles.content}>
               <div className={styles.selectDep}>
@@ -244,6 +246,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                   const isApproved = item.UserAction === "Approved";
                   const isRejected = item.UserAction === "Rejected";
                   const isInitiated = item.UserAction === "Request Initiator";
+                  const isUpcoming = item.UserAction === "Upcoming";
                   return (
                     <li
                       key={index}
@@ -252,7 +255,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                           ? styles.tickIcon
                           : isRejected
                             ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : ""
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
                       }
                     >
                       <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
@@ -266,7 +269,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : ""
+                                  : isUpcoming ? styles.upcomingstatus : ""
                             }
                           >
                             {item.UserAction}

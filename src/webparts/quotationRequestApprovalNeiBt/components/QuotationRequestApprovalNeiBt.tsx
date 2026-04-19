@@ -1,6 +1,6 @@
 import * as React from 'react';
 import styles from './QuotationRequestApprovalNeiBt.module.scss';
-import type { IQuotationRequestApprovalNeiBtProps,IState,IForm } from './IQuotationRequestApprovalNeiBtProps';
+import type { IQuotationRequestApprovalNeiBtProps, IState, IForm } from './IQuotationRequestApprovalNeiBtProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import { SPHttpClient } from '@microsoft/sp-http';
 import { useEffect, useState } from 'react';
@@ -10,93 +10,92 @@ import { Spinner, SpinnerSize } from '@fluentui/react';
 
 const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProps> = (props) => {
 
-     const [form, setForm] = React.useState({
-   ProjectTitle:'',
-      ProjectReffNo:'',
-      ProjectDescription: '',
-      TotalProjectAmount:0,
-      ApplicableTaxes:0,
-      Vendor1: '',
-      Vendor2: '',
-      Vendor3: '',
-      Quote1:'',
-      Quote2:'',
-      Quote3:'',
-      Selectedvendor:'',
-      SelectedQuote:'',
-      Department:'',
-      Advancepayment:0,
-      ApprovalPath: '',
-      files: null,
-      attachments: [],
-       ApproverComment1:'',
-       CurrentStatus:'',
-       approver1: '',
+  const [form, setForm] = React.useState({
+    ProjectTitle: '',
+    ProjectReffNo: '',
+    ProjectDescription: '',
+    TotalProjectAmount: 0,
+    ApplicableTaxes: 0,
+    Vendor1: '',
+    Vendor2: '',
+    Vendor3: '',
+    Quote1: '',
+    Quote2: '',
+    Quote3: '',
+    Selectedvendor: '',
+    SelectedQuote: '',
+    Department: '',
+    Advancepayment: 0,
+    ApprovalPath: '',
+    files: null,
+    attachments: [],
+    ApproverComment1: '',
+    CurrentStatus: '',
+    approver1: '',
     approver2: '',
     approver3: '',
     approver4: '',
     approver5: '',
-    ActionDate1:'',
-    ActionDate2:'',
-     ActionDate3:'',
-      Approval2: '',
-       Approval3: '',
+    ActionDate1: '',
+    ActionDate2: '',
+    ActionDate3: '',
+    Approval2: '',
+    Approval3: '',
     DepartmentHead: '',
-    RequestNo:'',
-    Approver2EmailId:0,
-    Approver3EmailId:0,
-    ApproverTwoId:0
-    
-   
+    RequestNo: '',
+    Approver2EmailId: 0,
+    Approver3EmailId: 0,
+    ApproverTwoId: 0
+
+
   });
 
-   const [itemId, setItemId] = React.useState<number | null>(null);
-    const service = new SharePointService(props.context);
-    const [approverComment, setApproverComment] = React.useState('');
-     const [approverComment2, setApproverComment2] = React.useState('');
-    const [attachments, setAttachments] = React.useState<any[]>([]);
-     const [AssignedID2, setAssignedID2] = React.useState('');
-     const [AssignedID3, setAssignedID3] = React.useState('');
-    const [approver1, setApprover1] = React.useState('');
-    const [approver2, setApprover2] = React.useState('');
-    const [approver3, setApprover3] = React.useState('');
-    const [approver4, setApprover4] = React.useState('');
-    const [approver5, setApprover5] = React.useState('');
-    const [departmentHead, setDepartmentHead] = React.useState('');
-    const [isDisabled, setIsDisabled] = useState(false);
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+  const [approverComment, setApproverComment] = React.useState('');
+  const [approverComment2, setApproverComment2] = React.useState('');
+  const [attachments, setAttachments] = React.useState<any[]>([]);
+  const [AssignedID2, setAssignedID2] = React.useState('');
+  const [AssignedID3, setAssignedID3] = React.useState('');
+  const [approver1, setApprover1] = React.useState('');
+  const [approver2, setApprover2] = React.useState('');
+  const [approver3, setApprover3] = React.useState('');
+  const [approver4, setApprover4] = React.useState('');
+  const [approver5, setApprover5] = React.useState('');
+  const [departmentHead, setDepartmentHead] = React.useState('');
+  const [isDisabled, setIsDisabled] = useState(false);
   const [History, setHistory] = useState<any[]>([]);
-   const [loading, setLoading] = React.useState(false);
-       const [actionType, setActionType] = React.useState<'approve' | 'reject' | ''>('');
-  
-    // --- 1️⃣ Get ID from query string ---
-     const getIdFromQueryString = (): number | null => {
-       const params = new URLSearchParams(window.location.search);
-       const id = params.get('RequestId');
-       return id ? parseInt(id, 10) : null;
-     };
-   
-     // --- 3️⃣ Load data on mount ---
-     React.useEffect(() => {
-       const id = getIdFromQueryString();
-       if (id) {
-         handleFetchById(id);
-       }
-     }, []);
+  const [loading, setLoading] = React.useState(false);
+  const [actionType, setActionType] = React.useState<'approve' | 'reject' | ''>('');
 
-const loadAttachments = async (id:number) => {
-    try{
-  const files = await service.getAttachments(id);
-  console.log("Attachments:", files);
-  setAttachments(files);
-    }catch(error)
-    {
+  // --- 1️⃣ Get ID from query string ---
+  const getIdFromQueryString = (): number | null => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('RequestId');
+    return id ? parseInt(id, 10) : null;
+  };
+
+  // --- 3️⃣ Load data on mount ---
+  React.useEffect(() => {
+    const id = getIdFromQueryString();
+    if (id) {
+      handleFetchById(id);
+    }
+  }, []);
+
+  const loadAttachments = async (id: number) => {
+    try {
+      const files = await service.getAttachments(id);
+      console.log("Attachments:", files);
+      setAttachments(files);
+    } catch (error) {
       console.error(error);
     }
-   };
+  };
 
 
 
- const getApprover = async () => {
+  const getApprover = async () => {
     try {
       const data = await service.getApprover('');
 
@@ -115,283 +114,278 @@ const loadAttachments = async (id:number) => {
       console.error(error);
     }
   };
-React.useEffect(() => {
-  if (itemId) {
-    loadAttachments(itemId);
-     getApprover();// 👈 dynamic ID use karo
-  }
-}, [itemId]);
+  React.useEffect(() => {
+    if (itemId) {
+      loadAttachments(itemId);
+      getApprover();// 👈 dynamic ID use karo
+    }
+  }, [itemId]);
 
 
-const handleFetchById = async (id: number) => {
+  const handleFetchById = async (id: number) => {
     try {
-       setLoading(true);
+      setLoading(true);
       console.log("Calling API with ID:", id);
-      const currentuser= await service.getUser();
+      const currentuser = await service.getUser();
       const result = await service.getItemByRequestNo(id);
       if (result.Approval2Id) {
-  const user2 = await service.getUserById(result.Approval2Id);
-  if (user2?.Title) {
-    setAssignedID2(user2.Title);
-  }
-}
-if (result.Approval3Id) {
-  const user3 = await service.getUserById(result.Approval3Id);
-  if (user3?.Title) {
-    setAssignedID3(user3.Title);
-  }
-}
-        const User=await service.getUserById(result.Approval2Id);
-    const historydata=await service.GetHistoryItem(id,"QANEIBT");
-     setHistory(historydata); 
+        const user2 = await service.getUserById(result.Approval2Id);
+        if (user2?.Title) {
+          setAssignedID2(user2.Title);
+        }
+      }
+      if (result.Approval3Id) {
+        const user3 = await service.getUserById(result.Approval3Id);
+        if (user3?.Title) {
+          setAssignedID3(user3.Title);
+        }
+      }
+      const User = await service.getUserById(result.Approval2Id);
+      const historydata = await service.GetHistoryItem(id, "QANEIBT");
+      setHistory(historydata);
       console.log("Result:", result);
 
-       if (result.AssignedTo === currentuser.Title) {
-      if (result.CurrentStatus==='Pending' || result.CurrentStatus==='Approved' ) {
-      setItemId(result.Id);
+      if (result.AssignedTo === currentuser.Title) {
+        if (result.CurrentStatus === 'Pending' || result.CurrentStatus === 'Approved') {
+          setItemId(result.Id);
 
-      setForm(prev => ({
-        ...prev,
-        ProjectTitle: result.ProjectTitle || '',
-        ProjectReffNo: result. ProjectReffNo || '',
-        ProjectDescription: result.ProjectDescription || '',
-        TotalProjectAmount: result.TotalProjectAmount || 0,
-         ApplicableTaxes: result.ApplicableTaxes || 0,
-          Vendor1: result.Vendor1 || '',
-      Vendor2: result.Vendor2 || '',
-      Vendor3: result.Vendor3 || '',
-      Quote1: result.Quote1 || '',
-      Quote2:result.Quote2 || '',
-      Quote3: result.Quote3 || '',
-      Selectedvendor: result.Selectedvendor || '',
-      SelectedQuote: result.SelectedQuote || '',
-      Department: result.Department || '',
-      Advancepayment: result.Advancepayment || 0,
-      ApprovalPath: result.ApprovalPath || '',
-      RequestNo : result.RequestNo || '',
-      ActionDate1:result.ActionDate1 || '',
-      ActionDate2:result.ActionDate2 || '',
-      ActionDate3:result.ActionDate3 || '',
-          Approver2EmailId: result.Approval2Id,
-          Approver3EmailId: result.Approval3Id,
-           ApproverTwoId: result.Approval2Id,
-
-
-      files: null
-      }));
-   
+          setForm(prev => ({
+            ...prev,
+            ProjectTitle: result.ProjectTitle || '',
+            ProjectReffNo: result.ProjectReffNo || '',
+            ProjectDescription: result.ProjectDescription || '',
+            TotalProjectAmount: result.TotalProjectAmount || 0,
+            ApplicableTaxes: result.ApplicableTaxes || 0,
+            Vendor1: result.Vendor1 || '',
+            Vendor2: result.Vendor2 || '',
+            Vendor3: result.Vendor3 || '',
+            Quote1: result.Quote1 || '',
+            Quote2: result.Quote2 || '',
+            Quote3: result.Quote3 || '',
+            Selectedvendor: result.Selectedvendor || '',
+            SelectedQuote: result.SelectedQuote || '',
+            Department: result.Department || '',
+            Advancepayment: result.Advancepayment || 0,
+            ApprovalPath: result.ApprovalPath || '',
+            RequestNo: result.RequestNo || '',
+            ActionDate1: result.ActionDate1 || '',
+            ActionDate2: result.ActionDate2 || '',
+            ActionDate3: result.ActionDate3 || '',
+            Approver2EmailId: result.Approval2Id,
+            Approver3EmailId: result.Approval3Id,
+            ApproverTwoId: result.Approval2Id,
 
 
-  if (!result.ActionDate1 || !result.ActionDate2 || !result.ActionDate3) {
-  setIsDisabled(false);  // enable
-} else {
-  setIsDisabled(true);   // disable
-}
-       
-    } else {
-      alert("No Data Found.");
+            files: null
+          }));
+
+
+
+          if (!result.ActionDate1 || !result.ActionDate2 || !result.ActionDate3) {
+            setIsDisabled(false);  // enable
+          } else {
+            setIsDisabled(true);   // disable
+          }
+
+        } else {
+          alert("No Data Found.");
+        }
+      } else {
+        alert("❌ This Action Has Already Taken.Please Wait For Queue.");
+      }
+    } catch (error) {
+      console.error("Error Occurred,Please Contact To System Administrator.:", error);
     }
- } else {
-      alert("❌ This Action Has Already Taken.Please Wait For Queue.");
+    finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error Occurred,Please Contact To System Administrator.:", error);
-  }
-   finally
-  {
-    setLoading(false);
-  }
-};
+  };
 
 
-const handleSaveApproveHistory = async (id: number) => {
+  const handleSaveApproveHistory = async (id: number) => {
 
-  const currentuser = await service.getUser();
+    const currentuser = await service.getUser();
 
-  const payload = {
-    Title: 'QANEIBT',
-    FID: id,  
-    UserName: currentuser.Title,
-    UserAction: 'Approved',
-    ActionDate: new Date().toISOString(),
-     Designation: currentuser.JobTitle, 
+    const payload = {
+      Title: 'QANEIBT',
+      FID: id,
+      UserName: currentuser.Title,
+      UserAction: 'Approved',
+      ActionDate: new Date().toISOString(),
+      Designation: currentuser.JobTitle,
       UserComment: approverComment
+    };
+
+    await service.createHistoryItem(payload);
   };
 
-  await service.createHistoryItem(payload);
-};
+  const handleSaveRejectedHistory = async (id: number) => {
 
-const handleSaveRejectedHistory = async (id: number) => {
+    const currentuser = await service.getUser();
 
-  const currentuser = await service.getUser();
+    const payload = {
+      Title: 'QANEIBT',
+      FID: id,
+      UserName: currentuser.Title,
+      UserAction: 'Rejected',
+      ActionDate: new Date().toISOString(),
+      Designation: currentuser.JobTitle,
+      UserComment: approverComment
 
-  const payload = {
-    Title: 'QANEIBT',
-    FID: id,  
-    UserName: currentuser.Title,
-    UserAction: 'Rejected',
-    ActionDate: new Date().toISOString(),
-     Designation: currentuser.JobTitle,
-     UserComment: approverComment
-      
+    };
+
+    await service.createHistoryItem(payload);
   };
 
-  await service.createHistoryItem(payload);
-};
 
+  const handleApprove = async () => {
+    try {
+      setLoading(true);
 
-const handleApprove = async () => {
-  try {
-    setLoading(true);
+      if (!approverComment) return alert("Enter Approver Comment.");
+      if (!itemId) return;
 
-    if (!approverComment) return alert("Enter Approver Comment.");
-    if (!itemId) return;
-
-    // 🔥 CASE 1: Only 1 approver
-    if (!form.Approver2EmailId && !form.Approver3EmailId) {
-      await service.updateItemdata(itemId, "Approved", approverComment, "", 0);
-
-      await handleSaveApproveHistory(itemId);
-      alert("✅ Final Approved");
-
-      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
-      return;
-    }
-
-    // 🔥 CASE 2: First Approver
-    if (!form.ActionDate1) {
-      await service.updateItemdata(
-        itemId,
-        "Pending",
-        approverComment,
-        AssignedID2,
-        form.Approver2EmailId
-      );
-
-      await handleSaveApproveHistory(itemId);
-      alert("✅ First Level Approved");
-
-      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
-      return;
-    }
-
-    // 🔥 CASE 3: Second Approver
-    if (!form.ActionDate2) {
-
-      // agar 3rd approver nahi hai → FINAL
-      if (!form.Approver3EmailId) {
-        await service.updateItemdata2(itemId, "Approved", approverComment, "", 0);
+      // 🔥 CASE 1: Only 1 approver
+      if (!form.Approver2EmailId && !form.Approver3EmailId) {
+        await service.updateItemdata(itemId, "Approved", approverComment, "", 0);
 
         await handleSaveApproveHistory(itemId);
         alert("✅ Final Approved");
-      } else {
-        // agar 3rd approver hai → Pending
-        await service.updateItemdata2(
+
+        window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+        return;
+      }
+
+      // 🔥 CASE 2: First Approver
+      if (!form.ActionDate1) {
+        await service.updateItemdata(
           itemId,
           "Pending",
           approverComment,
-          AssignedID3,
-          form.Approver3EmailId
+          AssignedID2,
+          form.Approver2EmailId
         );
 
         await handleSaveApproveHistory(itemId);
-        alert("✅ Second Level Approved");
+        alert("✅ First Level Approved");
+
+        window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+        return;
       }
 
-      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
-      return;
+      // 🔥 CASE 3: Second Approver
+      if (!form.ActionDate2) {
+
+        // agar 3rd approver nahi hai → FINAL
+        if (!form.Approver3EmailId) {
+          await service.updateItemdata2(itemId, "Approved", approverComment, "", 0);
+
+          await handleSaveApproveHistory(itemId);
+          alert("✅ Final Approved");
+        } else {
+          // agar 3rd approver hai → Pending
+          await service.updateItemdata2(
+            itemId,
+            "Pending",
+            approverComment,
+            AssignedID3,
+            form.Approver3EmailId
+          );
+
+          await handleSaveApproveHistory(itemId);
+          alert("✅ Second Level Approved");
+        }
+
+        window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+        return;
+      }
+
+      // 🔥 CASE 4: Third Approver (FINAL)
+      if (!form.ActionDate3) {
+        await service.updateItemdata3(itemId, "Approved", approverComment, "Approved");
+
+        await handleSaveApproveHistory(itemId);
+        alert("✅ Final Approved");
+
+        window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+        return;
+      }
+
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // 🔥 CASE 4: Third Approver (FINAL)
-    if (!form.ActionDate3) {
-      await service.updateItemdata3(itemId, "Approved", approverComment, "Approved");
-
-      await handleSaveApproveHistory(itemId);
-      alert("✅ Final Approved");
-
-      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
-      return;
-    }
-
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-const handleReject = async () => {
-  try {
-     //setActionType('approve');
+  const handleReject = async () => {
+    try {
+      //setActionType('approve');
       setLoading(true);
-    if (!approverComment) return alert("Enter Approver Comment");
-    if (!itemId) return;
+      if (!approverComment) return alert("Enter Approver Comment");
+      if (!itemId) return;
 
-    if (!approverComment) {
-      alert("Comment is Required For Rejection ❗");
-      return;
-    }
+      if (!approverComment) {
+        alert("Comment is Required For Rejection ❗");
+        return;
+      }
 
-    if (!form.Approver2EmailId && !form.Approver3EmailId) {
-      await service.updateItemdata(itemId, "Rejected", approverComment, "", 0);
+      if (!form.Approver2EmailId && !form.Approver3EmailId) {
+        await service.updateItemdata(itemId, "Rejected", approverComment, "", 0);
 
-      await handleSaveApproveHistory(itemId);
-      alert("✅ Final Rejected");
+        await handleSaveApproveHistory(itemId);
+        alert("✅ Final Rejected");
 
-      window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
-      return;
-    }
+        window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
+        return;
+      }
 
-   if(form.ActionDate1==='')
-      {
-      await service.updateItemdata(itemId,"Rejected", approverComment,"Rejected",form.Approver2EmailId);
+      if (form.ActionDate1 === '') {
+        await service.updateItemdata(itemId, "Rejected", approverComment, "Rejected", form.Approver2EmailId);
         await handleSaveRejectedHistory(itemId);
         alert("✅ Rejected Successfully");
-         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-     window.location.assign(url); 
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
         return;
 
       }
 
-      
-       else if(form.ActionDate2==='')
-     {
-       await service.updateItemdata2(itemId, "Rejected", approverComment,'Rejected',form.Approver3EmailId);
-         await handleSaveRejectedHistory(itemId);
+
+      else if (form.ActionDate2 === '') {
+        await service.updateItemdata2(itemId, "Rejected", approverComment, 'Rejected', form.Approver3EmailId);
+        await handleSaveRejectedHistory(itemId);
         alert("✅ Rejected Successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-     window.location.assign(url); 
-      return; // 🔥 stop again
-       
-     }
-      else if(form.ActionDate3==='')
-     {
-       await service.updateItemdata3(itemId, "Rejected", approverComment,"Rejected");
-         await handleSaveRejectedHistory(itemId);
+        window.location.assign(url);
+        return; // 🔥 stop again
+
+      }
+      else if (form.ActionDate3 === '') {
+        await service.updateItemdata3(itemId, "Rejected", approverComment, "Rejected");
+        await handleSaveRejectedHistory(itemId);
         alert("✅  Rejected Successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-     window.location.assign(url); 
-      return; // 🔥 stop again
-       
-     }
-      alert("❌ Rejected Successfully");
-     
-    setApproverComment('');
-  } catch (error) {
-    console.error(error);
-  }
-  finally
-  {
-    setLoading(false);
-  }
-};
+        window.location.assign(url);
+        return; // 🔥 stop again
 
-  
-    
-  
-   return (
-            <section>
-              {loading && (
+      }
+      alert("❌ Rejected Successfully");
+
+      setApproverComment('');
+    } catch (error) {
+      console.error(error);
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
+
+
+
+  return (
+    <section>
+      {loading && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -410,181 +404,181 @@ const handleReject = async () => {
         {/* LEFT FORM */}
         <div className={styles.header}>
           <h4>Quotation Approval Form-NEI BT Admin</h4>
-          </div>
-              <div className={styles.row}>
-        {/* LEFT FORM */}
-        <div className={styles['col-md-9']}>
-          <div className={styles.leftPanel}>
-            <div className={styles.leftPanelHeader}>
-              <label style={{fontWeight: "bold"}}>Quotation Approval NEI BT Admin-{form.RequestNo} </label>
-            </div>
-            
-          <label>Project Title</label>
-          <input name="ProjectTitle" value={form.ProjectTitle} readOnly style={{backgroundColor:"lightgray"}} />
-
-          <label>Project Reference No</label>
-          <input name="ProjectReffNo" value={form.ProjectReffNo}  readOnly style={{backgroundColor:"lightgray"}} >
-          </input>
-
-          <label>Project Description & Advance Payment Details</label>
-          <input name="projectDescription" value={form.ProjectDescription}  readOnly style={{backgroundColor:"lightgray"}} >
-          </input>
-
-          <label>Total Project Amount</label>
-          <input name="TotalProjectAmount" value={form.TotalProjectAmount } readOnly style={{backgroundColor:"lightgray"}} />
-
-          <label>Applicable Taxes</label>
-          <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly style={{backgroundColor:"lightgray"}}  >
-          </input>
-
-
-    <div className={styles.twoColumnRow}>
-              <div className={styles.fieldBlock}>
-                <label>Vendor 1 <span className={styles.required}>*</span></label>
-                 <input name="Vendor1" value={form.Vendor1} readOnly style={{backgroundColor:"lightgray"}}/>
+        </div>
+        <div className={styles.row}>
+          {/* LEFT FORM */}
+          <div className={styles['col-md-9']}>
+            <div className={styles.leftPanel}>
+              <div className={styles.leftPanelHeader}>
+                <label style={{ fontWeight: "bold" }}>Quotation Approval NEI BT Admin-{form.RequestNo} </label>
               </div>
-              <div className={styles.fieldBlock}>
-                <label>Quote 1 <span className={styles.required}>*</span></label>
-                 <input name="Quote1" value={form.Quote1} readOnly style={{backgroundColor:"lightgray"}} />
+
+              <label>Project Title</label>
+              <input name="ProjectTitle" value={form.ProjectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
+
+              <label>Project Reference No</label>
+              <input name="ProjectReffNo" value={form.ProjectReffNo} readOnly style={{ backgroundColor: "lightgray" }} >
+              </input>
+
+              <label>Project Description & Advance Payment Details</label>
+              <input name="projectDescription" value={form.ProjectDescription} readOnly style={{ backgroundColor: "lightgray" }} >
+              </input>
+
+              <label>Total Project Amount</label>
+              <input name="TotalProjectAmount" value={form.TotalProjectAmount} readOnly style={{ backgroundColor: "lightgray" }} />
+
+              <label>Applicable Taxes</label>
+              <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly style={{ backgroundColor: "lightgray" }}  >
+              </input>
+
+
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor 1 <span className={styles.required}>*</span></label>
+                  <input name="Vendor1" value={form.Vendor1} readOnly style={{ backgroundColor: "lightgray" }} />
+                </div>
+                <div className={styles.fieldBlock}>
+                  <label>Quote 1 <span className={styles.required}>*</span></label>
+                  <input name="Quote1" value={form.Quote1} readOnly style={{ backgroundColor: "lightgray" }} />
+                </div>
               </div>
-            </div>
 
-             <div className={styles.twoColumnRow}>
-                          <div className={styles.fieldBlock}>
-                            <label>Vendor 2</label>
-                          <input name="Vendor2" value={form.Vendor2} readOnly style={{backgroundColor:"lightgray"}} />
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor 2</label>
+                  <input name="Vendor2" value={form.Vendor2} readOnly style={{ backgroundColor: "lightgray" }} />
 
-                          </div>
-                          <div className={styles.fieldBlock}>
-                            <label>Quote 2</label>
-                            <input name="Quote2" value={form.Quote2} readOnly style={{backgroundColor:"lightgray"}} />
-                          </div>
-                        </div>
-
-                <div className={styles.twoColumnRow}>
-              <div className={styles.fieldBlock}>
-                <label>Vendor 3</label>
-               <input name="Quote2" value={form.Quote3} readOnly style={{backgroundColor:"lightgray"}} />
+                </div>
+                <div className={styles.fieldBlock}>
+                  <label>Quote 2</label>
+                  <input name="Quote2" value={form.Quote2} readOnly style={{ backgroundColor: "lightgray" }} />
+                </div>
               </div>
-                
-              <div className={styles.fieldBlock}>
-                 <label>Quote 3</label>
-                <input name="Quote3" value={form.Quote3} readOnly style={{backgroundColor:"lightgray"}} />
 
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor 3</label>
+                  <input name="Quote2" value={form.Quote3} readOnly style={{ backgroundColor: "lightgray" }} />
+                </div>
+
+                <div className={styles.fieldBlock}>
+                  <label>Quote 3</label>
+                  <input name="Quote3" value={form.Quote3} readOnly style={{ backgroundColor: "lightgray" }} />
+
+                </div>
               </div>
-            </div>
-          
-          <label>Select Vendor</label>
-          <input name="Selectedvendor" value={form.Selectedvendor} readOnly style={{backgroundColor:"lightgray"}} />
 
-          <label>Select Quote</label>
-          <input name="SelectedQuote" value={form.SelectedQuote} readOnly  style={{backgroundColor:"lightgray"}} >
-          </input>
+              <label>Select Vendor</label>
+              <input name="Selectedvendor" value={form.Selectedvendor} readOnly style={{ backgroundColor: "lightgray" }} />
 
-          <label>Department</label>
-          <input name="Department" value={form.Department}  readOnly style={{backgroundColor:"lightgray"}} >
-          </input>
+              <label>Select Quote</label>
+              <input name="SelectedQuote" value={form.SelectedQuote} readOnly style={{ backgroundColor: "lightgray" }} >
+              </input>
 
-          <label>Advance Amount</label>
-          <input name="AdvancePayment" value={form.Advancepayment} readOnly  style={{backgroundColor:"lightgray"}}>
-          </input>
+              <label>Department</label>
+              <input name="Department" value={form.Department} readOnly style={{ backgroundColor: "lightgray" }} >
+              </input>
 
-          <label>Approval Path</label>
-          <input name="ApprovalPath" value={form.ApprovalPath}  readOnly style={{backgroundColor:"lightgray"}}>
-          </input>          
- <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px" , marginBottom:"10px"}}>
-           <label>
-            Attachments <span className={styles.required}>*</span>
-            </label>
-           <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
-      {attachments.map((file: any, index: number) => (
-        <a
-          key={index}
-            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
-          {file.FileName}
-        </a>
-       ))}
-    </div>
-</div>
+              <label>Advance Amount</label>
+              <input name="AdvancePayment" value={form.Advancepayment} readOnly style={{ backgroundColor: "lightgray" }}>
+              </input>
 
-<label></label>
-        <label></label>
-        <label>Approver Comments <span className={styles.required}>*</span></label>
-       <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)}/>
-          {/* Buttons */}
-         <div className={styles.buttonGroup}>
-            <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled}>Approve</button>
+              <label>Approval Path</label>
+              <input name="ApprovalPath" value={form.ApprovalPath} readOnly style={{ backgroundColor: "lightgray" }}>
+              </input>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "10px" }}>
+                <label>
+                  Attachments <span className={styles.required}>*</span>
+                </label>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", }}>
+                  {attachments.map((file: any, index: number) => (
+                    <a
+                      key={index}
+                      href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+                      {file.FileName}
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <label></label>
+              <label></label>
+              <label>Approver Comments <span className={styles.required}>*</span></label>
+              <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)} />
+              {/* Buttons */}
+              <div className={styles.buttonGroup}>
+                <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled}>Approve</button>
                 <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled}>Reject</button>
-            <button className={styles.cancelBtn}>Cancel</button>
+                <button className={styles.cancelBtn}>Cancel</button>
+              </div>
+            </div>
+          </div>
+
+
+
+          {/* RIGHT PANEL */}
+          <div className={styles['col-md-3']}>
+            <div className={styles.rightPanel}>
+              <div className={styles.rightPanelHeader}>
+                <h4>Timeline of the Request - {form.RequestNo}</h4>
+              </div>
+              <ul>
+                {History.map((item, index) => {
+                  const isApproved = item.UserAction === "Approved";
+                  const isRejected = item.UserAction === "Rejected";
+                  const isInitiated = item.UserAction === "Request Initiator";
+                  return (
+                    <li
+                      key={index}
+                      className={
+                        isApproved
+                          ? styles.tickIcon
+                          : isRejected
+                            ? styles.crossIcon
+                            : isInitiated ? styles.tickIcon : ""
+                      }
+                    >
+                      <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
+                      <span><b>{isInitiated ? "Initiator" : "Approver Name:"} </b>{item.UserName}</span>
+                      {item.UserAction && (
+                        <span>
+                          <b>Action Taken:{" "}</b>
+                          <span
+                            className={
+                              isApproved
+                                ? styles.apprStatus
+                                : isRejected
+                                  ? styles.rejStatus
+                                  : ""
+                            }
+                          >
+                            {item.UserAction}
+                          </span>
+                        </span>
+                      )}
+                      {item.ActionDate && (<span><b>Action Date: </b>
+                        {new Date(item.ActionDate).toLocaleString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        }).replace(',', ' AT')}
+                      </span>
+                      )}
+                      {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-     
-
-
-        {/* RIGHT PANEL */}
-      <div className={styles['col-md-3']}>
-               <div className={styles.rightPanel}>
-                 <div className={styles.rightPanelHeader}>
-                   <h4>Timeline of the Request - {form.RequestNo}</h4>
-                 </div>
-                 <ul>              
-                   {History.map((item, index) => {
-         const isApproved = item.UserAction === "Approved";
-         const isRejected = item.UserAction === "Rejected";
-         const isInitiated = item.UserAction === "Request Initiator";
-         return (
-           <li
-             key={index}
-             className={
-               isApproved
-                 ? styles.tickIcon
-                 : isRejected
-                 ? styles.crossIcon
-                 : isInitiated ?styles.tickIcon:""
-             }
-           >
-             <span className={styles.spanHeader} style={{fontSize:"bold"}}>{item.Designation}</span>
-             <span><b>{isInitiated?"Initiator":"Approver Name:"} </b>{item.UserName}</span>
-             {item.UserAction && (
-               <span>
-                 <b>Action Taken:{" "}</b>
-                 <span
-                   className={
-                     isApproved
-                       ? styles.apprStatus
-                       : isRejected
-                       ? styles.rejStatus
-                       : ""
-                   }
-                 >
-                   {item.UserAction}
-                 </span>
-               </span>
-             )}
-            {item.ActionDate && ( <span><b>Action Date: </b>
-    {new Date(item.ActionDate).toLocaleString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    }).replace(',', ' AT')}
-  </span>
-)}
-             {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
-           </li>
-         );
-       })}
-                 </ul>
-               </div>
-             </div>
-          </div>
-          </div>
-      </section>
-    );
-  }
+    </section>
+  );
+}
 
 
 export default QuotationRequestApprovalNeiBt;
