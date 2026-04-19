@@ -280,6 +280,31 @@ FinanceController/Id,FinanceController/Title
    const data = await response.json();
    return data.value;
     }
+    public async UpdateHistoryItem(id: number, data: any, Title: string, Sequence: number): Promise<any[]> {
+    const getUrl = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${id} and Title eq '${Title}' and Sequence eq ${Sequence}`;
+
+    const getResponse = await this.context.spHttpClient.get(
+      getUrl,
+      SPHttpClient.configurations.v1
+    );
+    const result = await getResponse.json();
+    const itemId = result.value[0].Id;
+    const updateUrl = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items(${itemId})`;
+    const updateResponse = await this.context.spHttpClient.post(
+      updateUrl,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;odata=nometadata",
+          "Content-Type": "application/json;odata=nometadata",
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "MERGE"
+        },
+        body: JSON.stringify(data)
+      }
+    );
+    return updateResponse.json();
+  }
   
   }
   

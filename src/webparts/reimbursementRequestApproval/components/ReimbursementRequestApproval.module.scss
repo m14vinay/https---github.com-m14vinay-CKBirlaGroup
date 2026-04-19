@@ -260,6 +260,15 @@ rightPanel {
   content: "\00d7";
   font-size: 20px;
 }
+.rightPanel ul li span.upcomingstatus {
+  color: orange;
+  font-weight: bold;
+}
+.rightPanel ul li.upcomingIcon::before {
+  background-color: orange;
+  content: "\f105";
+  font-size: 20px;
+}
 
 .rightPanel ul li span {
   display: block;
@@ -277,6 +286,10 @@ rightPanel {
 
 .rightPanel ul li span.rejStatus {
   color: #9a1111;
+  font-weight: bold;
+}
+.rightPanel ul li span.upcomingstatus {
+  color: orange;
   font-weight: bold;
 }
 .leftPanelStatusHeader {
@@ -363,12 +376,31 @@ rightPanel {
   position: absolute;
   top: 0;
 }
+.upcomingBox {
+  background-color: #ee7606;
+}
+
+.upcomingBox::after {
+  border-left-color: #ee7606;
+}
+
+.upcomingBox::before {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid white;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
 .pendingBox .content,
 .rejectedBox .content,
 .upcomingBox .content {
   padding-left: 40px;
 }
 .Pending {
-  color: yellow;
+  color: rgb(162, 234, 17);
   font-weight: bold;
 }

@@ -61,6 +61,10 @@
   right: -61%;
   top: 0;
 }
+.Pending {
+  color: rgb(162, 234, 17);
+  font-weight: bold;
+}
 
 .pendingBox {
   background-color: #cdcd17;
@@ -287,4 +291,13 @@ button {
 
 .inputError {
   border: 1px solid red;
+}
+.rightPanel ul li span.upcomingstatus {
+  color: orange;
+  font-weight: bold;
+}
+.rightPanel ul li.upcomingIcon::before {
+  background-color: orange;
+  content: "\f105";
+  font-size: 20px;
 }

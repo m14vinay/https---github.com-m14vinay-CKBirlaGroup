@@ -11,31 +11,31 @@ import { Spinner, SpinnerSize } from '@fluentui/react';
 
 const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
 
-  const [form, setForm]=React.useState({
+  const [form, setForm] = React.useState({
     projectCode: '',
     projectTitle: '',
     projectDescription: '',
     vendorName: '',
     vendorDescription: '',
     files: null as FileList | null,
-     attachments: [],
-     RequestNo:'',
-     CurrentStatus:'',
-     AuthorId:'',
-     Created:'',
-     Actiondate1:'',
-     ApproverComment: ''
+    attachments: [],
+    RequestNo: '',
+    CurrentStatus: '',
+    AuthorId: '',
+    Created: '',
+    Actiondate1: '',
+    ApproverComment: ''
   });
 
   ;
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
-   const [attachments, setAttachments] = React.useState<any[]>([]);
-   const [History, setHistory] = React.useState<any[]>([]);
-   const [loading, setLoading] = React.useState(false);
-  
- 
-  
+  const [attachments, setAttachments] = React.useState<any[]>([]);
+  const [History, setHistory] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(false);
+
+
+
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -52,71 +52,69 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
   }, []);
 
 
-  const loadAttachments = async (id:number) => {
-    try{
-  const files = await service.getAttachments(id);
-  console.log("Attachments:", files);
-  setAttachments(files);
-    }catch(error)
-    {
+  const loadAttachments = async (id: number) => {
+    try {
+      const files = await service.getAttachments(id);
+      console.log("Attachments:", files);
+      setAttachments(files);
+    } catch (error) {
       console.error(error);
     }
-   };
-   React.useEffect(() => {
-     if (itemId) {
-       loadAttachments(itemId);
-        // 👈 dynamic ID use karo
-     }
-   }, [itemId]);
- function formatDate(iso: string) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  const day = d.getUTCDate() < 10 ? '0' + d.getUTCDate() : d.getUTCDate().toString();
-  const month = d.toLocaleString('default', { month: 'long', timeZone: 'UTC' });
-  const year = d.getFullYear();
-  let hours = d.getUTCHours();
-  const minutes = d.getUTCMinutes() < 10 ? '0' + d.getUTCMinutes() : d.getUTCMinutes().toString();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12 || 12; // convert to 12-hour
-  return `${day} ${month} ${year} AT ${hours}:${minutes} ${ampm}`;
-}
-//FETCH DATA-----
-const handleFetchById = async (id: number) => {
+  };
+  React.useEffect(() => {
+    if (itemId) {
+      loadAttachments(itemId);
+      // 👈 dynamic ID use karo
+    }
+  }, [itemId]);
+  function formatDate(iso: string) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const day = d.getUTCDate() < 10 ? '0' + d.getUTCDate() : d.getUTCDate().toString();
+    const month = d.toLocaleString('default', { month: 'long', timeZone: 'UTC' });
+    const year = d.getFullYear();
+    let hours = d.getUTCHours();
+    const minutes = d.getUTCMinutes() < 10 ? '0' + d.getUTCMinutes() : d.getUTCMinutes().toString();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12; // convert to 12-hour
+    return `${day} ${month} ${year} AT ${hours}:${minutes} ${ampm}`;
+  }
+  //FETCH DATA-----
+  const handleFetchById = async (id: number) => {
     try {
       setLoading(true);
       console.log("Calling API with ID:", id);
 
       const result = await service.getItemByRequestNo(id);
-     const user = await service.getUser();
-     const historydata=await service.GetHistoryItem(id,"VMR");
-     setHistory(historydata);
-       console.log("Result:", result);
-       const currentUser = await service.getUser();
-       if(result.AuthorId!== currentUser.Id)
-      {
-         alert("You Are Not Authorized ❌ ");
-      } 
-  
+      const user = await service.getUser();
+      const historydata = await service.GetHistoryItem(id, "VMR");
+      setHistory(historydata);
+      console.log("Result:", result);
+      const currentUser = await service.getUser();
+      if (result.AuthorId !== currentUser.Id) {
+        alert("You Are Not Authorized ❌ ");
+      }
+
 
       if (result) {
         setItemId(result.Id);
 
         setForm(prev => ({
-        ...prev,
-        RequestNo:result.RequestNo || '',
+          ...prev,
+          RequestNo: result.RequestNo || '',
           projectCode: result.ProjectCode || '',
           projectTitle: result.ProjectTitle || '',
           projectDescription: result.ProjectDescription || '',
           vendorName: result.VendorName || '',
           vendorDescription: result.VendorDescription || '',
           files: null,
-          CurrentStatus:result.CurrentStatus || '',
-          Author:result.Author || '',
-          Created:formatDate(result.Created),
+          CurrentStatus: result.CurrentStatus || '',
+          Author: result.Author || '',
+          Created: formatDate(result.Created),
           Actiondate1: formatDate(result.Actiondate1),
-          ApproverComment:result.ApproverComment || ''
+          ApproverComment: result.ApproverComment || ''
         }));
-      
+
 
       } else {
         alert("No Data Found");
@@ -125,173 +123,174 @@ const handleFetchById = async (id: number) => {
     } catch (error) {
       console.error("Error Occurred,Please Contact To System Administrator.:", error);
     }
-    finally
-  {
-    setLoading(false);
-  }
+    finally {
+      setLoading(false);
+    }
   };
 
 
-    
+
 
 
 
   // --- RENDER ---
- return (
-          <section>
-            {loading && (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: 'rgba(255,255,255,0.6)',
-        zIndex: 9999
-      }}>
-        <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
-          <Spinner label="Processing..." size={SpinnerSize.large} />
-        </div>
-      </div>
-    )}
-    <div className={styles.container}>
-      <div className={styles.header}>
-             <h4>Vendor Mapping Details & Status</h4>
-           </div>
-      
-      <div className={styles.row}>
-        <div className={styles['col-md-9']}>
-          <div className={styles.leftPanel}>
-            <div className={styles.leftPanelHeader}>
-              <h4></h4>
-              <h4>Current Status:  <span className={
-    form.CurrentStatus === "Approved"
-      ? styles.Approved
-      : form.CurrentStatus === "Rejected"
-      ? styles.Rejected
-      : styles.Pending }>{form.CurrentStatus}</span></h4>
-            </div>
-             <div className={styles.leftPanelStatusHeader}>
-                        {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-    let statusClass = styles.statusBox;
-    if (item.UserAction === "Approved") {
-      statusClass = `${styles.statusBox}`;    
-    } 
-    else if (item.UserAction === "Rejected") {
-      statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-    }
-
-    return (
-      <div className={statusClass} key={index}>
-        <div className={styles.content}>
-          <h5>{item.UserName}</h5>
-          <h6>{'NA'}</h6>
-          <h4>{item.UserAction}</h4>
-        </div>
-      </div>
-    );
-  })}
-             </div>
-          <div className={styles.formGroup}>
-                      <label>Project Code<span className={styles.required}>*</span></label>
-                    <input name="projectCode" value={form.projectCode}   readOnly style={{backgroundColor:"lightgray"}} />
-                    </div>
-         <div className={styles.formGroup}>
-        <label>Project Title</label>
-        <input name="projectTitle" value={form.projectTitle}   readOnly style={{backgroundColor:"lightgray"}} />
-</div>
-<div className={styles.formGroup}>
-        <label>Project Description</label>
-        <input name="projectDescription" value={form.projectDescription}  readOnly style={{backgroundColor:"lightgray"}} />
-        </div>
-       <div className={styles.formGroup}>
-        <label>Select Vendor <span className={styles.required}>*</span></label>
-      <input name="vendorName" value={form.vendorName}  readOnly style={{backgroundColor:"lightgray"}} />
-  </div>
-  <div className={styles.formGroup}>
-        <label>Additional Information & Remarks</label>
-        <input name="vendorDescription" value={form.vendorDescription}  readOnly style={{backgroundColor:"lightgray"}} />
-        </div>
-
-       <div className={styles.formGroup}>
-       <div style={{ display: "flex", alignItems: "flex-start" , gap: "10px" }}>
-           <label>
-            Attachments <span className={styles.required}>*</span>
-            </label>
-     
-    <div style={{ display: "flex", flexDirection: "column" ,gap: "6px", }}>
-      {attachments.map((file: any, index: number) => (
-        <a
-          key={index}
-            href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
-          {file.FileName}
-        </a>
-       ))}
-    </div>
- </div>
-</div> 
-</div> 
-</div> 
-     <div className={styles['col-md-3']}>
-          <div className={styles.rightPanel}>
-            <div className={styles.rightPanelHeader}>
-              <h4>Timeline of the Request - {form.RequestNo}</h4>
-            </div>
-            <ul>              
-              {History.map((item, index) => {
-    const isApproved = item.UserAction === "Approved";
-    const isRejected = item.UserAction === "Rejected";
-    const isInitiated = item.UserAction === "Request Initiator";
-    return (
-      <li
-        key={index}
-        className={
-          isApproved
-            ? styles.tickIcon
-            : isRejected
-            ? styles.crossIcon
-            : isInitiated ?styles.tickIcon:""
-        }
-      >
-        <span className={styles.spanHeader} style={{fontSize:"bold"}}>{item.Designation}</span>
-        <span><b>{isInitiated?"Initiator":"Approver Name:"} </b>{item.UserName}</span>
-       
-        {item.UserAction && (
-          <span>
-            <b>Action Taken:{" "}</b>
-            <span
-              className={
-                isApproved
-                  ? styles.apprStatus
-                  : isRejected
-                  ? styles.rejStatus
-                  : ""
-              }
-            >
-              {item.UserAction}
-            </span>
-          </span>
-        )}
-        {item.ActionDate && ( <span><b>Action Date: </b>
-    {new Date(item.ActionDate).toLocaleString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    }).replace(',', ' AT')}
-  </span>
-)}
-        {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
-      </li>
-    );
-  })}
-            </ul>
+  return (
+    <section>
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.6)',
+          zIndex: 9999
+        }}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+            <Spinner label="Processing..." size={SpinnerSize.large} />
           </div>
         </div>
-    </div>
-    </div>
+      )}
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h4>Vendor Mapping Details & Status</h4>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles['col-md-9']}>
+            <div className={styles.leftPanel}>
+              <div className={styles.leftPanelHeader}>
+                <h4></h4>
+                <h4>Current Status:  <span className={
+                  form.CurrentStatus === "Approved"
+                    ? styles.Approved
+                    : form.CurrentStatus === "Rejected"
+                      ? styles.Rejected
+                      : styles.Pending}>{form.CurrentStatus}</span></h4>
+              </div>
+              <div className={styles.leftPanelStatusHeader}>
+                {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
+                  let statusClass = styles.statusBox;
+                  if (item.UserAction === "Approved") {
+                    statusClass = `${styles.statusBox}`;
+                  }
+                  else if (item.UserAction === "Rejected") {
+                    statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+                  }
+                  else if (item.UserAction === "Upcoming") {
+                    statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
+                  }
+                  return (
+                    <div className={statusClass} key={index}>
+                      <div className={styles.content}>
+                        <h5>{item.UserName}</h5>
+                        <h6>{item.Designation}</h6>
+                        <h4>{item.UserAction}</h4>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className={styles.formGroup}>
+                <label>Project Code<span className={styles.required}>*</span></label>
+                <input name="projectCode" value={form.projectCode} readOnly style={{ backgroundColor: "lightgray" }} />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Project Title</label>
+                <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Project Description</label>
+                <input name="projectDescription" value={form.projectDescription} readOnly style={{ backgroundColor: "lightgray" }} />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Select Vendor <span className={styles.required}>*</span></label>
+                <input name="vendorName" value={form.vendorName} readOnly style={{ backgroundColor: "lightgray" }} />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Additional Information & Remarks</label>
+                <input name="vendorDescription" value={form.vendorDescription} readOnly style={{ backgroundColor: "lightgray" }} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                  <label>
+                    Attachments <span className={styles.required}>*</span>
+                  </label>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px", }}>
+                    {attachments.map((file: any, index: number) => (
+                      <a
+                        key={index}
+                        href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+                        {file.FileName}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className={styles['col-md-3']}>
+            <div className={styles.rightPanel}>
+              <div className={styles.rightPanelHeader}>
+                <h4>Timeline of the Request - {form.RequestNo}</h4>
+              </div>
+              <ul>
+                {History.map((item, index) => {
+                  const isApproved = item.UserAction === "Approved";
+                  const isRejected = item.UserAction === "Rejected";
+                  const isInitiated = item.UserAction === "Request Initiator";
+                  const isUpcoming = item.UserAction === "Upcoming";
+                  return (
+                    <li
+                      key={index}
+                      className={
+                        isApproved
+                          ? styles.tickIcon
+                          : isRejected
+                            ? styles.crossIcon
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
+                      }
+                    >
+                      <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
+                      <span><b>{isInitiated ? "Initiator" : "Approver Name:"} </b>{item.UserName}</span>
+                      {item.UserAction && (
+                        <span>
+                          <b>Action Taken:{" "}</b>
+                          <span
+                            className={
+                              isApproved
+                                ? styles.apprStatus
+                                : isRejected
+                                  ? styles.rejStatus
+                                  : isUpcoming ? styles.upcomingstatus : ""
+                            }
+                          >
+                            {item.UserAction}
+                          </span>
+                        </span>
+                      )}
+                      {item.ActionDate && (<span><b>Action Date: </b>
+                        {new Date(item.ActionDate).toLocaleString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        }).replace(',', ' AT')}
+                      </span>
+                      )}
+                      {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 };
