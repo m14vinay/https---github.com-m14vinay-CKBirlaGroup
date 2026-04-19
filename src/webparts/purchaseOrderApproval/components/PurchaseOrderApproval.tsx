@@ -190,7 +190,7 @@ const handleUpdateApproveHistory = async (id: number, UserAction: string, Sequen
       ActionDate: new Date().toISOString(),
       UserComment: comment
     };
-    await service.UpdateHistoryItem(id, payload, 'VMR', Sequence);
+    await service.UpdateHistoryItem(id, payload, 'PO', Sequence);
   };
 
 
@@ -251,7 +251,7 @@ const handleUpdateApproveHistory = async (id: number, UserAction: string, Sequen
         return;
       }
 
-        if (!form.Approver2Id) {
+        if (!form.Approver2EmailId) {
       await service.updateItemdata(itemId, "Rejected", approverComment,0,"");
 
       await handleUpdateApproveHistory(itemId, 'Rejected', 1, approverComment);
