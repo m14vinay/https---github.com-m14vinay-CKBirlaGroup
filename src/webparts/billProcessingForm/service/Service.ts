@@ -110,6 +110,21 @@ export default class Service {
 
     return data.value;
   }
+   //Get ProjectCode Data
+  public async getRequestDetailsbyPORequestNo(requestNo: string,PORequestNo:string): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.PoApproval}')/items?$filter=ProjectCode eq '${requestNo}' and PORequestNo eq '${PORequestNo}'  and CurrentStatus eq 'Approved'`;
+
+    console.log("URL:", url)
+    const response = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await response.json();
+
+    return data.value;
+  }
   // Upload Files
   public async uploadFile(itemId: number, file: File): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;

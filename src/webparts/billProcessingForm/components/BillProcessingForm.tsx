@@ -25,7 +25,9 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     CurrentStatus: '',
     DepartmentName: '',
     POAmount: 0,
-    ApprovalPath:''
+    ApprovalPath: '',
+    OccupiedAmount:'',
+    RemainingAmount:''
   });
   const [POOptions, setPOOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
@@ -94,7 +96,9 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               CalculatedTaxes: result.CalculatedTaxes || 0,
               PORequestNo: result.PORequestNo || '',
               PORequestNoID: result.PORequestNo || '',
-              AttachedSignedPO: result.AttachedSignedPO == "True" ? true : false
+              AttachedSignedPO: result.AttachedSignedPO == "True" ? true : false,
+              OccupiedAmount:result.OccupiedAmount,
+              RemainingAmount:result.RemainingAmount
             }));
           }
 
@@ -118,15 +122,51 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     setLoading(true);
     if (!option) return;
     const data = await service.getDocumentDetailsID(option.text);
-    const TotalAmount=await service.getTotalAmountFromBillProcessingByPO(option.text);
+    const TotalAmount = await service.getTotalAmountFromBillProcessingByPO(option.text);
     console.log(data);
     setPOAmount(data[0].POAmount);
     setTotalAmount(TotalAmount);
     setForm(prev => ({
       ...prev,
       PORequestNo: option?.text as string,
-      PORequestNoID: option.key as string
+      PORequestNoID: option.key as string,
+      OccupiedAmount:TotalAmount.toString(),
+      RemainingAmount:(Number(data[0].POAmount)-Number(TotalAmount)).toString()
     }))
+    try {
+      const result = await service.getRequestDetailsbyPORequestNo(form.ProjectCode,option.text);
+      if (result.length > 0) {
+        setForm(prev => ({
+          ...prev,
+          ProjectCode: form.ProjectCode,
+          vendorcode: result[0].vendorcode,
+          VendorName: result[0].VendorName,
+          projectTitle: result[0].ProjectTitle,
+          DepartmentName: result[0].Department
+        }));
+        const options = result.map((item: any) => ({
+          key: item.Id,
+          text: item.RequestNo
+        }));
+        setPOOptions(options);
+      }
+      else {
+        setForm(prev => ({
+          ...prev,
+          ProjectCode: form.ProjectCode,
+          vendorCode: '',
+          VendorName: '',
+          projectTitle: '',
+          DepartmentName: ''
+        }));
+        alert("Request is not approved.");
+      }
+    }
+
+    catch (error) {
+      console.error("Error fetching data:", error);
+
+    }
     setLoading(false);
   };
   const handleCancel = () => {
@@ -186,43 +226,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       ...prev,
       ProjectCode: value
     }));
-    if (!value) {
-      return;
-    }
-    try {
-      const result = await service.getRequestDetails(value);
-      if (result.length > 0) {
-        setForm(prev => ({
-          ...prev,
-          ProjectCode: value,
-          vendorcode: result[0].vendorcode,
-          VendorName: result[0].VendorName,
-          projectTitle: result[0].ProjectTitle,
-          DepartmentName: result[0].Department
-        }));
-        const options = result.map((item: any) => ({
-          key: item.Id,
-          text: item.RequestNo
-        }));
-        setPOOptions(options);
-      }
-      else {
-        setForm(prev => ({
-          ...prev,
-          ProjectCode: value,
-          vendorCode: '',
-          VendorName: '',
-          projectTitle: '',
-          DepartmentName: ''
-        }));
-        alert("Request is not approved.");
-      }
-    }
-
-    catch (error) {
-      console.error("Error fetching data:", error);
-
-    }
   };
   // // 🔹 Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,17 +238,17 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   const handleBillDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const selectedDate = new Date(value);
-  const today = new Date();
-  // remove time part
-  today.setHours(0, 0, 0, 0);
-  if (selectedDate > today) {
-    alert("Bill date cannot be greater than current date");
-    return; // ❌ stop updating state
-  }
-  setForm({
-    ...form,
-    [name]: value
-  });
+    const today = new Date();
+    // remove time part
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate > today) {
+      alert("Bill date cannot be greater than current date");
+      return; // ❌ stop updating state
+    }
+    setForm({
+      ...form,
+      [name]: value
+    });
   };
 
   const handleAmountCalculateChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -254,12 +257,12 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       ...form,
       [name]: value
     });
-    if (Number(TotalAmount+Number(value)) > Number(POAmount)) {
+    if (Number(TotalAmount + Number(value)) > Number(form.RemainingAmount)) {
       setForm(prev => ({
         ...prev,
         BillAmount: 0
       }));
-      alert("Bill Amount must be less than PO Amount.");
+      alert("Bill Amount must be less than Remaining Amount.");
       return;
     }
     else {
@@ -398,7 +401,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         Approver2Id: databillingApprover.Billing2ndApprover?.Id,
         Approver3Id: dataFinanceApprover.FinanceController?.Id,
         Approver5Id: databillingApprover.Billing2ndApprover?.Id,
-        ApprovalPath:'1.'+User?.Title+' 2.'+databillingApprover.Billing2ndApprover?.Title+' 3.' +dataFinanceApprover.FinanceController?.Title+' 4.'+databillingApprover.Billing2ndApprover?.Title
+        ApprovalPath: User?.Title + '-->' + databillingApprover.Billing2ndApprover?.Title + '-->' + dataFinanceApprover.FinanceController?.Title + '-->' + databillingApprover.Billing2ndApprover?.Title
       };
       if (!itemId) {
         // 🔹 CREATE
@@ -482,6 +485,13 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                 value={form.ProjectCode}
                 onChange={handleRequestNoChange}
               />
+              <label>PO Request No</label>
+              <Dropdown
+                placeholder="Select Request No"
+                options={POOptions}
+                selectedKey={form.PORequestNoID}
+                onChange={(e, option) => handleDocumentChange(option)}
+              />
               <label>Vendor Name</label>
               <input name="VendorName" value={form.vendorcode + "-" + form.VendorName} type='text' readOnly>
               </input>
@@ -490,13 +500,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               <label>Additional Information & Remarks</label>
               <input name="Comments" value={form.Comments} onChange={handleChange}  >
               </input>
-              <label>PO Request No</label>
-              <Dropdown
-                placeholder="Select Request No"
-                options={POOptions}
-                selectedKey={form.PORequestNoID}
-                onChange={(e, option) => handleDocumentChange(option)}
-              />
+              <label>Occupied Amount</label>
+              <input name="OccupiedAmount" value={form.OccupiedAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
+              <label>Remaining Amount</label>
+              <input name="RemainingAmount" value={form.RemainingAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Bill No</label>
               <input name="BillNo" value={form.BillNo} type='text' onChange={handleChange}>
               </input>
