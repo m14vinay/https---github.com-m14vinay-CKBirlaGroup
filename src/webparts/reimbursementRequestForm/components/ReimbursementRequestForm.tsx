@@ -250,7 +250,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction: UserAction,
+        UserAction: 'Upcoming',
         Designation: Designation,
         Sequence: Sequence
       };

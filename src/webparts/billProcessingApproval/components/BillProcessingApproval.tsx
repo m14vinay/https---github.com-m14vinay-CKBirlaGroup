@@ -468,30 +468,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                       ? styles.Rejected
                       : styles.Pending}>{form.CurrentStatus}</span></h4>
               </div>
-              <div className={styles.leftPanelStatusHeader}>
-                {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-                  let statusClass = styles.statusBox;
-                  if (item.UserAction === "Approved") {
-                    statusClass = `${styles.statusBox}`;
-                  }
-                  else if (item.UserAction === "Rejected") {
-                    statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-                  }
-                  else if (item.UserAction === "Upcoming") {
-                    statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
-                  }
-                  return (
-                    <div className={statusClass} key={index}>
-                      <div className={styles.content}>
-                        <h5>{item.UserName}</h5>
-                        <h6>{item.Designation}</h6>
-                        <h4>{item.UserAction}</h4>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className={styles['col-md-12']}>
+             <div className={styles['col-md-12']}>
                 <div className={styles["formGroup"]}>
                   <label style={{ display: "inline-flex" }}>Bill Signed</label>
                   <input style={{ width: "15%", backgroundColor: "lightgray" }} type="checkbox" name='POsigned' checked={form.AttachedSignedPO} readOnly />
