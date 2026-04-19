@@ -31,7 +31,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
   const [loading, setLoading] = React.useState(false);
   const [History, setHistory] = React.useState<any[]>([]);
   const [Expenseform, setExpenseForm] = React.useState<{
-    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string,files:[] }[];
+    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string, files: [] }[];
   }>({
     expenses: []
   });
@@ -212,11 +212,19 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                         <label>{exp.DocumentName}</label>
                       </p>
                       <p>
-                        {exp.files.length > 0 && (
+                        {exp.files?.length > 0 && (
                           <ul style={{ listStyle: "none", padding: 0 }}>
                             {exp.files.map((file: File, index: number) => (
-                              <li key={index} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                <span>{file.name}</span>
+                              <li
+                                key={index}
+                                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                              >
+                                <a
+                                  href={file.webkitRelativePath}
+                                  rel="noopener noreferrer"
+                                >
+                                  {file.name}
+                                </a>
                               </li>
                             ))}
                           </ul>

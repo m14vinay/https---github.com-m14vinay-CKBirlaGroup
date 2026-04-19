@@ -66,18 +66,15 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       [name]: value
     });
   };
-  const handleCheckbillNoExist = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    const checkdata = await service.getCheckBillNoExist(value);
-    if (checkdata.value.length > 0) {
+  const handleCheckbillNoExist = async () => {
+    const checkdata = await service.getCheckBillNoExist(form.BillNo);
+    if (checkdata != null) {
+      setForm(prev => ({
+        ...prev,
+        BillNo: ''
+      }))
       alert("Bill No is duplicate , Please enter another bill no");
       return;
-    }
-    else {
-      setForm({
-        ...form,
-        [name]: value
-      });
     }
   }
   //Get ID from query string ---
@@ -715,23 +712,31 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                       <label>Document: </label>
                       <label>{exp.DocumentName}</label>
                     </p>
+                    <p>
+                      {exp.files?.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0 }}>
+                          {exp.files.map((file: File, index: number) => (
+                            <li
+                              key={index}
+                              style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                            >
+                              <a
+                                href={file.webkitRelativePath}
+                                rel="noopener noreferrer"
+                              >
+                                {file.name}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </p>
                     <p className={styles.btnPara}>
                       <button
                         className={styles.btnRemove}
                         onClick={() => removeExpense(index)}>
                         Remove
                       </button>
-                    </p>
-                    <p>
-                      {exp.files.length > 0 && (
-                        <ul style={{ listStyle: "none", padding: 0 }}>
-                          {exp.files.map((file: File, index: number) => (
-                            <li key={index} style={{ display: "flex", alignItems: "center", gap: "8px" }}>             
-                              <span>{file.name}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
                     </p>
                   </div>
                 </div>
@@ -799,11 +804,11 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
             </div>
             <div className={styles.formGroup}>
               <label style={{ width: '30%' }}>Bill Number<span className={styles.required}>*</span></label>
-              <input className="form-control" style={{ width: '100%' }} name="BillNo" value={form.BillNo} onChange={handleChange} required />
+              <input className="form-control" style={{ width: '100%' }} name="BillNo" value={form.BillNo} onChange={handleChange} onBlur={handleCheckbillNoExist} required />
             </div>
             <div className={styles.formGroup}>
               <label style={{ width: '30%' }}>Bill Amount<span className={styles.required}>*</span></label>
-              <input className="form-control" style={{ width: '100%' }} name="BillAmount" value={form.BillAmount} onChange={handleCheckbillNoExist} required>
+              <input className="form-control" style={{ width: '100%' }} name="BillAmount" value={form.BillAmount} onChange={handleChange} required>
               </input>
             </div>
             <div className={styles.formGroup}>

@@ -26,8 +26,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     DepartmentName: '',
     POAmount: 0,
     ApprovalPath: '',
-    OccupiedAmount:'',
-    RemainingAmount:''
+    OccupiedAmount: '',
+    RemainingAmount: ''
   });
   const [POOptions, setPOOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
@@ -40,6 +40,17 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   const MAX_TOTAL_SIZE_MB = 25;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
 
+  const handleCheckbillNoExist = async () => {
+    const checkdata = await service.getCheckBillNoExist(form.BillNo);
+    if (checkdata!=null) {
+      setForm(prev => ({
+        ...prev,
+        BillNo: ''
+      }))
+      alert("Bill No is duplicate , Please enter another bill no");
+      return;
+    }
+  }
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -97,8 +108,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               PORequestNo: result.PORequestNo || '',
               PORequestNoID: result.PORequestNo || '',
               AttachedSignedPO: result.AttachedSignedPO == "True" ? true : false,
-              OccupiedAmount:result.OccupiedAmount,
-              RemainingAmount:result.RemainingAmount
+              OccupiedAmount: result.OccupiedAmount,
+              RemainingAmount: result.RemainingAmount
             }));
           }
 
@@ -130,11 +141,11 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       ...prev,
       PORequestNo: option?.text as string,
       PORequestNoID: option.key as string,
-      OccupiedAmount:TotalAmount.toString(),
-      RemainingAmount:(Number(data[0].POAmount)-Number(TotalAmount)).toString()
+      OccupiedAmount: TotalAmount.toString(),
+      RemainingAmount: (Number(data[0].POAmount) - Number(TotalAmount)).toString()
     }))
     try {
-      const result = await service.getRequestDetailsbyPORequestNo(form.ProjectCode,option.text);
+      const result = await service.getRequestDetailsbyPORequestNo(form.ProjectCode, option.text);
       if (result.length > 0) {
         setForm(prev => ({
           ...prev,
@@ -144,11 +155,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           projectTitle: result[0].ProjectTitle,
           DepartmentName: result[0].Department
         }));
-        const options = result.map((item: any) => ({
-          key: item.Id,
-          text: item.RequestNo
-        }));
-        setPOOptions(options);
       }
       else {
         setForm(prev => ({
@@ -222,11 +228,19 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   };
   const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
-    setForm(prev => ({
-      ...prev,
-      ProjectCode: value
-    }));
-  };
+    const result = await service.getRequestDetails(value);
+    if (result.length > 0) {
+      setForm(prev => ({
+        ...prev,
+        ProjectCode: value
+      }));
+      const options = result.map((item: any) => ({
+        key: item.Id,
+        text: item.RequestNo
+      }));
+      setPOOptions(options);
+    };
+  }
   // // 🔹 Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -505,7 +519,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               <label>Remaining Amount</label>
               <input name="RemainingAmount" value={form.RemainingAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Bill No</label>
-              <input name="BillNo" value={form.BillNo} type='text' onChange={handleChange}>
+              <input name="BillNo" value={form.BillNo} type='text' onChange={handleChange} onBlur={handleCheckbillNoExist}>
               </input>
               <label>Bill Date</label>
               <input name="BillDate" type="date" value={

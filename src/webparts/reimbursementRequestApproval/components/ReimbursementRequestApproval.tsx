@@ -495,11 +495,19 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                         <label>{exp.DocumentName}</label>
                       </p>
                       <p>
-                        {exp.files.length > 0 && (
+                        {exp.files?.length > 0 && (
                           <ul style={{ listStyle: "none", padding: 0 }}>
                             {exp.files.map((file: File, index: number) => (
-                              <li key={index} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                <span>{file.name}</span>
+                              <li
+                                key={index}
+                                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                              >
+                                <a
+                                  href={file.webkitRelativePath}
+                                  rel="noopener noreferrer"
+                                >
+                                  {file.name}
+                                </a>
                               </li>
                             ))}
                           </ul>
