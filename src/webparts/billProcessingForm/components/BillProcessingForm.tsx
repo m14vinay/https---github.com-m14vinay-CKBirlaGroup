@@ -228,6 +228,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   };
   const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
+     setForm({
+      ...form,
+      ProjectCode: value
+    });
     const result = await service.getRequestDetails(value);
     if (result.length > 0) {
       setForm(prev => ({

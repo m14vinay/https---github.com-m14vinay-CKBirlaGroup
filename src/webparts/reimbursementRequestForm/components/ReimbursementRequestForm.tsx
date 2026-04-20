@@ -259,7 +259,10 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       DocumentName: form.ExpenseName,
       ClaimAmount: form.ClaimAmount,
       ExpanseType: form.ExpenseName,
-      files: form.files
+      files: form.files ? form.files.map((File: any) => ({
+        FileName: File.Name,
+        ServerRelativeUrl: File.webkitRelativePath
+      })) : []
     };
     addExpense(newExpense);
     setForm(prev => ({
@@ -316,7 +319,9 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         AssignedToEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         AssignedTo: dataApproverFI.ApproverName?.Title || "",
         DepartmentHead: dataApproverFI.ApproverName?.Title || "",
-        ApprovalPath: dataApproverFI.ApproverName?.Title
+        ApprovalPath: dataApproverFI.ApproverName?.Title,
+        ProjectTitle: 'Reimbursement',
+        Description: form.Remarks
       };
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -332,6 +337,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         ComplianceHeadEmailId: 0,
         CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
+        ProjectTitle: 'Reimbursement',
+        Description: form.Remarks,
         ApprovalPath: dataApprover.DepartmentHead?.Title + '-->' + dataApproverFI.ApproverName?.Title + '-->' + dataApproverCFO.ApproverName?.Title + '-->' + dataApproverFI.ApproverName?.Title
       }
     }
@@ -348,6 +355,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
         CFOEmailId: 0,
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
+        ProjectTitle: 'Reimbursement',
+        Description: form.Remarks,
         ApprovalPath: dataApprover.DepartmentHead?.Title + '-->' + dataApproverFI.ApproverName?.Title + '-->' + dataApproverCompliance.ApproverName?.Title + '-->' + dataApproverFI.ApproverName?.Title
       }
     }
@@ -482,7 +491,9 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       TotalClaimAmount: form.TotalAmount,
       Remarks: form.Remarks,
       DepartmentName: form.DepartmentName,
-      CurrentStatus: 'Draft'
+      CurrentStatus: 'Draft',
+      ProjectTitle: 'Reimbursement',
+      Description: form.Remarks
     };
     try {
       setLoading(true);
