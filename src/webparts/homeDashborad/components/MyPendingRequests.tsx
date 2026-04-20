@@ -170,7 +170,7 @@ export default function MyPendingRequests() {
     return (
         <div className="p-2">
             <div>
-                <Label style={{display:"inline-block"}}>My Pending Requests</Label>
+                <Label style={{display:"inline-block"}}>Requests Pending For Approval</Label>
                 <input
                     value={globalFilter ?? ""}
                     onChange={(e) => setGlobalFilter(e.target.value)}

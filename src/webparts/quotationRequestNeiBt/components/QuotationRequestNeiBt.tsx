@@ -22,8 +22,8 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
       Vendor2: '',
       Vendor3: '',
       Quote1:0,
-      Quote2:0,
-      Quote3:0,
+      Quote2:'',
+      Quote3:'',
       Selectedvendor:'',
       SelectedQuote:'',
       Department:'',
@@ -347,7 +347,7 @@ const User=await service.getUserById(Number(form.Approval1Id));
      Vendor2:form.Vendor2,
       Vendor3: form.Vendor3,
       Quote1: form.Quote1,
-      Quote2: form.Quote2 || 0,
+      Quote2: form.Quote2 ,
       Quote3: form.Quote3,
       Selectedvendor: form.Selectedvendor,
       SelectedQuote: form.SelectedQuote,
@@ -580,7 +580,7 @@ setForm(prev => ({
               </div>
               <div className={styles.fieldBlock}>
                 <label>Quote 2</label>
-                <input   name="Quote2" value={form.Quote2} type='number' onChange={handleChange} />
+                <input   name="Quote2" value={form.Quote2 || ''} type='number' onChange={handleChange} />
               </div>
             </div>
 
@@ -591,7 +591,7 @@ setForm(prev => ({
               </div>
               <div className={styles.fieldBlock}>
                 <label>Quote 3</label>
-                <input name="Quote3" value={form.Quote3} type='number' onChange={handleChange} />
+                <input name="Quote3" value={form.Quote3 || ''} type='number' onChange={handleChange} />
               </div>
             </div>
 
