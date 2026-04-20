@@ -292,18 +292,29 @@ const approvalPaths = data.map((item: any) => {
    });
   };
 
-const handleSaveHistory = async (id: number) => {
-
-  const currentuser = await service.getUser();
-
-  const payload = {
-    Title: 'QANEIBT',
-    FID: id,  
-    UserName: currentuser.Title,
-    UserAction: 'Request Initiator',
-    ActionDate: new Date().toISOString(),
-     Designation: 'Request Initiator',
-  };
+const handleSaveHistory = async (id: number, Title: string, UserName: string, UserAction: string, Designation: string, ActionDate: Date, Sequence: number) => {
+    let payload: {};
+    if (Sequence == 0) {
+      payload = {
+        Title: Title,
+        FID: id,
+        UserName: UserName,
+        UserAction: UserAction,
+        ActionDate: ActionDate,
+        Designation: Designation,
+        Sequence: Sequence
+      };
+    }
+    else {
+      payload = {
+        Title: Title,
+        FID: id,
+        UserName: UserName,
+        UserAction: 'Upcoming',
+        Designation: Designation,
+        Sequence: Sequence
+      };
+    }
 
   await service.createHistoryItem(payload);
 };
@@ -336,7 +347,7 @@ const User=await service.getUserById(Number(form.Approval1Id));
      Vendor2:form.Vendor2,
       Vendor3: form.Vendor3,
       Quote1: form.Quote1,
-      Quote2: form.Quote2,
+      Quote2: form.Quote2 || 0,
       Quote3: form.Quote3,
       Selectedvendor: form.Selectedvendor,
       SelectedQuote: form.SelectedQuote,
@@ -402,11 +413,14 @@ const handleUpdate = async () => {
     if(!form.Department) return alert("Please Select Department Name");
     if(!form.Advancepayment) return alert("Please Select Advance Payemnt");
      if (!form.files || form.files.length === 0) return alert("Please Attach files");
+      const currentuser = await service.getUser();
      const User=await service.getUserById(Number(form.ApprovalID.split('_')[0]));
       if(User?.Id)
       {
       setAssignedID(User.Title);
       }
+      const User1=await service.getUserById(Number(form.ApprovalID.split('_')[1]));
+         const User2=await service.getUserById(Number(form.ApprovalID.split('_')[2]));
   const payload = {
     ProjectTitle: form.ProjectTitle,
     ProjectReffNo: form.ProjectReffNo,
@@ -435,7 +449,16 @@ const handleUpdate = async () => {
   
     if (itemId) {       
      await service.updateItem(itemId, payload);
-     await handleSaveHistory(itemId);
+     if (!form.ApprovalID.split('_')[1] && !form.ApprovalID.split('_')[2]) {
+          await handleSaveHistory(itemId, 'QANEIBT', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(itemId, 'QANEIBT',User.Title, '', 'Department Head', new Date(), 1);
+        }
+   else {
+          await handleSaveHistory(itemId, 'QANEIBT', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(itemId, 'QANEIBT', User.Title, '', 'Department Head', new Date(), 1);
+          await handleSaveHistory(itemId, 'QANEIBT', User1.Title ,'', 'Management Approver', new Date(), 2);
+          await handleSaveHistory(itemId, 'QANEIBT', User2.Title, '', 'Management Approver', new Date(), 3);
+        }
      if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(itemId, form.files[i]);
@@ -448,7 +471,17 @@ const handleUpdate = async () => {
     else{
      const res= await service.createItem(payload);
       setItemId(res.Id);
-     await handleSaveHistory(res.Id);
+     
+     if (!form.ApprovalID.split('_')[1] && !form.ApprovalID.split('_')[2]) {
+          await handleSaveHistory(res.Id, 'QANEIBT', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(res.Id, 'QANEIBT',User.Title, '', 'Department Head', new Date(), 1);
+        }
+   else {
+          await handleSaveHistory(res.Id, 'QANEIBT', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(res.Id, 'QANEIBT', User.Title, '', 'Department Head', new Date(), 1);
+          await handleSaveHistory(res.Id, 'QANEIBT', User1.Title ,'', 'Management Approver', new Date(), 2);
+          await handleSaveHistory(res.Id, 'QANEIBT', User2.Title, '', 'Management Approver', new Date(), 3);
+        }
      if(res.Id>0)
      {
      if (res.Id > 0 && form.files.length > 0) {
@@ -558,7 +591,7 @@ setForm(prev => ({
               </div>
               <div className={styles.fieldBlock}>
                 <label>Quote 3</label>
-                <input name="Quote3" value={form.Quote3} type='number'  onChange={handleChange} />
+                <input name="Quote3" value={form.Quote3} type='number' onChange={handleChange} />
               </div>
             </div>
 

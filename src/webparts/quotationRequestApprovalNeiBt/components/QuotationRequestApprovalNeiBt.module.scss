@@ -112,7 +112,7 @@
 
 .upcomingBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #8b3222;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -310,4 +310,14 @@ button {
 .Pending {
   color: rgb(162, 234, 17);
   font-weight: bold;
+}
+
+.rightPanel ul li span.upcomingstatus {
+  color: orange;
+  font-weight: bold;
+}
+.rightPanel ul li.upcomingIcon::before {
+  background-color: orange;
+  content: "\f105";
+  font-size: 20px;
 }

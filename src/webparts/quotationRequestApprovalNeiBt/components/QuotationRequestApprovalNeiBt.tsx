@@ -202,40 +202,35 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
   };
 
 
-  const handleSaveApproveHistory = async (id: number) => {
-
-    const currentuser = await service.getUser();
-
+  const handleUpdateApproveHistory = async (id: number, UserAction: string, Sequence: number, comment: string) => {
     const payload = {
-      Title: 'QANEIBT',
-      FID: id,
-      UserName: currentuser.Title,
-      UserAction: 'Approved',
+      UserAction: UserAction,
       ActionDate: new Date().toISOString(),
-      Designation: currentuser.JobTitle,
-      UserComment: approverComment
+      UserComment: comment
     };
-
-    await service.createHistoryItem(payload);
+    await service.UpdateHistoryItem(id, payload, 'QANEIBT', Sequence);
   };
 
-  const handleSaveRejectedHistory = async (id: number) => {
 
-    const currentuser = await service.getUser();
+  
 
-    const payload = {
-      Title: 'QANEIBT',
-      FID: id,
-      UserName: currentuser.Title,
-      UserAction: 'Rejected',
-      ActionDate: new Date().toISOString(),
-      Designation: currentuser.JobTitle,
-      UserComment: approverComment
+  // const handleSaveRejectedHistory = async (id: number) => {
 
-    };
+  //   const currentuser = await service.getUser();
 
-    await service.createHistoryItem(payload);
-  };
+  //   const payload = {
+  //     Title: 'QANEIBT',
+  //     FID: id,
+  //     UserName: currentuser.Title,
+  //     UserAction: 'Rejected',
+  //     ActionDate: new Date().toISOString(),
+  //     Designation: currentuser.JobTitle,
+  //     UserComment: approverComment
+
+  //   };
+
+  //   await service.createHistoryItem(payload);
+  // };
 
 
   const handleApprove = async () => {
@@ -249,7 +244,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
       if (!form.Approver2EmailId && !form.Approver3EmailId) {
         await service.updateItemdata(itemId, "Approved", approverComment, "", 0);
 
-        await handleSaveApproveHistory(itemId);
+           await handleUpdateApproveHistory(itemId, 'Approved', 1, approverComment);
         alert("✅ Final Approved");
 
         window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
@@ -266,7 +261,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
           form.Approver2EmailId
         );
 
-        await handleSaveApproveHistory(itemId);
+           await handleUpdateApproveHistory(itemId, 'Approved', 1, approverComment);
         alert("✅ First Level Approved");
 
         window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
@@ -280,7 +275,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
         if (!form.Approver3EmailId) {
           await service.updateItemdata2(itemId, "Approved", approverComment, "", 0);
 
-          await handleSaveApproveHistory(itemId);
+           await handleUpdateApproveHistory(itemId, 'Approved', 2, approverComment);
           alert("✅ Final Approved");
         } else {
           // agar 3rd approver hai → Pending
@@ -292,7 +287,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
             form.Approver3EmailId
           );
 
-          await handleSaveApproveHistory(itemId);
+            await handleUpdateApproveHistory(itemId, 'Approved', 2, approverComment);
           alert("✅ Second Level Approved");
         }
 
@@ -304,7 +299,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
       if (!form.ActionDate3) {
         await service.updateItemdata3(itemId, "Approved", approverComment, "Approved");
 
-        await handleSaveApproveHistory(itemId);
+          await handleUpdateApproveHistory(itemId, 'Approved', 3, approverComment);
         alert("✅ Final Approved");
 
         window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
@@ -333,7 +328,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
       if (!form.Approver2EmailId && !form.Approver3EmailId) {
         await service.updateItemdata(itemId, "Rejected", approverComment, "", 0);
 
-        await handleSaveApproveHistory(itemId);
+         await handleUpdateApproveHistory(itemId, 'Rejected', 1, approverComment);
         alert("✅ Final Rejected");
 
         window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
@@ -342,7 +337,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
 
       if (form.ActionDate1 === '') {
         await service.updateItemdata(itemId, "Rejected", approverComment, "Rejected", form.Approver2EmailId);
-        await handleSaveRejectedHistory(itemId);
+       await handleUpdateApproveHistory(itemId, 'Rejected', 1, approverComment);
         alert("✅ Rejected Successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
@@ -353,7 +348,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
 
       else if (form.ActionDate2 === '') {
         await service.updateItemdata2(itemId, "Rejected", approverComment, 'Rejected', form.Approver3EmailId);
-        await handleSaveRejectedHistory(itemId);
+        await handleUpdateApproveHistory(itemId, 'Rejected', 2, approverComment);
         alert("✅ Rejected Successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
@@ -362,7 +357,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
       }
       else if (form.ActionDate3 === '') {
         await service.updateItemdata3(itemId, "Rejected", approverComment, "Rejected");
-        await handleSaveRejectedHistory(itemId);
+        await handleUpdateApproveHistory(itemId, 'Rejected', 3, approverComment);
         alert("✅  Rejected Successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
@@ -527,6 +522,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
                   const isApproved = item.UserAction === "Approved";
                   const isRejected = item.UserAction === "Rejected";
                   const isInitiated = item.UserAction === "Request Initiator";
+                  const isUpcoming = item.UserAction === "Upcoming";
                   return (
                     <li
                       key={index}
@@ -535,7 +531,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
                           ? styles.tickIcon
                           : isRejected
                             ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : ""
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
                       }
                     >
                       <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
@@ -549,7 +545,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : ""
+                                  : isUpcoming ? styles.upcomingstatus : ""
                             }
                           >
                             {item.UserAction}
