@@ -260,19 +260,11 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       ClaimAmount: form.ClaimAmount,
       ExpanseType: form.ExpenseName,
       files: form.files
-<<<<<<< HEAD
-  ? Array.from(form.files).map((file: any) => ({
-      FileName: file.name,
-      ServerRelativeUrl:file.name
-    }))
-  : []
-=======
         ? Array.from(form.files).map((file: any) => ({
           FileName: file.name,
           ServerRelativeUrl:file.Name
         }))
         : []
->>>>>>> main
     };
     addExpense(newExpense);
     setForm(prev => ({
@@ -349,7 +341,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
         ProjectTitle: 'Reimbursement',
         Description: form.Remarks,
-        ApprovalPath: dataApprover.DepartmentHead?.Title + '-->' + dataApproverFI.ApproverName?.Title + '-->' + dataApproverCFO.ApproverName?.Title + '-->' + dataApproverFI.ApproverName?.Title
+        ApprovalPath: dataApprover.DepartmentHead?.Title + ' > ' + dataApproverFI.ApproverName?.Title + ' > ' + dataApproverCFO.ApproverName?.Title + ' > ' + dataApproverFI.ApproverName?.Title
       }
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -367,7 +359,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
         ProjectTitle: 'Reimbursement',
         Description: form.Remarks,
-        ApprovalPath: dataApprover.DepartmentHead?.Title + '-->' + dataApproverFI.ApproverName?.Title + '-->' + dataApproverCompliance.ApproverName?.Title + '-->' + dataApproverFI.ApproverName?.Title
+        ApprovalPath: dataApprover.DepartmentHead?.Title + ' > ' + dataApproverFI.ApproverName?.Title + ' > ' + dataApproverCompliance.ApproverName?.Title + ' > ' + dataApproverFI.ApproverName?.Title
       }
     }
     try {
