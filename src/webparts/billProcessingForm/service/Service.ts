@@ -69,19 +69,27 @@ export default class Service {
     return item;
 
   }
+  public async getCheckBillNoExist(BillNo: string): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items?$filter=BillNo eq '${BillNo}'`;
+    const res = await this.context.spHttpClient.get(      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data.value.length > 0 ? data : null;
+  }
   // PO Request NO;
-   public async getTotalAmountFromBillProcessingByPO(PORequestNo: string): Promise<number> {
+  public async getTotalAmountFromBillProcessingByPO(PORequestNo: string): Promise<number> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items?$select=*&$PORequestNo eq '${PORequestNo}'`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
     );
     const data = await res.json();
-    // Sum total amount
-  const total = data.value.reduce((sum: number, item: any) => {
-    return sum + (item.TotalAmount || 0);
-  }, 0);
-  return total;
+    const total = data.value.reduce((sum: number, item: any) => {
+      const amount = parseFloat(item.TotalAmount);
+      return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+    return total;
   }
   // Get Data using PO Request No
   public async getDocumentDetailsID(RequestNo: string): Promise<any[]> {
@@ -99,6 +107,21 @@ export default class Service {
   public async getRequestDetails(requestNo: string): Promise<any> {
 
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.PoApproval}')/items?$filter=ProjectCode eq '${requestNo}' and CurrentStatus eq 'Approved'`;
+
+    console.log("URL:", url)
+    const response = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await response.json();
+
+    return data.value;
+  }
+  //Get ProjectCode Data
+  public async getRequestDetailsbyPORequestNo(requestNo: string, PORequestNo: string): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.PoApproval}')/items?$filter=ProjectCode eq '${requestNo}' and RequestNo eq '${PORequestNo}' and CurrentStatus eq 'Approved'`;
 
     console.log("URL:", url)
     const response = await this.context.spHttpClient.get(

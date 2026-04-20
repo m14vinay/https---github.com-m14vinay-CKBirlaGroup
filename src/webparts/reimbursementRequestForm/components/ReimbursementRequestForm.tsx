@@ -51,6 +51,32 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
     window.location.assign(url);
   };
+  const handleBillDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const selectedDate = new Date(value);
+    const today = new Date();
+    // remove time part
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate > today) {
+      alert("Bill date cannot be greater than current date");
+      return; // ❌ stop updating state
+    }
+    setForm({
+      ...form,
+      [name]: value
+    });
+  };
+  const handleCheckbillNoExist = async () => {
+    const checkdata = await service.getCheckBillNoExist(form.BillNo);
+    if (checkdata != null) {
+      setForm(prev => ({
+        ...prev,
+        BillNo: ''
+      }))
+      alert("Bill No is duplicate , Please enter another bill no");
+      return;
+    }
+  }
   //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -250,7 +276,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction: UserAction,
+        UserAction: 'Upcoming',
         Designation: Designation,
         Sequence: Sequence
       };
@@ -280,7 +306,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         AssignedToEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         AssignedTo: dataApproverFI.ApproverName?.Title || "",
         DepartmentHead: dataApproverFI.ApproverName?.Title || "",
-        ApprovalPath: '1.' + dataApproverFI.ApproverName?.Title
+        ApprovalPath: dataApproverFI.ApproverName?.Title
       };
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -296,7 +322,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         ComplianceHeadEmailId: 0,
         CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
-        ApprovalPath: '1.' + dataApprover.DepartmentHead?.Title + ' 2.' + dataApproverFI.ApproverName?.Title + ' 3.' + dataApproverCFO.ApproverName?.Title
+        ApprovalPath: dataApprover.DepartmentHead?.Title + '-->' + dataApproverFI.ApproverName?.Title + '-->' + dataApproverCFO.ApproverName?.Title + '-->' + dataApproverFI.ApproverName?.Title
       }
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -312,13 +338,12 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
         CFOEmailId: 0,
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
-        ApprovalPath: '1.' + dataApprover.DepartmentHead?.Title + ' 2.' + dataApproverFI.ApproverName?.Title + ' 3.' + dataApproverCompliance.ApproverName?.Title
+        ApprovalPath: dataApprover.DepartmentHead?.Title + '-->' + dataApproverFI.ApproverName?.Title + '-->' + dataApproverCompliance.ApproverName?.Title + '-->' + dataApproverFI.ApproverName?.Title
       }
     }
     try {
       if (Expenseform.expenses.length > 0) {
         if (!itemId) {
-          // 🔹 CREATE
           const res = await service.createItem(payload);
           if (res.Id > 0) {
             setItemId(res.Id); // store ID for future updates  
@@ -355,12 +380,14 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                     await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
                     await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
                     await handleSaveHistory(res.Id, 'REM', dataApproverCFO.ApproverName?.Title, '', 'CFO Approver', new Date(), 3);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
                   }
                   else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
                     await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
                     await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
                     await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
                     await handleSaveHistory(res.Id, 'REM', dataApproverCompliance.ApproverName?.Title, '', 'Compliance Head', new Date(), 3);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
                   }
                   alert("Data Submitted Successfully ✅");
                   console.log("Successfully Transaction Saved:-" + resExpense.Id);
@@ -685,6 +712,25 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                       <label>Document: </label>
                       <label>{exp.DocumentName}</label>
                     </p>
+                    <p>
+                      {exp.files?.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0 }}>
+                          {exp.files.map((file: File, index: number) => (
+                            <li
+                              key={index}
+                              style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                            >
+                              <a
+                                href={file.webkitRelativePath}
+                                rel="noopener noreferrer"
+                              >
+                                {file.name}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </p>
                     <p className={styles.btnPara}>
                       <button
                         className={styles.btnRemove}
@@ -732,7 +778,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               />
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '45%' }}>Select Document</label>
+              <label style={{ width: '45%' }}>Select Document<span className={styles.required}>*</span></label>
               <input type="file" style={{ width: '100%' }} multiple onChange={handleFileChange} />
               {/* Selected Files */}
               {form.files.length > 0 && (
@@ -757,29 +803,29 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               )}
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Bill Number</label>
-              <input className="form-control" style={{ width: '100%' }} name="BillNo" value={form.BillNo} onChange={handleChange} />
+              <label style={{ width: '30%' }}>Bill Number<span className={styles.required}>*</span></label>
+              <input className="form-control" style={{ width: '100%' }} name="BillNo" value={form.BillNo} onChange={handleChange} onBlur={handleCheckbillNoExist} required />
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Bill Amount</label>
-              <input className="form-control" style={{ width: '100%' }} name="BillAmount" value={form.BillAmount} onChange={handleChange}>
+              <label style={{ width: '30%' }}>Bill Amount<span className={styles.required}>*</span></label>
+              <input className="form-control" style={{ width: '100%' }} name="BillAmount" value={form.BillAmount} onChange={handleChange} required>
               </input>
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Bill Date</label>
+              <label style={{ width: '30%' }}>Bill Date<span className={styles.required}>*</span></label>
               <input className="form-control" style={{ width: '100%' }} type='Date' name="BillDate" value={form.BillDate
                 ? new Date(form.BillDate).toISOString().split('T')[0]
-                : ''} onChange={handleChange}>
+                : ''} onChange={handleBillDateChange} required>
               </input>
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Claim Amount</label>
-              <input className="form-control" type='number' style={{ width: '100%' }} name="ClaimAmount" value={form.ClaimAmount} onChange={handleClaimAmountChange}>
+              <label style={{ width: '30%' }}>Claim Amount<span className={styles.required}>*</span></label>
+              <input className="form-control" type='number' style={{ width: '100%' }} name="ClaimAmount" value={form.ClaimAmount} onChange={handleClaimAmountChange} required>
               </input>
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Description</label>
-              <input className="form-control" style={{ width: '100%' }} name="Description" value={form.Description} onChange={handleChange}>
+              <label style={{ width: '30%' }}>Description<span className={styles.required}>*</span></label>
+              <input className="form-control" style={{ width: '100%' }} name="Description" value={form.Description} onChange={handleChange} required>
               </input>
             </div>
             <div className={styles.btnGroup}>

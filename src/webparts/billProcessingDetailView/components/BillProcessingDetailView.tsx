@@ -31,7 +31,9 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
     DepartmentName: '',
     POAmount: 0,
     AttachedSignedPO: false,
-    ApprovalPath:''
+    ApprovalPath:'',
+    OccupiedAmount:'',
+    RemainingAmount:''
   });
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
@@ -93,7 +95,9 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
           AttachedSignedPO: result.AttachedSignedPO == "True" ? true : false,
           RequestNo: result.RequestNo,
           CurrentStatus: result.CurrentStatus,
-          ApprovalPath:result.ApprovalPath
+          ApprovalPath:result.ApprovalPath,
+          OccupiedAmount:result.OccupiedAmount,
+          RemainingAmount:result.RemainingAmount
         }));
         const historydata = await service.GetHistoryItem(Number(id), "FBP");
         setHistory(historydata);
@@ -176,6 +180,8 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
               </div>
               <label>Project Code</label>
               <input type='text' name="ProjectCode" value={form.ProjectCode} readOnly style={{ backgroundColor: "lightgray" }}/>
+              <label>PO Request No</label>
+              <input name="PORequestNo" value={form.PORequestNo} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Vendor Name</label>
               <input name="VendorName" value={form.vendorcode + "-" + form.VendorName} type='text' readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
@@ -183,9 +189,11 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
               <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Additional Information & Remarks</label>
               <input name="Comments" value={form.Comments} readOnly style={{ backgroundColor: "lightgray" }}>
-              </input>
-              <label>PO Request No</label>
-              <input name="PORequestNo" value={form.PORequestNo} readOnly style={{ backgroundColor: "lightgray" }} />
+              </input>              
+              <label>Occupied Amount</label>
+              <input name="OccupiedAmount" value={form.OccupiedAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
+              <label>Remaining Amount</label>
+              <input name="RemainingAmount" value={form.RemainingAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Bill No</label>
               <input name="BillNo" value={form.BillNo} readOnly style={{ backgroundColor: "lightgray" }}>
               </input>

@@ -163,7 +163,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
       setLoading(true);
       if (!form.Comments) return alert("Comment is required.");
       let payload = {};
-      let Sequence=0;
+      let Sequence = 0;
       if (!itemId) return;
       if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
         if (form.ActionDate1 == '') {
@@ -174,8 +174,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Approved',
             AssignedToEmailId: 0
           };
-          Sequence=1;
-        }        
+          Sequence = 1;
+        }
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
         if (form.ActionDate1 == '') {
@@ -187,7 +187,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
-          Sequence=1;
+          Sequence = 1;
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.CFOEmailId);
@@ -198,7 +198,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
-          Sequence=2;
+          Sequence = 2;
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -209,7 +209,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
-          Sequence=3;
+          Sequence = 3;
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -220,7 +220,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedToEmailId: 0
           };
         }
-        Sequence=4;
+        Sequence = 4;
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
         if (form.ActionDate1 == '') {
@@ -232,7 +232,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
-          Sequence=1;
+          Sequence = 1;
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.ComplianceHeadEmailId);
@@ -243,7 +243,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
-          Sequence=2;
+          Sequence = 2;
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -254,7 +254,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
-          Sequence=3;
+          Sequence = 3;
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -264,12 +264,12 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Approved',
             AssignedToEmailId: 0
           };
-          Sequence=4;
+          Sequence = 4;
         }
       }
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
-        await handleSaveApproveHistory(itemId,'Approved',Sequence,form.Comments);
+        await handleSaveApproveHistory(itemId, 'Approved', Sequence, form.Comments);
         alert("Approved Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
@@ -284,7 +284,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
     }
   };
   // Update History Item
-   const handleSaveApproveHistory = async (id: number, UserAction: string, Sequence: number, comment: string) => {
+  const handleSaveApproveHistory = async (id: number, UserAction: string, Sequence: number, comment: string) => {
     const payload = {
       UserAction: UserAction,
       ActionDate: new Date().toISOString(),
@@ -297,7 +297,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
       setLoading(true);
       if (!Comment) return alert("Comment is required.");
       let payload = {};
-      let Sequence=0;
+      let Sequence = 0;
       if (!itemId) return;
       if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
         if (form.ActionDate1 == '') {
@@ -308,8 +308,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };
-           Sequence=1;
-        }       
+          Sequence = 1;
+        }
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
         if (form.ActionDate1 == '') {
@@ -321,7 +321,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
-          Sequence=1;
+          Sequence = 1;
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.CFOEmailId);
@@ -332,7 +332,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
-          Sequence=2;
+          Sequence = 2;
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -343,7 +343,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
-          Sequence=3;
+          Sequence = 3;
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -353,7 +353,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };
-          Sequence=4;
+          Sequence = 4;
         }
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -366,7 +366,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
-          Sequence=1;
+          Sequence = 1;
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.ComplianceHeadEmailId);
@@ -377,7 +377,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
-          Sequence=2;
+          Sequence = 2;
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -388,7 +388,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
-          Sequence=3;
+          Sequence = 3;
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -398,12 +398,12 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };
-          Sequence=4;
+          Sequence = 4;
         }
       }
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
-        await handleSaveApproveHistory(itemId,'Rejected',Sequence,form.Comments);
+        await handleSaveApproveHistory(itemId, 'Rejected', Sequence, form.Comments);
         alert("Rejected Successfully.");
         setComment('');
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -451,29 +451,6 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                     ? styles.Rejected
                     : styles.Pending}>{form.CurrentStatus}</span></h4>
             </div>
-            <div className={styles.leftPanelStatusHeader}>
-              {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-                let statusClass = styles.statusBox;
-                if (item.UserAction === "Approved") {
-                  statusClass = `${styles.statusBox}`;
-                }
-                else if (item.UserAction === "Rejected") {
-                  statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-                }
-                else if (item.UserAction === "Upcoming") {
-                  statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
-                }
-                return (
-                  <div className={statusClass} key={index}>
-                    <div className={styles.content}>
-                      <h5>{item.UserName}</h5>
-                      <h6>{item.Designation}</h6>
-                      <h4>{item.UserAction}</h4>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
             <div className={styles.content}>
               <div className={styles.selectDep}>
                 <div className={styles.selectDepInner}>
@@ -516,6 +493,25 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                       <p>
                         <label>Document: </label>
                         <label>{exp.DocumentName}</label>
+                      </p>
+                      <p>
+                        {exp.files?.length > 0 && (
+                          <ul style={{ listStyle: "none", padding: 0 }}>
+                            {exp.files.map((file: File, index: number) => (
+                              <li
+                                key={index}
+                                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                              >
+                                <a
+                                  href={file.webkitRelativePath}
+                                  rel="noopener noreferrer"
+                                >
+                                  {file.name}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </p>
                     </div>
                   </div>

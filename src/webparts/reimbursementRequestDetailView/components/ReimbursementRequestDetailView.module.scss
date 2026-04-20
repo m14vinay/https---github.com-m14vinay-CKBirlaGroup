@@ -344,7 +344,7 @@ rightPanel {
 
 .statusBox::after {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #225a22;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -363,7 +363,7 @@ rightPanel {
 
 .rejectedBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #cdcd17;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";

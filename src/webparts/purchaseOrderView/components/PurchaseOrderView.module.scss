@@ -72,7 +72,7 @@
 
 .pendingBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #225a22;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -92,7 +92,7 @@
 
 .rejectedBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #225a22;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -112,7 +112,7 @@
 
 .upcomingBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #8b3222;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
