@@ -260,11 +260,19 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       ClaimAmount: form.ClaimAmount,
       ExpanseType: form.ExpenseName,
       files: form.files
+<<<<<<< HEAD
   ? Array.from(form.files).map((file: any) => ({
       FileName: file.name,
       ServerRelativeUrl:file.name
     }))
   : []
+=======
+        ? Array.from(form.files).map((file: any) => ({
+          FileName: file.name,
+          ServerRelativeUrl:file.Name
+        }))
+        : []
+>>>>>>> main
     };
     addExpense(newExpense);
     setForm(prev => ({

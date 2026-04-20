@@ -42,7 +42,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
 
   const handleCheckbillNoExist = async () => {
     const checkdata = await service.getCheckBillNoExist(form.BillNo);
-    if (checkdata!=null) {
+    if (checkdata != null) {
       setForm(prev => ({
         ...prev,
         BillNo: ''
@@ -135,8 +135,12 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     const data = await service.getDocumentDetailsID(option.text);
     const TotalAmount = await service.getTotalAmountFromBillProcessingByPO(option.text);
     console.log(data);
-    setPOAmount(data[0].POAmount);
-    setTotalAmount(TotalAmount);
+    if (data !== undefined) {
+      setPOAmount(data[0].POAmount);
+    }
+    if (TotalAmount !== undefined) {
+      setTotalAmount(TotalAmount);
+    }
     setForm(prev => ({
       ...prev,
       PORequestNo: option?.text as string,
@@ -228,7 +232,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   };
   const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
-     setForm({
+    setForm({
       ...form,
       ProjectCode: value
     });
@@ -317,7 +321,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction: 'Upcoming',
+        UserAction: UserAction,
         Designation: Designation,
         Sequence: Sequence
       };
@@ -344,7 +348,9 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       BillDescription: form.Comments,
       PODescription: form.Comments,
       ProjectDescription: form.Comments,
-      AttachedSignedPO: isChecked ? "True" : "False"
+      AttachedSignedPO: isChecked ? "True" : "False",
+      OccupiedAmount: form.OccupiedAmount,
+      RemainingAmount: form.RemainingAmount
     };
     try {
       if (!itemId) {
@@ -415,6 +421,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         Department: form.DepartmentName,
         AssignedTo: User?.Title,
         AssignedToEmailId: User?.Id,
+        OccupiedAmount: form.OccupiedAmount,
+        RemainingAmount: form.RemainingAmount,
         DepartmentHeadId: data.Departmenthead?.Id,
         Approver2Id: databillingApprover.Billing2ndApprover?.Id,
         Approver3Id: dataFinanceApprover.FinanceController?.Id,
@@ -434,10 +442,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
             RequestNo: `FBP-${res.Id}`
           });
           await handleSaveHistory(res.Id, 'FBP', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(res.Id, 'FBP', data.Departmenthead?.Title, '', 'Department Head', new Date(), 1);
-          await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 2);
-          await handleSaveHistory(res.Id, 'FBP', dataFinanceApprover.FinanceController?.Title, '', 'Finance Controller', new Date(), 3);
-          await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 4);
+          await handleSaveHistory(res.Id, 'FBP', data.Departmenthead?.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, 'Upcoming', 'Billing and Approver', new Date(), 2);
+          await handleSaveHistory(res.Id, 'FBP', dataFinanceApprover.FinanceController?.Title, 'Upcoming', 'Finance Controller', new Date(), 3);
+          await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, 'Upcoming', 'Billing and Approver', new Date(), 4);
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
         }
@@ -450,10 +458,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           }
         }
         await handleSaveHistory(itemId, 'FBP', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-        await handleSaveHistory(itemId, 'FBP', data.Departmenthead?.Title, '', 'Department Head', new Date(), 1);
-        await handleSaveHistory(itemId, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 2);
-        await handleSaveHistory(itemId, 'FBP', dataFinanceApprover.FinanceController?.Title, '', 'Finance Controller', new Date(), 3);
-        await handleSaveHistory(itemId, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 4);
+        await handleSaveHistory(itemId, 'FBP', data.Departmenthead?.Title, 'Pending', 'Department Head', new Date(), 1);
+        await handleSaveHistory(itemId, 'FBP', databillingApprover.Billing2ndApprover?.Title, 'Upcoming', 'Billing and Approver', new Date(), 2);
+        await handleSaveHistory(itemId, 'FBP', dataFinanceApprover.FinanceController?.Title, 'Upcoming', 'Finance Controller', new Date(), 3);
+        await handleSaveHistory(itemId, 'FBP', databillingApprover.Billing2ndApprover?.Title, 'Upcoming', 'Billing and Approver', new Date(), 4);
         alert("Submitted Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
