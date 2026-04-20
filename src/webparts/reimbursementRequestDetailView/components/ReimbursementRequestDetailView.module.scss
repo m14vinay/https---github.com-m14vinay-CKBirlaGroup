@@ -334,17 +334,17 @@ rightPanel {
   top: 0;
 }
 
-.statusBox {
-  background-color: #225a22;
+.upcomingBox {
+  background-color: orange;
   color: #fff;
   padding: 19px 10px 8px;
   position: relative;
   width: 150px;
 }
 
-.statusBox::after {
+.upcomingBox::after {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #225a22;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -363,7 +363,7 @@ rightPanel {
 
 .rejectedBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #cdcd17;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -372,15 +372,15 @@ rightPanel {
   position: absolute;
   top: 0;
 }
-.upcomingBox {
-  background-color: #ee7606;
+.statusBox {
+  background-color: green;
 }
 
-.upcomingBox::after {
-  border-left-color: #ee7606;
+.statusBox::after {
+  border-left-color: green;
 }
 
-.upcomingBox::before {
+.statusBox::before {
   border-bottom: 46px solid transparent;
   border-left: 46px solid white;
   border-right: 46px solid transparent;
@@ -391,12 +391,7 @@ rightPanel {
   position: absolute;
   top: 0;
 }
-.pendingBox .content,
-.rejectedBox .content,
-.upcomingBox .content {
-  padding-left: 40px;
-}
 .Pending {
-  color: rgb(162, 234, 17);
+  color: darkgoldenrod;
   font-weight: bold;
 }

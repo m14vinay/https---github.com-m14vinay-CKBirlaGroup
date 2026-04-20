@@ -204,13 +204,22 @@ DepartmentHead/Id,DepartmentHead/Title
   }
   public async getItemByExpenseData(ID: number): Promise<any> {
 
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$filter=ReimursementLookup eq ${ID}&$expand=AttachmentFiles`;
+   const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$select=*,AttachmentFiles&$expand=AttachmentFiles
+&$filter=ReimursementLookup eq ${ID}`;
 
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
     );
 
+    const data = await res.json();
+    return data.value.length > 0 ? data : null;
+  }
+  public async getCheckBillNoExist(BillNo: string): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$filter=BillNo eq '${BillNo}'`;
+    const res = await this.context.spHttpClient.get(      url,
+      SPHttpClient.configurations.v1
+    );
     const data = await res.json();
     return data.value.length > 0 ? data : null;
   }

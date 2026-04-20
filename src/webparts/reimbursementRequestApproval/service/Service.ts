@@ -56,7 +56,8 @@ export default class Service {
   }
   public async getItemByExpenseData(ID: number): Promise<any> {
 
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$filter=ReimursementLookup eq ${ID}`;
+   const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$select=*,AttachmentFiles&$expand=AttachmentFiles
+&$filter=ReimursementLookup eq ${ID}`;
 
     const res = await this.context.spHttpClient.get(
       url,

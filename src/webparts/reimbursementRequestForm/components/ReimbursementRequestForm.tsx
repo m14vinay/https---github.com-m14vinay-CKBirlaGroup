@@ -51,6 +51,32 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
     window.location.assign(url);
   };
+  const handleBillDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const selectedDate = new Date(value);
+    const today = new Date();
+    // remove time part
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate > today) {
+      alert("Bill date cannot be greater than current date");
+      return; // ❌ stop updating state
+    }
+    setForm({
+      ...form,
+      [name]: value
+    });
+  };
+  const handleCheckbillNoExist = async () => {
+    const checkdata = await service.getCheckBillNoExist(form.BillNo);
+    if (checkdata != null) {
+      setForm(prev => ({
+        ...prev,
+        BillNo: ''
+      }))
+      alert("Bill No is duplicate , Please enter another bill no");
+      return;
+    }
+  }
   //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -168,14 +194,24 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       });
       const Expensedata = await service.getItemByExpenseData(requestNo);
       if (Expensedata.value.length > 0) {
-        for (let i = 0; i < Expensedata.value.length; i++) {
-          {
-            setExpenseForm({
-              ...Expenseform,
-              expenses: [...Expenseform.expenses, Expensedata.value[i]]
-            });
-          }
-        }
+        const formattedExpenses = Expensedata.value.map((item: any) => ({
+          Id: item.Id,
+          Description: item.Description || "",
+          BillAmount: item.BillAmount || 0,
+          BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+          BillNo: item.BillNo || "",
+          DocumentName: item.DocumentName || "",
+          ClaimAmount: item.ClaimAmount || 0,
+          ExpanseType: item.ExpanseType || "",
+          files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+            FileName: file.FileName,
+            ServerRelativeUrl: file.ServerRelativeUrl
+          }))
+            : []
+        }));
+        setExpenseForm({
+          expenses: formattedExpenses
+        });
       }
     } else {
 
@@ -224,6 +260,11 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       ClaimAmount: form.ClaimAmount,
       ExpanseType: form.ExpenseName,
       files: form.files
+  ? Array.from(form.files).map((file: any) => ({
+      FileName: file.name,
+      ServerRelativeUrl:file.name
+    }))
+  : []
     };
     addExpense(newExpense);
     setForm(prev => ({
@@ -280,7 +321,9 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         AssignedToEmailId: Number(dataApproverFI.ApproverName?.Id || 0),
         AssignedTo: dataApproverFI.ApproverName?.Title || "",
         DepartmentHead: dataApproverFI.ApproverName?.Title || "",
-        ApprovalPath: '1.' + dataApproverFI.ApproverName?.Title
+        ApprovalPath: dataApproverFI.ApproverName?.Title,
+        ProjectTitle: 'Reimbursement',
+        Description: form.Remarks
       };
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -296,7 +339,9 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         ComplianceHeadEmailId: 0,
         CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
-        ApprovalPath: '1.' + dataApprover.DepartmentHead?.Title + ' 2.' + dataApproverFI.ApproverName?.Title + ' 3.' + dataApproverCFO.ApproverName?.Title
+        ProjectTitle: 'Reimbursement',
+        Description: form.Remarks,
+        ApprovalPath: dataApprover.DepartmentHead?.Title + '-->' + dataApproverFI.ApproverName?.Title + '-->' + dataApproverCFO.ApproverName?.Title + '-->' + dataApproverFI.ApproverName?.Title
       }
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -312,13 +357,14 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         ComplianceHeadEmailId: Number(dataApproverCompliance.ApproverName?.Id || 0),
         CFOEmailId: 0,
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
-        ApprovalPath: '1.' + dataApprover.DepartmentHead?.Title + ' 2.' + dataApproverFI.ApproverName?.Title + ' 3.' + dataApproverCompliance.ApproverName?.Title
+        ProjectTitle: 'Reimbursement',
+        Description: form.Remarks,
+        ApprovalPath: dataApprover.DepartmentHead?.Title + '-->' + dataApproverFI.ApproverName?.Title + '-->' + dataApproverCompliance.ApproverName?.Title + '-->' + dataApproverFI.ApproverName?.Title
       }
     }
     try {
       if (Expenseform.expenses.length > 0) {
         if (!itemId) {
-          // 🔹 CREATE
           const res = await service.createItem(payload);
           if (res.Id > 0) {
             setItemId(res.Id); // store ID for future updates  
@@ -355,12 +401,14 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                     await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
                     await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
                     await handleSaveHistory(res.Id, 'REM', dataApproverCFO.ApproverName?.Title, '', 'CFO Approver', new Date(), 3);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
                   }
                   else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
                     await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
                     await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
                     await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
                     await handleSaveHistory(res.Id, 'REM', dataApproverCompliance.ApproverName?.Title, '', 'Compliance Head', new Date(), 3);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
                   }
                   alert("Data Submitted Successfully ✅");
                   console.log("Successfully Transaction Saved:-" + resExpense.Id);
@@ -408,12 +456,14 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
                 await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
                 await handleSaveHistory(itemId, 'REM', dataApproverCFO.ApproverName?.Title, '', 'CFO Approver', new Date(), 3);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
               }
               else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
                 await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
                 await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
                 await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
                 await handleSaveHistory(itemId, 'REM', dataApproverCompliance.ApproverName?.Title, '', 'Compliance Head', new Date(), 3);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
               }
               alert("Data Submitted Successfully ✅");
               const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -443,7 +493,9 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       TotalClaimAmount: form.TotalAmount,
       Remarks: form.Remarks,
       DepartmentName: form.DepartmentName,
-      CurrentStatus: 'Draft'
+      CurrentStatus: 'Draft',
+      ProjectTitle: 'Reimbursement',
+      Description: form.Remarks
     };
     try {
       setLoading(true);
@@ -481,11 +533,26 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               expenses: []
             });
             const Expensedata = await service.getItemByExpenseData(Number(res.Id));
-            if (Expensedata.value[0].Id > 0) {
+            if (Expensedata.value.length > 0) {
+              const formattedExpenses = Expensedata.value.map((item: any) => ({
+                Id: item.Id,
+                Description: item.Description || "",
+                BillAmount: item.BillAmount || 0,
+                BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+                BillNo: item.BillNo || "",
+                DocumentName: item.DocumentName || "",
+                ClaimAmount: item.ClaimAmount || 0,
+                ExpanseType: item.ExpanseType || "",
+                files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+                  FileName: file.FileName,
+                  ServerRelativeUrl: file.ServerRelativeUrl
+                }))
+                  : []
+              }));
               setExpenseForm({
-                ...Expenseform,
-                expenses: Expensedata.value
+                expenses: formattedExpenses
               });
+
               alert("Data Saved Successfully ✅");
             }
           }
@@ -525,10 +592,24 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               ...Expenseform,
               expenses: []
             });
-            if (Expensedata.value[0].Id > 0) {
+            if (Expensedata.value.length > 0) {
+              const formattedExpenses = Expensedata.value.map((item: any) => ({
+                Id: item.Id,
+                Description: item.Description || "",
+                BillAmount: item.BillAmount || 0,
+                BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+                BillNo: item.BillNo || "",
+                DocumentName: item.DocumentName || "",
+                ClaimAmount: item.ClaimAmount || 0,
+                ExpanseType: item.ExpanseType || "",
+                files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+                  FileName: file.FileName,
+                  ServerRelativeUrl: file.ServerRelativeUrl
+                }))
+                  : []
+              }));
               setExpenseForm({
-                ...Expenseform,
-                expenses: Expensedata.value
+                expenses: formattedExpenses
               });
             }
             alert("Data Updated Successfully ✅");
@@ -581,10 +662,24 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
           ...Expenseform,
           expenses: []
         });
-        if (Expensedata.value[0].Id > 0) {
+        if (Expensedata.value.length > 0) {
+          const formattedExpenses = Expensedata.value.map((item: any) => ({
+            Id: item.Id,
+            Description: item.Description || "",
+            BillAmount: item.BillAmount || 0,
+            BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+            BillNo: item.BillNo || "",
+            DocumentName: item.DocumentName || "",
+            ClaimAmount: item.ClaimAmount || 0,
+            ExpanseType: item.ExpanseType || "",
+            files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+              FileName: file.FileName,
+              ServerRelativeUrl: file.ServerRelativeUrl
+            }))
+              : []
+          }));
           setExpenseForm({
-            ...Expenseform,
-            expenses: Expensedata.value
+            expenses: formattedExpenses
           });
           setForm(prev => ({
             ...prev,
@@ -685,6 +780,29 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                       <label>Document: </label>
                       <label>{exp.DocumentName}</label>
                     </p>
+                    <p>
+                      {exp.files?.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0 }}>
+                          {exp.files?.length > 0 && (
+                            <ul style={{ listStyle: "none", padding: 0 }}>
+                              {exp.files.map((file: any, index: any) => (
+                                <li
+                                  key={index}
+                                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                                >
+                                  <a
+                                    href={file.ServerRelativeUrl}
+                                    rel="noopener noreferrer"
+                                  >
+                                    {file.FileName}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </ul>
+                      )}
+                    </p>
                     <p className={styles.btnPara}>
                       <button
                         className={styles.btnRemove}
@@ -732,7 +850,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               />
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '45%' }}>Select Document</label>
+              <label style={{ width: '45%' }}>Select Document<span className={styles.required}>*</span></label>
               <input type="file" style={{ width: '100%' }} multiple onChange={handleFileChange} />
               {/* Selected Files */}
               {form.files.length > 0 && (
@@ -757,29 +875,29 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               )}
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Bill Number</label>
-              <input className="form-control" style={{ width: '100%' }} name="BillNo" value={form.BillNo} onChange={handleChange} />
+              <label style={{ width: '30%' }}>Bill Number<span className={styles.required}>*</span></label>
+              <input className="form-control" style={{ width: '100%' }} name="BillNo" value={form.BillNo} onChange={handleChange} onBlur={handleCheckbillNoExist} required />
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Bill Amount</label>
-              <input className="form-control" style={{ width: '100%' }} name="BillAmount" value={form.BillAmount} onChange={handleChange}>
+              <label style={{ width: '30%' }}>Bill Amount<span className={styles.required}>*</span></label>
+              <input className="form-control" style={{ width: '100%' }} name="BillAmount" value={form.BillAmount} onChange={handleChange} required>
               </input>
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Bill Date</label>
+              <label style={{ width: '30%' }}>Bill Date<span className={styles.required}>*</span></label>
               <input className="form-control" style={{ width: '100%' }} type='Date' name="BillDate" value={form.BillDate
                 ? new Date(form.BillDate).toISOString().split('T')[0]
-                : ''} onChange={handleChange}>
+                : ''} onChange={handleBillDateChange} required>
               </input>
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Claim Amount</label>
-              <input className="form-control" type='number' style={{ width: '100%' }} name="ClaimAmount" value={form.ClaimAmount} onChange={handleClaimAmountChange}>
+              <label style={{ width: '30%' }}>Claim Amount<span className={styles.required}>*</span></label>
+              <input className="form-control" type='number' style={{ width: '100%' }} name="ClaimAmount" value={form.ClaimAmount} onChange={handleClaimAmountChange} required>
               </input>
             </div>
             <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Description</label>
-              <input className="form-control" style={{ width: '100%' }} name="Description" value={form.Description} onChange={handleChange}>
+              <label style={{ width: '30%' }}>Description<span className={styles.required}>*</span></label>
+              <input className="form-control" style={{ width: '100%' }} name="Description" value={form.Description} onChange={handleChange} required>
               </input>
             </div>
             <div className={styles.btnGroup}>
