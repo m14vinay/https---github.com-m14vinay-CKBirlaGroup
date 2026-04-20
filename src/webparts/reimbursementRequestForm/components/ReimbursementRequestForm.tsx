@@ -291,7 +291,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction: 'Upcoming',
+        UserAction: UserAction,
         Designation: Designation,
         Sequence: Sequence
       };
@@ -394,21 +394,21 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                   }
                   if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
                     await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 1);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Pending', 'Finance Approver', new Date(), 1);
                   }
                   else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
                     await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverCFO.ApproverName?.Title, '', 'CFO Approver', new Date(), 3);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
+                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverCFO.ApproverName?.Title, 'Upcoming', 'CFO Approver', new Date(), 3);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
                   }
                   else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
                     await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverCompliance.ApproverName?.Title, '', 'Compliance Head', new Date(), 3);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
+                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverCompliance.ApproverName?.Title, 'Upcoming', 'Compliance Head', new Date(), 3);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
                   }
                   alert("Data Submitted Successfully ✅");
                   console.log("Successfully Transaction Saved:-" + resExpense.Id);
