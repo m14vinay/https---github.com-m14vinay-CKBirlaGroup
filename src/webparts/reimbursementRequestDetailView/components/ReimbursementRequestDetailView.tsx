@@ -30,8 +30,9 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
   });
   const [loading, setLoading] = React.useState(false);
   const [History, setHistory] = React.useState<any[]>([]);
+  const [attachments, setAttachments] = React.useState<any[]>([]);
   const [Expenseform, setExpenseForm] = React.useState<{
-    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string, files: [] }[];
+    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string, files: { FileName: string; ServerRelativeUrl: string }[] }[];
   }>({
     expenses: []
   });
@@ -54,7 +55,6 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
     }
     setLoading(false);
   }, []);
-
   const getRequestDetails = async (requestNo: number) => {
     const data = await service.getItemByRequestNo(requestNo);
     const currentUser = await service.getUser();
@@ -73,15 +73,25 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
       });
       const Expensedata = await service.getItemByExpenseData(requestNo);
       if (Expensedata.value.length > 0) {
-        for (let i = 0; i < Expensedata.value.length; i++) {
-          {
-            setExpenseForm(prev => {
-              return {
-                ...prev,
-                expenses: [...prev.expenses, Expensedata.value[i]]
-              };
-            });
-          }
+        {
+           const formattedExpenses = Expensedata.value.map((item: any) => ({
+            Id: item.Id,
+            Description: item.Description || "",
+            BillAmount: item.BillAmount || 0,
+            BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+            BillNo: item.BillNo || "",
+            DocumentName: item.DocumentName || "",
+            ClaimAmount: item.ClaimAmount || 0,
+            ExpanseType: item.ExpanseType || "",
+            files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+              FileName: file.FileName,
+              ServerRelativeUrl: file.ServerRelativeUrl
+            }))
+              : []
+          }));
+          setExpenseForm({
+            expenses: formattedExpenses
+          });
         }
       }
       const historydata = await service.GetHistoryItem(requestNo, "REM");
@@ -147,16 +157,17 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
             </div>
             <div className={styles.leftPanelStatusHeader}>
               {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-                let statusClass = styles.statusBox;
-                if (item.UserAction === "Approved") {
-                  statusClass = `${styles.statusBox}`;
+                let statusClass = styles.upcomingBox;
+                if (item.UserAction === "Upcoming") {
+                  statusClass = `${styles.upcomingBox}`;
+                }
+                else if (item.UserAction === "Approved") {
+                  statusClass = `${styles.upcomingBox} ${styles.statusBox}`;
                 }
                 else if (item.UserAction === "Rejected") {
-                  statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+                  statusClass = `${styles.upcomingBox} ${styles.rejectedBox}`;
                 }
-                else if (item.UserAction === "Upcoming") {
-                  statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
-                }
+
                 return (
                   <div className={statusClass} key={index}>
                     <div className={styles.content}>
@@ -177,7 +188,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
               </div>
               <div style={{ paddingBottom: "2%" }}></div>
               <div className='row'>
-                {Expenseform.expenses.map((exp: any, index: number) => (
+                {Expenseform.expenses.map((exp: any, index: any) => (
                   <div className="col-md-4" key={index}>
                     <div className={styles.remBox}>
                       <h6>Reimbursement Details- {exp.ExpanseType}</h6>
@@ -214,16 +225,16 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                       <p>
                         {exp.files?.length > 0 && (
                           <ul style={{ listStyle: "none", padding: 0 }}>
-                            {exp.files.map((file: File, index: number) => (
+                            {exp.files.map((file: any, index:any) => (
                               <li
                                 key={index}
                                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
                               >
                                 <a
-                                  href={file.webkitRelativePath}
+                                  href={file.ServerRelativeUrl}
                                   rel="noopener noreferrer"
                                 >
-                                  {file.name}
+                                  {file.FileName}
                                 </a>
                               </li>
                             ))}

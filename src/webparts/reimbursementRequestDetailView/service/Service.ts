@@ -47,9 +47,28 @@ export default class Service {
     const data = await res.json();
     return data.value.length > 0 ? data.value[0] : null;
   }
+  public async getAttachments(itemId: number): Promise<any[]> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items(${itemId})/AttachmentFiles`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;"
+        }
+      }
+    );
+    const data = await res.json();
+
+    return data.value; // array of attachments
+  }
+
   public async getItemByExpenseData(ID: number): Promise<any> {
 
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$filter=ReimursementLookup eq ${ID}`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$select=*,AttachmentFiles&$expand=AttachmentFiles
+&$filter=ReimursementLookup eq ${ID}`;
 
     const res = await this.context.spHttpClient.get(
       url,
