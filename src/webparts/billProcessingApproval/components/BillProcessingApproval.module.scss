@@ -325,6 +325,16 @@ button {
 }
 
 .Pending {
-  color: rgb(162, 234, 17);
+  color: darkgoldenrod;
   font-weight: bold;
 }
+.rightPanel ul li.pendingIcon::before {
+  background-color: yellow;
+  content: "\f105";
+  font-size: 20px;
+}
+.rightPanel ul li span.pendingstatus {
+  color: yellow;
+  font-weight: bold;
+}
+

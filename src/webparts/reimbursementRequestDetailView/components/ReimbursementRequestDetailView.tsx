@@ -157,15 +157,15 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
             </div>
             <div className={styles.leftPanelStatusHeader}>
               {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-                let statusClass = styles.upcomingBox;
-                if (item.UserAction === "Upcoming") {
-                  statusClass = `${styles.upcomingBox}`;
+                let statusClass = styles.statusBox;
+                if (item.UserAction === "Approved") {
+                  statusClass = `${styles.statusBox}`;
                 }
-                else if (item.UserAction === "Approved") {
-                  statusClass = `${styles.upcomingBox} ${styles.statusBox}`;
+                else if (item.UserAction === "Upcoming") {
+                  statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
                 }
                 else if (item.UserAction === "Rejected") {
-                  statusClass = `${styles.upcomingBox} ${styles.rejectedBox}`;
+                  statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
                 }
 
                 return (
