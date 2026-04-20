@@ -42,7 +42,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
 
   const handleCheckbillNoExist = async () => {
     const checkdata = await service.getCheckBillNoExist(form.BillNo);
-    if (checkdata!=null) {
+    if (checkdata != null) {
       setForm(prev => ({
         ...prev,
         BillNo: ''
@@ -135,8 +135,12 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     const data = await service.getDocumentDetailsID(option.text);
     const TotalAmount = await service.getTotalAmountFromBillProcessingByPO(option.text);
     console.log(data);
-    setPOAmount(data[0].POAmount);
-    setTotalAmount(TotalAmount);
+    if (data !== undefined) {
+      setPOAmount(data[0].POAmount);
+    }
+    if (TotalAmount !== undefined) {
+      setTotalAmount(TotalAmount);
+    }
     setForm(prev => ({
       ...prev,
       PORequestNo: option?.text as string,
@@ -228,7 +232,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   };
   const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
-     setForm({
+    setForm({
       ...form,
       ProjectCode: value
     });
@@ -344,7 +348,9 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       BillDescription: form.Comments,
       PODescription: form.Comments,
       ProjectDescription: form.Comments,
-      AttachedSignedPO: isChecked ? "True" : "False"
+      AttachedSignedPO: isChecked ? "True" : "False",
+      OccupiedAmount: form.OccupiedAmount,
+      RemainingAmount: form.RemainingAmount
     };
     try {
       if (!itemId) {
@@ -415,6 +421,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         Department: form.DepartmentName,
         AssignedTo: User?.Title,
         AssignedToEmailId: User?.Id,
+        OccupiedAmount: form.OccupiedAmount,
+        RemainingAmount: form.RemainingAmount,
         DepartmentHeadId: data.Departmenthead?.Id,
         Approver2Id: databillingApprover.Billing2ndApprover?.Id,
         Approver3Id: dataFinanceApprover.FinanceController?.Id,

@@ -79,7 +79,7 @@ export default class Service {
   }
   // PO Request NO;
   public async getTotalAmountFromBillProcessingByPO(PORequestNo: string): Promise<number> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items?$select=*&$PORequestNo eq '${PORequestNo}'`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items?$filter=PORequestNo eq '${PORequestNo}' and CurrentStatus ne 'Rejected'`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
@@ -94,7 +94,7 @@ export default class Service {
   // Get Data using PO Request No
   public async getDocumentDetailsID(RequestNo: string): Promise<any[]> {
 
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.PoApproval}')/items?$top=5000&$select=*&$filter=RequestNo eq '${RequestNo}'`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.PoApproval}')/items?$top=5000&$select=*&$filter=RequestNo eq '${RequestNo}' and CurrentStatus eq 'Approved'`;
 
     const res = await this.context.spHttpClient.get(
       url,
