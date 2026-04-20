@@ -194,14 +194,24 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       });
       const Expensedata = await service.getItemByExpenseData(requestNo);
       if (Expensedata.value.length > 0) {
-        for (let i = 0; i < Expensedata.value.length; i++) {
-          {
-            setExpenseForm({
-              ...Expenseform,
-              expenses: [...Expenseform.expenses, Expensedata.value[i]]
-            });
-          }
-        }
+        const formattedExpenses = Expensedata.value.map((item: any) => ({
+          Id: item.Id,
+          Description: item.Description || "",
+          BillAmount: item.BillAmount || 0,
+          BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+          BillNo: item.BillNo || "",
+          DocumentName: item.DocumentName || "",
+          ClaimAmount: item.ClaimAmount || 0,
+          ExpanseType: item.ExpanseType || "",
+          files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+            FileName: file.FileName,
+            ServerRelativeUrl: file.ServerRelativeUrl
+          }))
+            : []
+        }));
+        setExpenseForm({
+          expenses: formattedExpenses
+        });
       }
     } else {
 
@@ -435,12 +445,14 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
                 await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
                 await handleSaveHistory(itemId, 'REM', dataApproverCFO.ApproverName?.Title, '', 'CFO Approver', new Date(), 3);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
               }
               else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
                 await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
                 await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
                 await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
                 await handleSaveHistory(itemId, 'REM', dataApproverCompliance.ApproverName?.Title, '', 'Compliance Head', new Date(), 3);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
               }
               alert("Data Submitted Successfully ✅");
               const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -508,11 +520,26 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               expenses: []
             });
             const Expensedata = await service.getItemByExpenseData(Number(res.Id));
-            if (Expensedata.value[0].Id > 0) {
+            if (Expensedata.value.length > 0) {
+              const formattedExpenses = Expensedata.value.map((item: any) => ({
+                Id: item.Id,
+                Description: item.Description || "",
+                BillAmount: item.BillAmount || 0,
+                BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+                BillNo: item.BillNo || "",
+                DocumentName: item.DocumentName || "",
+                ClaimAmount: item.ClaimAmount || 0,
+                ExpanseType: item.ExpanseType || "",
+                files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+                  FileName: file.FileName,
+                  ServerRelativeUrl: file.ServerRelativeUrl
+                }))
+                  : []
+              }));
               setExpenseForm({
-                ...Expenseform,
-                expenses: Expensedata.value
+                expenses: formattedExpenses
               });
+
               alert("Data Saved Successfully ✅");
             }
           }
@@ -552,10 +579,24 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               ...Expenseform,
               expenses: []
             });
-            if (Expensedata.value[0].Id > 0) {
+            if (Expensedata.value.length > 0) {
+              const formattedExpenses = Expensedata.value.map((item: any) => ({
+                Id: item.Id,
+                Description: item.Description || "",
+                BillAmount: item.BillAmount || 0,
+                BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+                BillNo: item.BillNo || "",
+                DocumentName: item.DocumentName || "",
+                ClaimAmount: item.ClaimAmount || 0,
+                ExpanseType: item.ExpanseType || "",
+                files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+                  FileName: file.FileName,
+                  ServerRelativeUrl: file.ServerRelativeUrl
+                }))
+                  : []
+              }));
               setExpenseForm({
-                ...Expenseform,
-                expenses: Expensedata.value
+                expenses: formattedExpenses
               });
             }
             alert("Data Updated Successfully ✅");
@@ -608,10 +649,24 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
           ...Expenseform,
           expenses: []
         });
-        if (Expensedata.value[0].Id > 0) {
+        if (Expensedata.value.length > 0) {
+          const formattedExpenses = Expensedata.value.map((item: any) => ({
+            Id: item.Id,
+            Description: item.Description || "",
+            BillAmount: item.BillAmount || 0,
+            BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+            BillNo: item.BillNo || "",
+            DocumentName: item.DocumentName || "",
+            ClaimAmount: item.ClaimAmount || 0,
+            ExpanseType: item.ExpanseType || "",
+            files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+              FileName: file.FileName,
+              ServerRelativeUrl: file.ServerRelativeUrl
+            }))
+              : []
+          }));
           setExpenseForm({
-            ...Expenseform,
-            expenses: Expensedata.value
+            expenses: formattedExpenses
           });
           setForm(prev => ({
             ...prev,
@@ -715,19 +770,23 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                     <p>
                       {exp.files?.length > 0 && (
                         <ul style={{ listStyle: "none", padding: 0 }}>
-                          {exp.files.map((file: File, index: number) => (
-                            <li
-                              key={index}
-                              style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                            >
-                              <a
-                                href={file.webkitRelativePath}
-                                rel="noopener noreferrer"
-                              >
-                                {file.name}
-                              </a>
-                            </li>
-                          ))}
+                          {exp.files?.length > 0 && (
+                            <ul style={{ listStyle: "none", padding: 0 }}>
+                              {exp.files.map((file: any, index: any) => (
+                                <li
+                                  key={index}
+                                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                                >
+                                  <a
+                                    href={file.ServerRelativeUrl}
+                                    rel="noopener noreferrer"
+                                  >
+                                    {file.FileName}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </ul>
                       )}
                     </p>

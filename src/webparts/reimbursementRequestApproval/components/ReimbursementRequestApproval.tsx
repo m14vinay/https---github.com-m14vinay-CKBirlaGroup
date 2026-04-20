@@ -42,7 +42,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
   const [AssignedID, setAssignedID] = React.useState<number | null>(null);
   const [AssignedToEmail, setAssignedToEmail] = React.useState<number | null>(null);
   const [Expenseform, setExpenseForm] = React.useState<{
-    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string, files: [] }[];
+    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string, files: { FileName: string; ServerRelativeUrl: string }[] }[];
   }>({
     expenses: []
   });
@@ -103,16 +103,24 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           }
           const Expensedata = await service.getItemByExpenseData(requestNo);
           if (Expensedata.value.length > 0) {
-            for (let i = 0; i < Expensedata.value.length; i++) {
-              {
-                setExpenseForm(prev => {
-                  return {
-                    ...prev,
-                    expenses: [...prev.expenses, Expensedata.value[i]]
-                  };
-                });
-              }
-            }
+            const formattedExpenses = Expensedata.value.map((item: any) => ({
+            Id: item.Id,
+            Description: item.Description || "",
+            BillAmount: item.BillAmount || 0,
+            BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+            BillNo: item.BillNo || "",
+            DocumentName: item.DocumentName || "",
+            ClaimAmount: item.ClaimAmount || 0,
+            ExpanseType: item.ExpanseType || "",
+            files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+              FileName: file.FileName,
+              ServerRelativeUrl: file.ServerRelativeUrl
+            }))
+              : []
+          }));
+          setExpenseForm({
+            expenses: formattedExpenses
+          });
           }
           const historydata = await service.GetHistoryItem(requestNo, "REM");
           setHistory(historydata);
@@ -497,16 +505,16 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                       <p>
                         {exp.files?.length > 0 && (
                           <ul style={{ listStyle: "none", padding: 0 }}>
-                            {exp.files.map((file: File, index: number) => (
+                            {exp.files.map((file: any, index:any) => (
                               <li
                                 key={index}
                                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
                               >
                                 <a
-                                  href={file.webkitRelativePath}
+                                  href={file.ServerRelativeUrl}
                                   rel="noopener noreferrer"
                                 >
-                                  {file.name}
+                                  {file.FileName}
                                 </a>
                               </li>
                             ))}
