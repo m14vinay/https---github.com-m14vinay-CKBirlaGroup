@@ -431,16 +431,25 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
 
   // 🔹 Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
 
-    setForm((prev:any) => ({
-      ...prev,
-      [name]: name.includes("Amount") || name.includes("Quote")
-        ? value === "" ? null : Number(value)
-        : value
-    }));
-  };
+  //   setForm(prev => ({
+  //     ...prev,
+  //     [name]: name.includes("Amount") || name.includes("Quote")
+  //       ? Number(value)
+  //       : value
+  //   }));
+  // };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+     const { name, value } = e.target;
+   
+     setForm({
+       ...form,
+       [name]: value
+     });
+    };
 
   const handleSaveHistory = async (id: number) => {
 
@@ -848,7 +857,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           <div className={styles["col-md-9"]}>
             <div className={styles.leftPanel}>
               <div className={styles.leftPanelHeader}>
-                <h4>Quotation Request Approval Form</h4>
+                <h4>Quotation Request Approval</h4>
               </div>
 
               <label>Project Title <span className={styles.required}>*</span></label>
@@ -871,42 +880,46 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
               {/* 
           <label>Vendor 1 <span className={styles.required}>*</span></label>
           <input name="Vendor1" value={form.Vendor1} onChange={handleChange}  /> */}
-              <div className={styles.twoColumnRow}>
-                <div className={styles.fieldBlock}>
-                  <label>Vendor1 <span className={styles.required}>*</span></label>
-                  <input name="Vendor1" value={form.Vendor1} onChange={handleChange} />
-                </div>
-                <div className={styles.fieldBlock}>
-                  <label>Quote 1 <span className={styles.required}>*</span></label>
-                  <input name="Quote1" value={form.Quote1} type='number' onChange={handleChange} />
-                </div>
-              </div>
-              <div className={styles.twoColumnRow}>
-                <div className={styles.fieldBlock}>
-                  <label>Vendor2 <span className={styles.required}>*</span></label>
-                  <input name="Vendor2" value={form.Vendor2} onChange={handleChange} />
-                </div>
-                <div className={styles.fieldBlock}>
-                  <label>Quote 2</label>
-                  <input name="Quote2" value={form.Quote2} type='number' onChange={handleChange} />
-                </div>
-              </div>
-              <div className={styles.twoColumnRow}>
-                <div className={styles.fieldBlock}>
-                  <label>Vendor3 <span className={styles.required}>*</span></label>
-                  <input name="Vendor3" value={form.Vendor3} onChange={handleChange} />
-                </div>
-                <div className={styles.fieldBlock}>
-                  <label>Quote 3</label>
-                  <input name="Quote3" value={form.Quote3} type='number' onChange={handleChange} />
-                </div>
-              </div>
-              <label>Select Vendor <span className={styles.required}>*</span></label>
-              <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
 
-              <label>Selected Quote <span className={styles.required}>*</span></label>
-              <input name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} type='number' />
+               <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Vendor 1 <span className={styles.required}>*</span></label>
+                <input name="Vendor1" value={form.Vendor1} onChange={handleChange} />
+              </div>
+              <div className={styles.fieldBlock}>
+                <label>Quote 1 <span className={styles.required}>*</span></label>
+                <input  name="Quote1" value={form.Quote1} type='number' onChange={handleChange}  />
+              </div>
+            </div>
 
+            <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Vendor 2</label>
+                <input name="Vendor2" value={form.Vendor2} onChange={handleChange} />
+              </div>
+              <div className={styles.fieldBlock}>
+                <label>Quote 2</label>
+                <input   name="Quote2" value={form.Quote2} type='number' onChange={handleChange} />
+              </div>
+            </div>
+
+            <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Vendor 3</label>
+                <input name="Vendor3" value={form.Vendor3} onChange={handleChange} />
+              </div>
+              <div className={styles.fieldBlock}>
+                <label>Quote 3</label>
+                <input name="Quote3" value={form.Quote3} type='number'  onChange={handleChange} />
+              </div>
+            </div>
+
+             <label>Select Vendor <span className={styles.required}>*</span></label>
+        <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
+
+          <label>Selected Quote <span className={styles.required}>*</span></label>
+          <input name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} type='number' />
+          
 
               {/* Department and approval section */}
               <label>Department <span className={styles.required}>*</span></label>
@@ -946,7 +959,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
               />
 
               <label>Approval Path<span className={styles.required}>*</span></label>
-              <input value={form.ApprovalPath || ""} readOnly />
+              <input value={form.ApprovalPath || ""} readOnly   style={{backgroundColor:"lightgray"}} />
 
 
               {Number(form.TotalProjectAmount || 0) > 200000 && approverOptions.length > 0 && (

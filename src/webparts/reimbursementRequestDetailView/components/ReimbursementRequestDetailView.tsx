@@ -26,12 +26,12 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
     DocumentName: '',
     DocumentID: '',
     CurrentStatus: '',
-    ApprovalPath:''
+    ApprovalPath: ''
   });
   const [loading, setLoading] = React.useState(false);
   const [History, setHistory] = React.useState<any[]>([]);
   const [Expenseform, setExpenseForm] = React.useState<{
-    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string }[];
+    expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string, files: [] }[];
   }>({
     expenses: []
   });
@@ -57,11 +57,10 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
 
   const getRequestDetails = async (requestNo: number) => {
     const data = await service.getItemByRequestNo(requestNo);
-     const currentUser = await service.getUser();
-       if(data.AuthorId!== currentUser.Id)
-      {
-         alert("You Are Not Authorized ❌ ");
-      } 
+    const currentUser = await service.getUser();
+    if (data.AuthorId !== currentUser.Id) {
+      alert("You Are Not Authorized ❌ ");
+    }
     if (data.Id > 0) {
       setForm({
         ...form,
@@ -69,19 +68,19 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
         DepartmentName: data.DepartmentName,
         Remarks: data.Remarks,
         TotalAmount: data.TotalClaimAmount,
-        CurrentStatus:data.CurrentStatus,
-        ApprovalPath:data.ApprovalPath
+        CurrentStatus: data.CurrentStatus,
+        ApprovalPath: data.ApprovalPath
       });
       const Expensedata = await service.getItemByExpenseData(requestNo);
       if (Expensedata.value.length > 0) {
         for (let i = 0; i < Expensedata.value.length; i++) {
           {
-             setExpenseForm(prev => {
-      return {
-        ...prev,
-        expenses: [...prev.expenses, Expensedata.value[i]]
-      };
-    });
+            setExpenseForm(prev => {
+              return {
+                ...prev,
+                expenses: [...prev.expenses, Expensedata.value[i]]
+              };
+            });
           }
         }
       }
@@ -108,7 +107,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
         DocumentID: '',
         ID: 0,
         CurrentStatus: '',
-        ApprovalPath:''
+        ApprovalPath: ''
       });
     }
   };
@@ -148,26 +147,26 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
             </div>
             <div className={styles.leftPanelStatusHeader}>
               {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-                  let statusClass = styles.statusBox;
-                  if (item.UserAction === "Approved") {
-                    statusClass = `${styles.statusBox}`;
-                  }
-                  else if (item.UserAction === "Rejected") {
-                    statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-                  }
-                  else if (item.UserAction === "Upcoming") {
-                    statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
-                  }
-                  return (
-                    <div className={statusClass} key={index}>
-                      <div className={styles.content}>
-                        <h5>{item.UserName}</h5>
-                        <h6>{item.Designation}</h6>
-                        <h4>{item.UserAction}</h4>
-                      </div>
+                let statusClass = styles.statusBox;
+                if (item.UserAction === "Approved") {
+                  statusClass = `${styles.statusBox}`;
+                }
+                else if (item.UserAction === "Rejected") {
+                  statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+                }
+                else if (item.UserAction === "Upcoming") {
+                  statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
+                }
+                return (
+                  <div className={statusClass} key={index}>
+                    <div className={styles.content}>
+                      <h5>{item.UserName}</h5>
+                      <h6>{item.Designation}</h6>
+                      <h4>{item.UserAction}</h4>
                     </div>
-                  );
-                })}
+                  </div>
+                );
+              })}
             </div>
             <div className={styles.content}>
               <div className={styles.selectDep}>
@@ -176,7 +175,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                   <input type='text' className="form-control" name="DepartmentName" value={form.DepartmentName} readOnly style={{ backgroundColor: "lightgray" }} />
                 </div>
               </div>
-              <div style={{paddingBottom:"2%"}}></div>
+              <div style={{ paddingBottom: "2%" }}></div>
               <div className='row'>
                 {Expenseform.expenses.map((exp: any, index: number) => (
                   <div className="col-md-4" key={index}>
@@ -211,6 +210,25 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                       <p>
                         <label>Document: </label>
                         <label>{exp.DocumentName}</label>
+                      </p>
+                      <p>
+                        {exp.files?.length > 0 && (
+                          <ul style={{ listStyle: "none", padding: 0 }}>
+                            {exp.files.map((file: File, index: number) => (
+                              <li
+                                key={index}
+                                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                              >
+                                <a
+                                  href={file.webkitRelativePath}
+                                  rel="noopener noreferrer"
+                                >
+                                  {file.name}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </p>
                     </div>
                   </div>

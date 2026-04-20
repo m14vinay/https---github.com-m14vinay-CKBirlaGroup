@@ -39,7 +39,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     Approver3Id: 0,
     Approver5Id: 0,
     ApprovalComment: '',
-    ApprovalPath:''
+    ApprovalPath:'',
+    OccupiedAmount:'',
+    RemainingAmount:''
   });
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
@@ -119,7 +121,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             Approver2Id: result.Approver2Id || 0,
             Approver3Id: result.Approver3Id || 0,
             Approver5Id: result.Approver5Id || 0,
-            ApprovalPath:result.ApprovalPath
+            ApprovalPath:result.ApprovalPath,
+            OccupiedAmount:result.OccupiedAmount,
+            RemainingAmount:result.RemainingAmount
           }));
           if (User?.Id) {
             setAssignedID(User.Title);
@@ -184,7 +188,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             Approver3Id: 0,
             Approver5Id: 0,
             ApprovalComment: '',
-            ApprovalPath:''
+            ApprovalPath:'',
+            OccupiedAmount:'',
+            RemainingAmount:''
           });
           alert("Record is already Rejected.");
           return;
@@ -468,30 +474,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                       ? styles.Rejected
                       : styles.Pending}>{form.CurrentStatus}</span></h4>
               </div>
-              <div className={styles.leftPanelStatusHeader}>
-                {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-                  let statusClass = styles.statusBox;
-                  if (item.UserAction === "Approved") {
-                    statusClass = `${styles.statusBox}`;
-                  }
-                  else if (item.UserAction === "Rejected") {
-                    statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-                  }
-                  else if (item.UserAction === "Upcoming") {
-                    statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
-                  }
-                  return (
-                    <div className={statusClass} key={index}>
-                      <div className={styles.content}>
-                        <h5>{item.UserName}</h5>
-                        <h6>{item.Designation}</h6>
-                        <h4>{item.UserAction}</h4>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className={styles['col-md-12']}>
+             <div className={styles['col-md-12']}>
                 <div className={styles["formGroup"]}>
                   <label style={{ display: "inline-flex" }}>Bill Signed</label>
                   <input style={{ width: "15%", backgroundColor: "lightgray" }} type="checkbox" name='POsigned' checked={form.AttachedSignedPO} readOnly />
@@ -499,6 +482,8 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
               </div>
               <label>Project Code</label>
               <input type='text' name="ProjectCode" value={form.ProjectCode} readOnly style={{ backgroundColor: "lightgray" }} />
+              <label>PO Request No</label>
+              <input name="PORequestNo" value={form.PORequestNo} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Vendor Name</label>
               <input name="VendorName" value={form.vendorcode + "-" + form.VendorName} type='text' readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
@@ -506,9 +491,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
               <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Additional Information & Remarks</label>
               <input name="Comments" value={form.Comments} readOnly style={{ backgroundColor: "lightgray" }}>
-              </input>
-              <label>PO Request No</label>
-              <input name="PORequestNo" value={form.PORequestNo} readOnly style={{ backgroundColor: "lightgray" }} />
+              </input>             
               <label>Bill No</label>
               <input name="BillNo" value={form.BillNo} readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
@@ -518,6 +501,10 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                   ? new Date(form.BillDate).toISOString().split('T')[0]
                   : ''} readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
+              <label>Occupied Amount</label>
+              <input name="OccupiedAmount" value={form.OccupiedAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
+              <label>Remaining Amount</label>
+              <input name="RemainingAmount" value={form.RemainingAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Bill Amount</label>
               <input name="BillAmount" value={form.BillAmount} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Calculated Taxes</label>

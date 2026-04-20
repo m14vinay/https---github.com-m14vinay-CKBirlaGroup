@@ -383,7 +383,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction: UserAction,
+        UserAction: 'Upcoming',
         Designation: Designation,
         Sequence: Sequence
       };
