@@ -321,7 +321,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction: 'Upcoming',
+        UserAction: UserAction,
         Designation: Designation,
         Sequence: Sequence
       };
@@ -442,10 +442,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
             RequestNo: `FBP-${res.Id}`
           });
           await handleSaveHistory(res.Id, 'FBP', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(res.Id, 'FBP', data.Departmenthead?.Title, '', 'Department Head', new Date(), 1);
-          await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 2);
-          await handleSaveHistory(res.Id, 'FBP', dataFinanceApprover.FinanceController?.Title, '', 'Finance Controller', new Date(), 3);
-          await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 4);
+          await handleSaveHistory(res.Id, 'FBP', data.Departmenthead?.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, 'Upcoming', 'Billing and Approver', new Date(), 2);
+          await handleSaveHistory(res.Id, 'FBP', dataFinanceApprover.FinanceController?.Title, 'Upcoming', 'Finance Controller', new Date(), 3);
+          await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, 'Upcoming', 'Billing and Approver', new Date(), 4);
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
         }
@@ -458,10 +458,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           }
         }
         await handleSaveHistory(itemId, 'FBP', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-        await handleSaveHistory(itemId, 'FBP', data.Departmenthead?.Title, '', 'Department Head', new Date(), 1);
-        await handleSaveHistory(itemId, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 2);
-        await handleSaveHistory(itemId, 'FBP', dataFinanceApprover.FinanceController?.Title, '', 'Finance Controller', new Date(), 3);
-        await handleSaveHistory(itemId, 'FBP', databillingApprover.Billing2ndApprover?.Title, '', 'Billing and Approver', new Date(), 4);
+        await handleSaveHistory(itemId, 'FBP', data.Departmenthead?.Title, 'Pending', 'Department Head', new Date(), 1);
+        await handleSaveHistory(itemId, 'FBP', databillingApprover.Billing2ndApprover?.Title, 'Upcoming', 'Billing and Approver', new Date(), 2);
+        await handleSaveHistory(itemId, 'FBP', dataFinanceApprover.FinanceController?.Title, 'Upcoming', 'Finance Controller', new Date(), 3);
+        await handleSaveHistory(itemId, 'FBP', databillingApprover.Billing2ndApprover?.Title, 'Upcoming', 'Billing and Approver', new Date(), 4);
         alert("Submitted Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);

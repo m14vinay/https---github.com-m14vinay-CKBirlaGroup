@@ -31,9 +31,9 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
     DepartmentName: '',
     POAmount: 0,
     AttachedSignedPO: false,
-    ApprovalPath:'',
-    OccupiedAmount:'',
-    RemainingAmount:''
+    ApprovalPath: '',
+    OccupiedAmount: '',
+    RemainingAmount: ''
   });
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
@@ -95,9 +95,9 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
           AttachedSignedPO: result.AttachedSignedPO == "True" ? true : false,
           RequestNo: result.RequestNo,
           CurrentStatus: result.CurrentStatus,
-          ApprovalPath:result.ApprovalPath,
-          OccupiedAmount:result.OccupiedAmount,
-          RemainingAmount:result.RemainingAmount
+          ApprovalPath: result.ApprovalPath,
+          OccupiedAmount: result.OccupiedAmount,
+          RemainingAmount: result.RemainingAmount
         }));
         const historydata = await service.GetHistoryItem(Number(id), "FBP");
         setHistory(historydata);
@@ -161,6 +161,9 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                   else if (item.UserAction === "Upcoming") {
                     statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
                   }
+                  else if (item.UserAction === "Pending") {
+                    statusClass = `${styles.statusBox} ${styles.pendingBox}`;
+                  }
                   return (
                     <div className={statusClass} key={index}>
                       <div className={styles.content}>
@@ -179,7 +182,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                 </div>
               </div>
               <label>Project Code</label>
-              <input type='text' name="ProjectCode" value={form.ProjectCode} readOnly style={{ backgroundColor: "lightgray" }}/>
+              <input type='text' name="ProjectCode" value={form.ProjectCode} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>PO Request No</label>
               <input name="PORequestNo" value={form.PORequestNo} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Vendor Name</label>
@@ -189,7 +192,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
               <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Additional Information & Remarks</label>
               <input name="Comments" value={form.Comments} readOnly style={{ backgroundColor: "lightgray" }}>
-              </input>              
+              </input>
               <label>Occupied Amount</label>
               <input name="OccupiedAmount" value={form.OccupiedAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Remaining Amount</label>
@@ -243,6 +246,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                   const isRejected = item.UserAction === "Rejected";
                   const isInitiated = item.UserAction === "Request Initiator";
                   const isUpcoming = item.UserAction === "Upcoming";
+                  const isPending = item.UserAction === "Pending";
                   return (
                     <li
                       key={index}
@@ -251,7 +255,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                           ? styles.tickIcon
                           : isRejected
                             ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : ""
                       }
                     >
                       <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
@@ -265,7 +269,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : isUpcoming ? styles.upcomingstatus : ""
+                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : ""
                             }
                           >
                             {item.UserAction}

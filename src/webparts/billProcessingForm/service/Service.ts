@@ -86,7 +86,7 @@ export default class Service {
     );
     const data = await res.json();
     const total = data.value.reduce((sum: number, item: any) => {
-      const amount = parseFloat(item.TotalAmount);
+      const amount = parseFloat(item.BillAmount);
       return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
     return total;
