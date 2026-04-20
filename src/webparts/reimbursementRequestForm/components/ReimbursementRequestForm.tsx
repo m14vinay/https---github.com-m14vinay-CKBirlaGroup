@@ -435,12 +435,14 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
                 await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
                 await handleSaveHistory(itemId, 'REM', dataApproverCFO.ApproverName?.Title, '', 'CFO Approver', new Date(), 3);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
               }
               else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
                 await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
                 await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
                 await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
                 await handleSaveHistory(itemId, 'REM', dataApproverCompliance.ApproverName?.Title, '', 'Compliance Head', new Date(), 3);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
               }
               alert("Data Submitted Successfully ✅");
               const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -509,10 +511,15 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
             });
             const Expensedata = await service.getItemByExpenseData(Number(res.Id));
             if (Expensedata.value[0].Id > 0) {
-              setExpenseForm({
-                ...Expenseform,
-                expenses: Expensedata.value
-              });
+              for (let i = 0; i < Expensedata.value.length; i++) {
+                {
+                  setExpenseForm({
+                    ...Expenseform,
+                    expenses: [...Expenseform.expenses, Expensedata.value[i]]
+                  });
+                }
+              }
+
               alert("Data Saved Successfully ✅");
             }
           }
@@ -553,10 +560,14 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               expenses: []
             });
             if (Expensedata.value[0].Id > 0) {
-              setExpenseForm({
-                ...Expenseform,
-                expenses: Expensedata.value
-              });
+              for (let i = 0; i < Expensedata.value.length; i++) {
+                {
+                  setExpenseForm({
+                    ...Expenseform,
+                    expenses: [...Expenseform.expenses, Expensedata.value[i]]
+                  });
+                }
+              }
             }
             alert("Data Updated Successfully ✅");
           }
