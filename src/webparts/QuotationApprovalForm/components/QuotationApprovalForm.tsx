@@ -77,7 +77,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
   const [poItems, setPoItems] = React.useState<TPurchaseOrderRow[]>([INITIAL_PO_ROW]);
   const service = React.useMemo(() => new SharePointService(props.context), [props.context]);
   const [attachments, setAttachments] = React.useState<any[]>([]);
-  const MAX_TOTAL_SIZE_MB = 25;
+  const MAX_TOTAL_SIZE_MB = 51;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   const [approvalChain, setApprovalChain] = React.useState<any[]>([]);
@@ -126,7 +126,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       console.log("Result:", result);
       if (
         result.AuthorId !== currentUser.Id &&
-        result.AssignedToId !== currentUser.Id
+        result.AssignedTo !== currentUser.Id
       ) {
         alert("You Are Not Authorized ❌");
         return;
@@ -153,7 +153,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Approval1Id: result.Approval1Id || 0,
           Approval2Id: result.Approval2Id || 0,
           Approval3Id: result.Approval3Id || 0,
-          AssignedToId: result.AssignedToId || 0,
+          AssignedTo: result.AssignedTo || 0,
           ActionDate1: result.ActionDate1 ?? null,
           ActionDate2: result.ActionDate2 ?? null,
           ActionDate3: result.ActionDate3 ?? null,
@@ -501,8 +501,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedToId: approver?.Approval1?.Id || 0,
-          AssignedToEmailId: approver?.Approval1?.Id || 0,
+          AssignedTo: approver?.Approval1?.Title || "",
+          AssignedToEmailId: approver?.Approval1?.Id || null,
           //AssignedTo: User.Title,
           //Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
           Approval1Id: (dataApprover[0].Approval1?.Id || 0),
@@ -530,8 +530,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedToId: approver?.Approval1.Id || 0,
-          AssignedToEmailId: approver?.Approval1?.Id || 0,
+          AssignedTo: approver?.Approval1?.Title || "",
+          AssignedToEmailId: approver?.Approval1?.Id || null,
           //AssignedTo: User.Title,
           Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
           Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
@@ -559,8 +559,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedToId: approver?.Approval1?.Id || 0,
-          AssignedToEmailId: approver?.Approval1?.Id || 0,
+          AssignedTo: approver?.Approval1?.Title || "",
+          AssignedToEmailId: approver?.Approval1?.Id || null,
           //AssignedTo: User.Title,
           Approval1Id: dataApprover[0].Approval1.Id || 0,
           Approval2Id: dataApprover[0].Approval2.Id || 0,
@@ -685,8 +685,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedToId: Number(dataApprover[0].Approval1.Id || 0),
-          AssignedToEmailId: approver?.Approval1?.Id || 0,
+          AssignedTo: approver?.Approval1?.Title || "",
+          AssignedToEmailId: approver?.Approval1?.Id || null,
           //AssignedTo: User.Title,
           Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
           Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
@@ -715,8 +715,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             Department: form.Department || "",
             Advancepayment: form.Advancepayment || "",
             ApprovalPath: form.ApprovalPath || "",
-            AssignedToId: Number(dataApprover[0].Approval1.Id || 0),
-            AssignedToEmailId: approver?.Approval1?.Id || 0,
+            AssignedTo: approver?.Approval1?.Title || "",
+            AssignedToEmailId: approver?.Approval1?.Id || null,
             Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
             Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
             Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
@@ -744,8 +744,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedToId: Number(dataApprover[0].Approval1.Id || 0),
-          AssignedToEmailId: approver?.Approval1?.Id || 0,
+          AssignedTo: approver?.Approval1?.Title || "",
+          AssignedToEmailId: approver?.Approval1?.Id || null,
           //AssignedTo: User.Title,
           Approval1Id: dataApprover[0].Approval1.Id || 0,
           Approval2Id: dataApprover[0].Approval2.Id || 0,
@@ -788,9 +788,9 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
         //alert("Submitted Successfully ✅");
         alert("Submitted Successfully ✅");
 
-setTimeout(() => {
-  window.location.href = "https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/Dashboard.aspx";
-}, 800);
+        setTimeout(() => {
+          window.location.href = "https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/Dashboard.aspx";
+        }, 800);
 
         await service.updateItem(res.Id, {
           RequestNo: `PRJ-${res.Id}`
@@ -817,6 +817,10 @@ setTimeout(() => {
           await service.uploadFile(itemId, form.files[i]);
         }
         alert("Submitted Successfully ✅");
+
+        setTimeout(() => {
+          window.location.href = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        }, 500);
       }
     } catch (error: any) {
       console.error(error);

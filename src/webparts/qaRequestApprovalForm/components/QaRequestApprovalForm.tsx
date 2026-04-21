@@ -45,7 +45,11 @@ interface IPurchaseOrderItem {
 }
 
 interface IUserLookup {
+  Id?: number;
   Title?: string;
+}
+interface IApprovalItem {
+  CurrentStatus?: string; 
 }
 
 interface IDepartmentApproverData {
@@ -97,8 +101,8 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
 
   const isReadOnly =
     isActionDone ||
-    data?.Status === 'Approved' ||
-    data?.Status === 'Rejected' ||
+    data?.CurrentStatus === 'Approved' ||
+    data?.CurrentStatus === 'Rejected' ||
     statusMsg.includes("successfully");
 
   const fetchFromList = React.useCallback(async <T,>(url: string): Promise<T> => {
@@ -176,7 +180,14 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
         ),
         departmentName
           ? fetchFromList<IListResponse<IDepartmentApproverData>>(
-            `${props.siteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?$filter=DepartmentName eq '${departmentName}'&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4`
+            `${props.siteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?
+$filter=DepartmentName eq '${departmentName}'
+&$select=Departmenthead/Id,Departmenthead/Title,
+Approval1/Id,Approval1/Title,
+Approval2/Id,Approval2/Title,
+Approval3/Id,Approval3/Title,
+Approval4/Id,Approval4/Title
+&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4`
           )
           : Promise.resolve({ value: [] })
       ]);
@@ -225,94 +236,130 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
     }
   }, [comment, createHistoryItem, currentStep, getUserFromStep]);
 
-  const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
-    if (!comment.trim()) {
-      setStatusMsg('Enter comment before taking action.');
+const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
+
+  if (!comment.trim()) {
+    setStatusMsg('Enter comment before taking action.');
+    return;
+  }
+
+  try {
+
+    // 🔴 SAFETY CHECK
+    if (!approverData) {
+      setStatusMsg("Approver configuration missing ❌");
       return;
     }
 
-    try {
-      let payload: any = {};
+    // ✅ STEP CALCULATION (FIXED)
+    const step =
+      !data?.ActionDate1 ? 1 :
+      !data?.ActionDate2 ? 2 :
+      !data?.ActionDate3 ? 3 :
+      4;
 
-      // STEP 1
-      if (!data?.ActionDate1) {
-        payload = {
-          ApproverComment1: comment,
-          ActionDate1: new Date().toISOString(),
-          Status: "Pending"
-        };
-      }
+    let payload: any = {};
 
-      // STEP 2
-      else if (!data?.ActionDate2) {
-        payload = {
-          ApproverComment2: comment,
-          ActionDate2: new Date().toISOString(),
-          Status: "Pending"
-        };
-      }
-
-      // FINAL
-      else if (!data?.ActionDate3) {
-        payload = {
-          ApproverComment3: comment,
-          ActionDate3: new Date().toISOString(),
-          Status: "Approved"
-        };
-      }
-
-      console.log("FINAL PAYLOAD:", payload);
-
-      //  UPDATE LIST
-      await props.spHttpClient.post(
-        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
-        SPHttpClient.configurations.v1,
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'IF-MATCH': '*',
-            'X-HTTP-Method': 'MERGE'
-          },
-          body: JSON.stringify(payload)
-        }
-      );
-
-      await handleSaveHistory(itemId, status);
-
-      if (status === 'Approved') {
-        setCurrentStep((previousStep) => previousStep + 1);
-      }
-
-      if (status === 'Approved' && currentStep >= FINAL_STEP) {
-        await props.spHttpClient.post(
-          `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
-          SPHttpClient.configurations.v1,
-          {
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              'IF-MATCH': '*',
-              'X-HTTP-Method': 'MERGE'
-            },
-            body: JSON.stringify({
-              Status: 'Approved'
-            })
-          }
-        );
-      }
-
-      setData(prev => prev ? { ...prev, ...payload } : prev);
-      setStatusMsg(`${status} successfully.`);
-      setIsActionDone(true);
-      await fetchHistory();
-    } catch (error: any) {
-      console.error('Status update failed:', error);
-      setStatusMsg(error?.message || 'Unable to update the request.');
+    // 🔴 REJECT (highest priority)
+    if (status === "Rejected") {
+      payload = {
+        CurrentStatus: "Rejected",
+        AssignedTo: "",
+        AssignedToEmailId: null
+      };
     }
-  },
 
-    [comment, currentStep, fetchHistory, handleSaveHistory, itemId, props.listName, props.siteUrl, props.spHttpClient]);
+    // ✅ STEP 1 → move to Approval2
+    else if (step === 1) {
+      payload = {
+        ApproverComment1: comment,
+        ActionDate1: new Date().toISOString(),
+
+        AssignedTo: approverData?.Approval2?.Title || "",
+        AssignedToEmailId: approverData?.Approval2?.Id || null,
+
+        CurrentStatus: "Pending"
+      };
+    }
+
+    // ✅ STEP 2 → move to Approval3
+    else if (step === 2) {
+      payload = {
+        ApproverComment2: comment,
+        ActionDate2: new Date().toISOString(),
+
+        AssignedTo: approverData?.Approval3?.Title || "",
+        AssignedToEmailId: approverData?.Approval3?.Id || null,
+
+        CurrentStatus: "Pending"
+      };
+    }
+
+    // ✅ FINAL STEP
+    else if (step === 3) {
+      payload = {
+        ApproverComment3: comment,
+        ActionDate3: new Date().toISOString(),
+
+        AssignedTo: "",
+        AssignedToEmailId: null,
+
+        CurrentStatus: "Approved"
+      };
+    }
+
+    // ❌ SAFETY CHECK
+    if (Object.keys(payload).length === 0) {
+      setStatusMsg("No action available ❌");
+      return;
+    }
+
+    console.log("FINAL PAYLOAD:", payload);
+
+    // 🔹 UPDATE SHAREPOINT ITEM
+    await props.spHttpClient.post(
+      `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'IF-MATCH': '*',
+          'X-HTTP-Method': 'MERGE'
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    // 🔹 SAVE HISTORY
+    await handleSaveHistory(itemId, status);
+
+    // 🔥 IMPORTANT → REFRESH FROM SERVER (NO LOCAL FAKE UPDATE)
+    await fetchData();
+    await fetchHistory();
+
+    setStatusMsg(`${status} successfully.`);
+    setIsActionDone(true);
+
+  } catch (error: any) {
+    console.error('Status update failed:', error);
+    setStatusMsg(error?.message || 'Unable to update the request.');
+  }
+
+}, [
+  comment,
+  data,
+  approverData,
+  fetchData,
+  fetchHistory,
+  handleSaveHistory,
+  itemId,
+  props.listName,
+  props.siteUrl,
+  props.spHttpClient
+]);
+
+[comment, currentStep, fetchHistory, handleSaveHistory, itemId, props.listName, props.siteUrl, props.spHttpClient];
 
   React.useEffect(() => {
     fetchData().catch(() => undefined);
