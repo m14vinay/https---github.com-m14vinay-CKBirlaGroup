@@ -2,6 +2,7 @@ import * as React from 'react';
 import { SPHttpClient } from '@microsoft/sp-http';
 import { IQaRequestApprovalFormProps } from './IQaRequestApprovalFormProps';
 import styles from './QaRequestApprovalForm.module.scss';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 type TApprovalStatus = 'Approved' | 'Rejected';
 type TTimelineStatus = 'approved' | 'rejected' | 'pending';
@@ -428,9 +429,9 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
     return 'pending';
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  // if (loading) {
+  //   return <div>Loading...</div>;
+  // }
 
   if (!data) {
     return <div>No data found.</div>;
@@ -522,6 +523,21 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
 
   return (
     <div className={styles.container}>
+      {loading && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: 'rgba(255,255,255,0.6)',
+                zIndex: 9999
+              }}>
+                <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                  <Spinner label="Processing..." size={SpinnerSize.large} />
+                </div>
+              </div>
+            )}
       <div className={styles.mainLayout}>
         <div className={styles.leftPanel}>
           <h4 className={styles.heading}>Quotation Request Approval Form</h4>
