@@ -427,7 +427,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         Approver2Id: databillingApprover.Billing2ndApprover?.Id,
         Approver3Id: dataFinanceApprover.FinanceController?.Id,
         Approver5Id: databillingApprover.Billing2ndApprover?.Id,
-        ApprovalPath: User?.Title + '-->' + databillingApprover.Billing2ndApprover?.Title + '-->' + dataFinanceApprover.FinanceController?.Title + '-->' + databillingApprover.Billing2ndApprover?.Title
+        ApprovalPath: User?.Title + ' > ' + databillingApprover.Billing2ndApprover?.Title + ' > ' + dataFinanceApprover.FinanceController?.Title + ' > ' + databillingApprover.Billing2ndApprover?.Title
       };
       if (!itemId) {
         // 🔹 CREATE

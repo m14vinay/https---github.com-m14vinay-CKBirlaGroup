@@ -165,27 +165,29 @@ const handleFetchById = async (id: number) => {
       ? styles.Rejected
       : styles.Pending }>{form.CurrentStatus}</span></h4>
             </div>
-            <div className={styles.leftPanelStatusHeader}>
-                                    {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-                let statusClass = styles.statusBox;
-                if (item.UserAction === "Approved") {
-                  statusClass = `${styles.statusBox}`;    
-                } 
-                else if (item.UserAction === "Rejected") {
-                  statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-                }
-            
-                return (
-                  <div className={statusClass} key={index}>
-                    <div className={styles.content}>
-                      <h5>{item.UserName}</h5>
-                      <h6>{item.Designation}</h6>
-                      <h4>{item.UserAction}</h4>
-                    </div>
-                  </div>
-                );
-              })}
-                         </div>
+             <div className={styles.leftPanelStatusHeader}>
+                            {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
+                              let statusClass = styles.statusBox;
+                              if (item.UserAction === "Approved") {
+                                statusClass = `${styles.statusBox}`;
+                              }
+                              else if (item.UserAction === "Rejected") {
+                                statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+                              }
+                              else if (item.UserAction === "Upcoming") {
+                                statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
+                              }
+                              return (
+                                <div className={statusClass} key={index}>
+                                  <div className={styles.content}>
+                                    <h5>{item.UserName}</h5>
+                                    <h6>{item.Designation}</h6>
+                                    <h4>{item.UserAction}</h4>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
                 <div className={styles.formGroup}>        
           <label>Project Title</label>
           <input name="ProjectTitle" value={form.ProjectTitle} readOnly style={{backgroundColor:"lightgray"}} />
@@ -296,56 +298,57 @@ const handleFetchById = async (id: number) => {
             <div className={styles.rightPanelHeader}>
               <h4>Timeline of the Request - {form.RequestNo}</h4>
             </div>
-            <ul>              
-              {History.map((item, index) => {
-    const isApproved = item.UserAction === "Approved";
-    const isRejected = item.UserAction === "Rejected";
-    const isInitiated = item.UserAction === "Request Initiator";
-    return (
-      <li
-        key={index}
-        className={
-          isApproved
-            ? styles.tickIcon
-            : isRejected
-            ? styles.crossIcon
-            : isInitiated ?styles.tickIcon:""
-        }
-      >
-        <span className={styles.spanHeader} style={{fontSize:"bold"}}>{item.Designation}</span>
-        <span><b>{isInitiated?"Initiator":"Approver Name:"} </b>{item.UserName}</span>
-        {item.UserAction && (
-          <span>
-            <b>Action Taken:{" "}</b>
-            <span
-              className={
-                isApproved
-                  ? styles.apprStatus
-                  : isRejected
-                  ? styles.rejStatus
-                  : ""
-              }
-            >
-              {item.UserAction}
-            </span>
-          </span>
-        )}
-       {item.ActionDate && ( <span><b>Action Date: </b>
-    {new Date(item.ActionDate).toLocaleString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    }).replace(',', ' AT')}
-  </span>
-)}
-        {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
-      </li>
-    );
-  })}
-            </ul>
+            <ul>
+                           {History.map((item, index) => {
+                             const isApproved = item.UserAction === "Approved";
+                             const isRejected = item.UserAction === "Rejected";
+                             const isInitiated = item.UserAction === "Request Initiator";
+                             const isUpcoming = item.UserAction === "Upcoming";
+                             return (
+                               <li
+                                 key={index}
+                                 className={
+                                   isApproved
+                                     ? styles.tickIcon
+                                     : isRejected
+                                       ? styles.crossIcon
+                                       : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
+                                 }
+                               >
+                                 <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
+                                 <span><b>{isInitiated ? "Initiator" : "Approver Name:"} </b>{item.UserName}</span>
+                                 {item.UserAction && (
+                                   <span>
+                                     <b>Action Taken:{" "}</b>
+                                     <span
+                                       className={
+                                         isApproved
+                                           ? styles.apprStatus
+                                           : isRejected
+                                             ? styles.rejStatus
+                                             : isUpcoming ? styles.upcomingstatus : ""
+                                       }
+                                     >
+                                       {item.UserAction}
+                                     </span>
+                                   </span>
+                                 )}
+                                 {item.ActionDate && (<span><b>Action Date: </b>
+                                   {new Date(item.ActionDate).toLocaleString('en-GB', {
+                                     day: 'numeric',
+                                     month: 'short',
+                                     year: 'numeric',
+                                     hour: 'numeric',
+                                     minute: '2-digit',
+                                     hour12: true
+                                   }).replace(',', ' AT')}
+                                 </span>
+                                 )}
+                                 {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
+                               </li>
+                             );
+                           })}
+                         </ul>
           </div>
         </div>
     </div>

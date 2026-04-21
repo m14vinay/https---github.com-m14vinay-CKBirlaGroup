@@ -112,7 +112,7 @@
 
 .upcomingBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #8b3222;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -319,4 +319,18 @@ button {
 /* Inputs full width */
 .fieldBlock input {
   width: 100%;
+}
+
+.inputError {
+  border: 1px solid red;
+}
+
+.rightPanel ul li span.upcomingstatus {
+  color: orange;
+  font-weight: bold;
+}
+.rightPanel ul li.upcomingIcon::before {
+  background-color: orange;
+  content: "\f105";
+  font-size: 20px;
 }
