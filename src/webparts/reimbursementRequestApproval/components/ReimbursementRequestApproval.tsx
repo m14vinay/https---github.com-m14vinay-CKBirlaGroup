@@ -104,23 +104,23 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
           const Expensedata = await service.getItemByExpenseData(requestNo);
           if (Expensedata.value.length > 0) {
             const formattedExpenses = Expensedata.value.map((item: any) => ({
-            Id: item.Id,
-            Description: item.Description || "",
-            BillAmount: item.BillAmount || 0,
-            BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
-            BillNo: item.BillNo || "",
-            DocumentName: item.DocumentName || "",
-            ClaimAmount: item.ClaimAmount || 0,
-            ExpanseType: item.ExpanseType || "",
-            files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
-              FileName: file.FileName,
-              ServerRelativeUrl: file.ServerRelativeUrl
-            }))
-              : []
-          }));
-          setExpenseForm({
-            expenses: formattedExpenses
-          });
+              Id: item.Id,
+              Description: item.Description || "",
+              BillAmount: item.BillAmount || 0,
+              BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+              BillNo: item.BillNo || "",
+              DocumentName: item.DocumentName || "",
+              ClaimAmount: item.ClaimAmount || 0,
+              ExpanseType: item.ExpanseType || "",
+              files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+                FileName: file.FileName,
+                ServerRelativeUrl: file.ServerRelativeUrl
+              }))
+                : []
+            }));
+            setExpenseForm({
+              expenses: formattedExpenses
+            });
           }
           const historydata = await service.GetHistoryItem(requestNo, "REM");
           setHistory(historydata);
@@ -171,7 +171,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
       setLoading(true);
       if (!form.Comments) return alert("Comment is required.");
       let payload = {};
-      let Sequence = 0;
+      let CurrentSequence = 0;
+      let NextSequence = 0;
+      let CurrentUserAction = '';
+      let NextuserAction = '';
       if (!itemId) return;
       if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
         if (form.ActionDate1 == '') {
@@ -182,7 +185,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Approved',
             AssignedToEmailId: 0
           };
-          Sequence = 1;
+          CurrentSequence = 1;
+          CurrentUserAction = 'Approved';
+          NextSequence = 0;
+          NextuserAction = '';
         }
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -195,7 +201,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
-          Sequence = 1;
+          CurrentSequence = 1;
+          CurrentUserAction = 'Approved';
+          NextSequence = 2;
+          NextuserAction = 'Pending';
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.CFOEmailId);
@@ -206,7 +215,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
-          Sequence = 2;
+          CurrentSequence = 2;
+          CurrentUserAction = 'Approved';
+          NextSequence = 3;
+          NextuserAction = 'Pending';
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -217,7 +229,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
-          Sequence = 3;
+          CurrentSequence = 3;
+          CurrentUserAction = 'Approved';
+          NextSequence = 4;
+          NextuserAction = 'Pending';
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -228,7 +243,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedToEmailId: 0
           };
         }
-        Sequence = 4;
+        CurrentSequence = 4;
+        CurrentUserAction = 'Approved';
+        NextSequence = 0;
+        NextuserAction = '';
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
         if (form.ActionDate1 == '') {
@@ -240,7 +258,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
-          Sequence = 1;
+          CurrentSequence = 1;
+          CurrentUserAction = 'Approved';
+          NextSequence = 2;
+          NextuserAction = 'Pending';
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.ComplianceHeadEmailId);
@@ -251,7 +272,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
-          Sequence = 2;
+          CurrentSequence = 2;
+          CurrentUserAction = 'Approved';
+          NextSequence = 3;
+          NextuserAction = 'Pending';
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -262,7 +286,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
-          Sequence = 3;
+          CurrentSequence = 3;
+          CurrentUserAction = 'Approved';
+          NextSequence = 4;
+          NextuserAction = 'Pending';
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -272,12 +299,15 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Approved',
             AssignedToEmailId: 0
           };
-          Sequence = 4;
+          CurrentSequence = 4;
+          CurrentUserAction = 'Approved';
+          NextSequence = 0;
+          NextuserAction = '';
         }
       }
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
-        await handleSaveApproveHistory(itemId, 'Approved', Sequence, form.Comments);
+        await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.Comments);
         alert("Approved Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
@@ -292,20 +322,35 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
     }
   };
   // Update History Item
-  const handleSaveApproveHistory = async (id: number, UserAction: string, Sequence: number, comment: string) => {
-    const payload = {
-      UserAction: UserAction,
-      ActionDate: new Date().toISOString(),
-      UserComment: comment
-    };
-    await service.UpdateHistoryItem(id, payload, 'REM', Sequence);
+  const handleSaveApproveHistory = async (id: number, CurrentUserAction: string, NextUserAction: string, CurrentSequence: number, NextSequence: number, comment: string) => {
+
+    if (CurrentUserAction != '') {
+      const payload = {
+        UserAction: CurrentUserAction,
+        ActionDate: new Date().toISOString(),
+        UserComment: comment
+      };
+      await service.UpdateHistoryItem(id, payload, 'REM', CurrentSequence);
+    }
+    if (NextUserAction != '') {
+      const payload = {
+        UserAction: NextUserAction,
+        ActionDate: new Date().toISOString(),
+        UserComment: comment
+      };
+      await service.UpdateHistoryItem(id, payload, 'REM', NextSequence);
+    }
+
   };
   const handleReject = async () => {
     try {
       setLoading(true);
       if (!Comment) return alert("Comment is required.");
       let payload = {};
-      let Sequence = 0;
+      let CurrentSequence = 0;
+      let NextSequence = 0;
+      let CurrentUserAction = '';
+      let NextuserAction = '';
       if (!itemId) return;
       if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
         if (form.ActionDate1 == '') {
@@ -316,7 +361,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };
-          Sequence = 1;
+          CurrentSequence = 1;
+          CurrentUserAction = 'Rejected';
+          NextSequence = 0;
+          NextuserAction = '';
         }
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -329,7 +377,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
-          Sequence = 1;
+          CurrentSequence = 1;
+          CurrentUserAction = 'Rejected';
+          NextSequence = 2;
+          NextuserAction = 'Rejected';
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.CFOEmailId);
@@ -340,7 +391,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
-          Sequence = 2;
+          CurrentSequence = 2;
+          CurrentUserAction = 'Rejected';
+          NextSequence = 3;
+          NextuserAction = 'Rejected';
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -351,7 +405,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
-          Sequence = 3;
+          CurrentSequence = 3;
+          CurrentUserAction = 'Rejected';
+          NextSequence = 4;
+          NextuserAction = 'Rejected';
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -361,7 +418,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };
-          Sequence = 4;
+          CurrentSequence = 4;
+          CurrentUserAction = 'Rejected';
+          NextSequence = 0;
+          NextuserAction = '';
         }
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -374,7 +434,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval2?.Title),
             AssignedToEmailId: Number(UserApproval2?.Id)
           };
-          Sequence = 1;
+          CurrentSequence = 1;
+          CurrentUserAction = 'Rejected';
+          NextSequence = 2;
+          NextuserAction = 'Rejected';
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.ComplianceHeadEmailId);
@@ -385,7 +448,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval3?.Title),
             AssignedToEmailId: Number(UserApproval3?.Id)
           };
-          Sequence = 2;
+          CurrentSequence = 2;
+          CurrentUserAction = 'Rejected';
+          NextSequence = 3;
+          NextuserAction = 'Rejected';
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -396,7 +462,10 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: (UserApproval4?.Title),
             AssignedToEmailId: Number(UserApproval4?.Id)
           };
-          Sequence = 3;
+          CurrentSequence = 3;
+          CurrentUserAction = 'Rejected';
+          NextSequence = 4;
+          NextuserAction = 'Rejected';
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -406,12 +475,15 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };
-          Sequence = 4;
+          CurrentSequence = 4;
+          CurrentUserAction = 'Rejected';
+          NextSequence = 0;
+          NextuserAction = '';
         }
       }
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
-        await handleSaveApproveHistory(itemId, 'Rejected', Sequence, form.Comments);
+        await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.Comments);
         alert("Rejected Successfully.");
         setComment('');
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -505,7 +577,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                       <p>
                         {exp.files?.length > 0 && (
                           <ul style={{ listStyle: "none", padding: 0 }}>
-                            {exp.files.map((file: any, index:any) => (
+                            {exp.files.map((file: any, index: any) => (
                               <li
                                 key={index}
                                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
@@ -562,6 +634,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                   const isRejected = item.UserAction === "Rejected";
                   const isInitiated = item.UserAction === "Request Initiator";
                   const isUpcoming = item.UserAction === "Upcoming";
+                  const isPending = item.UserAction === "Pending";
                   return (
                     <li
                       key={index}
@@ -570,7 +643,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                           ? styles.tickIcon
                           : isRejected
                             ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : ""
                       }
                     >
                       <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
@@ -584,7 +657,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : isUpcoming ? styles.upcomingstatus : ""
+                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : ""
                             }
                           >
                             {item.UserAction}
