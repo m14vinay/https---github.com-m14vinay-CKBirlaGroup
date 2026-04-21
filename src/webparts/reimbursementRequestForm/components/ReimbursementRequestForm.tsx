@@ -791,7 +791,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                                     href={file.name ? file.name : file.ServerRelativeUrl}
                                     rel="noopener noreferrer"
                                   >
-                                    {file.name ? file.name : file.FileName}
+                                    <span>{file.name ? file.name : file.FileName}</span>
                                   </a>
                                 </li>
                               ))}
