@@ -260,11 +260,6 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       ClaimAmount: form.ClaimAmount,
       ExpanseType: form.ExpenseName,
       files: form.files
-        ? Array.from(form.files).map((file: any) => ({
-          FileName: file.name,
-          ServerRelativeUrl:file.Name
-        }))
-        : []
     };
     addExpense(newExpense);
     setForm(prev => ({
@@ -449,21 +444,21 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               }
               if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
                 await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 1);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, 'Pending', 'Finance Approver', new Date(), 1);
               }
               else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
                 await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
-                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
-                await handleSaveHistory(itemId, 'REM', dataApproverCFO.ApproverName?.Title, '', 'CFO Approver', new Date(), 3);
-                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
+                await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
+                await handleSaveHistory(itemId, 'REM', dataApproverCFO.ApproverName?.Title, 'Upcoming', 'CFO Approver', new Date(), 3);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
               }
               else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
                 await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
-                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
-                await handleSaveHistory(itemId, 'REM', dataApproverCompliance.ApproverName?.Title, '', 'Compliance Head', new Date(), 3);
-                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
+                await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
+                await handleSaveHistory(itemId, 'REM', dataApproverCompliance.ApproverName?.Title, 'Upcoming', 'Compliance Head', new Date(), 3);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
               }
               alert("Data Submitted Successfully ✅");
               const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -662,29 +657,31 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
           ...Expenseform,
           expenses: []
         });
-        if (Expensedata.value.length > 0) {
-          const formattedExpenses = Expensedata.value.map((item: any) => ({
-            Id: item.Id,
-            Description: item.Description || "",
-            BillAmount: item.BillAmount || 0,
-            BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
-            BillNo: item.BillNo || "",
-            DocumentName: item.DocumentName || "",
-            ClaimAmount: item.ClaimAmount || 0,
-            ExpanseType: item.ExpanseType || "",
-            files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
-              FileName: file.FileName,
-              ServerRelativeUrl: file.ServerRelativeUrl
-            }))
-              : []
-          }));
-          setExpenseForm({
-            expenses: formattedExpenses
-          });
-          setForm(prev => ({
-            ...prev,
-            TotalAmount: Number(form.TotalAmount) - Number(Expenseform.expenses[index].ClaimAmount)
-          }));
+        if (Expensedata !== null) {
+          if (Expensedata.value.length > 0) {
+            const formattedExpenses = Expensedata.value.map((item: any) => ({
+              Id: item.Id,
+              Description: item.Description || "",
+              BillAmount: item.BillAmount || 0,
+              BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+              BillNo: item.BillNo || "",
+              DocumentName: item.DocumentName || "",
+              ClaimAmount: item.ClaimAmount || 0,
+              ExpanseType: item.ExpanseType || "",
+              files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+                FileName: file.FileName,
+                ServerRelativeUrl: file.ServerRelativeUrl
+              }))
+                : []
+            }));
+            setExpenseForm({
+              expenses: formattedExpenses
+            });
+            setForm(prev => ({
+              ...prev,
+              TotalAmount: Number(form.TotalAmount) - Number(Expenseform.expenses[index].ClaimAmount)
+            }));
+          }
         }
       }
     }
@@ -791,10 +788,10 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                                   style={{ display: "flex", alignItems: "center", gap: "10px" }}
                                 >
                                   <a
-                                    href={file.ServerRelativeUrl}
+                                    href={file.name ? file.name : file.ServerRelativeUrl}
                                     rel="noopener noreferrer"
                                   >
-                                    {file.FileName}
+                                    {file.name ? file.name : file.FileName}
                                   </a>
                                 </li>
                               ))}
