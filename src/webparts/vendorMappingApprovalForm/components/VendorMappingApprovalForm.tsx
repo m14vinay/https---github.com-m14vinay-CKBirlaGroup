@@ -144,12 +144,31 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
     try {
       setLoading(true);
       if (!approverComment) return alert("Approver Comment required");
+    let payload = {};
+      let CurrentSequence = 0;
+      let NextSequence = 0;
+      let CurrentUserAction = '';
+      let NextuserAction = '';
+
       if (!itemId) return;
-      await service.updateItemdata(itemId, "Approved", approverComment, "Approved");
-      await handleUpdateApproveHistory(itemId, 'Approved', 1, approverComment);
-      alert("✅ Approved Successfully");
-      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-      window.location.assign(url);
+      payload = {
+          ApproverComment: approverComment,
+          CurrentStatus: 'Approved',
+          Actiondate1: new Date().toLocaleDateString('en-GB'),
+          AssignedTo:'Approved',
+          AssignedToEmailId: null,
+         
+        };
+        CurrentSequence = 1;
+        CurrentUserAction = 'Approved';
+       if (payload != '') {
+        const updatedData = await service.updateItem(itemId, payload);
+        await handleSaveApproveHistory(itemId, CurrentUserAction,  CurrentSequence,  approverComment);
+        alert("Approved Successfully.");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
+        return;
+      }
     } catch (error) {
       console.error(error);
     }
@@ -157,24 +176,51 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
       setLoading(false);
     }
   };
+
+  const handleSaveApproveHistory = async (id: number, CurrentUserAction: string, CurrentSequence: number, comment: string) => {
+
+    if (CurrentUserAction != '') {
+      const payload = {
+        UserAction: CurrentUserAction,
+        ActionDate: new Date().toISOString(),
+        UserComment: comment
+      };
+      await service.UpdateHistoryItem(id, payload, 'VMR', CurrentSequence);
+    }
+    
+  };
+ 
 
   const handleReject = async () => {
     try {
       setLoading(true);
       if (!approverComment) return alert("Approver Comment required");
       if (!itemId) return;
-
-      if (!approverComment) {
-        alert("Comment is required for rejection ❗");
+        let payload = {};
+      let CurrentSequence = 0;
+      let NextSequence = 0;
+      let CurrentUserAction = '';
+      let NextuserAction = '';
+      if (!itemId) return;
+       payload = {
+          ApproverComment: approverComment,
+          CurrentStatus: 'Rejected',
+          Actiondate1: new Date().toLocaleDateString('en-GB'),
+          AssignedTo: 'Rejected',
+          AssignedToEmailId: null
+        };
+        CurrentSequence = 1;
+       
+        CurrentUserAction='Rejected';
+      
+      if (payload != '') {
+        const updatedData = await service.updateItem(itemId, payload);
+        await handleSaveApproveHistory(itemId, CurrentUserAction, CurrentSequence,  approverComment);
+        alert("Rejected Successfully.");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
         return;
       }
-
-      await service.updateItemdata(itemId, "Rejected", approverComment, "Rejected");
-      await handleUpdateApproveHistory(itemId, 'Rejected', 1, approverComment);
-      alert("❌ Rejected Successfully");
-      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-      window.location.assign(url);
-      //setApproverComment('');
     } catch (error) {
       console.error(error);
     }
@@ -182,6 +228,20 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
       setLoading(false);
     }
   };
+
+  //     await service.updateItemdata(itemId, "Rejected", approverComment, "Rejected");
+  //     await handleUpdateApproveHistory(itemId, 'Rejected', 1, approverComment);
+  //     alert("❌ Rejected Successfully");
+  //     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+  //     window.location.assign(url);
+  //     //setApproverComment('');
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  //   finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // --- RENDER ---
   return (
@@ -272,11 +332,12 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
                 <h4>Timeline of the Request - {form.RequestNo}</h4>
               </div>
               <ul>
-                {history.map((item, index) => {
+                 {history.map((item, index) => {
                   const isApproved = item.UserAction === "Approved";
                   const isRejected = item.UserAction === "Rejected";
                   const isInitiated = item.UserAction === "Request Initiator";
                   const isUpcoming = item.UserAction === "Upcoming";
+                  const isPending = item.UserAction === "Pending";
                   return (
                     <li
                       key={index}
@@ -285,7 +346,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
                           ? styles.tickIcon
                           : isRejected
                             ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : ""
                       }
                     >
                       <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
@@ -299,7 +360,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : isUpcoming ? styles.upcomingstatus : ""
+                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : ""
                             }
                           >
                             {item.UserAction}

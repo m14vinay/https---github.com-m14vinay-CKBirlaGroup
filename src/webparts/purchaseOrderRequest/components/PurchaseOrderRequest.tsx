@@ -20,7 +20,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     OccupiedAmount: 0,
     Department: '',
     POAmount: 0,
-    ApplicableTaxes: 0,
+    ApplicableTaxes: '',
     AssignedTo: '',
     PoMaster: '',
     ApprovalPath: '',
@@ -215,7 +215,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       TotalAmount: 0,
       OccupiedAmount: 0,
       POAmount: 0,
-      ApplicableTaxes: 0,
+      ApplicableTaxes: '',
       AssignedTo: '',
       PoMaster: '',
       Comments: '',
@@ -364,8 +364,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     });
   };
 
-
-  const handleSaveHistory = async (id: number, Title: string, UserName: string, UserAction: string, Designation: string, ActionDate: Date, Sequence: number) => {
+ const handleSaveHistory = async (id: number, Title: string, UserName: string, UserAction: string, Designation: string, ActionDate: Date, Sequence: number) => {
     let payload: {};
     if (Sequence == 0) {
       payload = {
@@ -383,7 +382,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction: 'Upcoming',
+        UserAction: UserAction,
         Designation: Designation,
         Sequence: Sequence
       };
@@ -582,12 +581,12 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
         await service.updateItem(itemId, payload);
         if (form.PoMaster === 'Internal Compliance') {
           await handleSaveHistory(itemId, 'PO', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(itemId, 'PO', dataApprover?.FinanceController?.Title, '', 'Department Head', new Date(), 1);
+          await handleSaveHistory(itemId, 'PO', dataApprover?.FinanceController?.Title, 'Pending', 'Finance Controller', new Date(), 1);
         }
         else {
           await handleSaveHistory(itemId, 'PO', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(itemId, 'PO', UserDepartment?.Title, '', 'Department Head', new Date(), 1);
-          await handleSaveHistory(itemId, 'PO', dataApprover?.FinanceController?.Title, '', 'Finance Controller', new Date(), 2);
+          await handleSaveHistory(itemId, 'PO', UserDepartment?.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(itemId, 'PO', dataApprover?.FinanceController?.Title, 'Upcoming', 'Finance Controller', new Date(), 2);
         }
         if (form.files && form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
@@ -603,12 +602,12 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
         setItemId(res.Id);
          if (form.PoMaster === 'Internal Compliance') {
           await handleSaveHistory(res.Id, 'PO', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(res.Id, 'PO', dataApprover?.FinanceController?.Title, '', 'Finance Controller', new Date(), 1);
+          await handleSaveHistory(res.Id, 'PO', dataApprover?.FinanceController?.Title, 'Pending', 'Finance Controller', new Date(), 1);
         }
         else {
-          await handleSaveHistory(res.Id, 'PO', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(res.Id, 'PO', UserDepartment?.Title, '', 'Department Head', new Date(), 1);
-          await handleSaveHistory(res.Id, 'PO', dataApprover?.FinanceController?.Title, '', 'Finance Controller', new Date(), 2);
+           await handleSaveHistory(res.Id, 'PO', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(res.Id, 'PO', UserDepartment?.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(res.Id, 'PO', dataApprover?.FinanceController?.Title, 'Upcoming', 'Finance Controller', new Date(), 2);
         }
         if (res.Id > 0) {
           if (res.Id > 0 && form.files.length > 0) {

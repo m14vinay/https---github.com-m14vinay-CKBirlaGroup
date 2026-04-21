@@ -223,6 +223,18 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
+const handleprojectNoExist = async () => {
+  const checkdata = await service.getRequestDetails(form.projectCode);
+    if (checkdata != null) {
+      setForm(prev => ({
+        ...prev,
+        projectCode: ''
+      }))
+      alert(" Please enter correct Project code");
+      //return;
+    }
+  }
+
   const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
 
@@ -248,10 +260,10 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     try {
       // 🔹 Service call to fetch request details
       const result = await service.getRequestDetails(value);
-
+  
       if (result.length > 0) {
 
-        if (result[0].CurrentStatus === 'Approved') {
+        if (  result[0].CurrentStatus === 'Approved') {
           setForm(prev => ({
             ...prev,
             projectTitle: result[0].ProjectTitle || '',
@@ -262,9 +274,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
           alert("This request is Not Approved.✅");
           setForm(prev => ({
             ...prev,
-            projectTitle: '',
-            projectDescription: '',
-            Department: ''
+           projectCode:''
           }));
         }
 
@@ -302,7 +312,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction: 'Upcoming',
+        UserAction:UserAction,
         Designation: Designation,
         Sequence: Sequence
       };
@@ -399,7 +409,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
       if (itemId) {
         await service.updateItem(itemId, payload);
         await handleSaveHistory(itemId, 'VMR', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-        await handleSaveHistory(itemId, 'VMR', useremail?.Title, '', 'Approver', new Date(), 1);
+        await handleSaveHistory(itemId, 'VMR', useremail?.Title, 'Pending', 'Approver', new Date(), 1);
         if (form.files && form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(itemId, form.files[i]);
@@ -413,7 +423,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
         const res = await service.createItem(payload);
         setItemId(res.Id);
       await handleSaveHistory(res.Id, 'VMR', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-       await handleSaveHistory(res.Id, 'VMR', useremail?.Title, '', 'Approver', new Date(), 1);
+       await handleSaveHistory(res.Id, 'VMR', useremail?.Title, 'Pending', 'Approver', new Date(), 1);
         // store ID for future update
         if (res.Id > 0 && form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
@@ -473,7 +483,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
 
               <label>Project Code <span className={styles.required}>*</span></label>
               <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange} />
-              {requestNoError && <span className={styles.error}>{requestNoError}</span>}
+                        {requestNoError && <span className={styles.error}>{requestNoError}</span>}
 
               <label>Project Title</label>
               <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />

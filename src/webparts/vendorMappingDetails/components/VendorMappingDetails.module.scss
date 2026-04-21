@@ -43,7 +43,7 @@
 }
 
 .statusBox {
-  background-color: #225a22;
+  background-color:  #006B3D;
   color: #fff;
   padding: 19px 10px 15px;
   position: relative;
@@ -52,7 +52,7 @@
 
 .statusBox::after {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #225a22;
+  border-left: 46px solid  #006B3D;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -63,16 +63,16 @@
 }
 
 .pendingBox {
-  background-color: #cdcd17;
+  background-color: #F6BE00;
 }
 
 .pendingBox::after {
-  border-left-color: #cdcd17;
+  border-left-color:#F6BE00;
 }
 
 .pendingBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #225a22;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -83,16 +83,16 @@
 }
 
 .rejectedBox {
-  background-color: #8b3222;
+  background-color: #DE0606;
 }
 
 .rejectedBox::after {
-  border-left-color: #8b3222;
+  border-left-color: #DE0606;
 }
 
 .rejectedBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #cdcd17;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -103,11 +103,11 @@
 }
 
 .upcomingBox {
-  background-color: #ee7606;
+  background-color: #FF980E;
 }
 
 .upcomingBox::after {
-  border-left-color: #ee7606;
+  border-left-color: #FF980E;
 }
 
 .upcomingBox::before {
@@ -174,7 +174,7 @@
 }
 
 .rightPanel ul::before {
-  border: 0.5px dotted #13ab13;
+  border: 0.5px dotted  #006B3D;
   content: "";
   display: inline-block;
   height: 100%;
@@ -203,13 +203,25 @@
 }
 
 .rightPanel ul li.tickIcon::before {
-  background-color: #13ab13;
+  background-color:  #006B3D;
   content: "\2713";
 }
 
 .rightPanel ul li.crossIcon::before {
-  background-color: #e64e4e;
+  background-color: #DE0606;
   content: "\00d7";
+  font-size: 20px;
+}
+
+.rightPanel ul li.upcomingIcon::before {
+  background-color:  #FF980E;
+  content: "\f105";
+  font-size: 20px;
+}
+
+.rightPanel ul li.pendingIcon::before {
+  background-color: #F6BE00;
+  content: "\f105";
   font-size: 20px;
 }
 
@@ -223,14 +235,23 @@
 }
 
 .rightPanel ul li span.apprStatus {
-  color: #0e9e0e;
+  color: #006B3D;
   font-weight: bold;
 }
 
 .rightPanel ul li span.rejStatus {
-  color: #9a1111;
+  color:  #DE0606;
   font-weight: bold;
 }
+.rightPanel ul li span.upcomingstatus {
+  color: #FF980E;
+  font-weight: bold;
+}
+.rightPanel ul li span.pendingstatus {
+  color: #F6BE00;
+  font-weight: bold;
+}
+
 
 label {
   display: block;
@@ -289,25 +310,17 @@ button {
   border: 1px solid red;
 }
 .Approved {
-  color: green;
+  color:  #006B3D;
   font-weight: bold;
 }
 
 .Rejected {
-  color: red;
+  color: #DE0606;
   font-weight: bold;
 }
 
 .Pending {
-  color: rgb(162, 234, 17);
+  color: #F6BE00;
   font-weight: bold;
 }
-.rightPanel ul li span.upcomingstatus {
-  color: orange;
-  font-weight: bold;
-}
-.rightPanel ul li.upcomingIcon::before {
-  background-color: orange;
-  content: "\f105";
-  font-size: 20px;
-}
+

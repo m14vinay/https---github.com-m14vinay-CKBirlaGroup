@@ -59,26 +59,23 @@ export default class Service {
   }
 
   // Update the Record (Submit)
-  public async updateItem(ID: number, comments: any): Promise<void> {
+  public async updateItem(ID: number, data: any): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})`;
 
-
     await this.context.spHttpClient.post(
-      url,
+       url,
       SPHttpClient.configurations.v1,
       {
         headers: {
-          "Accept": "application/json;odata=nometadata",
-          "Content-Type": "application/json;odata=nometadata",
+          "Accept": "application/json;",
+          "Content-Type": "application/json;",
           "IF-MATCH": "*",
           "X-HTTP-Method": "MERGE"
         },
-        
-        body: JSON.stringify({
-        ApproverComment: comments  // 👈 column name same hona chahiye
-      })
+        body: JSON.stringify(data)
       }
     );
+    
   }
 
   // Update the Record (Submit)
@@ -116,24 +113,10 @@ export default class Service {
 
     const item = await res.json();
    
-   if (item && item.Id) {
-    return {
-      Id: item.Id,
-      RequestNo: item.RequestNo,
-      ProjectCode: item.ProjectCode,
-      ProjectTitle: item.ProjectTitle,
-      ProjectDescription: item.ProjectDescription,
-      VendorName: item.VendorName,
-      VendorDescription: item.VendorDescription,
-      ApproverComments: item.ApproverComments, // 👈 check column name
-      Attachments: item.AttachmentFiles || [],
-      CurrentStatus:item.CurrentStatus ,// 👈 important
-      Actiondate1 : item.Actiondate1,
-      AssignedTo : item.AssignedTo
-    };
-  }
+  
+  
 
-  return null;
+  return item;
 }
   
   // Upload Files
