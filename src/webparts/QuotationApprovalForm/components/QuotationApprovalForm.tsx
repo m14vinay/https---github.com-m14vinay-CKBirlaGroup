@@ -125,11 +125,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       console.log("Result:", result);
       if (
         result.AuthorId !== currentUser.Id &&
-<<<<<<< HEAD
-        result.AssignedToEmailId !== currentUser.Id
-=======
         result.AssignedTo !== currentUser.Id
->>>>>>> origin/Abhishek
       ) {
         alert("You Are Not Authorized ❌");
         return;
@@ -517,16 +513,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-<<<<<<< HEAD
-          // AssignedTo: approver?.Approval1?.Title || 0,
-          // AssignedToEmailId: approver?.Approval1?.Id || 0,
-          // //AssignedTo: User.Title,
-          // //Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-          // Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-          // Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          // Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
-          CurrentStatus: "Draft"
-=======
           AssignedTo: approver?.Approval1?.Title || "",
           AssignedToEmailId: approver?.Approval1?.Id || null,
           //AssignedTo: User.Title,
@@ -535,7 +521,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Approval2Id: (dataApprover[0].Approval2?.Id || 0),
           Approval3Id: (dataApprover[0].Approval3?.Id || 0),
           CurrentStatus: "Pending"
->>>>>>> origin/Abhishek
         };
 
       else if (form.TotalProjectAmount > 200000 && form.Department === "Branding") {
@@ -557,21 +542,12 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-<<<<<<< HEAD
-          // AssignedTo: approver?.Approval1.Title || 0,
-          // AssignedToEmailId: approver?.Approval1?.Id || 0,
-          // //AssignedTo: User.Title,
-          // Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-          // Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          // Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
-=======
           AssignedTo: approver?.Approval1?.Title || "",
           AssignedToEmailId: approver?.Approval1?.Id || null,
           //AssignedTo: User.Title,
           Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
           Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
           Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
->>>>>>> origin/Abhishek
           CurrentStatus: "Pending"
         };
       }
@@ -594,21 +570,12 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-<<<<<<< HEAD
-          // AssignedTo: approver?.Approval1?.Title || 0,
-          // AssignedToEmailId: approver?.Approval1?.Id || 0,
-          // //AssignedTo: User.Title,
-          // Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-          // Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          // Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
-=======
           AssignedTo: approver?.Approval1?.Title || "",
           AssignedToEmailId: approver?.Approval1?.Id || null,
           //AssignedTo: User.Title,
           Approval1Id: dataApprover[0].Approval1.Id || 0,
           Approval2Id: dataApprover[0].Approval2.Id || 0,
           Approval3Id: dataApprover[0].Approval3.Id || 0,
->>>>>>> origin/Abhishek
           CurrentStatus: "Draft"
         };
 
@@ -729,13 +696,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-<<<<<<< HEAD
           AssignedTo: approver?.Approval1?.Title,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
-=======
-          AssignedTo: approver?.Approval1?.Title || "",
-          AssignedToEmailId: approver?.Approval1?.Id || null,
->>>>>>> origin/Abhishek
           //AssignedTo: User.Title,
           Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
           Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
@@ -764,19 +726,11 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             Department: form.Department || "",
             Advancepayment: form.Advancepayment || "",
             ApprovalPath: form.ApprovalPath || "",
-<<<<<<< HEAD
-            AssignedTo: approver?.Approval1?.Title,
-            AssignedToEmailId: approver?.Approval1?.Id || 0,
-            Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-            Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-            Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
-=======
             AssignedTo: approver?.Approval1?.Title || "",
             AssignedToEmailId: approver?.Approval1?.Id || null,
             Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
             Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
             Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
->>>>>>> origin/Abhishek
             CurrentStatus: "Pending"
           };
 
@@ -801,13 +755,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-<<<<<<< HEAD
-          AssignedTo: approver?.Approval1?.Title,
-          AssignedToEmailId: approver?.Approval1?.Id || 0,
-=======
           AssignedTo: approver?.Approval1?.Title || "",
           AssignedToEmailId: approver?.Approval1?.Id || null,
->>>>>>> origin/Abhishek
           //AssignedTo: User.Title,
           Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
           Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
