@@ -323,7 +323,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         DepartmentHead: dataApproverFI.ApproverName?.Title || "",
         ApprovalPath: dataApproverFI.ApproverName?.Title,
         ProjectTitle: 'Reimbursement',
-        Description: form.Remarks
+        ProjectDescription: form.Remarks
       };
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -340,7 +340,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
         ProjectTitle: 'Reimbursement',
-        Description: form.Remarks,
+        ProjectDescription: form.Remarks,
         ApprovalPath: dataApprover.DepartmentHead?.Title + ' > ' + dataApproverFI.ApproverName?.Title + ' > ' + dataApproverCFO.ApproverName?.Title + ' > ' + dataApproverFI.ApproverName?.Title
       }
     }
@@ -358,7 +358,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         CFOEmailId: 0,
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
         ProjectTitle: 'Reimbursement',
-        Description: form.Remarks,
+        ProjectDescription: form.Remarks,
         ApprovalPath: dataApprover.DepartmentHead?.Title + ' > ' + dataApproverFI.ApproverName?.Title + ' > ' + dataApproverCompliance.ApproverName?.Title + ' > ' + dataApproverFI.ApproverName?.Title
       }
     }
@@ -495,7 +495,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       DepartmentName: form.DepartmentName,
       CurrentStatus: 'Draft',
       ProjectTitle: 'Reimbursement',
-      Description: form.Remarks
+      ProjectDescription: form.Remarks
     };
     try {
       setLoading(true);
