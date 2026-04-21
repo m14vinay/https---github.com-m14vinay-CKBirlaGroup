@@ -395,7 +395,7 @@ button {
 
 /* Description textbox */
 .poDescriptionInput {
-  min-width: 300px;
+  min-width: 200px;
 }
 
 /* Center numeric fields */
@@ -440,4 +440,29 @@ button {
     justify-content: flex-start;
     text-align: left;
   }
+}
+
+
+
+/* 🔥 TWO COLUMN FORM ROW */
+.twoColumnRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+/* Each field block */
+.fieldBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Inputs full width */
+.fieldBlock input {
+  width: 100%;
+}
+.Pending {
+  color: rgb(162, 234, 17);
+  font-weight: bold;
 }

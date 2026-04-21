@@ -296,6 +296,7 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
             <label>Total Project Amount</label>
             <div className={styles.twoCol}>
               <input value={data.TotalProjectAmount || ''} disabled />
+              <span>Applicable Taxes</span>
               <input value={data.ApplicableTaxes || ''} disabled />
             </div>
           </div>
@@ -305,6 +306,7 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
               <label>Vendor {i}</label>
               <div className={styles.twoCol}>
                 <input value={String(data[`Vendor${i}`] || '')} disabled />
+                <span>Quote {i}</span>
                 <input value={String(data[`Quote${i}`] || '')} disabled />
               </div>
             </div>

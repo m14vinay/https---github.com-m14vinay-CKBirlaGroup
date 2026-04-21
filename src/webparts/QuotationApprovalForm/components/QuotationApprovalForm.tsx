@@ -70,7 +70,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     amount: ''
   };
 
-
   const [AssignedID, setAssignedID] = React.useState<string | null>(null);
   const [itemId, setItemId] = React.useState<number | null>(null);
   const [poItems, setPoItems] = React.useState<TPurchaseOrderRow[]>([INITIAL_PO_ROW]);
@@ -159,6 +158,10 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
 
         }));
+
+        if(result.Department){
+          handleDepartmentChange(result.Department);
+        }
       } else {
         alert("No Data Found");
       }
@@ -420,16 +423,25 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
 
   // 🔹 Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
 
-    setForm(prev => ({
-      ...prev,
-      [name]: name.includes("Amount") || name.includes("Quote")
-        ? Number(value)
-        : value
-    }));
-  };
+  //   setForm(prev => ({
+  //     ...prev,
+  //     [name]: name.includes("Amount") || name.includes("Quote")
+  //       ? Number(value)
+  //       : value
+  //   }));
+  // };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+     const { name, value } = e.target;
+   
+     setForm({
+       ...form,
+       [name]: value
+     });
+    };
 
   const handleSaveHistory = async (id: number) => {
 
@@ -530,7 +542,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
           CurrentStatus: "Pending"
         };
-
       }
       else {
         payload = {
@@ -647,7 +658,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
       if (!form.Advancepayment) return alert("Please Select Advance Payment");
-      if (!form.files || form.files.length === 0) return alert("Attach files");
+      if ((!form.files || form.files.length === 0) && (!attachments || attachments.length === 0)) return alert("Attach files");
       const dataApprover = await service.getDepartmentApprovers(form.Department);
 
       const approver = dataApprover[0];
@@ -676,12 +687,12 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedTo: approver?.Approval1?.Title || "",
-          AssignedToEmailId: approver?.Approval1?.Id || null,
+          AssignedTo: approver?.Approval1?.Title,
+          AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
-          Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-          Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
-          Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
+          Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
+          Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
+          Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
           //Approval3Id: approver3Id? Number(approver3Id)  : null,
           CurrentStatus: "Pending"
         };
@@ -737,9 +748,9 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           AssignedTo: approver?.Approval1?.Title || "",
           AssignedToEmailId: approver?.Approval1?.Id || null,
           //AssignedTo: User.Title,
-          Approval1Id: dataApprover[0].Approval1.Id || 0,
-          Approval2Id: dataApprover[0].Approval2.Id || 0,
-          Approval3Id: dataApprover[0].Approval3.Id || 0,
+          Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
+          Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
+          Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
           CurrentStatus: "Pending"
         };
 
@@ -810,6 +821,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           window.location.href = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         }, 500);
       }
+      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+      window.location.assign(url); 
     } catch (error: any) {
       console.error(error);
       alert(error?.message || "Error occurred");
@@ -841,7 +854,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           <div className={styles["col-md-9"]}>
             <div className={styles.leftPanel}>
               <div className={styles.leftPanelHeader}>
-                <h4>Quotation Request Approval Form</h4>
+                <h4>Quotation Request Approval</h4>
               </div>
 
               <label>Project Title <span className={styles.required}>*</span></label>
@@ -865,31 +878,45 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           <label>Vendor 1 <span className={styles.required}>*</span></label>
           <input name="Vendor1" value={form.Vendor1} onChange={handleChange}  /> */}
 
-              <label>Vendor1 <span className={styles.required}>*</span></label>
-              <input name="Vendor1" value={form.Vendor1} onChange={handleChange} />
+               <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Vendor 1 <span className={styles.required}>*</span></label>
+                <input name="Vendor1" value={form.Vendor1} onChange={handleChange} />
+              </div>
+              <div className={styles.fieldBlock}>
+                <label>Quote 1 <span className={styles.required}>*</span></label>
+                <input  name="Quote1" value={form.Quote1} type='number' onChange={handleChange}  />
+              </div>
+            </div>
 
-              <label>Vendor2 <span className={styles.required}>*</span></label>
-              <input name="Vendor2" value={form.Vendor2} onChange={handleChange} />
+            <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Vendor 2</label>
+                <input name="Vendor2" value={form.Vendor2} onChange={handleChange} />
+              </div>
+              <div className={styles.fieldBlock}>
+                <label>Quote 2</label>
+                <input   name="Quote2" value={form.Quote2} type='number' onChange={handleChange} />
+              </div>
+            </div>
 
-              <label>Vendor3 <span className={styles.required}>*</span></label>
-              <input name="Vendor3" value={form.Vendor3} onChange={handleChange} />
+            <div className={styles.twoColumnRow}>
+              <div className={styles.fieldBlock}>
+                <label>Vendor 3</label>
+                <input name="Vendor3" value={form.Vendor3} onChange={handleChange} />
+              </div>
+              <div className={styles.fieldBlock}>
+                <label>Quote 3</label>
+                <input name="Quote3" value={form.Quote3} type='number'  onChange={handleChange} />
+              </div>
+            </div>
 
+             <label>Select Vendor <span className={styles.required}>*</span></label>
+        <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
 
-              <label>Quote 1 <span className={styles.required}>*</span></label>
-              <input name="Quote1" value={form.Quote1} type='number' onChange={handleChange} />
-
-              <label>Quote 2</label>
-              <input name="Quote2" value={form.Quote2} type='number' onChange={handleChange} />
-
-              <label>Quote 3</label>
-              <input name="Quote3" value={form.Quote3} type='number' onChange={handleChange} />
-
-              <label>Select Vendor <span className={styles.required}>*</span></label>
-              <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
-
-              <label>Selected Quote <span className={styles.required}>*</span></label>
-              <input name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} type='number' />
-
+          <label>Selected Quote <span className={styles.required}>*</span></label>
+          <input name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} type='number' />
+          
 
               {/* Department and approval section */}
               <label>Department <span className={styles.required}>*</span></label>
@@ -929,7 +956,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
               />
 
               <label>Approval Path<span className={styles.required}>*</span></label>
-              <input value={form.ApprovalPath || ""} readOnly />
+              <input value={form.ApprovalPath || ""} readOnly   style={{backgroundColor:"lightgray"}} />
 
 
               {Number(form.TotalProjectAmount || 0) > 200000 && approverOptions.length > 0 && (

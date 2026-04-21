@@ -2,6 +2,7 @@ import * as React from 'react';
 import { SPHttpClient } from '@microsoft/sp-http';
 import { IQaRequestApprovalFormProps } from './IQaRequestApprovalFormProps';
 import styles from './QaRequestApprovalForm.module.scss';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 type TApprovalStatus = 'Approved' | 'Rejected';
 type TTimelineStatus = 'approved' | 'rejected' | 'pending';
@@ -31,7 +32,7 @@ interface IApprovalItem {
   ApprovalPath?: string;
   ApproverComment1?: string;
   AttachmentFiles?: IAttachmentFile[];
-  [key: string]: unknown;
+  [key: string]: any;
   ActionDate1?: string;
   ActionDate2?: string;
   ActionDate3?: string;
@@ -122,6 +123,8 @@ const itemId =
     return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('en-IN');
   };
 
+  // const getDesignationByStep = (step: number): string => STEP_DESIGNATION_MAP[step] || 'Approver';
+
   const getDesignationByStep = (step: number): string => STEP_DESIGNATION_MAP[step] || 'Approver';
 
   const getUser = React.useCallback(async (): Promise<IUserLookup> => {
@@ -173,7 +176,7 @@ const itemId =
 
     try {
       const itemResponse = await fetchFromList<IApprovalItem>(
-        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles`
+        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles,Approval1,Approval2,Approval3&$select=*,Approval1/Title,Approval2/Title,Approval3/Title`
       );
 
       const departmentName = String(itemResponse.Department || '').replace(/'/g, "''");
@@ -196,7 +199,7 @@ Approval4/Id,Approval4/Title
       ]);
 
       setData(itemResponse);
-      setComment(itemResponse.ApproverComment1 || '');
+      // setComment(itemResponse.ApproverComment1 || '');
       setPoItems(purchaseOrderResponse.value || []);
       setApproverData(departmentResponse.value?.[0] || null);
     } catch (error) {
@@ -221,9 +224,9 @@ Approval4/Id,Approval4/Title
   }, [props.siteUrl, props.spHttpClient]);
 
   // Keep the history timeline in sync with each approval action.
-  const handleSaveHistory = React.useCallback(async (id: number, userAction: TApprovalStatus) => {
+  const handleSaveHistory = React.useCallback(async (id: number, userAction: TApprovalStatus, userName: string, userDesignation: string) => {
     try {
-      const userName = await getUserFromStep(currentStep);
+      // const userName = await getUserFromStep(currentStep);
 
       await createHistoryItem({
         Title: 'QA',
@@ -232,13 +235,188 @@ Approval4/Id,Approval4/Title
         UserAction: userAction,
         UserComment: comment,
         ActionDate: new Date().toISOString(),
-        Designation: getDesignationByStep(currentStep)
+        Designation: userDesignation
       });
     } catch (error) {
       console.error('History save failed:', error);
     }
   }, [comment, createHistoryItem, currentStep, getUserFromStep]);
 
+
+  const handleApproveReject = async (action:string) => {
+    try {
+      setLoading(true);
+
+      if (!comment) return alert("Comment is required.");
+      if (!itemId || !data) return;
+
+      // 🔹 CURRENT USER
+      const currentUser = await props.spHttpClient.get(
+        `${props.siteUrl}/_api/web/currentuser`,
+        SPHttpClient.configurations.v1
+      ).then(res => res.json());
+
+      // 🔐 SECURITY CHECK (IMPORTANT)
+      if (Number(data.AssignedToEmailId) !== currentUser.Id) {
+        alert("You are not authorized ❌");
+        return;
+      }
+
+      let payload: any = {};
+
+      let userDesignation = "";
+
+      // 🔥 STEP DETECTION BASED ON AssignedTo (BEST)
+
+      if(action == "Rejected"){
+        // STEP 1
+      if (data.AssignedToEmailId === data.Approval1Id && data.ActionDate1 === null) {
+
+        userDesignation = "Department Head"
+          payload = {
+            ApproverComment1: comment,
+            ActionDate1: new Date().toISOString(),
+            AssignedToEmailId: null,
+            AssignedTo: "Rejected",
+            Status: "Rejected",
+            CurrentStatus: "Rejected"
+          };
+      }
+
+      // STEP 2
+      else if (data.AssignedToEmailId === data.Approval2Id && data.ActionDate2 === null) {
+        userDesignation = "Management 1"
+        
+          payload = {
+            ApproverComment2: comment,
+            ActionDate2: new Date().toISOString(),
+            AssignedToEmailId: null,
+            AssignedTo: "Rejected",
+            Status: "Rejected",
+            CurrentStatus: "Rejected"
+          };
+      }
+
+      // FINAL STEP
+      else if (data.AssignedToEmailId === data.Approval3Id) {
+        userDesignation = "Management 2"
+        payload = {
+          ApproverComment3: comment,
+          ActionDate3: new Date().toISOString(),
+          AssignedToEmailId: null,
+          AssignedTo: "Rejected",
+          Status: "Rejected",
+          CurrentStatus: "Rejected"
+        };
+      }
+      }
+      
+      else if(action === "Approved"){
+        // STEP 1
+        if (data.AssignedToEmailId === data.Approval1Id && data.ActionDate1 === null) {
+
+          userDesignation = "Department Head"
+          if(data.Approval2Id){
+            payload = {
+              ApproverComment1: comment,
+              ActionDate1: new Date().toISOString(),
+              AssignedToEmailId: Number(data.Approval2Id) || null,
+              AssignedTo: data.Approval2?.Title,
+              Status: "Pending"
+            };
+          }
+          else{
+            payload = {
+              ApproverComment1: comment,
+              ActionDate1: new Date().toISOString(),
+              AssignedToEmailId: null,
+              AssignedTo: "Approved",
+              Status: "Approved",
+              CurrentStatus: "Approved"
+            };
+          }
+        }
+
+        // STEP 2
+        else if (data.AssignedToEmailId === data.Approval2Id && data.ActionDate2 === null) {
+          userDesignation = "Management 1"
+          if(data.Approval3Id){
+            payload = {
+              ApproverComment2: comment,
+              ActionDate2: new Date().toISOString(),
+              AssignedToEmailId: Number(data.Approval3Id) || null,
+              AssignedTo: data.Approval3?.Title,
+              Status: "Pending"
+            };
+          }
+          else{
+            payload = {
+              ApproverComment2: comment,
+              ActionDate2: new Date().toISOString(),
+              AssignedToEmailId: null,
+              AssignedTo: "Approved",
+              Status: "Approved",
+              CurrentStatus: "Approved"
+            };
+          }
+        }
+
+        // FINAL STEP
+        else if (data.AssignedToEmailId === data.Approval3Id) {
+          userDesignation = "Management 2"
+          payload = {
+            ApproverComment3: comment,
+            ActionDate3: new Date().toISOString(),
+            AssignedToEmailId: null,
+            AssignedTo: "Approved",
+            Status: "Approved",
+            CurrentStatus: "Approved"
+          };
+        }
+      }
+
+      if (Object.keys(payload).length === 0) {
+        alert("No approval action available ❌");
+        return;
+      }
+
+      console.log("FINAL PAYLOAD:", payload);
+
+      // 🔹 UPDATE ITEM
+      await props.spHttpClient.post(
+        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+        SPHttpClient.configurations.v1,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'IF-MATCH': '*',
+            'X-HTTP-Method': 'MERGE'
+          },
+          body: JSON.stringify(payload)
+        }
+      );
+
+      // 🔹 HISTORY SAVE
+      await handleSaveHistory(itemId, "Approved", currentUser.Title, userDesignation);
+
+      alert( action + " Successfully ✅");
+
+      // 🔹 UI UPDATE (IMPORTANT)
+      setData(prev => prev ? { ...prev, ...payload } : prev);
+      setIsActionDone(true);
+
+      // 🔹 REDIRECT
+  window.location.assign(
+    `${props.siteUrl}/SitePages/Dashboard.aspx`
+  );
+
+    } catch (error) {
+      console.error("APPROVE ERROR:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
 
   if (!comment.trim()) {
@@ -335,7 +513,7 @@ const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
     );
 
     // 🔹 SAVE HISTORY
-    await handleSaveHistory(itemId, status);
+    await handleSaveHistory(itemId, status,'','');
 
     // 🔥 IMPORTANT → REFRESH FROM SERVER (NO LOCAL FAKE UPDATE)
     await fetchData();
@@ -389,100 +567,26 @@ const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
     return 'pending';
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   if (!data) {
     return <div>No data found.</div>;
   }
-
-  //********** */
-
-  //************Handle Approver**************
-  // const handleApprove = async () => {
-  //   try {
-  //     setLoading(true);
-
-  //     if (!form.Comments) return alert("Comment is required.");
-  //     if (!itemId) return;
-
-  //     const currentUser = await service.getUser();
-
-  //     // 🔐 SECURITY CHECK
-  //     if (!form.AssignedTo || Number(form.AssignedTo) !== currentUser.Id) {
-  //       alert("You are not authorized ❌");
-  //       return;
-  //     }
-
-  //     let payload: any = {};
-
-  //     // * STEP BASED APPROVAL (NO BUG LOGIC)
-
-  //     // STEP 1
-  //     if (!form.ActionDate1) {
-  //       payload = {
-  //         ApproverComment1: form.Comments,
-  //         ActionDate1: new Date().toISOString(), // ✅ date always set
-  //         CurrentStatus: "Pending",
-  //         AssignedToId: Number(form.Approval2Id) || null
-  //       };
-  //     }
-
-  //     // STEP 2
-  //     else if (!form.ActionDate2) {
-  //       payload = {
-  //         ApproverComment2: form.Comments,
-  //         ActionDate2: new Date().toLocaleString(),
-  //         CurrentStatus: "Pending",
-  //         AssignedToId: Number(form.Approval3Id) || null
-  //       };
-  //     }
-
-  //     // FINAL STEP
-  //     else if (!form.ActionDate3) {
-  //       payload = {
-  //         ApproverComment3: form.Comments,
-  //         ActionDate3: new Date().toLocaleString(),
-  //         CurrentStatus: "Approved",
-  //         AssignedToId: null
-  //       };
-  //     }
-
-  //     // ❌ SAFETY CHECK
-  //     if (Object.keys(payload).length === 0) {
-  //       alert("No approval action available ❌");
-  //       return;
-  //     }
-
-  //     console.log("FINAL APPROVE PAYLOAD:", payload);
-
-  //     // 🔹 UPDATE MAIN LIST
-  //     await service.updateItem(itemId, payload);
-
-  //     // 🔹 SAVE HISTORY
-  //     await handleSaveHistory(itemId);
-
-  //     alert("Approved Successfully ✅");
-
-  //     // 🔹 REDIRECT
-  //     window.location.assign(
-  //       `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`
-  //     );
-
-  //     // 🔹 RESET COMMENT ONLY
-  //     setForm(prev => ({ ...prev, Comments: "" }));
-
-  //   } catch (error) {
-  //     console.error("APPROVE ERROR:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-
   return (
     <div className={styles.container}>
+      {loading && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: 'rgba(255,255,255,0.6)',
+                zIndex: 9999
+              }}>
+                <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                  <Spinner label="Processing..." size={SpinnerSize.large} />
+                </div>
+              </div>
+            )}
       <div className={styles.mainLayout}>
         <div className={styles.leftPanel}>
           <h4 className={styles.heading}>Quotation Request Approval Form</h4>
@@ -600,7 +704,7 @@ const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
           <div className={styles.buttonContainer}>
             <button
               className={styles.ApproveBtn}
-              onClick={() => updateStatus('Approved').catch(() => undefined)}
+              onClick={() => handleApproveReject("Approved").catch(() => undefined)}
               disabled={isReadOnly}
             >
               Approve
@@ -608,7 +712,7 @@ const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
 
             <button
               className={styles.RejectBtn}
-              onClick={() => updateStatus('Rejected').catch(() => undefined)}
+              onClick={() => handleApproveReject('Rejected').catch(() => undefined)}
               disabled={isReadOnly}
             >
               Reject

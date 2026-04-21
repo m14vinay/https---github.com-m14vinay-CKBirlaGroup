@@ -2,24 +2,9 @@ import { SPHttpClient } from '@microsoft/sp-http';
 export default class Service {
 
   private context: any;
-  private listname="AllDocuments";
-  private DocumentMaster ="Master_TypeofDocument";
-
+  private listname="AllVendor";
   constructor(context: any) {
     this.context = context;
-  }
-  
-  //Get Master Document Type Data
-  public async getMasterDocument(): Promise<any[]> {
-
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.DocumentMaster}')/items`;
-
-    const res = await this.context.spHttpClient.get(
-      url,
-      SPHttpClient.configurations.v1
-    );
-    const data = await res.json();
-    return data.value;
   }
 
   // Save the Record
@@ -39,16 +24,44 @@ export default class Service {
     return response.json();
   }
   // Fetch the Record
-  public async getItemByTitle(Title: string): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=Title eq '${Title}'`;
+  public async getItemByID(ID: number): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=ID eq ${ID}`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
     );
     const data = await res.json();
-    return data.value.length > 0 ? 1 : 0;
+    return data.value.length > 0 ? data.value[0] : null;
   }
-  
+
+  public async getUser(): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data;
+  }
+
+  // UPdate the Item
+  public async updateItem(id: number, data: any): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+            'IF-MATCH': '*',
+            'X-HTTP-Method': 'MERGE',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+        body: JSON.stringify(data)
+      }
+    );
+  }
   // Upload Files
 
   public async uploadFile(itemId: number, file: File): Promise<void> {
@@ -67,4 +80,84 @@ export default class Service {
       }
     );
   }
+    // Fetch the Files from List
+  public async getAttachments(itemId: number): Promise<any[]> {
+
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
+
+  const res = await this.context.spHttpClient.get(
+    url,
+    SPHttpClient.configurations.v1,
+    {
+      headers: {
+        "Accept": "application/json;"
+      }
+    }
+  );
+
+  const data = await res.json();
+
+  return data.value; // array of attachments
+}
+public saveToSharePoint = async (items: any[]) => {
+  for (const item of items) {
+  const utc_days = Math.floor(item.CommencementDate - 25569);
+  const utc_value = utc_days * 86400; 
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;   
+    const response = await this.context.spHttpClient.post(
+      url,
+     SPHttpClient.configurations.v1,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            Title: item.Title,
+      YearofEstablishment: item.YearofEstablishment,
+      GST:item.GST,
+      CommencementDate: new Date(utc_value * 1000),
+      Pan: item.Pan,
+      Tin:item.Tin,
+      CentralSalesTaxNo:item.CentralSalesTaxNo,
+      ServiceTaxRegNo:item.ServiceTaxRegNo,
+      NatureofService:item.NatureofService,
+      MSMERegistrationNo:item.MSMERegistrationNo,
+      ESICNo:item.ESICNo,
+      ExciseRegisterNo:item.ExciseRegisterNo,
+      WorkContractTaxNo:item.WorkContractTaxNo,
+      FullAddress:item.FullAddress,
+      TelephoneNo:item.TelephoneNo,
+      FaxNo:item.FaxNo,
+      EmailId:item.EmailId,
+      ContactPerson:item.ContactPerson,
+      RegFullAddress:item.RegFullAddress,
+      RegTelephoneNo:item.RegTelephoneNo,
+      RegFaxNo:item.RegFaxNo,
+      RegEmailId:item.RegEmailId,
+      RegContactPerson:item.RegContactPerson,
+      Manufacturer:item.Manufacturer,
+      AuthorizedAgent:item.AuthorizedAgent,
+      Trader:item.Trader,
+      ConsultingCompany:item.ConsultingCompany,
+      Other:item.Other,
+      ConstitutionofOrganization:item.ConstitutionofOrganization,
+      Name:item.Name,
+      Address:item.Address,
+      ContactNo:item.ContactNo,
+      Details:item.Details,
+      BankName:item.BankName,
+      BankAddress:item.BankAddress,
+      NameinBankAccount:item.NameinBankAccount,
+      BankAccountNo:item.BankAccountNo,
+      BankIFSCMICRCode:item.BankIFSCMICRCode,
+      CurrentStatus:'Completed'
+          })
+        }
+    );
+    return response.json();
+  }
+};
+
 }

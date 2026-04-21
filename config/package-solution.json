@@ -3,7 +3,7 @@
   "solution": {
     "name": "ck-birla-group-digi-flow-client-side-solution",
     "id": "837c3770-1824-4a26-a710-0decf5482f1b",
-    "version": "1.0.0.0",
+    "version": "1.0.0.3",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,

@@ -14,22 +14,71 @@ import {
 } from '@tanstack/react-table';
 import Table from 'react-bootstrap/Table';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Icon, Label, Modal } from '@fluentui/react';
+import { Icon, Label, Modal, Spinner } from '@fluentui/react';
 import { SharePointContext } from './SharePointContext';
 
 export default function MyRequests() {
 
     const context = React.useContext(SharePointContext) as WebPartContext;
 
-    const columnHelper = createColumnHelper<any>()
+    const columnHelper = createColumnHelper<any>();
 
-    const openForm = (row:any) => {
+    let data1:any[] = [];
+    let counter = 0;
+
+    const openViewForm = (row:any) => {
         console.log(row);
 
         if(row["@odata.type"]){
             switch(row["@odata.type"]){
                 case '#SP.Data.QuotationApprovalListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationView.aspx?requestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Quotation-Details.aspx?RequestId=" + row.Id,"_blank");
+                    break;
+                case '#SP.Data.PoApprovalListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchaseOrderView.aspx?RequestId=" + row.Id,"_blank");
+                    break;
+                case '#SP.Data.VendorMappingListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingDetails.aspx?RequestId=" + row.Id,"_blank");
+                    break;
+                case '#SP.Data.Remb_x005f_ExpanseMasterListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementDetails.aspx?RequestId=" + row.Id,"_blank");
+                    break;  
+                case '#SP.Data.BillProcessingListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Bill-Processing-Detail.aspx?RequestId=" + row.Id,"_blank");
+                    break;  
+                case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Detail.aspx?RequestId=" + row.Id,"_blank");
+                    break;         
+                default:
+                    alert("Page not found");
+                    break;
+            }
+        }
+    }
+
+    const openEditForm = (row:any) => {
+        console.log(row);
+
+        if(row["@odata.type"]){
+            switch(row["@odata.type"]){
+                case '#SP.Data.QuotationApprovalListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationForm.aspx?RequestId=" + row.Id,"_blank");
+                    break;
+                case '#SP.Data.PoApprovalListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchsaseOrderRequest.aspx?RequestId=" + row.Id,"_blank");
+                    break;
+                case '#SP.Data.VendorMappingListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingForm.aspx?RequestId=" + row.Id,"_blank");
+                    break;
+                case '#SP.Data.Remb_x005f_ExpanseMasterListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementRequestForm.aspx?RequestId=" + row.Id,"_blank");
+                    break;  
+                case '#SP.Data.BillProcessingListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Bill.aspx?RequestId=" + row.Id,"_blank");
+                    break;  
+                case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Request.aspx?RequestId=" + row.Id,"_blank");
+                    break;         
                 default:
                     alert("Page not found");
                     break;
@@ -41,7 +90,7 @@ export default function MyRequests() {
         columnHelper.accessor('RequestNo', {
             header: () => <span>Request No</span>
         }),
-        columnHelper.accessor((row) => row.lastName, {
+        columnHelper.accessor('ProjectTitle', {
             id: 'ProjectTitle',
             header: () => <span>Project Title</span>
         }),
@@ -49,34 +98,36 @@ export default function MyRequests() {
             header: () => 'Description'
         }),
         columnHelper.accessor('Department', {
-            header: () => <span>Department</span>
+            header: () => <span>Department</span>,
+            cell: (info) => <span>{info.row.original.Department || info.row.original.DepartmentName}</span>
         }),
         columnHelper.accessor('CurrentStatus', {
             header: 'Status'
         }),
         columnHelper.accessor('Created', {
-            header: 'Submitted Date'
+            header: 'Submitted Date',
+            cell: (info) => <span>{new Date(info.row.original.Created).toLocaleDateString()}</span>
         }),
         columnHelper.accessor('Created', {
             header: 'Approved Date',
-            cell: (info) => <span>TBD</span>
-        }),
-        columnHelper.accessor('Created', {
-            header: 'Approval History',
-            cell: (info) => <span>TBD</span>
+            cell: (info) => <span>{info.row.original.CurrentStatus === "Approved"?new Date(info.row.original.Modified).toLocaleDateString():""}</span>
         }),
         columnHelper.accessor('Created', {
             header: 'View',
-            cell: (info) => <span style={{cursor:"pointer"}}><Icon iconName="RedEye" onClick={() => openForm(info.row.original)}></Icon></span>
+            cell: (info) => <span style={{cursor:"pointer"}}>
+                {info.row.original.CurrentStatus === "Draft"? <Icon iconName="Edit" onClick={() => openEditForm(info.row.original)}></Icon>:
+                <Icon iconName="RedEye" onClick={() => openViewForm(info.row.original)}></Icon>}
+            </span>
         })
     ]
     const [data, _setData] = useState<any[]>(() => []);
+    const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<any>(null);
 
     const [globalFilter, setGlobalFilter] = useState("");
     const [sorting, setSorting] = useState<any>([]);
     const webUrl = context.pageContext.web.absoluteUrl;
-    const lists = ["QuotationApproval","PoApproval","ITApproval","ReimburseExpenseMaster","BillProcessing","VendorMapping"];
+    const lists = ["QuotationApproval","PoApproval","ReimburseExpenseMaster","BillProcessing","VendorMapping","QuotationApprovalNEIBTAdmin"];
 
     const getUser = () => {
         console.log("context user : ", context);
@@ -105,11 +156,28 @@ export default function MyRequests() {
         ).then(res => res.json()).then(data => {
             console.log(listName,data);
             if (data.value.length > 0) {
-                _setData((d) => [...d.concat(data.value)]);
+                // _setData((d) => [...d.concat(data.value)]);
+                data1 = data1.concat(...data.value);
+            }
+            counter++;
+            if(counter === lists.length){
+                sortData();
             }
         }).catch(e => {
             console.log(e);
+            counter++;
         })
+    };
+
+    const sortData = () => {
+        setLoading(false);
+        _setData(data1.sort((a,b) => {
+            return new Date(b.Modified) > new Date(a.Modified)?1:-1;
+        }));
+        console.log("Data : ", data1.sort((a,b) => {
+            return new Date(b.Modified) > new Date(a.Modified)?1:-1;
+        }))
+        data1 = [];
     }
 
     useEffect(() => {
@@ -146,108 +214,112 @@ export default function MyRequests() {
                     style={{ marginBottom: "10px", padding: "5px", float:"right" }}
                 />
             </div>
-            <Table striped bordered hover>
-                <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                        <th 
-                        key={header.id} 
-                        onClick={header.column.getToggleSortingHandler()}>
-                        {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                            )}
-                            {{
-                                asc: <Icon iconName='ChevronUpMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
-                                desc: <Icon iconName='ChevronDownMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
-                            }[header.column.getIsSorted() as string] ?? null}
-                        </th>
+            {loading && <div>
+                <Spinner label='loading'></Spinner>
+            </div>}
+            {!loading && <div>
+                <Table striped bordered hover>
+                    <thead>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                        <tr key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                            <th style={{cursor:"pointer"}}
+                            key={header.id} 
+                            onClick={header.column.getToggleSortingHandler()}>
+                            {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext(),
+                                )}
+                                {{
+                                    asc: <Icon iconName='ChevronUpMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
+                                    desc: <Icon iconName='ChevronDownMed' style={{verticalAlign:"middle", marginLeft:"5px"}}/>,
+                                }[header.column.getIsSorted() as string] ?? null}
+                            </th>
+                        ))}
+                        </tr>
                     ))}
-                    </tr>
-                ))}
-                </thead>
-                <tbody>
-                {table.getRowModel().rows.map((row) => (
-                    <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
+                    </thead>
+                    <tbody>
+                    {table.getRowModel().rows.map((row) => (
+                        <tr key={row.id}>
+                        {row.getVisibleCells().map((cell) => (
+                            <td key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </td>
+                        ))}
+                        </tr>
                     ))}
-                    </tr>
-                ))}
-                </tbody>
-            </Table>
-
-            {/* 📄 Pagination */}
-            <div className="flex items-center gap-2">
-                <span>
-                    Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
-                    {table.getRowCount().toLocaleString()} Rows
-                </span>
-                <div style={{float:"right"}} className="flex items-center gap-2">
-                    <label>
-                    Go to page:
-                    </label>
-                    <label>
-                        <input
-                            type="number"
-                            min="1"
-                            max={table.getPageCount()}
-                            defaultValue={table.getState().pagination.pageIndex + 1}
-                            onChange={(e) => {
-                            const page = e.target.value ? Number(e.target.value) - 1 : 0
-                            table.setPageIndex(page)
-                            }}
-                            className="border p-1 rounded w-16"
-                        />
-                    </label>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.firstPage()}
-                    disabled={!table.getCanPreviousPage()}
-                    >
-                    {'<<'}
-                    </button>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                    >
-                    {'<'}
-                    </button>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                    >
-                    {'>'}
-                    </button>
-                    <button
-                    className="border rounded p-1"
-                    onClick={() => table.lastPage()}
-                    disabled={!table.getCanNextPage()}
-                    >
-                    {'>>'}
-                    </button>
-                    <span>Page size</span>
-                    <select
-                    value={table.getState().pagination.pageSize}
-                    onChange={(e) => {
-                        table.setPageSize(Number(e.target.value))
-                    }}
-                    >
-                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                        <option key={pageSize} value={pageSize}>
-                        {pageSize}
-                        </option>
-                    ))}
-                    </select>
+                    </tbody>
+                </Table>
+                {/* 📄 Pagination */}
+                <div className="flex items-center gap-2">
+                    <span>
+                        Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
+                        {table.getRowCount().toLocaleString()} Rows
+                    </span>
+                    <div style={{float:"right"}} className="flex items-center gap-2">
+                        <label>
+                        Go to page:
+                        </label>
+                        <label>
+                            <input
+                                type="number"
+                                min="1"
+                                max={table.getPageCount()}
+                                defaultValue={table.getState().pagination.pageIndex + 1}
+                                onChange={(e) => {
+                                const page = e.target.value ? Number(e.target.value) - 1 : 0
+                                table.setPageIndex(page)
+                                }}
+                                className="border p-1 rounded w-16"
+                            />
+                        </label>
+                        <button
+                        className="border rounded p-1"
+                        onClick={() => table.firstPage()}
+                        disabled={!table.getCanPreviousPage()}
+                        >
+                        {'<<'}
+                        </button>
+                        <button
+                        className="border rounded p-1"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                        >
+                        {'<'}
+                        </button>
+                        <button
+                        className="border rounded p-1"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                        >
+                        {'>'}
+                        </button>
+                        <button
+                        className="border rounded p-1"
+                        onClick={() => table.lastPage()}
+                        disabled={!table.getCanNextPage()}
+                        >
+                        {'>>'}
+                        </button>
+                        <span>Page size</span>
+                        <select
+                        value={table.getState().pagination.pageSize}
+                        onChange={(e) => {
+                            table.setPageSize(Number(e.target.value))
+                        }}
+                        >
+                        {[10, 20, 30, 40, 50].map((pageSize) => (
+                            <option key={pageSize} value={pageSize}>
+                            {pageSize}
+                            </option>
+                        ))}
+                        </select>
+                    </div>
                 </div>
-            </div>
+            </div>}
         </div>
     )
 }

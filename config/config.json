@@ -186,14 +186,6 @@
         }
       ]
     },
-    "vendor-registration-web-part": {
-      "components": [
-        {
-          "entrypoint": "./lib/webparts/vendorRegistration/VendorRegistrationWebPart.js",
-          "manifest": "./src/webparts/vendorRegistration/VendorRegistrationWebPart.manifest.json"
-        }
-      ]
-    },
     "vendor-registration-manually-web-part": {
       "components": [
         {
@@ -233,6 +225,78 @@
           "manifest": "./src/webparts/qrDetailsStatus/QrDetailsStatusWebPart.manifest.json"
         }
       ]
+    },
+    "digiflow-menu-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/digiflowMenu/DigiflowMenuWebPart.js",
+          "manifest": "./src/webparts/digiflowMenu/DigiflowMenuWebPart.manifest.json"
+        }
+      ]
+    },
+    "manage-approvers-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/manageApprovers/ManageApproversWebPart.js",
+          "manifest": "./src/webparts/manageApprovers/ManageApproversWebPart.manifest.json"
+        }
+      ]
+    },
+    "signed-po-repository-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/signedPoRepository/SignedPoRepositoryWebPart.js",
+          "manifest": "./src/webparts/signedPoRepository/SignedPoRepositoryWebPart.manifest.json"
+        }
+      ]
+    },
+    "bill-payment-repository-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/billPaymentRepository/BillPaymentRepositoryWebPart.js",
+          "manifest": "./src/webparts/billPaymentRepository/BillPaymentRepositoryWebPart.manifest.json"
+        }
+      ]
+    },
+    "summary-report-neibt-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/summaryReportNeibt/SummaryReportNeibtWebPart.js",
+          "manifest": "./src/webparts/summaryReportNeibt/SummaryReportNeibtWebPart.manifest.json"
+        }
+      ]
+    },
+    "finance-report-neibt-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/financeReportNeibt/FinanceReportNeibtWebPart.js",
+          "manifest": "./src/webparts/financeReportNeibt/FinanceReportNeibtWebPart.manifest.json"
+        }
+      ]
+    },
+    "request-history-report-neibt-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/requestHistoryReportNeibt/RequestHistoryReportNeibtWebPart.js",
+          "manifest": "./src/webparts/requestHistoryReportNeibt/RequestHistoryReportNeibtWebPart.manifest.json"
+        }
+      ]
+    },
+    "summary-report-expense-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/summaryReportExpense/SummaryReportExpenseWebPart.js",
+          "manifest": "./src/webparts/summaryReportExpense/SummaryReportExpenseWebPart.manifest.json"
+        }
+      ]
+    },
+    "finance-report-expense-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/financeReportExpense/FinanceReportExpenseWebPart.js",
+          "manifest": "./src/webparts/financeReportExpense/FinanceReportExpenseWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -260,11 +324,20 @@
     "SummaryReportWebPartStrings": "lib/webparts/summaryReport/loc/{locale}.js",
     "FinanceReportWebPartStrings": "lib/webparts/financeReport/loc/{locale}.js",
     "RequestHistoryReportWebPartStrings": "lib/webparts/requestHistoryReport/loc/{locale}.js",
-    "VendorRegistrationWebPartStrings": "lib/webparts/vendorRegistration/loc/{locale}.js",
     "VendorRegistrationManuallyWebPartStrings": "lib/webparts/vendorRegistrationManually/loc/{locale}.js",
     "VendorRegistrationDetailWebPartStrings": "lib/webparts/vendorRegistrationDetail/loc/{locale}.js",
     "VendorRegistrationSearchWebPartStrings": "lib/webparts/vendorRegistrationSearch/loc/{locale}.js",
     "QaRequestApprovalFormWebPartStrings": "lib/webparts/qaRequestApprovalForm/loc/{locale}.js",
-    "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js"
+    "QrDetailsStatusWebPartStrings": "lib/webparts/qrDetailsStatus/loc/{locale}.js",
+    "DigiflowMenuWebPartStrings": "lib/webparts/digiflowMenu/loc/{locale}.js",
+    "ManageApproversWebPartStrings": "lib/webparts/manageApprovers/loc/{locale}.js",
+    "SignedPoRepositoryWebPartStrings": "lib/webparts/signedPoRepository/loc/{locale}.js",
+    "BillPaymentRepositoryWebPartStrings": "lib/webparts/billPaymentRepository/loc/{locale}.js",
+    "SummaryReportNeibtWebPartStrings": "lib/webparts/summaryReportNeibt/loc/{locale}.js",
+    "FinanceReportNeibtWebPartStrings": "lib/webparts/financeReportNeibt/loc/{locale}.js",
+    "RequestHistoryReportNeibtWebPartStrings": "lib/webparts/requestHistoryReportNeibt/loc/{locale}.js",
+    "SummaryReportExpenseWebPartStrings": "lib/webparts/summaryReportExpense/loc/{locale}.js",
+    "FinanceReportExpenseWebPartStrings": "lib/webparts/financeReportExpense/loc/{locale}.js",
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
   }
 }
