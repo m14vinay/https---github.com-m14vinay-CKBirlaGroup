@@ -46,7 +46,11 @@ interface IPurchaseOrderItem {
 }
 
 interface IUserLookup {
+  Id?: number;
   Title?: string;
+}
+interface IApprovalItem {
+  CurrentStatus?: string; 
 }
 
 interface IDepartmentApproverData {
@@ -93,14 +97,18 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
 
   const params = new URLSearchParams(window.location.search);
   const itemId =
+<<<<<<< HEAD
   Number(params.get('RequestId'));
+=======
+    Number(params.get('id')) || Number(params.get('ID'));
+>>>>>>> origin/Abhishek
   const requestLabel = `PRJ-${itemId}`;
 
   const isReadOnly =
-  isActionDone ||
-  data?.Status === 'Approved' ||
-  data?.Status === 'Rejected' ||
-  statusMsg.includes("successfully");
+    isActionDone ||
+    data?.CurrentStatus === 'Approved' ||
+    data?.CurrentStatus === 'Rejected' ||
+    statusMsg.includes("successfully");
 
   const fetchFromList = React.useCallback(async <T,>(url: string): Promise<T> => {
     const response = await props.spHttpClient.get(url, SPHttpClient.configurations.v1);
@@ -179,8 +187,15 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
         ),
         departmentName
           ? fetchFromList<IListResponse<IDepartmentApproverData>>(
-              `${props.siteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?$filter=DepartmentName eq '${departmentName}'&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4`
-            )
+            `${props.siteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?
+$filter=DepartmentName eq '${departmentName}'
+&$select=Departmenthead/Id,Departmenthead/Title,
+Approval1/Id,Approval1/Title,
+Approval2/Id,Approval2/Title,
+Approval3/Id,Approval3/Title,
+Approval4/Id,Approval4/Title
+&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4`
+          )
           : Promise.resolve({ value: [] })
       ]);
 
@@ -228,6 +243,7 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
     }
   }, [comment, createHistoryItem, currentStep, getUserFromStep]);
 
+<<<<<<< HEAD
 
   const handleApproveReject = async (action:string) => {
     try {
@@ -403,6 +419,132 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
       setLoading(false);
     }
   };
+=======
+const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
+
+  if (!comment.trim()) {
+    setStatusMsg('Enter comment before taking action.');
+    return;
+  }
+
+  try {
+
+    // 🔴 SAFETY CHECK
+    if (!approverData) {
+      setStatusMsg("Approver configuration missing ❌");
+      return;
+    }
+
+    // ✅ STEP CALCULATION (FIXED)
+    const step =
+      !data?.ActionDate1 ? 1 :
+      !data?.ActionDate2 ? 2 :
+      !data?.ActionDate3 ? 3 :
+      4;
+
+    let payload: any = {};
+
+    // 🔴 REJECT (highest priority)
+    if (status === "Rejected") {
+      payload = {
+        CurrentStatus: "Rejected",
+        AssignedTo: "",
+        AssignedToEmailId: null
+      };
+    }
+
+    // ✅ STEP 1 → move to Approval2
+    else if (step === 1) {
+      payload = {
+        ApproverComment1: comment,
+        ActionDate1: new Date().toISOString(),
+
+        AssignedTo: approverData?.Approval2?.Title || "",
+        AssignedToEmailId: approverData?.Approval2?.Id || null,
+
+        CurrentStatus: "Pending"
+      };
+    }
+
+    // ✅ STEP 2 → move to Approval3
+    else if (step === 2) {
+      payload = {
+        ApproverComment2: comment,
+        ActionDate2: new Date().toISOString(),
+
+        AssignedTo: approverData?.Approval3?.Title || "",
+        AssignedToEmailId: approverData?.Approval3?.Id || null,
+
+        CurrentStatus: "Pending"
+      };
+    }
+
+    // ✅ FINAL STEP
+    else if (step === 3) {
+      payload = {
+        ApproverComment3: comment,
+        ActionDate3: new Date().toISOString(),
+
+        AssignedTo: "",
+        AssignedToEmailId: null,
+
+        CurrentStatus: "Approved"
+      };
+    }
+
+    // ❌ SAFETY CHECK
+    if (Object.keys(payload).length === 0) {
+      setStatusMsg("No action available ❌");
+      return;
+    }
+
+    console.log("FINAL PAYLOAD:", payload);
+
+    // 🔹 UPDATE SHAREPOINT ITEM
+    await props.spHttpClient.post(
+      `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'IF-MATCH': '*',
+          'X-HTTP-Method': 'MERGE'
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    // 🔹 SAVE HISTORY
+    await handleSaveHistory(itemId, status);
+
+    // 🔥 IMPORTANT → REFRESH FROM SERVER (NO LOCAL FAKE UPDATE)
+    await fetchData();
+    await fetchHistory();
+
+    setStatusMsg(`${status} successfully.`);
+    setIsActionDone(true);
+
+  } catch (error: any) {
+    console.error('Status update failed:', error);
+    setStatusMsg(error?.message || 'Unable to update the request.');
+  }
+
+}, [
+  comment,
+  data,
+  approverData,
+  fetchData,
+  fetchHistory,
+  handleSaveHistory,
+  itemId,
+  props.listName,
+  props.siteUrl,
+  props.spHttpClient
+]);
+
+[comment, currentStep, fetchHistory, handleSaveHistory, itemId, props.listName, props.siteUrl, props.spHttpClient];
+>>>>>>> origin/Abhishek
 
   React.useEffect(() => {
     fetchData().catch(() => undefined);
@@ -440,85 +582,85 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
   //********** */
 
   //************Handle Approver**************
-// const handleApprove = async () => {
-//   try {
-//     setLoading(true);
+  // const handleApprove = async () => {
+  //   try {
+  //     setLoading(true);
 
-//     if (!form.Comments) return alert("Comment is required.");
-//     if (!itemId) return;
+  //     if (!form.Comments) return alert("Comment is required.");
+  //     if (!itemId) return;
 
-//     const currentUser = await service.getUser();
+  //     const currentUser = await service.getUser();
 
-//     // 🔐 SECURITY CHECK
-//     if (!form.AssignedTo || Number(form.AssignedTo) !== currentUser.Id) {
-//       alert("You are not authorized ❌");
-//       return;
-//     }
+  //     // 🔐 SECURITY CHECK
+  //     if (!form.AssignedTo || Number(form.AssignedTo) !== currentUser.Id) {
+  //       alert("You are not authorized ❌");
+  //       return;
+  //     }
 
-//     let payload: any = {};
+  //     let payload: any = {};
 
-//     // * STEP BASED APPROVAL (NO BUG LOGIC)
+  //     // * STEP BASED APPROVAL (NO BUG LOGIC)
 
-//     // STEP 1
-//     if (!form.ActionDate1) {
-//       payload = {
-//         ApproverComment1: form.Comments,
-//         ActionDate1: new Date().toISOString(), // ✅ date always set
-//         CurrentStatus: "Pending",
-//         AssignedToId: Number(form.Approval2Id) || null
-//       };
-//     }
+  //     // STEP 1
+  //     if (!form.ActionDate1) {
+  //       payload = {
+  //         ApproverComment1: form.Comments,
+  //         ActionDate1: new Date().toISOString(), // ✅ date always set
+  //         CurrentStatus: "Pending",
+  //         AssignedToId: Number(form.Approval2Id) || null
+  //       };
+  //     }
 
-//     // STEP 2
-//     else if (!form.ActionDate2) {
-//       payload = {
-//         ApproverComment2: form.Comments,
-//         ActionDate2: new Date().toLocaleString(),
-//         CurrentStatus: "Pending",
-//         AssignedToId: Number(form.Approval3Id) || null
-//       };
-//     }
+  //     // STEP 2
+  //     else if (!form.ActionDate2) {
+  //       payload = {
+  //         ApproverComment2: form.Comments,
+  //         ActionDate2: new Date().toLocaleString(),
+  //         CurrentStatus: "Pending",
+  //         AssignedToId: Number(form.Approval3Id) || null
+  //       };
+  //     }
 
-//     // FINAL STEP
-//     else if (!form.ActionDate3) {
-//       payload = {
-//         ApproverComment3: form.Comments,
-//         ActionDate3: new Date().toLocaleString(),
-//         CurrentStatus: "Approved",
-//         AssignedToId: null
-//       };
-//     }
+  //     // FINAL STEP
+  //     else if (!form.ActionDate3) {
+  //       payload = {
+  //         ApproverComment3: form.Comments,
+  //         ActionDate3: new Date().toLocaleString(),
+  //         CurrentStatus: "Approved",
+  //         AssignedToId: null
+  //       };
+  //     }
 
-//     // ❌ SAFETY CHECK
-//     if (Object.keys(payload).length === 0) {
-//       alert("No approval action available ❌");
-//       return;
-//     }
+  //     // ❌ SAFETY CHECK
+  //     if (Object.keys(payload).length === 0) {
+  //       alert("No approval action available ❌");
+  //       return;
+  //     }
 
-//     console.log("FINAL APPROVE PAYLOAD:", payload);
+  //     console.log("FINAL APPROVE PAYLOAD:", payload);
 
-//     // 🔹 UPDATE MAIN LIST
-//     await service.updateItem(itemId, payload);
+  //     // 🔹 UPDATE MAIN LIST
+  //     await service.updateItem(itemId, payload);
 
-//     // 🔹 SAVE HISTORY
-//     await handleSaveHistory(itemId);
+  //     // 🔹 SAVE HISTORY
+  //     await handleSaveHistory(itemId);
 
-//     alert("Approved Successfully ✅");
+  //     alert("Approved Successfully ✅");
 
-//     // 🔹 REDIRECT
-//     window.location.assign(
-//       `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`
-//     );
+  //     // 🔹 REDIRECT
+  //     window.location.assign(
+  //       `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`
+  //     );
 
-//     // 🔹 RESET COMMENT ONLY
-//     setForm(prev => ({ ...prev, Comments: "" }));
+  //     // 🔹 RESET COMMENT ONLY
+  //     setForm(prev => ({ ...prev, Comments: "" }));
 
-//   } catch (error) {
-//     console.error("APPROVE ERROR:", error);
-//   } finally {
-//     setLoading(false);
-//   }
-// };
+  //   } catch (error) {
+  //     console.error("APPROVE ERROR:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
 
   return (
@@ -699,11 +841,17 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
                       {item.Designation || item.UserName}
                     </div>
 
-                    <div className={styles.timelineText}>
-                      <b>Approver Name:</b> {item.UserName || '-'}
-                    </div>
+                    {item.Designation !== "Request Initiator" ? (
+                      <div className={styles.timelineText}>
+                        <b>Approver Name:</b> {item.UserName || '-'}
+                      </div>
+                    ) : (
+                      <div className={styles.timelineText}>
+                        <b>Initiator:</b> {item.UserName || '-'}
+                      </div>
+                    )}
 
-                    {item.UserAction && (
+                    {item.UserAction && item.Designation !== "Request Initiator" && (
                       <div className={`${styles.timelineText} ${statusTextClassMap[status]}`}>
                         <b>Action Taken:</b> {item.UserAction}
                       </div>
