@@ -225,17 +225,8 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
 
   const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
-
-    // ✅ form me update karo
-    setForm(prev => ({
-      ...prev,
-      projectCode: value
-    }));
-
-    // 🔹 Validation
     const errorMsg = validateProjectCode(value);
     setRequestNoError(errorMsg);
-
     if (errorMsg || !value) {
       setForm(prev => ({
         ...prev,
@@ -244,13 +235,10 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
       }));
       return;
     }
-
     try {
       // 🔹 Service call to fetch request details
       const result = await service.getRequestDetails(value);
-
       if (result.length > 0) {
-
         if (result[0].CurrentStatus === 'Approved') {
           setForm(prev => ({
             ...prev,
@@ -268,6 +256,16 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
           }));
         }
 
+      }
+      else{
+         alert("Enter correct project code");
+          setForm(prev => ({
+            ...prev,
+            projectCode:'',
+            projectTitle: '',
+            projectDescription: '',
+            Department: ''
+          }));
       }
     } catch (error) {
       console.error("Error Fetching Data:", error);
@@ -472,7 +470,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
               </div>
 
               <label>Project Code <span className={styles.required}>*</span></label>
-              <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange} />
+              <input name="projectCode" value={form.projectCode} onChange={handleChange} onBlur={handleRequestNoChange} />
               {requestNoError && <span className={styles.error}>{requestNoError}</span>}
 
               <label>Project Title</label>
