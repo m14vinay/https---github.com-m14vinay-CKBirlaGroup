@@ -168,7 +168,7 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
 
     try {
       const itemResponse = await fetchFromList<IApprovalItem>(
-        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles`
+        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles,Approval1,Approval2,Approval3&$select=*,Approval1/Title,Approval2/Title,Approval3/Title`
       );
 
       const departmentName = String(itemResponse.Department || '').replace(/'/g, "''");
