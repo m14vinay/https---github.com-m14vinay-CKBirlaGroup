@@ -241,15 +241,25 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
               </div>
             )}
 
-            <div className={styles.managementColumn}>
-              {pendingTopSteps.map((item: IWorkflowStep, i: number) => (
-                <div key={i} className={styles.managementStep}>
-                  <div className={styles.approverName}>{item.userName}</div>
-                  <div className={styles.approverRole}>{item.designation || 'Pending Approval'}</div>
-                  <div className={styles.approverStatus}>Pending</div>
-                </div>
-              ))}
-            </div>
+         <div className={styles.approverFlow}>
+
+  {latestApprovedTopItem && (
+    <div className={styles.departmentStep}>
+      <div className={styles.approverName}>{latestApprovedTopItem.UserName}</div>
+      <div className={styles.approverRole}>{latestApprovedTopItem.Designation}</div>
+      <div className={styles.approverStatus}>Approved</div>
+    </div>
+  )}
+
+  {pendingTopSteps.map((item: IWorkflowStep, i: number) => (
+    <div key={i} className={styles.managementStep}>
+      <div className={styles.approverName}>{item.userName}</div>
+      <div className={styles.approverRole}>{item.designation || 'Pending Approval'}</div>
+      <div className={styles.approverStatus}>Pending</div>
+    </div>
+  ))}
+
+</div>
           </div>
 
           {/* ================= FORM ================= */}
