@@ -74,8 +74,8 @@
 .approverFlow {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 0;
-  margin: 0 0 14px;
 }
 
 .departmentStep,
@@ -87,7 +87,7 @@
 .departmentStep {
   width: 190px;
   min-height: 64px;
-  margin-right: -22px;
+  margin-right: 0px;
   padding: 10px 34px 10px 16px;
   background: #0c7a3f;
   color: #fff;
@@ -96,8 +96,8 @@
 
 .managementColumn {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  gap: 0;
   z-index: 1;
 }
 

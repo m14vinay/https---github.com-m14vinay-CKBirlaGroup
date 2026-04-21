@@ -237,17 +237,8 @@ const handleprojectNoExist = async () => {
 
   const handleRequestNoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
-
-    // ✅ form me update karo
-    setForm(prev => ({
-      ...prev,
-      projectCode: value
-    }));
-
-    // 🔹 Validation
     const errorMsg = validateProjectCode(value);
     setRequestNoError(errorMsg);
-
     if (errorMsg || !value) {
       setForm(prev => ({
         ...prev,
@@ -256,14 +247,11 @@ const handleprojectNoExist = async () => {
       }));
       return;
     }
-
     try {
       // 🔹 Service call to fetch request details
       const result = await service.getRequestDetails(value);
-  
       if (result.length > 0) {
-
-        if (  result[0].CurrentStatus === 'Approved') {
+        if (result[0].CurrentStatus === 'Approved') {
           setForm(prev => ({
             ...prev,
             projectTitle: result[0].ProjectTitle || '',
@@ -278,6 +266,16 @@ const handleprojectNoExist = async () => {
           }));
         }
 
+      }
+      else{
+         alert("Enter correct project code");
+          setForm(prev => ({
+            ...prev,
+            projectCode:'',
+            projectTitle: '',
+            projectDescription: '',
+            Department: ''
+          }));
       }
     } catch (error) {
       console.error("Error Fetching Data:", error);
@@ -482,8 +480,8 @@ const handleprojectNoExist = async () => {
               </div>
 
               <label>Project Code <span className={styles.required}>*</span></label>
-              <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange} />
-                        {requestNoError && <span className={styles.error}>{requestNoError}</span>}
+              <input name="projectCode" value={form.projectCode} onChange={handleChange} onBlur={handleRequestNoChange} />
+              {requestNoError && <span className={styles.error}>{requestNoError}</span>}
 
               <label>Project Title</label>
               <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />

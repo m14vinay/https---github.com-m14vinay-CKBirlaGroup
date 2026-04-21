@@ -241,15 +241,25 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
               </div>
             )}
 
-            <div className={styles.managementColumn}>
-              {pendingTopSteps.map((item: IWorkflowStep, i: number) => (
-                <div key={i} className={styles.managementStep}>
-                  <div className={styles.approverName}>{item.userName}</div>
-                  <div className={styles.approverRole}>{item.designation || 'Pending Approval'}</div>
-                  <div className={styles.approverStatus}>Pending</div>
-                </div>
-              ))}
-            </div>
+         <div className={styles.approverFlow}>
+
+  {latestApprovedTopItem && (
+    <div className={styles.departmentStep}>
+      <div className={styles.approverName}>{latestApprovedTopItem.UserName}</div>
+      <div className={styles.approverRole}>{latestApprovedTopItem.Designation}</div>
+      <div className={styles.approverStatus}>Approved</div>
+    </div>
+  )}
+
+  {pendingTopSteps.map((item: IWorkflowStep, i: number) => (
+    <div key={i} className={styles.managementStep}>
+      <div className={styles.approverName}>{item.userName}</div>
+      <div className={styles.approverRole}>{item.designation || 'Pending Approval'}</div>
+      <div className={styles.approverStatus}>Pending</div>
+    </div>
+  ))}
+
+</div>
           </div>
 
           {/* ================= FORM ================= */}
@@ -352,7 +362,10 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
           <div className={styles.timelineTitle}>Timeline of the Request - {requestLabel}</div>
 
           {latestTimelineHistory.map((item: IHistoryItem, i: number) => {
-            const timelineStatus = getTimelineStatus(item.UserAction);
+            const timelineStatus =
+  item.Designation === "Request Initiator"
+    ? "approved"
+    : getTimelineStatus(item.UserAction);
             const status =
               timelineStatus === 'approved'
                 ? 'Approved'
@@ -366,21 +379,35 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
                   {getTimelineMarker(timelineStatus)}
                 </div>
 
-                <div className={styles.timelineText}>
-                  <b>{item.Designation}</b>
+<div className={styles.timelineText}>
+  <b>{item.Designation}</b>
 
-                  <div>Approver Name: {item.UserName}</div>
-                  <div>Action Taken: {status}</div>
-                  <div>
-                    Action Date: {item.ActionDate
-                      ? new Date(item.ActionDate).toLocaleString()
-                      : '-'}
-                  </div>
+  {/* ✅ Initiator case */}
+  {item.Designation === "Request Initiator" ? (
+    <>
+      <div>Initiator: {item.UserName}</div>
+      <div>
+        Date & Time: {item.ActionDate
+          ? new Date(item.ActionDate).toLocaleString()
+          : '-'}
+      </div>
+    </>
+  ) : (
+    <>
+      <div>Approver Name: {item.UserName}</div>
+      <div>Action Taken: {status}</div>
+      <div>
+        Action Date: {item.ActionDate
+          ? new Date(item.ActionDate).toLocaleString()
+          : '-'}
+      </div>
+    </>
+  )}
 
-                  {item.UserComment && (
-                    <div>Comments: {item.UserComment}</div>
-                  )}
-                </div>
+  {item.UserComment && (
+    <div>Comments: {item.UserComment}</div>
+  )}
+</div>
               </div>
             );
           })}

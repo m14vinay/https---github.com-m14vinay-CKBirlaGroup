@@ -68,7 +68,8 @@ export default function MyPendingRequests() {
             header: () => 'Description'
         }),
         columnHelper.accessor('Department', {
-            header: () => <span>Department</span>
+            header: () => <span>Department</span>,
+            cell: (info) => <span>{info.row.original.Department || info.row.original.DepartmentName}</span>
         }),
         columnHelper.accessor('CurrentStatus', {
             header: 'Status'

@@ -328,7 +328,7 @@ rightPanel {
 
 .pendingBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #225a22;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";
@@ -344,7 +344,7 @@ rightPanel {
 .statusBox {
   background-color:#225a22;
   color: #fff;
-  padding: 19px 10px 8px;
+  padding: 19px 10px 24px;
   position: relative;
   width: 150px;
 }
@@ -415,4 +415,13 @@ rightPanel {
 .Pending {
   color: darkgoldenrod;
   font-weight: bold;
+}
+.rightPanel ul li span.pendingstatus {
+  color: yellow;
+  font-weight: bold;
+}
+.rightPanel ul li.pendingIcon::before {
+  background-color: yellow;
+  content: "\f105";
+  font-size: 20px;
 }

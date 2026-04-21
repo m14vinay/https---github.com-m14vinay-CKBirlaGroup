@@ -36,7 +36,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     approver3: '',
     approver4: '',
     approver5: '',
-    Approval1Id: 0, //Change in num
+    Approval1Id: 0,
     Approval2Id: 0,
     Approval3Id: 0,
     Approval1: '',
@@ -54,7 +54,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     rate: 0,
     amount: 0,
     Comments: ''
-    //selectedApprover: 0
   });
 
   type TPurchaseOrderRow = {
@@ -76,23 +75,22 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
   const [poItems, setPoItems] = React.useState<TPurchaseOrderRow[]>([INITIAL_PO_ROW]);
   const service = React.useMemo(() => new SharePointService(props.context), [props.context]);
   const [attachments, setAttachments] = React.useState<any[]>([]);
-  const MAX_TOTAL_SIZE_MB = 25;
+  const MAX_TOTAL_SIZE_MB = 51;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   const [approvalChain, setApprovalChain] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [actionType, setActionType] = React.useState<'approve' | 'reject' | ''>('');
-  //const [approverOptions, setApproverOptions] = React.useState<string[]>([]);
   const [approverOptions, setApproverOptions] = React.useState<any[]>([]);
 
-  // --- 1️⃣ Get ID from query string ---
+  //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
 
-  // --- 3️⃣ Load data on mount ---
+  // Load data on mount ---
   React.useEffect(() => {
     const id = getIdFromQueryString();
     if (id) {
@@ -104,8 +102,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
   const removeExistingFile = async (index: number) => {
     const file = attachments[index];
 
-
-
     await service.deleteAttachmentFromSP(file);
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
@@ -114,7 +110,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     { key: 'Yes', text: 'Yes' },
     { key: 'No', text: 'No' }
   ];
-
 
   const handleFetchById = async (id: number) => {
     try {
@@ -125,7 +120,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       console.log("Result:", result);
       if (
         result.AuthorId !== currentUser.Id &&
-        result.AssignedToEmailId !== currentUser.Id
+        result.AssignedTo !== currentUser.Id
       ) {
         alert("You Are Not Authorized ❌");
         return;
@@ -152,7 +147,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Approval1Id: result.Approval1Id || 0,
           Approval2Id: result.Approval2Id || 0,
           Approval3Id: result.Approval3Id || 0,
-          AssignedToId: result.AssignedToId || 0,
+          AssignedTo: result.AssignedTo || 0,
           ActionDate1: result.ActionDate1 ?? null,
           ActionDate2: result.ActionDate2 ?? null,
           ActionDate3: result.ActionDate3 ?? null,
@@ -177,7 +172,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       setLoading(false);
     }
   };
-
   //Load purchase order detail rows already stored against the current item.
   const loadPurchaseOrderDetails = React.useCallback(async (id: number) => {
     try {
@@ -198,8 +192,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     }
   }, [service]);
 
-
-  // Add a blank purchase order row.
   const addPurchaseOrderRow = () => {
     setPoItems((prev) => [...prev, { ...INITIAL_PO_ROW }]);
   };
@@ -513,14 +505,14 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          // AssignedTo: approver?.Approval1?.Title || 0,
-          // AssignedToEmailId: approver?.Approval1?.Id || 0,
-          // //AssignedTo: User.Title,
-          // //Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-          // Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-          // Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          // Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
-          CurrentStatus: "Draft"
+          AssignedTo: approver?.Approval1?.Title || "",
+          AssignedToEmailId: approver?.Approval1?.Id || null,
+          //AssignedTo: User.Title,
+          //Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
+          Approval1Id: (dataApprover[0].Approval1?.Id || 0),
+          Approval2Id: (dataApprover[0].Approval2?.Id || 0),
+          Approval3Id: (dataApprover[0].Approval3?.Id || 0),
+          CurrentStatus: "Pending"
         };
 
       else if (form.TotalProjectAmount > 200000 && form.Department === "Branding") {
@@ -542,12 +534,12 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          // AssignedTo: approver?.Approval1.Title || 0,
-          // AssignedToEmailId: approver?.Approval1?.Id || 0,
-          // //AssignedTo: User.Title,
-          // Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-          // Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          // Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
+          AssignedTo: approver?.Approval1?.Title || "",
+          AssignedToEmailId: approver?.Approval1?.Id || null,
+          //AssignedTo: User.Title,
+          Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
+          Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
+          Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
           CurrentStatus: "Pending"
         };
       }
@@ -570,15 +562,14 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          // AssignedTo: approver?.Approval1?.Title || 0,
-          // AssignedToEmailId: approver?.Approval1?.Id || 0,
-          // //AssignedTo: User.Title,
-          // Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-          // Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          // Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
+          AssignedTo: approver?.Approval1?.Title || "",
+          AssignedToEmailId: approver?.Approval1?.Id || null,
+          //AssignedTo: User.Title,
+          Approval1Id: dataApprover[0].Approval1.Id || 0,
+          Approval2Id: dataApprover[0].Approval2.Id || 0,
+          Approval3Id: dataApprover[0].Approval3.Id || 0,
           CurrentStatus: "Draft"
         };
-
       }
 
       if (!itemId) {
@@ -722,15 +713,14 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             Quote3: form.Quote3?.toString() || "",
             SelectedQuote: form.SelectedQuote?.toString() || "",
             Selectedvendor: form.Selectedvendor || "",
-            //SelectedQuote: Number(form.SelectedQuote) || 0,
             Department: form.Department || "",
             Advancepayment: form.Advancepayment || "",
             ApprovalPath: form.ApprovalPath || "",
-            AssignedTo: approver?.Approval1?.Title,
-            AssignedToEmailId: approver?.Approval1?.Id || 0,
-            Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-            Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-            Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
+            AssignedTo: approver?.Approval1?.Title || "",
+            AssignedToEmailId: approver?.Approval1?.Id || null,
+            Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
+            Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
+            Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
             CurrentStatus: "Pending"
           };
 
@@ -755,8 +745,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedTo: approver?.Approval1?.Title,
-          AssignedToEmailId: approver?.Approval1?.Id || 0,
+          AssignedTo: approver?.Approval1?.Title || "",
+          AssignedToEmailId: approver?.Approval1?.Id || null,
           //AssignedTo: User.Title,
           Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
           Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
@@ -795,8 +785,11 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             await service.uploadFile(res.Id, form.files[i]);
           }
         }
-
         alert("Submitted Successfully ✅");
+
+        setTimeout(() => {
+          window.location.href = "https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/Dashboard.aspx";
+        }, 800);
 
         await service.updateItem(res.Id, {
           RequestNo: `PRJ-${res.Id}`
@@ -823,6 +816,10 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           await service.uploadFile(itemId, form.files[i]);
         }
         alert("Submitted Successfully ✅");
+
+        setTimeout(() => {
+          window.location.href = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        }, 500);
       }
       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
       window.location.assign(url); 

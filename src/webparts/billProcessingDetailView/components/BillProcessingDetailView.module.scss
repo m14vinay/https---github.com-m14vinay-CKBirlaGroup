@@ -45,7 +45,7 @@
 .statusBox {
   background-color: #225a22;
   color: #fff;
-  padding: 19px 10px 8px;
+  padding: 19px 10px 24px;
   position: relative;
   width: 150px;
 }
@@ -61,9 +61,12 @@
   right: -61%;
   top: 0;
 }
-
 .pendingBox {
   background-color: #cdcd17;
+  color: #fff;
+  padding: 19px 10px 8px;
+  position: relative;
+  width: 150px;
 }
 
 .pendingBox::after {
@@ -72,7 +75,7 @@
 
 .pendingBox::before {
   border-bottom: 46px solid transparent;
-  border-left: 46px solid #225a22;
+  border-left: 46px solid white;
   border-right: 46px solid transparent;
   border-top: 46px solid transparent;
   content: "";

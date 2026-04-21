@@ -260,19 +260,6 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       ClaimAmount: form.ClaimAmount,
       ExpanseType: form.ExpenseName,
       files: form.files
-<<<<<<< HEAD
-  ? Array.from(form.files).map((file: any) => ({
-      FileName: file.name,
-      ServerRelativeUrl:file.name
-    }))
-  : []
-=======
-        ? Array.from(form.files).map((file: any) => ({
-          FileName: file.name,
-          ServerRelativeUrl:file.Name
-        }))
-        : []
->>>>>>> main
     };
     addExpense(newExpense);
     setForm(prev => ({
@@ -299,7 +286,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction: 'Upcoming',
+        UserAction: UserAction,
         Designation: Designation,
         Sequence: Sequence
       };
@@ -331,7 +318,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         DepartmentHead: dataApproverFI.ApproverName?.Title || "",
         ApprovalPath: dataApproverFI.ApproverName?.Title,
         ProjectTitle: 'Reimbursement',
-        Description: form.Remarks
+        ProjectDescription: form.Remarks
       };
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -348,8 +335,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         CFOEmailId: Number(dataApproverCFO.ApproverName?.Id || 0),
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
         ProjectTitle: 'Reimbursement',
-        Description: form.Remarks,
-        ApprovalPath: dataApprover.DepartmentHead?.Title + '-->' + dataApproverFI.ApproverName?.Title + '-->' + dataApproverCFO.ApproverName?.Title + '-->' + dataApproverFI.ApproverName?.Title
+        ProjectDescription: form.Remarks,
+        ApprovalPath: dataApprover.DepartmentHead?.Title + ' > ' + dataApproverFI.ApproverName?.Title + ' > ' + dataApproverCFO.ApproverName?.Title + ' > ' + dataApproverFI.ApproverName?.Title
       }
     }
     else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -366,8 +353,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         CFOEmailId: 0,
         AssignedTo: dataApprover.DepartmentHead?.Title || "",
         ProjectTitle: 'Reimbursement',
-        Description: form.Remarks,
-        ApprovalPath: dataApprover.DepartmentHead?.Title + '-->' + dataApproverFI.ApproverName?.Title + '-->' + dataApproverCompliance.ApproverName?.Title + '-->' + dataApproverFI.ApproverName?.Title
+        ProjectDescription: form.Remarks,
+        ApprovalPath: dataApprover.DepartmentHead?.Title + ' > ' + dataApproverFI.ApproverName?.Title + ' > ' + dataApproverCompliance.ApproverName?.Title + ' > ' + dataApproverFI.ApproverName?.Title
       }
     }
     try {
@@ -402,21 +389,21 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                   }
                   if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
                     await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 1);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Pending', 'Finance Approver', new Date(), 1);
                   }
                   else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
                     await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverCFO.ApproverName?.Title, '', 'CFO Approver', new Date(), 3);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
+                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverCFO.ApproverName?.Title, 'Upcoming', 'CFO Approver', new Date(), 3);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
                   }
                   else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
                     await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverCompliance.ApproverName?.Title, '', 'Compliance Head', new Date(), 3);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
+                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverCompliance.ApproverName?.Title, 'Upcoming', 'Compliance Head', new Date(), 3);
+                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
                   }
                   alert("Data Submitted Successfully ✅");
                   console.log("Successfully Transaction Saved:-" + resExpense.Id);
@@ -457,21 +444,21 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               }
               if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
                 await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 1);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, 'Pending', 'Finance Approver', new Date(), 1);
               }
               else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
                 await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
-                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
-                await handleSaveHistory(itemId, 'REM', dataApproverCFO.ApproverName?.Title, '', 'CFO Approver', new Date(), 3);
-                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
+                await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
+                await handleSaveHistory(itemId, 'REM', dataApproverCFO.ApproverName?.Title, 'Upcoming', 'CFO Approver', new Date(), 3);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
               }
               else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
                 await handleSaveHistory(itemId, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, '', 'Department Head', new Date(), 1);
-                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 2);
-                await handleSaveHistory(itemId, 'REM', dataApproverCompliance.ApproverName?.Title, '', 'Compliance Head', new Date(), 3);
-                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, '', 'Finance Approver', new Date(), 4);
+                await handleSaveHistory(itemId, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
+                await handleSaveHistory(itemId, 'REM', dataApproverCompliance.ApproverName?.Title, 'Upcoming', 'Compliance Head', new Date(), 3);
+                await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
               }
               alert("Data Submitted Successfully ✅");
               const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -503,7 +490,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       DepartmentName: form.DepartmentName,
       CurrentStatus: 'Draft',
       ProjectTitle: 'Reimbursement',
-      Description: form.Remarks
+      ProjectDescription: form.Remarks
     };
     try {
       setLoading(true);
@@ -670,29 +657,31 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
           ...Expenseform,
           expenses: []
         });
-        if (Expensedata.value.length > 0) {
-          const formattedExpenses = Expensedata.value.map((item: any) => ({
-            Id: item.Id,
-            Description: item.Description || "",
-            BillAmount: item.BillAmount || 0,
-            BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
-            BillNo: item.BillNo || "",
-            DocumentName: item.DocumentName || "",
-            ClaimAmount: item.ClaimAmount || 0,
-            ExpanseType: item.ExpanseType || "",
-            files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
-              FileName: file.FileName,
-              ServerRelativeUrl: file.ServerRelativeUrl
-            }))
-              : []
-          }));
-          setExpenseForm({
-            expenses: formattedExpenses
-          });
-          setForm(prev => ({
-            ...prev,
-            TotalAmount: Number(form.TotalAmount) - Number(Expenseform.expenses[index].ClaimAmount)
-          }));
+        if (Expensedata !== null) {
+          if (Expensedata.value.length > 0) {
+            const formattedExpenses = Expensedata.value.map((item: any) => ({
+              Id: item.Id,
+              Description: item.Description || "",
+              BillAmount: item.BillAmount || 0,
+              BillDate: item.BillDate ? new Date(item.BillDate) : new Date(),
+              BillNo: item.BillNo || "",
+              DocumentName: item.DocumentName || "",
+              ClaimAmount: item.ClaimAmount || 0,
+              ExpanseType: item.ExpanseType || "",
+              files: item.AttachmentFiles ? item.AttachmentFiles.map((file: any) => ({
+                FileName: file.FileName,
+                ServerRelativeUrl: file.ServerRelativeUrl
+              }))
+                : []
+            }));
+            setExpenseForm({
+              expenses: formattedExpenses
+            });
+            setForm(prev => ({
+              ...prev,
+              TotalAmount: Number(form.TotalAmount) - Number(Expenseform.expenses[index].ClaimAmount)
+            }));
+          }
         }
       }
     }
@@ -799,10 +788,10 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                                   style={{ display: "flex", alignItems: "center", gap: "10px" }}
                                 >
                                   <a
-                                    href={file.ServerRelativeUrl}
+                                    href={file.name ? file.name : file.ServerRelativeUrl}
                                     rel="noopener noreferrer"
                                   >
-                                    {file.FileName}
+                                    <span>{file.name ? file.name : file.FileName}</span>
                                   </a>
                                 </li>
                               ))}
