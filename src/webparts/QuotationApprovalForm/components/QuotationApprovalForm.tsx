@@ -36,7 +36,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     approver3: '',
     approver4: '',
     approver5: '',
-    Approval1Id: 0, //Change in num
+    Approval1Id: 0,
     Approval2Id: 0,
     Approval3Id: 0,
     Approval1: '',
@@ -54,7 +54,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     rate: 0,
     amount: 0,
     Comments: ''
-    //selectedApprover: 0
   });
 
   type TPurchaseOrderRow = {
@@ -83,17 +82,16 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
   const [approvalChain, setApprovalChain] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [actionType, setActionType] = React.useState<'approve' | 'reject' | ''>('');
-  //const [approverOptions, setApproverOptions] = React.useState<string[]>([]);
   const [approverOptions, setApproverOptions] = React.useState<any[]>([]);
 
-  // --- 1️⃣ Get ID from query string ---
+  //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
 
-  // --- 3️⃣ Load data on mount ---
+  // Load data on mount ---
   React.useEffect(() => {
     const id = getIdFromQueryString();
     if (id) {
@@ -105,8 +103,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
   const removeExistingFile = async (index: number) => {
     const file = attachments[index];
 
-
-
     await service.deleteAttachmentFromSP(file);
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
@@ -115,7 +111,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     { key: 'Yes', text: 'Yes' },
     { key: 'No', text: 'No' }
   ];
-
 
   const handleFetchById = async (id: number) => {
     try {
@@ -174,7 +169,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       setLoading(false);
     }
   };
-
   //Load purchase order detail rows already stored against the current item.
   const loadPurchaseOrderDetails = React.useCallback(async (id: number) => {
     try {
@@ -195,8 +189,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     }
   }, [service]);
 
-
-  // Add a blank purchase order row.
   const addPurchaseOrderRow = () => {
     setPoItems((prev) => [...prev, { ...INITIAL_PO_ROW }]);
   };
@@ -567,7 +559,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Approval3Id: dataApprover[0].Approval3.Id || 0,
           CurrentStatus: "Draft"
         };
-
       }
 
       if (!itemId) {
@@ -711,7 +702,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             Quote3: form.Quote3?.toString() || "",
             SelectedQuote: form.SelectedQuote?.toString() || "",
             Selectedvendor: form.Selectedvendor || "",
-            //SelectedQuote: Number(form.SelectedQuote) || 0,
             Department: form.Department || "",
             Advancepayment: form.Advancepayment || "",
             ApprovalPath: form.ApprovalPath || "",
@@ -784,8 +774,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             await service.uploadFile(res.Id, form.files[i]);
           }
         }
-
-        //alert("Submitted Successfully ✅");
         alert("Submitted Successfully ✅");
 
         setTimeout(() => {
