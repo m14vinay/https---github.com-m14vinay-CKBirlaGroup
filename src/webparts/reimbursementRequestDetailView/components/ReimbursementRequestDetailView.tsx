@@ -168,7 +168,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                     statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
                   }
                   else if (item.UserAction === "Pending") {
-                    statusClass = `${styles.pendingBox}`;
+                    statusClass = `${styles.statusBox} ${styles.pendingBox}`;
                   }
                   return (
                     <div className={statusClass} key={index}>

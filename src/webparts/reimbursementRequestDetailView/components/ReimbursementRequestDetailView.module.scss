@@ -320,10 +320,6 @@ rightPanel {
 }
 .pendingBox {
   background-color: #cdcd17;
-  color: #fff;
-  padding: 19px 10px 8px;
-  position: relative;
-  width: 150px;
 }
 
 .pendingBox::after {
@@ -348,7 +344,7 @@ rightPanel {
 .statusBox {
   background-color:#225a22;
   color: #fff;
-  padding: 19px 10px 8px;
+  padding: 19px 10px 24px;
   position: relative;
   width: 150px;
 }
