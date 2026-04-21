@@ -283,7 +283,7 @@ const approvalPaths = data.map((item: any) => {
 };
  
  // 🔹 Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
    const { name, value } = e.target;
  
    setForm({
@@ -310,14 +310,14 @@ const handleSaveHistory = async (id: number, Title: string, UserName: string, Us
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction: 'Upcoming',
+        UserAction: UserAction,
         Designation: Designation,
         Sequence: Sequence
       };
     }
 
-  await service.createHistoryItem(payload);
-};
+    await service.createHistoryItem(payload);
+  };
 
    const handleSaveOrUpdate = async () => {
   // 🔹 Validations
@@ -374,7 +374,7 @@ const User=await service.getUserById(Number(form.Approval1Id));
         await service.uploadFile(res.Id , form.files[i]);
         }
       }
-      alert("Saved Successfully.✅");
+      alert("Request saved successfully.✅");
        await service.updateItem(res.Id, {
        RequestNo: `NEI-${res.Id}`
   });
@@ -388,7 +388,7 @@ const User=await service.getUserById(Number(form.Approval1Id));
         await service.uploadFile(itemId, form.files[i]);
         }
       }
-      alert("Updated Successfully ✅");
+      alert("Request Updated Successfully ✅");
     }
   } catch (error) {
     console.error(error);
@@ -451,20 +451,20 @@ const handleUpdate = async () => {
      await service.updateItem(itemId, payload);
      if (!form.ApprovalID.split('_')[1] && !form.ApprovalID.split('_')[2]) {
           await handleSaveHistory(itemId, 'QANEIBT', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(itemId, 'QANEIBT',User.Title, '', 'Department Head', new Date(), 1);
+          await handleSaveHistory(itemId, 'QANEIBT',User.Title, 'Pending', 'Department Head', new Date(), 1);
         }
    else {
           await handleSaveHistory(itemId, 'QANEIBT', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(itemId, 'QANEIBT', User.Title, '', 'Department Head', new Date(), 1);
-          await handleSaveHistory(itemId, 'QANEIBT', User1.Title ,'', 'Management Approver', new Date(), 2);
-          await handleSaveHistory(itemId, 'QANEIBT', User2.Title, '', 'Management Approver', new Date(), 3);
+          await handleSaveHistory(itemId, 'QANEIBT', User.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(itemId, 'QANEIBT', User1.Title ,'Upcoming', 'Management Approver', new Date(), 2);
+          await handleSaveHistory(itemId, 'QANEIBT', User2.Title, 'Upcoming', 'Management Approver', new Date(), 3);
         }
      if (form.files && form.files.length > 0) {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(itemId, form.files[i]);
       }
     }
-    alert("Submitted Successfully.✅");    
+    alert("Request Submitted Successfully.✅");    
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);  
     }
@@ -474,13 +474,13 @@ const handleUpdate = async () => {
      
      if (!form.ApprovalID.split('_')[1] && !form.ApprovalID.split('_')[2]) {
           await handleSaveHistory(res.Id, 'QANEIBT', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(res.Id, 'QANEIBT',User.Title, '', 'Department Head', new Date(), 1);
+          await handleSaveHistory(res.Id, 'QANEIBT',User.Title, 'Pending', 'Department Head', new Date(), 1);
         }
    else {
           await handleSaveHistory(res.Id, 'QANEIBT', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(res.Id, 'QANEIBT', User.Title, '', 'Department Head', new Date(), 1);
-          await handleSaveHistory(res.Id, 'QANEIBT', User1.Title ,'', 'Management Approver', new Date(), 2);
-          await handleSaveHistory(res.Id, 'QANEIBT', User2.Title, '', 'Management Approver', new Date(), 3);
+          await handleSaveHistory(res.Id, 'QANEIBT', User.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(res.Id, 'QANEIBT', User1.Title ,'Upcoming', 'Management Approver', new Date(), 2);
+          await handleSaveHistory(res.Id, 'QANEIBT', User2.Title, 'Upcoming', 'Management Approver', new Date(), 3);
         }
      if(res.Id>0)
      {
@@ -488,7 +488,7 @@ const handleUpdate = async () => {
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id , form.files[i]);
       }
-      alert("Submitted Successfully.✅");  
+      alert("Request Submitted Successfully.✅");  
       await service.updateItem(res.Id, {
        RequestNo: `NEI-${res.Id}`
   });
@@ -554,8 +554,8 @@ setForm(prev => ({
         
 
           <label>Project Description & Advance Payment Details</label>
-          <input name="ProjectDescription" value={form.ProjectDescription} onChange={handleChange} />
-          
+          {/* <input name="ProjectDescription" value={form.ProjectDescription} onChange={handleChange} /> */}
+          <textarea name="ProjectDescription" value={form.ProjectDescription} onChange={handleChange}/>
 
           <label>Total Project Amount</label>
           <input name="TotalProjectAmount" value={form.TotalProjectAmount } type='number' onChange={handleChange}  />

@@ -308,7 +308,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
         await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.Comments);
-        alert("Approved Successfully.");
+        alert("Request Approved Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
         setComment('');
@@ -484,7 +484,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
         await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.Comments);
-        alert("Rejected Successfully.");
+        alert("Request Rejected Successfully.");
         setComment('');
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);

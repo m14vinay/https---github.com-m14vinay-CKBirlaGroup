@@ -405,7 +405,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                     await handleSaveHistory(res.Id, 'REM', dataApproverCompliance.ApproverName?.Title, 'Upcoming', 'Compliance Head', new Date(), 3);
                     await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
                   }
-                  alert("Data Submitted Successfully ✅");
+                  alert("Request Submitted Successfully ✅");
                   console.log("Successfully Transaction Saved:-" + resExpense.Id);
                   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
                   window.location.assign(url);
@@ -460,7 +460,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 await handleSaveHistory(itemId, 'REM', dataApproverCompliance.ApproverName?.Title, 'Upcoming', 'Compliance Head', new Date(), 3);
                 await handleSaveHistory(itemId, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
               }
-              alert("Data Submitted Successfully ✅");
+              alert("Request Submitted Successfully ✅");
               const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
               window.location.assign(url);
             }
@@ -548,7 +548,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 expenses: formattedExpenses
               });
 
-              alert("Data Saved Successfully ✅");
+              alert("Request Saved Successfully ✅");
             }
           }
 
@@ -607,7 +607,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 expenses: formattedExpenses
               });
             }
-            alert("Data Updated Successfully ✅");
+            alert("Request Updated Successfully ✅");
           }
         }
 
@@ -651,7 +651,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     if (Number(Expenseform.expenses[index].Id) > 0) {
       const datadelete = await service.deleteExpense(Number(Expenseform.expenses[index].Id))
       if (datadelete) {
-        alert("Item deleted successfully.");
+        alert("Request Item deleted successfully.");
         const Expensedata = await service.getItemByExpenseData(Number(itemId));
         setExpenseForm({
           ...Expenseform,

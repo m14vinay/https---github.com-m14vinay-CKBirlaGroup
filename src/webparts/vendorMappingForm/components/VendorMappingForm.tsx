@@ -285,12 +285,13 @@ const handleprojectNoExist = async () => {
 
   // 🔹 Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm({
-      ...form,
-      [name]: value
-    });
-  };
+    const value = e.target.value.toUpperCase();
+
+  setForm(prev => ({
+    ...prev,
+    projectCode: value
+  }));
+};
 
   const handleSaveHistory = async (id: number, Title: string, UserName: string, UserAction: string, Designation: string, ActionDate: Date, Sequence: number) => {
     let payload: {};
@@ -354,7 +355,7 @@ const handleprojectNoExist = async () => {
             await service.uploadFile(res.Id, form.files[i]);
           }
         }
-        alert("Saved Successfully.✅");
+        alert("Request Saved Successfully.✅");
         await service.updateItem(res.Id, {
           RequestNo: `VMR-${res.Id}`
         });
@@ -368,7 +369,7 @@ const handleprojectNoExist = async () => {
             await service.uploadFile(itemId, form.files[i]);
           }
         }
-        alert("Updated Successfully.✅");
+        alert("Request Updated Successfully.✅");
       }
     } catch (error) {
       console.error(error);
@@ -413,7 +414,7 @@ const handleprojectNoExist = async () => {
             await service.uploadFile(itemId, form.files[i]);
           }
         }
-        alert("Submitted Successfully.✅");
+        alert("Request Submitted Successfully.✅");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
       }
@@ -428,7 +429,7 @@ const handleprojectNoExist = async () => {
             await service.uploadFile(res.Id, form.files[i]);
           }
         }
-        alert("Submitted Successfully.✅");
+        alert("Request Submitted Successfully.✅");
         await service.updateItem(res.Id, {
           RequestNo: `VMR-${res.Id}`
         });
@@ -480,7 +481,7 @@ const handleprojectNoExist = async () => {
               </div>
 
               <label>Project Code <span className={styles.required}>*</span></label>
-              <input name="projectCode" value={form.projectCode} onChange={handleChange} onBlur={handleRequestNoChange} />
+              <input name="projectCode" value={form.projectCode} onChange={handleChange} onBlur={handleRequestNoChange} type='uppercase' />
               {requestNoError && <span className={styles.error}>{requestNoError}</span>}
 
               <label>Project Title</label>

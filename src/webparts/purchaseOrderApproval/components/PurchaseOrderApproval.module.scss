@@ -33,7 +33,7 @@
 }
 
 .status {
-  color: red;
+  color:  #DE0606;
   font-weight: bold;
 }
 
@@ -67,7 +67,7 @@
 }
 
 .pendingBox::after {
-  border-left-color:#F6BE00;
+  border-left-color: #F6BE00;
 }
 
 .pendingBox::before {

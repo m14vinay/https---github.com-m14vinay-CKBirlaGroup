@@ -297,6 +297,25 @@ FinanceController/Id,FinanceController/Title
    const data = await response.json();
    return data.value;
     }
+
+    public async updateItem(id: number, data: any): Promise<void> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
+
+    await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+            'IF-MATCH': '*',
+            'X-HTTP-Method': 'MERGE',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+        body: JSON.stringify(data)
+      }
+    );
+  }
+
   // GetList Item
 private async getListItemType(): Promise<string> {
   const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')?$select=ListItemEntityTypeFullName`;

@@ -29,7 +29,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     ApprovalPath: '',
     files: null,
     attachments: [],
-    ApproverComment1: '',
+     ApprovalComment:'',
     CurrentStatus: '',
     approver1: '',
     approver2: '',
@@ -40,6 +40,7 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     ActionDate2: '',
     ActionDate3: '',
     Approval2: '',
+   
     Approval3: '',
     DepartmentHead: '',
     RequestNo: '',
@@ -121,6 +122,11 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     }
   }, [itemId]);
 
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setForm({ ...form, [name]: value });
+    };
 
   const handleFetchById = async (id: number) => {
     try {
@@ -213,7 +219,6 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
 
 
   
-
   // const handleSaveRejectedHistory = async (id: number) => {
 
   //   const currentuser = await service.getUser();
@@ -237,136 +242,98 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     try {
       setLoading(true);
 
-      if (!approverComment) return alert("Enter Approver Comment.");
+       if (!form.ApprovalComment) return alert("Enter Approver Comment");
+       let payload = {};
+      let CurrentSequence = 0;
+      let NextSequence = 0;
+      let CurrentUserAction = '';
+      let NextuserAction = '';
       if (!itemId) return;
-
       // 🔥 CASE 1: Only 1 approver
-      if (!form.Approver2EmailId && !form.Approver3EmailId) {
-        await service.updateItemdata(itemId, "Approved", approverComment, "", 0);
-
-           await handleUpdateApproveHistory(itemId, 'Approved', 1, approverComment);
-        alert("✅ Final Approved");
-
-        window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
-        return;
+       if (!form.Approver2EmailId && !form.Approver3EmailId) {
+         payload = {
+          ApproverComment1:form.ApprovalComment,
+          CurrentStatus: 'Approved',
+          ActionDate1: new Date().toLocaleDateString('en-GB'),
+          AssignedTo:'Approved',
+          AssignedToEmailId: 0
+        };
+        CurrentSequence = 1;
+        CurrentUserAction = 'Approved';
+        NextSequence = 0;
+        NextuserAction = '';
       }
-
-      // 🔥 CASE 2: First Approver
-      if (!form.ActionDate1) {
-        await service.updateItemdata(
-          itemId,
-          "Pending",
-          approverComment,
-          AssignedID2,
-          form.Approver2EmailId
-        );
-
-           await handleUpdateApproveHistory(itemId, 'Approved', 1, approverComment);
-        alert("✅ First Level Approved");
-
-        window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
-        return;
+      else
+if (form.ActionDate1 == '') {
+        const UserApproval2 = await service.getUserById(form.Approver2EmailId);
+        payload = {
+          ApproverComment1: form.ApprovalComment,
+          CurrentStatus: 'Pending',
+          ActionDate1: new Date().toLocaleDateString('en-GB'),
+          AssignedTo: UserApproval2?.Title,
+          AssignedToEmailId: Number(UserApproval2?.Id)
+        };
+        CurrentSequence = 1;
+        CurrentUserAction = 'Approved';
+        NextSequence = 2;
+        NextuserAction = 'Pending';
       }
-
+      
       // 🔥 CASE 3: Second Approver
-      if (!form.ActionDate2) {
+      else if (!form.ActionDate2) {
 
         // agar 3rd approver nahi hai → FINAL
         if (!form.Approver3EmailId) {
-          await service.updateItemdata2(itemId, "Approved", approverComment, "", 0);
-
-           await handleUpdateApproveHistory(itemId, 'Approved', 2, approverComment);
-          alert("✅ Final Approved");
+          {
+        payload = {
+          ApproverComment2: form.ApprovalComment,
+          CurrentStatus: 'Approved',
+          ActionDate2: new Date().toLocaleDateString('en-GB'),
+          AssignedTo: 'Approved',
+          AssignedToEmailId: 0
+        };
+        CurrentSequence = 2;
+        CurrentUserAction = 'Approved';
+        NextSequence = 0;
+        NextuserAction = '';
+      }
         } else {
-          // agar 3rd approver hai → Pending
-          await service.updateItemdata2(
-            itemId,
-            "Pending",
-            approverComment,
-            AssignedID3,
-            form.Approver3EmailId
-          );
-
-            await handleUpdateApproveHistory(itemId, 'Approved', 2, approverComment);
-          alert("✅ Second Level Approved");
-        }
-
-        window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
-        return;
+          const UserApproval3 = await service.getUserById(form.Approver3EmailId);
+        payload = {
+          ApproverComment2: form.ApprovalComment,
+          CurrentStatus: 'Pending',
+          ActionDate2: new Date().toLocaleDateString('en-GB'),
+          AssignedTo: UserApproval3?.Title,
+          AssignedToEmailId: Number(UserApproval3?.Id)
+        };
+        CurrentSequence = 2;
+        CurrentUserAction = 'Approved';
+        NextSequence = 3;
+        NextuserAction = 'Pending';
       }
-
-      // 🔥 CASE 4: Third Approver (FINAL)
-      if (!form.ActionDate3) {
-        await service.updateItemdata3(itemId, "Approved", approverComment, "Approved");
-
-          await handleUpdateApproveHistory(itemId, 'Approved', 3, approverComment);
-        alert("✅ Final Approved");
-
-        window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
-        return;
-      }
-
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const handleReject = async () => {
-    try {
-      //setActionType('approve');
-      setLoading(true);
-      if (!approverComment) return alert("Enter Approver Comment");
-      if (!itemId) return;
-
-      if (!approverComment) {
-        alert("Comment is Required For Rejection ❗");
-        return;
+      else if (form.ActionDate3 == '') {
+        payload = {
+          ApproverComment2: form.ApprovalComment,
+          CurrentStatus: 'Approved',
+          ActionDate2: new Date().toLocaleDateString('en-GB'),
+          AssignedTo: 'Approved',
+          AssignedToEmailId: 0
+        };
+        CurrentSequence = 3;
+        CurrentUserAction = 'Approved';
+        NextSequence = 0;
+        NextuserAction = '';
       }
-
-      if (!form.Approver2EmailId && !form.Approver3EmailId) {
-        await service.updateItemdata(itemId, "Rejected", approverComment, "", 0);
-
-         await handleUpdateApproveHistory(itemId, 'Rejected', 1, approverComment);
-        alert("✅ Final Rejected");
-
-        window.location.assign(`${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`);
-        return;
-      }
-
-      if (form.ActionDate1 === '') {
-        await service.updateItemdata(itemId, "Rejected", approverComment, "Rejected", form.Approver2EmailId);
-       await handleUpdateApproveHistory(itemId, 'Rejected', 1, approverComment);
-        alert("✅ Rejected Successfully");
+        if (payload != '') {
+        const updatedData = await service.updateItem(itemId, payload);
+        await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.ApprovalComment);
+        alert("Request Approved Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
         return;
-
-      }
-
-
-      else if (form.ActionDate2 === '') {
-        await service.updateItemdata2(itemId, "Rejected", approverComment, 'Rejected', form.Approver3EmailId);
-        await handleUpdateApproveHistory(itemId, 'Rejected', 2, approverComment);
-        alert("✅ Rejected Successfully");
-        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-        window.location.assign(url);
-        return; // 🔥 stop again
-
-      }
-      else if (form.ActionDate3 === '') {
-        await service.updateItemdata3(itemId, "Rejected", approverComment, "Rejected");
-        await handleUpdateApproveHistory(itemId, 'Rejected', 3, approverComment);
-        alert("✅  Rejected Successfully");
-        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-        window.location.assign(url);
-        return; // 🔥 stop again
-
-      }
-      alert("❌ Rejected Successfully");
-
-      setApproverComment('');
+        }
+      
     } catch (error) {
       console.error(error);
     }
@@ -375,8 +342,135 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
     }
   };
 
+     const handleSaveApproveHistory = async (id: number, CurrentUserAction: string, NextUserAction: string, CurrentSequence: number, NextSequence: number, comment: string) => {
+
+    if (CurrentUserAction != '') {
+      const payload = {
+        UserAction: CurrentUserAction,
+        ActionDate: new Date().toISOString(),
+        UserComment: comment
+      };
+      await service.UpdateHistoryItem(id, payload, 'QANEIBT', CurrentSequence);
+    }
+    if (NextUserAction != '') {
+      const payload = {
+        UserAction: NextUserAction,
+        ActionDate: new Date().toISOString(),
+        UserComment: comment
+      };
+      await service.UpdateHistoryItem(id, payload, 'QANEIBT', NextSequence);
+    }
+
+  };
 
 
+  const handleReject = async () => {
+    try {
+      //setActionType('approve');
+      setLoading(true);
+     if (!form.ApprovalComment) return alert("Enter Approver Comment");
+      let payload = {};
+      let CurrentSequence = 0;
+      let NextSequence = 0;
+      let CurrentUserAction = '';
+      let NextuserAction = '';
+      if (!itemId) return;
+
+    
+      if (!form.Approver2EmailId && !form.Approver3EmailId) {
+         payload = {
+          ApproverComment1: approverComment,
+          CurrentStatus: 'Rejected',
+          ActionDate1: new Date().toLocaleDateString('en-GB'),
+          AssignedTo: 'Rejected',
+          AssignedToEmailId: 0
+        };
+        CurrentSequence = 1;
+        NextSequence=0;
+        CurrentUserAction='Rejected';
+        NextuserAction='';
+      }
+       else
+if (form.ActionDate1 == '') {
+        const UserApproval2 = await service.getUserById(form.Approver2EmailId);
+        payload = {
+          ApproverComment1: form.ApprovalComment,
+          CurrentStatus: 'Rejected',
+          ActionDate1: new Date().toLocaleDateString('en-GB'),
+          AssignedTo: 'Rejected',
+          AssignedToEmailId: 0
+        };
+        CurrentSequence = 1;
+        NextSequence = 2;
+         CurrentUserAction='Rejected';
+        NextuserAction='Rejected';
+      }
+      
+      // 🔥 CASE 3: Second Approver
+      else if (!form.ActionDate2) {
+
+        // agar 3rd approver nahi hai → FINAL
+        if (!form.Approver3EmailId) {
+          {
+        payload = {
+          ApproverComment2: form.ApprovalComment,
+          CurrentStatus: 'Rejected',
+          ActionDate2: new Date().toLocaleDateString('en-GB'),
+          AssignedTo: 'Rejected',
+          AssignedToEmailId: 0
+        };
+        CurrentSequence = 2;
+        CurrentUserAction = 'Rejected';
+        NextSequence = 0;
+        NextuserAction = '';
+      }
+        } else {
+          const UserApproval3 = await service.getUserById(form.Approver3EmailId);
+        payload = {
+          ApproverComment2: form.ApprovalComment,
+          CurrentStatus: 'Rejected',
+          ActionDate2: new Date().toLocaleDateString('en-GB'),
+          AssignedTo: 'Rejected',
+          AssignedToEmailId: 0
+        };
+        CurrentSequence = 2;
+        CurrentUserAction = 'Rejected';
+        NextSequence = 3;
+        NextuserAction = 'Rejected';
+      }
+    }
+      else if (form.ActionDate3 == '') {
+     {
+        payload = {
+          ApproverComment2: form.ApprovalComment,
+          CurrentStatus: 'Rejected',
+          ActionDate2: new Date().toLocaleDateString('en-GB'),
+          AssignedTo: 'Rejected',
+          AssignedToEmailId: 0
+        };
+        CurrentSequence = 3;
+        CurrentUserAction = 'Rejected';
+        NextSequence = 0;
+        NextuserAction = '';
+      }
+      if (payload != '') {
+        const updatedData = await service.updateItem(itemId, payload);
+        await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.ApprovalComment);
+        alert("Request Rejected Successfully.");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
+        return;
+      }
+    }
+    } catch (error) {
+      console.error(error);
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
+     
 
   return (
     <section>
@@ -498,8 +592,10 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
 
               <label></label>
               <label></label>
-              <label>Approver Comments <span className={styles.required}>*</span></label>
-              <textarea value={approverComment} onChange={(e) => setApproverComment(e.target.value)} />
+              <div style={{ paddingBottom: "2%" }}>
+             <label>Comments <span className={styles.required}>*</span></label>
+            <input type='text' className="form-control" name="ApprovalComment" value={form.ApprovalComment} onChange={handleChange} />
+             </div>
               {/* Buttons */}
               <div className={styles.buttonGroup}>
                 <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled}>Approve</button>
@@ -517,57 +613,58 @@ const QuotationRequestApprovalNeiBt: React.FC<IQuotationRequestApprovalNeiBtProp
               <div className={styles.rightPanelHeader}>
                 <h4>Timeline of the Request - {form.RequestNo}</h4>
               </div>
-              <ul>
-                {History.map((item, index) => {
-                  const isApproved = item.UserAction === "Approved";
-                  const isRejected = item.UserAction === "Rejected";
-                  const isInitiated = item.UserAction === "Request Initiator";
-                  const isUpcoming = item.UserAction === "Upcoming";
-                  return (
-                    <li
-                      key={index}
-                      className={
-                        isApproved
-                          ? styles.tickIcon
-                          : isRejected
-                            ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : ""
-                      }
-                    >
-                      <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
-                      <span><b>{isInitiated ? "Initiator" : "Approver Name:"} </b>{item.UserName}</span>
-                      {item.UserAction && (
-                        <span>
-                          <b>Action Taken:{" "}</b>
-                          <span
-                            className={
-                              isApproved
-                                ? styles.apprStatus
-                                : isRejected
-                                  ? styles.rejStatus
-                                  : isUpcoming ? styles.upcomingstatus : ""
-                            }
-                          >
-                            {item.UserAction}
-                          </span>
-                        </span>
-                      )}
-                      {item.ActionDate && (<span><b>Action Date: </b>
-                        {new Date(item.ActionDate).toLocaleString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          hour12: true
-                        }).replace(',', ' AT')}
-                      </span>
-                      )}
-                      {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
-                    </li>
-                  );
-                })}
-              </ul>
+               <ul>
+                             {History.map((item, index) => {
+                                 const isApproved = item.UserAction === "Approved";
+                                 const isRejected = item.UserAction === "Rejected";
+                                 const isInitiated = item.UserAction === "Request Initiator";
+                                 const isUpcoming = item.UserAction === "Upcoming";
+                                 const isPending = item.UserAction === "Pending";
+                                 return (
+                                   <li
+                                     key={index}
+                                     className={
+                                       isApproved
+                                         ? styles.tickIcon
+                                         : isRejected
+                                           ? styles.crossIcon
+                                           : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : ""
+                                     }
+                                   >
+                                     <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
+                                     <span><b>{isInitiated ? "Initiator" : "Approver Name:"} </b>{item.UserName}</span>
+                                     {item.UserAction && (
+                                       <span>
+                                         <b>Action Taken:{" "}</b>
+                                         <span
+                                           className={
+                                             isApproved
+                                               ? styles.apprStatus
+                                               : isRejected
+                                                 ? styles.rejStatus
+                                                 : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : ""
+                                           }
+                                         >
+                                           {item.UserAction}
+                                         </span>
+                                       </span>
+                                     )}
+                                     {item.ActionDate && (<span><b>Action Date: </b>
+                                       {new Date(item.ActionDate).toLocaleString('en-GB', {
+                                         day: 'numeric',
+                                         month: 'short',
+                                         year: 'numeric',
+                                         hour: 'numeric',
+                                         minute: '2-digit',
+                                         hour12: true
+                                       }).replace(',', ' AT')}
+                                     </span>
+                                     )}
+                                     {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
+                                   </li>
+                                 );
+                               })}
+                            </ul>
             </div>
           </div>
         </div>

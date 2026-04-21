@@ -255,7 +255,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
         if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
         await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.ApprovalComment);
-        alert("Approved Successfully.");
+        alert("Request Approved Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
         return;
@@ -293,7 +293,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
     try {
        //setActionType('reject');
         setLoading(true);
-      if (!approverComment) return alert("Enter Approver Comment");
+      if (!form.ApprovalComment) return alert("Enter Approver Comment");
       let payload = {};
       let CurrentSequence = 0;
       let NextSequence = 0;
@@ -348,7 +348,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
         if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
         await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.ApprovalComment);
-        alert("Rejected Successfully.");
+        alert("Request Rejected Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
         return;

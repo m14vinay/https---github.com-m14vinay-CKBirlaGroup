@@ -164,7 +164,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
        if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
         await handleSaveApproveHistory(itemId, CurrentUserAction,  CurrentSequence,  approverComment);
-        alert("Approved Successfully.");
+        alert("Request Approved Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
         return;
@@ -216,7 +216,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
         await handleSaveApproveHistory(itemId, CurrentUserAction, CurrentSequence,  approverComment);
-        alert("Rejected Successfully.");
+        alert("Request Rejected Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
         return;
