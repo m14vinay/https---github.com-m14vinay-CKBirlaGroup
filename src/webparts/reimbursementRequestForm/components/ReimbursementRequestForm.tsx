@@ -249,7 +249,11 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     });
   };
   const handleExpenseSubmit = () => {
-    if (form.files.length < 0) { alert("Please upload file.") }
+    if (form.files.length < 0) { alert("Please upload file.");return; }
+    if (!form.BillNo) { alert("Please enter bill no.");return; }
+    if (!form.BillDate) { alert("Please enter bill date."); return; }
+    if (!form.BillAmount) { alert("Please enter bill amount."); return; }
+    if (!form.ClaimAmount) { alert("Please enter claim amount."); return; }
     const newExpense = {
       Id: 0,
       Description: form.Description,
@@ -386,8 +390,10 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                     for (let k = 0; k < Expenseform.expenses[i].files.length; k++) {
                       await service.uploadFile(res.Id, Expenseform.expenses[i].files[k]);
                     }
-                  }
-                  if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
+                  }                  
+                }
+              }
+              if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
                     await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
                     await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Pending', 'Finance Approver', new Date(), 1);
                   }
@@ -406,11 +412,9 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                     await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
                   }
                   alert("Request Submitted Successfully ✅");
-                  console.log("Successfully Transaction Saved:-" + resExpense.Id);
+                  console.log("Successfully Transaction Saved:-" + res.Id);
                   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
                   window.location.assign(url);
-                }
-              }
             }
           }
         } else {
