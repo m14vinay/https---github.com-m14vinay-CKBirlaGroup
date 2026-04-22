@@ -249,7 +249,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     });
   };
   const handleExpenseSubmit = () => {
-    if (form.files.length < 0) { alert("Please upload file.");return; }
+    if (form.files.length==0) { alert("Please upload file.");return; }
     if (!form.BillNo) { alert("Please enter bill no.");return; }
     if (!form.BillDate) { alert("Please enter bill date."); return; }
     if (!form.BillAmount) { alert("Please enter bill amount."); return; }
@@ -881,7 +881,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
             </div>
             <div className={styles.formGroup}>
               <label style={{ width: '30%' }}>Bill Amount<span className={styles.required}>*</span></label>
-              <input className="form-control" style={{ width: '100%' }} name="BillAmount" value={form.BillAmount} onChange={handleChange} required>
+              <input className="form-control" style={{ width: '100%' }} type='number' name="BillAmount" value={form.BillAmount} onChange={handleChange} required>
               </input>
             </div>
             <div className={styles.formGroup}>
