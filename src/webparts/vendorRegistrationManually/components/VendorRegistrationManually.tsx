@@ -8,7 +8,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import SharePointService from '../service/Service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import * as XLSX from 'xlsx';
-
+//import downloadIcon from '../assets/download.png';
 
 
 const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (props) => {
@@ -1009,12 +1009,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                                 <input style={{ width: '50%' }} name="filesPanManual" type="file" multiple onChange={handleFileChange} />
                               </div>
                             </div>
-                            <div className={styles['col-md-12']}>
-                              <div className={styles.formGroup}>
-                                <label style={{ width: '50%' }}>GST Registration<span className={styles.required}>*</span></label>
-                                <input style={{ width: '50%' }} name="filesVATManual" type="file" multiple onChange={handleFileChange} />
-                              </div>
-                            </div>
+                            
                             <div className={styles['col-md-12']}>
                               <div className={styles.formGroup}>
                                 <label style={{ width: '50%' }}>Address Proof</label>
@@ -1056,6 +1051,14 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                     </div>
                   </div>
                   <div id="Excel" style={{ display: isActiveExcel ? 'block' : 'none' }}>
+                    <div className={styles['col-md-12']}>
+                    <div className={styles.formGroup}>
+                    <label style={{ width: '50%' }}>Vendor</label>
+                    <p> <a href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/Vendor.xlsx" target="_blank" rel="noopener noreferrer">
+                    <img src="/assets/download.png"   alt="Download Vendor List" style={{ width: '24px', cursor: 'pointer' }}/> </a>  </p>
+                   </div>
+                 
+                        </div>
                     <div className={styles["accordion-item"]}>
                       <div className={styles['col-md-12']}>
                         <div className={styles.formGroup}>
