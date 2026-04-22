@@ -299,8 +299,16 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     await service.createHistoryItem(payload);
   };
   const handleSubmit = async () => {
-    if (!form.DepartmentName) {
+     if (!form.DepartmentName) {
       alert("Please select a Department");
+      return false;
+    }
+    if (!form.TotalAmount || form.TotalAmount==0) {
+      alert("Please add expenses.");
+      return false;
+    }
+    if (!form.Remarks) {
+      alert("Please enter remarks.");
       return false;
     }
     setLoading(true);
@@ -388,7 +396,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 if (resExpense.Id > 0) {
                   if (resExpense.Id > 0 && Expenseform.expenses[i].files.length > 0) {
                     for (let k = 0; k < Expenseform.expenses[i].files.length; k++) {
-                      await service.uploadFile(res.Id, Expenseform.expenses[i].files[k]);
+                      await service.uploadFile(resExpense.Id, Expenseform.expenses[i].files[k]);
                     }
                   }                  
                 }
@@ -485,6 +493,14 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   const handleSave = async () => {
     if (!form.DepartmentName) {
       alert("Please select a Department");
+      return false;
+    }
+    if (!form.TotalAmount || form.TotalAmount==0) {
+      alert("Please add expenses.");
+      return false;
+    }
+    if (!form.Remarks) {
+      alert("Please enter remarks.");
       return false;
     }
     // 🔹 Payload (common)
