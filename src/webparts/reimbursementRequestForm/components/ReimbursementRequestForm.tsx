@@ -249,7 +249,11 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     });
   };
   const handleExpenseSubmit = () => {
-    if (form.files.length < 0) { alert("Please upload file.") }
+    if (form.files.length==0) { alert("Please upload file.");return; }
+    if (!form.BillNo) { alert("Please enter bill no.");return; }
+    if (!form.BillDate) { alert("Please enter bill date."); return; }
+    if (!form.BillAmount) { alert("Please enter bill amount."); return; }
+    if (!form.ClaimAmount) { alert("Please enter claim amount."); return; }
     const newExpense = {
       Id: 0,
       Description: form.Description,
@@ -295,8 +299,16 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     await service.createHistoryItem(payload);
   };
   const handleSubmit = async () => {
-    if (!form.DepartmentName) {
+     if (!form.DepartmentName) {
       alert("Please select a Department");
+      return false;
+    }
+    if (!form.TotalAmount || form.TotalAmount==0) {
+      alert("Please add expenses.");
+      return false;
+    }
+    if (!form.Remarks) {
+      alert("Please enter remarks.");
       return false;
     }
     setLoading(true);
@@ -384,10 +396,12 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 if (resExpense.Id > 0) {
                   if (resExpense.Id > 0 && Expenseform.expenses[i].files.length > 0) {
                     for (let k = 0; k < Expenseform.expenses[i].files.length; k++) {
-                      await service.uploadFile(res.Id, Expenseform.expenses[i].files[k]);
+                      await service.uploadFile(resExpense.Id, Expenseform.expenses[i].files[k]);
                     }
-                  }
-                  if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
+                  }                  
+                }
+              }
+              if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
                     await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
                     await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Pending', 'Finance Approver', new Date(), 1);
                   }
@@ -406,11 +420,9 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                     await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
                   }
                   alert("Request Submitted Successfully ✅");
-                  console.log("Successfully Transaction Saved:-" + resExpense.Id);
+                  console.log("Successfully Transaction Saved:-" + res.Id);
                   const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
                   window.location.assign(url);
-                }
-              }
             }
           }
         } else {
@@ -481,6 +493,14 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   const handleSave = async () => {
     if (!form.DepartmentName) {
       alert("Please select a Department");
+      return false;
+    }
+    if (!form.TotalAmount || form.TotalAmount==0) {
+      alert("Please add expenses.");
+      return false;
+    }
+    if (!form.Remarks) {
+      alert("Please enter remarks.");
       return false;
     }
     // 🔹 Payload (common)
@@ -877,7 +897,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
             </div>
             <div className={styles.formGroup}>
               <label style={{ width: '30%' }}>Bill Amount<span className={styles.required}>*</span></label>
-              <input className="form-control" style={{ width: '100%' }} name="BillAmount" value={form.BillAmount} onChange={handleChange} required>
+              <input className="form-control" style={{ width: '100%' }} type='number' name="BillAmount" value={form.BillAmount} onChange={handleChange} required>
               </input>
             </div>
             <div className={styles.formGroup}>

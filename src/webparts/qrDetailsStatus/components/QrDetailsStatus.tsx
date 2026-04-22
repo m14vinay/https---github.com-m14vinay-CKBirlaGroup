@@ -81,6 +81,11 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
   // Load the main request, department approvers, and PO rows used by the page.
   const fetchData = async (): Promise<void> => {
+    if (!itemId) {
+      console.error("Invalid itemId:", itemId);
+      return;
+    }
+
     const res = await props.spHttpClient.get(
       `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles`,
       SPHttpClient.configurations.v1
@@ -241,25 +246,25 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
               </div>
             )}
 
-         <div className={styles.approverFlow}>
+            <div className={styles.approverFlow}>
 
-  {latestApprovedTopItem && (
-    <div className={styles.departmentStep}>
-      <div className={styles.approverName}>{latestApprovedTopItem.UserName}</div>
-      <div className={styles.approverRole}>{latestApprovedTopItem.Designation}</div>
-      <div className={styles.approverStatus}>Approved</div>
-    </div>
-  )}
+              {latestApprovedTopItem && (
+                <div className={styles.departmentStep}>
+                  <div className={styles.approverName}>{latestApprovedTopItem.UserName}</div>
+                  <div className={styles.approverRole}>{latestApprovedTopItem.Designation}</div>
+                  <div className={styles.approverStatus}>Approved</div>
+                </div>
+              )}
 
-  {pendingTopSteps.map((item: IWorkflowStep, i: number) => (
-    <div key={i} className={styles.managementStep}>
-      <div className={styles.approverName}>{item.userName}</div>
-      <div className={styles.approverRole}>{item.designation || 'Pending Approval'}</div>
-      <div className={styles.approverStatus}>Pending</div>
-    </div>
-  ))}
+              {pendingTopSteps.map((item: IWorkflowStep, i: number) => (
+                <div key={i} className={styles.managementStep}>
+                  <div className={styles.approverName}>{item.userName}</div>
+                  <div className={styles.approverRole}>{item.designation || 'Pending Approval'}</div>
+                  <div className={styles.approverStatus}>Pending</div>
+                </div>
+              ))}
 
-</div>
+            </div>
           </div>
 
           {/* ================= FORM ================= */}
@@ -363,9 +368,9 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
           {latestTimelineHistory.map((item: IHistoryItem, i: number) => {
             const timelineStatus =
-  item.Designation === "Request Initiator"
-    ? "approved"
-    : getTimelineStatus(item.UserAction);
+              item.Designation === "Request Initiator"
+                ? "approved"
+                : getTimelineStatus(item.UserAction);
             const status =
               timelineStatus === 'approved'
                 ? 'Approved'
@@ -379,35 +384,35 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
                   {getTimelineMarker(timelineStatus)}
                 </div>
 
-<div className={styles.timelineText}>
-  <b>{item.Designation}</b>
+                <div className={styles.timelineText}>
+                  <b>{item.Designation}</b>
 
-  {/* ✅ Initiator case */}
-  {item.Designation === "Request Initiator" ? (
-    <>
-      <div>Initiator: {item.UserName}</div>
-      <div>
-        Date & Time: {item.ActionDate
-          ? new Date(item.ActionDate).toLocaleString()
-          : '-'}
-      </div>
-    </>
-  ) : (
-    <>
-      <div>Approver Name: {item.UserName}</div>
-      <div>Action Taken: {status}</div>
-      <div>
-        Action Date: {item.ActionDate
-          ? new Date(item.ActionDate).toLocaleString()
-          : '-'}
-      </div>
-    </>
-  )}
+                  {/* ✅ Initiator case */}
+                  {item.Designation === "Request Initiator" ? (
+                    <>
+                      <div>Initiator: {item.UserName}</div>
+                      <div>
+                        Date & Time: {item.ActionDate
+                          ? new Date(item.ActionDate).toLocaleString()
+                          : '-'}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>Approver Name: {item.UserName}</div>
+                      <div>Action Taken: {status}</div>
+                      <div>
+                        Action Date: {item.ActionDate
+                          ? new Date(item.ActionDate).toLocaleString()
+                          : '-'}
+                      </div>
+                    </>
+                  )}
 
-  {item.UserComment && (
-    <div>Comments: {item.UserComment}</div>
-  )}
-</div>
+                  {item.UserComment && (
+                    <div>Comments: {item.UserComment}</div>
+                  )}
+                </div>
               </div>
             );
           })}
