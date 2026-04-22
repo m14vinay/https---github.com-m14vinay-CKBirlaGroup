@@ -389,7 +389,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     try {
       setLoading(true);
       if (!isChecked) {
-        alert("Please check PO Signed.");
+        alert("Please confirm bill is signed.");
         return;
       }
       if ((!form.files || form.files.length === 0) && (attachments.length <= 0)) {

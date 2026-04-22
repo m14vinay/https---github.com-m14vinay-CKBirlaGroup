@@ -345,7 +345,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
   const handleReject = async () => {
     try {
       setLoading(true);
-      if (!Comment) return alert("Comment is required.");
+      if (!form.Comments) return alert("Comment is required.");
       let payload = {};
       let CurrentSequence = 0;
       let NextSequence = 0;
