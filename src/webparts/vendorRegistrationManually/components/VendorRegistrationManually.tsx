@@ -8,7 +8,8 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import SharePointService from '../service/Service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import * as XLSX from 'xlsx';
-//import downloadIcon from '../assets/download.png';
+//import downloadIcon from '../assets/download.png'
+import { Icon } from '@fluentui/react/lib/Icon';
 
 
 const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (props) => {
@@ -110,7 +111,12 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
-
+  const handleDownload = () => {
+    const url = `${props.context.pageContext.web.absoluteUrl}/sites/DigiflowUAT/Shared%20Documents/Vendor.xlsx?d=wb2c644fc15b3495d8bde547468cc7bc7&csf=1&web=1&e=QpbZiL`;
+   window.open(url, '_blank');
+  }
+//https://ckbcsl.sharepoint.com/:x:/r/sites/DigiflowUAT/Shared%20Documents/Vendor.xlsx?d=wb2c644fc15b3495d8bde547468cc7bc7&csf=1&web=1&e=QpbZiL
+ 
   // Fetch Detail by ID
   const handleFetchById = async (id: number) => {
     try {
@@ -1053,12 +1059,13 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                   <div id="Excel" style={{ display: isActiveExcel ? 'block' : 'none' }}>
                     <div className={styles['col-md-12']}>
                     <div className={styles.formGroup}>
-                    <label style={{ width: '50%' }}>Vendor</label>
-                    <p> <a href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/Vendor.xlsx" target="_blank" rel="noopener noreferrer">
-                    <img src="/assets/download.png"   alt="Download Vendor List" style={{ width: '24px', cursor: 'pointer' }}/> </a>  </p>
-                   </div>
-                 
-                        </div>
+                    <label style={{ width: '50%' }}>Vendor Registration Template</label>
+                       
+  <a href="https://ckbcsl.sharepoint.com/:x:/r/sites/DigiflowUAT/Shared%20Documents/Vendor.xlsx" download><img src="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/Shared%20Documents/download.png"
+   style={{  height: "30px" }}/></a>               
+                     </div>
+                       </div>
+                                           
                     <div className={styles["accordion-item"]}>
                       <div className={styles['col-md-12']}>
                         <div className={styles.formGroup}>

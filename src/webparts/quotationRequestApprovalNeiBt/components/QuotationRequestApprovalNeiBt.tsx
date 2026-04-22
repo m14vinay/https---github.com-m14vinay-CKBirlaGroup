@@ -411,7 +411,6 @@ if (form.ActionDate1 == '') {
 
         // agar 3rd approver nahi hai → FINAL
         if (!form.Approver3EmailId) {
-          {
         payload = {
           ApproverComment2: form.ApprovalComment,
           CurrentStatus: 'Rejected',
@@ -424,7 +423,7 @@ if (form.ActionDate1 == '') {
         NextSequence = 0;
         NextuserAction = '';
       }
-        } else {
+         else {
           const UserApproval3 = await service.getUserById(form.Approver3EmailId);
         payload = {
           ApproverComment2: form.ApprovalComment,
@@ -440,7 +439,7 @@ if (form.ActionDate1 == '') {
       }
     }
       else if (form.ActionDate3 == '') {
-     {
+     
         payload = {
           ApproverComment2: form.ApprovalComment,
           CurrentStatus: 'Rejected',
@@ -461,7 +460,7 @@ if (form.ActionDate1 == '') {
         window.location.assign(url);
         return;
       }
-    }
+    
     } catch (error) {
       console.error(error);
     }

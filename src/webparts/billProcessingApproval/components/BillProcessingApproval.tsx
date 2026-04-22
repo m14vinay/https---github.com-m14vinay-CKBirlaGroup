@@ -581,7 +581,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                 </ul>
               )}
               <div style={{ paddingBottom: "2%" }}>
-                <label>Comments</label>
+                <label>Comments<span className={styles.required}>*</span></label>
                 <input type='text' className="form-control" name="ApprovalComment" value={form.ApprovalComment} onChange={handleChange} />
               </div>
               <div className={styles.buttonGroup}>

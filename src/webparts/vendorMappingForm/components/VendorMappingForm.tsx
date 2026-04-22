@@ -284,7 +284,25 @@ const handleprojectNoExist = async () => {
   };
 
   // 🔹 Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeProjectCode = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase();
+
+  setForm(prev => ({
+    ...prev,
+    projectCode: value
+  }));
+};
+
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setForm({
+      ...form,
+      [name]: value
+    });
+  };
+
+const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
 
   setForm(prev => ({
@@ -481,7 +499,7 @@ const handleprojectNoExist = async () => {
               </div>
 
               <label>Project Code <span className={styles.required}>*</span></label>
-              <input name="projectCode" value={form.projectCode} onChange={handleChange} onBlur={handleRequestNoChange} type='uppercase' />
+              <input name="projectCode" value={form.projectCode} onChange={handleChangeProjectCode} onBlur={handleRequestNoChange} type='uppercase' />
               {requestNoError && <span className={styles.error}>{requestNoError}</span>}
 
               <label>Project Title</label>
