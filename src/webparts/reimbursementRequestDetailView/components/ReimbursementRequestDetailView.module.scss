@@ -266,6 +266,11 @@ rightPanel {
   content: "\f105";
   font-size: 20px;
 }
+.rightPanel ul li.pendingIcon::before {
+  background-color: #F6BE00;
+  content: "\f105";
+  font-size: 20px;
+}
 .rightPanel ul li span {
   display: block;
   font-size: 12px;
@@ -332,6 +337,27 @@ rightPanel {
   right: -61%;
   top: 0;
 }
+
+
+.statusBox {
+  background-color:#006B3D;
+  color: #fff;
+  padding: 19px 10px 24px;
+  position: relative;
+  width: 150px;
+}
+
+.statusBox::after {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #006B3D;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  position: absolute;
+  right: -61%;
+  top: 0;
+}
 .pendingBox {
   background-color: #F6BE00;
 }
@@ -351,6 +377,8 @@ rightPanel {
   position: absolute;
   top: 0;
 }
+
+
 .rejectedBox {
   background-color: #DE0606;
 }
