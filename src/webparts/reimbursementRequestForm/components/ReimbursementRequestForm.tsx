@@ -68,7 +68,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   };
   const handleCheckbillNoExist = async () => {
     const checkdata = await service.getCheckBillNoExist(form.BillNo);
-    if (checkdata != null) {
+    const checkexpensebill=Expenseform.expenses.some(item => item.BillNo === form.BillNo);
+    if (checkdata != null || checkexpensebill) {
       setForm(prev => ({
         ...prev,
         BillNo: ''
