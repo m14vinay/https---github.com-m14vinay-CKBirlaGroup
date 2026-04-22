@@ -318,10 +318,24 @@ rightPanel {
   color:#DE0606;
   font-weight: bold;
 }
-.pendingBox .content,
-.rejectedBox .content,
-.upcomingBox .content {
-  padding-left: 40px;
+.statusBox {
+  background-color:#006B3D;
+  color: #fff;
+  padding: 19px 10px 10px;
+  position: relative;
+  width: 150px;
+}
+
+.statusBox::after {
+  border-bottom: 46px solid transparent;
+  border-left: 46px solid #006B3D;
+  border-right: 46px solid transparent;
+  border-top: 46px solid transparent;
+  content: "";
+  display: block;
+  position: absolute;
+  right: -61%;
+  top: 0;
 }
 
 
@@ -429,4 +443,9 @@ rightPanel {
   background-color:  #F6BE00;
   content: "\f105";
   font-size: 20px;
+}
+.pendingBox .content,
+.rejectedBox .content,
+.upcomingBox .content {
+  padding-left: 40px;
 }
