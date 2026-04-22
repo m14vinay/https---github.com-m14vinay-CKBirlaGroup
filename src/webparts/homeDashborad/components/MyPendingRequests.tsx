@@ -32,22 +32,22 @@ export default function MyPendingRequests() {
         if(row["@odata.type"]){
             switch(row["@odata.type"]){
                 case '#SP.Data.QuotationApprovalListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationApproval.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationApproval.aspx?RequestId=" + row.Id,"_self");
                     break;
                 case '#SP.Data.PoApprovalListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchaseOrderApproval.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchaseOrderApproval.aspx?RequestId=" + row.Id,"_self");
                     break;
                 case '#SP.Data.VendorMappingListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingApprovalForm.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingApprovalForm.aspx?RequestId=" + row.Id,"_self");
                     break;
                 case '#SP.Data.Remb_x005f_ExpanseMasterListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementExpenseApproval.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementExpenseApproval.aspx?RequestId=" + row.Id,"_self");
                     break;
                 case '#SP.Data.BillProcessingListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Bill-Processing-Approval.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Bill-Processing-Approval.aspx?RequestId=" + row.Id,"_self");
                     break; 
                 case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Approval.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Approval.aspx?RequestId=" + row.Id,"_self");
                     break;            
                 default:
                     alert("Page not found");
@@ -210,7 +210,7 @@ export default function MyPendingRequests() {
                     {table.getRowModel().rows.map((row) => (
                         <tr key={row.id}>
                         {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id}>
+                            <td key={cell.id} style={{maxWidth:"250px"}}>
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                             </td>
                         ))}
