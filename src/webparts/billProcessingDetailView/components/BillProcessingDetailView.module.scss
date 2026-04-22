@@ -63,14 +63,10 @@
 }
 .pendingBox {
   background-color: #F6BE00;
-  color: #fff;
-  padding: 19px 10px 8px;
-  position: relative;
-  width: 150px;
 }
 
 .pendingBox::after {
-  border-left-color:  #F6BE00;
+  border-left-color:#F6BE00;
 }
 
 .pendingBox::before {
