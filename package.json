@@ -21,7 +21,11 @@
     "@microsoft/sp-property-pane": "^1.11.0",
     "@microsoft/sp-webpart-base": "^1.11.0",
     "@microsoft/teams-js": "^2.50.0",
+<<<<<<< HEAD
     "@pnp/spfx-controls-react": "^1.10.0",
+=======
+    "@pnp/spfx-controls-react": "^3.24.0",
+>>>>>>> shubhamCkbirla
     "@tanstack/react-table": "^8.21.3",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
