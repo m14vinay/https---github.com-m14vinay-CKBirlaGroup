@@ -279,10 +279,11 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       ...form,
       [name]: value
     });
-    if (Number(TotalAmount + Number(value)) > Number(form.RemainingAmount)) {
+    if (Number(value) > Number(form.RemainingAmount)) {
       setForm(prev => ({
         ...prev,
-        BillAmount: 0
+        BillAmount: 0,
+        TotalAmount:form.CalculatedTaxes
       }));
       alert("Bill Amount must be less than Remaining Amount.");
       return;
@@ -542,7 +543,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               </input>
 
               <label>Bill Amount</label>
-              <input name="BillAmount" value={form.BillAmount} type='number' onChange={handleAmountCalculateChange} />
+              <input name="BillAmount" value={form.BillAmount} type='number' onChange={handleChange} onBlur={handleAmountCalculateChange} />
 
               <label>Calculated Taxes</label>
               <input name="CalculatedTaxes" value={form.CalculatedTaxes} type='number' onChange={handleTaxCalculateChange} />
