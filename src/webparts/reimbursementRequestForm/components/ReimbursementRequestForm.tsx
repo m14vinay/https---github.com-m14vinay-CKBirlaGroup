@@ -6,7 +6,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import { Dropdown, IDropdownOption } from '@fluentui/react';
 import SharePointService from '../service/Service';
-import { files } from '@microsoft/teams-js';
 const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (props) => {
 
   const [form, setForm] = React.useState({

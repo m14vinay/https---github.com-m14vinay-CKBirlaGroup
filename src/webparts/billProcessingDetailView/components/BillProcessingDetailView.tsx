@@ -1,16 +1,10 @@
 import * as React from 'react';
 import styles from './BillProcessingDetailView.module.scss';
 import { IBillProcessingDetailViewProps } from './IBillProcessingDetailViewProps';
-import { SPHttpClient } from '@microsoft/sp-http';
 import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption, Modal } from '@fluentui/react';
 import SharePointService from '../service/Service';
-import { PageContext } from '@microsoft/sp-page-context';
 import { Spinner, SpinnerSize } from '@fluentui/react';
-import { isBoolean } from 'lodash';
 const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (props) => {
-
-  // State
-  // State
   const [form, setForm] = React.useState({
     RequestNo: '',
     ProjectCode: '',
@@ -102,6 +96,14 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
           RemainingAmount: result.RemainingAmount,
           ApproverComment5: result.ApproverComment5 || ''
         }));
+        const vendor = await service.getVendorEmailByVendorCode(form.vendorcode);
+    if (vendor!=null) {      
+      setForm(
+        prev => ({
+          ...prev,
+          Email: vendor.EmailId || ''
+        }));
+    }
         const historydata = await service.GetHistoryItem(Number(id), "FBP");
         setHistory(historydata);
       }
@@ -123,18 +125,8 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);
   };
-  const handleEmail = async () => {
-    const vendor = await service.getVendorEmailByVendorCode(form.vendorcode);
-    if (vendor.Id > 0) {
-      setLoading(true);
-      setForm(
-        prev => ({
-          ...prev,
-          Email: vendor.EmailId || ''
-        }));
-    }
+  const handleEmail = () => {
     setisOpen(true);
-    setLoading(false);
   }
   const handleSendEmail = async () => {
     if (!form.Email && !form.Email.includes('@')) {
@@ -181,6 +173,24 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
         </div>
       )}
       <div className={styles.container}>
+        <Modal
+          isOpen={isOpen}
+          onDismiss={() => setisOpen(false)}
+          isBlocking={false} className={styles.modal}>
+          <div className={styles.searchBox}>
+            <h3>Send Email To Vendor</h3>
+            <div className={styles.formGroup}>
+              <label style={{ width: '30%' }}>Vendor Email<span style={{ color: "red" }}>*</span></label>
+              <input className="form-control" name='Email' type='email' placeholder='xxx@mail.com' value={form.Email} style={{ width: '100%' }}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.buttonGroup}>
+              <button className={styles.submitBtn} onClick={handleSendEmail}>Send Email</button>
+              <button className={styles.cancelBtn} onClick={() => setisOpen(false)} >Close</button>
+            </div>
+          </div>
+        </Modal>
         <div className={styles.header}>
           <h4>Bill Processing Details & Status</h4>
         </div>
@@ -277,7 +287,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                   ))}
                 </ul>
               )}
-              <div className={styles.buttonGroup}>
+              <div className={styles.buttonGroup} style={{textAlign:"center"}}>
                 <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
                 <button name='btnSendEmail' style={{ display: form.ApproverComment5 != '' ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleEmail}>Send Email to Vendor</button>
               </div>
@@ -343,24 +353,6 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
             </div>
           </div>
         </div>
-        <Modal
-          isOpen={isOpen}
-          onDismiss={() => setisOpen(false)}
-          isBlocking={false} className={styles.modal}>
-          <div className={styles.searchBox}>
-            <h3>Send Email To Vendor</h3>
-            <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Vendor Email<span style={{ color: "red" }}>*</span></label>
-              <input className="form-control" name='Email' type='email' placeholder='xxx@mail.com' value={form.Email} style={{ width: '100%' }}
-                onChange={handleChange}
-              />
-            </div>
-            <div className={styles.buttonGroup}>
-              <button className={styles.submitBtn} onClick={handleSendEmail}>Send Email</button>
-              <button className={styles.cancelBtn} onClick={() => setisOpen(false)} >Close</button>
-            </div>
-          </div>
-        </Modal>
       </div>
     </section>
   );

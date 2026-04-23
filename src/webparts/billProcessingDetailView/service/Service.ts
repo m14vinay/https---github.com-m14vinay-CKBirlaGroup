@@ -63,7 +63,7 @@ export default class Service {
   }
   // GetVendorEmail
    public async getVendorEmailByVendorCode(VendorCode: string): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Vendor}')/items?$filter=VendorCode eq ${VendorCode}`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Vendor}')/items?$filter=VendorCode eq '${VendorCode}'`;
     const res = await this.context.spHttpClient.get(
       url,
       SPHttpClient.configurations.v1
