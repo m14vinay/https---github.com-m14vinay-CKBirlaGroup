@@ -113,10 +113,10 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
 
   const handleDownload = () => {
     const url = `${props.context.pageContext.web.absoluteUrl}/sites/DigiflowUAT/Shared%20Documents/Vendor.xlsx?d=wb2c644fc15b3495d8bde547468cc7bc7&csf=1&web=1&e=QpbZiL`;
-   window.open(url, '_blank');
+    window.open(url, '_blank');
   }
-//https://ckbcsl.sharepoint.com/:x:/r/sites/DigiflowUAT/Shared%20Documents/Vendor.xlsx?d=wb2c644fc15b3495d8bde547468cc7bc7&csf=1&web=1&e=QpbZiL
- 
+  //https://ckbcsl.sharepoint.com/:x:/r/sites/DigiflowUAT/Shared%20Documents/Vendor.xlsx?d=wb2c644fc15b3495d8bde547468cc7bc7&csf=1&web=1&e=QpbZiL
+
   // Fetch Detail by ID
   const handleFetchById = async (id: number) => {
     try {
@@ -299,13 +299,8 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
   const handleSaveManual = async () => {
     const gst = form.GST?.toString().trim();
     //  GST validation
-    if (!gst) {
-      alert("GST is Required ❗");
-      return;
-    }
-    const isExists = await service.checkGSTExists(gst, itemId || undefined);
-    if (isExists) {
-      alert(`GST ${gst} Already Exists ❌`);
+    if (!form.Pan) {
+      alert("Pan No is Required ❗");
       return;
     }
     const dateOnly = new Date(form.CommencementDate);
@@ -353,6 +348,16 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
     try {
       setLoading(true);
       if (Number(itemId) == 0) {
+        const isExists = await service.checkGSTExists(gst);
+        if (isExists) {
+          alert(`GST ${gst} Already Exists ❌`);
+          return;
+        }
+        const isPanExists = await service.checkPanExists(form.Pan);
+        if (isPanExists) {
+          alert(`Pan No ${form.Pan} Already Exists ❌`);
+          return;
+        }
         const res = await service.createItem(payload);
         setItemId(res.Id);
         if (res.Id > 0) {
@@ -392,14 +397,14 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
     try {
       setLoading(true)
       if (isManualChecked) {
-        if (!form.files || form.files.length < 4) {
+        if (!form.files || form.files.length < 3) {
           alert("Please upload All Required Files");
           setLoading(false);
           return;
         }
       }
       else if (!isManualChecked) {
-        if (!form.files || form.files.length < 3) {
+        if (!form.files || form.files.length < 2) {
           alert("Please upload All Required Files");
           setLoading(false);
           return;
@@ -407,13 +412,8 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
       }
       const gst = form.GST?.toString().trim();
       //  GST validation
-      if (!gst) {
-        alert("GST Required ❗");
-        return;
-      }
-      const isExists = await service.checkGSTExists(gst, itemId || undefined);
-      if (isExists) {
-        alert(`GST ${gst} Already Exists ❌`);
+      if (!form.Pan) {
+        alert("Pan No Required ❗");
         return;
       }
       const dateOnly = new Date(form.CommencementDate);
@@ -470,6 +470,16 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
         window.location.assign(url);
       }
       else {
+        const isExists = await service.checkGSTExists(gst);
+        if (isExists) {
+          alert(`GST ${gst} Already Exists ❌`);
+          return;
+        }
+        const isPanExists = await service.checkPanExists(form.Pan);
+        if (isPanExists) {
+          alert(`Pan No ${form.Pan} Already Exists ❌`);
+          return;
+        }
         const res = await service.createItem(payload);
         if (res.Id > 0) {
           if (res.Id > 0 && form.files.length > 0) {
@@ -515,14 +525,14 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
         return;
       }
       if (isExcelChecked) {
-        if (!form.files || form.files.length < 4) {
+        if (!form.files || form.files.length < 3) {
           alert("Please upload All Required Files");
           setLoading(false);
           return;
         }
       }
       else if (!isExcelChecked) {
-        if (!form.files || form.files.length < 3) {
+        if (!form.files || form.files.length < 2) {
           alert("Please upload All Required Files");
           setLoading(false);
           return;
@@ -623,7 +633,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                           <div className={styles["accordion-body"]}>
                             <div className={styles['col-md-12']}>
                               <div className={styles["formGroup"]}>
-                                <label style={{ width: '50%' }}>Name of the Vendor</label>
+                                <label style={{ width: '50%' }}>Name of the Vendor<span style={{ color: "red" }}>*</span></label>
                                 <input style={{ width: '50%' }} name='Title' value={form.Title} onChange={handleChange} className='form-control' type='text' />
                               </div>
                             </div>
@@ -655,7 +665,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                             </div>
                             <div className={styles['col-md-12']}>
                               <div className={styles["formGroup"]}>
-                                <label style={{ width: '50%' }}>PAN</label>
+                                <label style={{ width: '50%' }}>PAN<span style={{ color: "red" }}>*</span></label>
                                 <input style={{ width: '50%' }} name='Pan' value={form.Pan} onChange={handleChange} className='form-control' type='text' />
                               </div>
                             </div>
@@ -1001,8 +1011,8 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                                 <label style={{ width: '50%' }}>Do you have MSME Registration Certificate?</label>
                                 <input style={{ width: '5%' }} type='checkbox' checked={isManualChecked} name='manualMSME' onChange={handleManualChange}>
                                 </input>&nbsp;&nbsp;
-                                <span style={{ color:"blue", display: isManualChecked ? "contents" : "none" }}>Yes</span>
-                                <span style={{ color:"blue",display: !isManualChecked ? "contents" : "none" }}>No</span>
+                                <span style={{ color: "blue", display: isManualChecked ? "contents" : "none" }}>Yes</span>
+                                <span style={{ color: "blue", display: !isManualChecked ? "contents" : "none" }}>No</span>
                               </div>
                               <div className={styles.formGroup}>
                                 <label style={{ width: '50%' }}>MSME Registration Certificate<span className={styles.required} style={{ display: isManualChecked ? "contents" : "none" }}>*</span></label>
@@ -1015,7 +1025,12 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                                 <input style={{ width: '50%' }} name="filesPanManual" type="file" multiple onChange={handleFileChange} />
                               </div>
                             </div>
-                            
+                            <div className={styles['col-md-12']}>
+                              <div className={styles.formGroup}>
+                                <label style={{ width: '50%' }}>GST Registration</label>
+                                <input style={{ width: '50%' }} name="filesGSTManual" type="file" multiple onChange={handleFileChange} />
+                              </div>
+                            </div>
                             <div className={styles['col-md-12']}>
                               <div className={styles.formGroup}>
                                 <label style={{ width: '50%' }}>Address Proof</label>
@@ -1058,14 +1073,14 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                   </div>
                   <div id="Excel" style={{ display: isActiveExcel ? 'block' : 'none' }}>
                     <div className={styles['col-md-12']}>
-                    <div className={styles.formGroup}>
-                    <label style={{ width: '50%' }}>Vendor Registration Template</label>
-                       
-  <a href="https://ckbcsl.sharepoint.com/:x:/r/sites/DigiflowUAT/Shared%20Documents/Vendor.xlsx" download><img src="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/Shared%20Documents/download.png"
-   style={{  height: "30px" }}/></a>               
-                     </div>
-                       </div>
-                                           
+                      <div className={styles.formGroup}>
+                        <label style={{ width: '50%' }}>Vendor Registration Template</label>
+
+                        <a href="https://ckbcsl.sharepoint.com/:x:/r/sites/DigiflowUAT/Shared%20Documents/Vendor.xlsx" download><img src="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/Shared%20Documents/download.png"
+                          style={{ height: "30px" }} /></a>
+                      </div>
+                    </div>
+
                     <div className={styles["accordion-item"]}>
                       <div className={styles['col-md-12']}>
                         <div className={styles.formGroup}>
@@ -1087,8 +1102,8 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                           <div className={styles.formGroup}>
                             <label style={{ width: '50%' }}>Have MSME certificate?</label>
                             <input style={{ width: '5%' }} type='checkbox' checked={isExcelChecked} name='manualMSME' onChange={handleExcelChange}></input>&nbsp;&nbsp;
-                            <span style={{ color:"blue", display: isExcelChecked ? "contents" : "none" }}>Yes</span>
-                            <span style={{ color:"blue",display: !isExcelChecked ? "contents" : "none" }}>No</span>
+                            <span style={{ color: "blue", display: isExcelChecked ? "contents" : "none" }}>Yes</span>
+                            <span style={{ color: "blue", display: !isExcelChecked ? "contents" : "none" }}>No</span>
                           </div>
                           <div className={styles.formGroup}>
                             <label style={{ width: '50%' }}>MSME Registration Certificate<span className={styles.required} style={{ display: isExcelChecked ? "contents" : "none" }}>*</span></label>
@@ -1098,13 +1113,13 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                         <div className={styles['col-md-12']}>
                           <div className={styles.formGroup}>
                             <label style={{ width: '50%' }}>Copy of Pan<span className={styles.required}>*</span></label>
-                            <input style={{ width: '50%' }} name="filesPanExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesPanExcel")} />
+                            <input style={{ width: '50%' }} name="filesPanExcel" type="file" multiple onChange={handleFileChange} />
                           </div>
                         </div>
                         <div className={styles['col-md-12']}>
                           <div className={styles.formGroup}>
-                            <label style={{ width: '50%' }}>GST Registration<span className={styles.required}>*</span></label>
-                            <input style={{ width: '50%' }} name="filesVATExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesVATExcel")} />
+                            <label style={{ width: '50%' }}>GST Registration</label>
+                            <input style={{ width: '50%' }} name="filesVATExcel" type="file" multiple onChange={handleFileChange} />
                           </div>
                         </div>
                         <div className={styles['col-md-12']}>
@@ -1122,7 +1137,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                         <div className={styles['col-md-12']}>
                           <div className={styles.formGroup}>
                             <label style={{ width: '50%' }}>Cancelled cheque<span className={styles.required}>*</span></label>
-                            <input style={{ width: '50%' }} name="filesCancelExcel" type="file" multiple onChange={(e) => handleFileExChange(e, "filesCancelExcel")} />
+                            <input style={{ width: '50%' }} name="filesCancelExcel" type="file" multiple onChange={handleFileChange} />
                           </div>
                         </div>
                         <div className={styles['col-md-12']}>
