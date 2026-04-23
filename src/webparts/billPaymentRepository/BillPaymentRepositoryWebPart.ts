@@ -115,7 +115,9 @@ export default class BillPaymentRepositoryWebPart extends BaseClientSideWebPart<
 
   
 //protected dataVersion: Version = Version.parse('1.0');
-  protected dataVersion: Version = Version.parse('1.0');
+protected get dataVersion(): Version {
+   return Version.parse('1.0');
+ }
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [
