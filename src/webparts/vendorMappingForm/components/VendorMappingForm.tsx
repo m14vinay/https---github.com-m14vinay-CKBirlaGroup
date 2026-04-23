@@ -15,6 +15,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     projectCode: '',
     projectTitle: '',
     projectDescription: '',
+    vendorId:0,
     vendorName: '',
     vendorDescription: '',
     files: [] as File[],
@@ -130,9 +131,9 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     try {
       const data = await service.getVendor();
       const options = data.map((item: any) => ({
-        key: 'CKBCSL/' + item.ID + '-' + item.Title,
+        key: item.ID,
         text: 'CKBCSL/' + item.ID + '-' + item.Title,
-
+  
       }));
       setVendorOptions(options);
     } catch (error) {
@@ -515,11 +516,12 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
               <Dropdown
                 placeholder="Select Vendor"
                 options={vendorOptions}
-                selectedKey={form.vendorName}
+                selectedKey={form.vendorId}
                 onChange={(e, option) =>
                   setForm(prev => ({
                     ...prev,
-                    vendorName: option?.key as string // safe default empty string
+                    vendorId: option?.key as number,
+                    vendorName: option?.text as string // safe default empty string
                   }))
                 }
               />
@@ -536,7 +538,15 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
               <label>Additional Information & Remarks</label>
               <input name="vendorDescription" value={form.vendorDescription} onChange={handleChange} />
 
-
+              <p>If you want to verfiy the document.
+                <a
+                  href={`https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/VendorRegistrationDetails.aspx?RequestId=${form.vendorId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Click Here
+                </a>
+              </p>
               <label>Attachments </label>
               <input type="file" multiple onChange={handleFileChange} />
 

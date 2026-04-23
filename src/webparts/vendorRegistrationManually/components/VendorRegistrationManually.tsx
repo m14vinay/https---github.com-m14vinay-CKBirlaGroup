@@ -298,11 +298,13 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
   // Button click save
   const handleSaveManual = async () => {
     const gst = form.GST?.toString().trim();
+   
     //  GST validation
     if (!gst) {
       alert("GST is Required ❗");
       return;
     }
+    
     const isExists = await service.checkGSTExists(gst, itemId || undefined);
     if (isExists) {
       alert(`GST ${gst} Already Exists ❌`);

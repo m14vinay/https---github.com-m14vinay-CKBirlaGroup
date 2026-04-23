@@ -133,6 +133,22 @@ if (currentId) {
   return data.value.length > 0;
 };
 
+// public checkPANExists = async (pan: string,currentId?:number): Promise<boolean> => {
+
+//   const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=GST eq '${pan}'`;
+
+//   const res = await this.context.spHttpClient.get(
+//     url,
+//     SPHttpClient.configurations.v1
+//   );
+
+//   const data = await res.json();
+// if (currentId) {
+//     return data.value.some((item: any) => item.Id !== currentId);
+//   }
+//   return data.value.length > 0;
+// };
+
 public saveToSharePoint = async (items: any[]) => {
   const results: any[] = [];
 
