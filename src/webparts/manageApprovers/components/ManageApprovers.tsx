@@ -5,7 +5,7 @@ import { Dropdown, Icon, IDropdownOption, Label } from '@fluentui/react';
 import SharePointService from '../service/service';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import { useEffect, useState } from 'react';
-import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
+import { IPeoplePickerContext, PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {
   createColumnHelper,
@@ -35,6 +35,11 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
   const [Label, setLabel] = useState("");
   const columnHelper = createColumnHelper<any>();
   const [columns, setColumns] = React.useState<any[]>([]);
+  const peoplePickerContext: IPeoplePickerContext = {
+    absoluteUrl: props.context.pageContext.web.absoluteUrl,
+    msGraphClientFactory: props.context.msGraphClientFactory as any,
+    spHttpClient: props.context.spHttpClient as any
+  };
   const table = useReactTable({
     data,
     columns,
@@ -1117,15 +1122,17 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
           <div className='row' id='vendor' style={{ paddingTop: "2%", display: isActiveVM ? "block" : "none", alignSelf: "center" }}>
             <div className={styles['form-control']}>
               <PeoplePicker
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Approver"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
+                required={true}
                 disabled={false}
-                principleTypes={[PrincipalType.User]}
+                searchTextLimit={2}
+                principalTypes={[PrincipalType.User]}
+                resolveDelay={1000}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                selectedItems={onUserVendorChange}
+                onChange={onUserVendorChange}
               />
             </div>
             {/* Buttons */}
@@ -1137,54 +1144,62 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
           <div className='row' id='Quotation' style={{ paddingTop: "2%", display: isActiveQA ? "block" : "none", alignSelf: "center" }}>
             <div className={styles['form-control']}>
               <PeoplePicker                
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Department Head"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
-                disabled={false}                
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                required={true}
+                disabled={false}
+                searchTextLimit={2}      
+                resolveDelay={1000}          
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                selectedItems={onUserQuotationDepartmentHeadChange}
+                onChange={onUserQuotationDepartmentHeadChange}
               />             
             </div>
             <div className={styles['form-control']}>
               <PeoplePicker                
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Approver 1"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
+                required={true}
                 disabled={false}
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.Approver1EMail]}
-                selectedItems={onUserQuotationApprover1Change}
+                onChange={onUserQuotationApprover1Change}
               />
             </div>
             <div className={styles['form-control']}>
               <PeoplePicker                
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Approver 2"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
+                required={true}
                 disabled={false}
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.Approver2EMail]}
-                selectedItems={onUserQuotationApprover2Change}
+                onChange={onUserQuotationApprover2Change}
               />
             </div>
             <div className={styles['form-control']}>
               <PeoplePicker               
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Approver 3"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
+                required={true}
                 disabled={false}
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.Approver3EMail]}
-                selectedItems={onUserQuotationApprover3Change}
+                onChange={onUserQuotationApprover3Change}
               />
             </div>
             {/* Buttons */}
@@ -1196,54 +1211,62 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
           <div className='row' id='QuotationNEI' style={{ paddingTop: "2%", display: isActiveNEI ? "block" : "none", alignSelf: "center" }}>
           <div className={styles['form-control']}>
               <PeoplePicker                
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Department Head"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
-                disabled={false}                
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                required={true}
+                disabled={false}
+                searchTextLimit={2}      
+                resolveDelay={1000}          
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                selectedItems={onUserQuotationNEIDepartmentHeadChange}
+                onChange={onUserQuotationNEIDepartmentHeadChange}
               />             
             </div>
             <div className={styles['form-control']}>
               <PeoplePicker                
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Approver 1"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
+                required={true}
                 disabled={false}
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.Approver1EMail]}
-                selectedItems={onUserQuotationNEIApprover1Change}
+                onChange={onUserQuotationNEIApprover1Change}
               />
             </div>
             <div className={styles['form-control']}>
               <PeoplePicker                
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Approver 2"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
+                required={true}
                 disabled={false}
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.Approver2EMail]}
-                selectedItems={onUserQuotationNEIApprover2Change}
+                onChange={onUserQuotationNEIApprover2Change}
               />
             </div>
             <div className={styles['form-control']}>
               <PeoplePicker               
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Approver 3"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
+                required={true}
                 disabled={false}
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.Approver3EMail]}
-                selectedItems={onUserQuotationNEIApprover3Change}
+                onChange={onUserQuotationNEIApprover3Change}
               />
             </div>
             {/* Buttons */}
@@ -1256,15 +1279,17 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
             <div className={styles['form-control']}>              
               <PeoplePicker
                 key={[form.ApproverEMail].join(",")}
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Department Head"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
-                disabled={false}                
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                required={true}
+                disabled={false}
+                 searchTextLimit={2}      
+                resolveDelay={1000}          
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                selectedItems={onUserREIMDChange}
+                onChange={onUserREIMDChange}
               />
             </div>
             {/* Buttons */}
@@ -1276,15 +1301,17 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
           <div className='row' id='ReimbursementF' style={{ paddingTop: "2%", display: isActiveREIMF ? "block" : "none", alignSelf: "center" }}>
             <div className={styles['form-control']}>              
               <PeoplePicker                
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Approver"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
-                disabled={false}                
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                required={true}
+                disabled={false}
+                searchTextLimit={2}      
+                resolveDelay={1000}          
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                selectedItems={onUserREIMFChange}
+                onChange={onUserREIMFChange}
               />
             </div>
             {/* Buttons */}
@@ -1296,28 +1323,32 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
           <div className='row' id='BillProcessing' style={{ paddingTop: "2%", display: isActiveBP ? "block" : "none", alignSelf: "center" }}>
             <div className={styles['form-control']}>
               <PeoplePicker                
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Finance Controller"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
-                disabled={false}                
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                required={true}
+                disabled={false}
+                searchTextLimit={2}      
+                resolveDelay={1000}          
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                selectedItems={onUserBPFinanceChange}
+                onChange={onUserBPFinanceChange}
               />             
             </div>
             <div className={styles['form-control']}>
               <PeoplePicker                
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Billing2 & Approver"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
+                required={true}
                 disabled={false}
-                principleTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+                searchTextLimit={2}
+                resolveDelay={1000}
+                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.Approver1EMail]}
-                selectedItems={onUserBPBillingChange}
+                onChange={onUserBPBillingChange}
               />
             </div>
             {/* Buttons */}
@@ -1329,15 +1360,17 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
           <div className='row' id='PurchaseOrder' style={{ paddingTop: "2%", display: isActivePO ? "block" : "none", alignSelf: "center" }}>
             <div className={styles['form-control']}>              
               <PeoplePicker                
-                context={props.context}
+                context={peoplePickerContext}
                 titleText="Select Approver"
                 personSelectionLimit={1}
                 showtooltip={true}
-                isRequired={true}
+                required={true}
                 disabled={false}
-                principleTypes={[PrincipalType.User]}
+                searchTextLimit={2}
+                principalTypes={[PrincipalType.User]}
+                resolveDelay={1000}
                 defaultSelectedUsers={[form.ApproverEMail]}
-                selectedItems={onUserPOChange}
+                onChange={onUserPOChange}
               />
             </div>
             {/* Buttons */}
@@ -1352,7 +1385,3 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
   );
 };
 export default ManageApprovers;
-
-
-
-
