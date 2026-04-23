@@ -43,7 +43,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     OccupiedAmount: '',
     RemainingAmount: '',
     Email: '',
-    ApproverComment5:''
+    ApproverComment5: ''
   });
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
@@ -57,7 +57,6 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
   const [showResumeButton, setShowResumeButton] = React.useState(false);
   const [showHoldButton, setShowHoldButton] = React.useState(false);
   const [showEmailButton, setShowEmailButton] = React.useState(false);
-  const [isOpen, setisOpen] = React.useState(false);
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -95,7 +94,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       console.log("Result:", result);
       const currentuser = await service.getUser();
       const User = await service.getUserById(currentuser.Id);
-      if (result.AssignedTo === currentuser.Title) {
+      if ((result.AssignedTo === currentuser.Title)) {
         if (result.CurrentStatus === 'Pending' || result.CurrentStatus === 'Approved') {
           setItemId(result.Id);
           setForm(prev => ({
@@ -128,7 +127,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             ApprovalPath: result.ApprovalPath,
             OccupiedAmount: result.OccupiedAmount,
             RemainingAmount: result.RemainingAmount,
-            ApproverComment5:result.ApproverComment5||''
+            ApproverComment5: result.ApproverComment5 || ''
           }));
           if (User?.Id) {
             setAssignedID(User.Title);
@@ -208,7 +207,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             OccupiedAmount: '',
             RemainingAmount: '',
             Email: '',
-            ApproverComment5:''
+            ApproverComment5: ''
           });
           alert("Request Record is already Rejected.");
           return;
@@ -509,46 +508,6 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       setLoading(false);
     }
   };
-  const handleEmail = async () => {
-    const vendor = await service.getVendorEmailByVendorCode(form.vendorcode);
-    if (vendor.Id > 0) {
-      setLoading(true);
-      setForm(
-        prev => ({
-          ...prev,
-          Email: vendor.EmailId || ''
-        }));
-    }
-    setisOpen(true);
-    setLoading(false);
-  }
-  const handleSendEmail = async () => {
-    if (!form.Email && !form.Email.includes('@')) {
-      alert('Please enter correct email address.');
-      return;
-    }
-    setLoading(true);
-    const payload = {
-      Title: form.VendorName,
-      VendorEmail: form.Email,
-      Comment: form.ApproverComment5,
-      Subject: 'Invoice is released to your account.',
-      Message:'Your invoice amount is released to you with the mentioned details.'
-    };
-    try {
-      const res = await service.createEmailList(payload);
-      if (res.Id > 0) {
-        alert("Email Send Successfully.✅");
-        setisOpen(false);
-      }
-    }
-    catch (error) {
-      console.error(error);
-    }
-    finally {
-      setLoading(false);
-    }
-  }
   // 🔹 UI
   return (
     <section>
@@ -649,7 +608,6 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                 <button name='btnPaid' style={{ display: showPaidButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handlePaid}>Paid</button>
                 <button name='btnhold' style={{ display: showHoldButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleHold}>Hold</button>
                 <button name='btncancel' className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
-                <button name='btnSendEmail' style={{ display: showEmailButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleEmail}>Send Email to Vendor</button>
               </div>
             </div>
           </div>
@@ -713,24 +671,6 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             </div>
           </div>
         </div>
-        <Modal
-          isOpen={isOpen}
-          onDismiss={() => setisOpen(false)}
-          isBlocking={false} className={styles.modal}>
-          <div className={styles.searchBox}>
-            <h3>Send Email To Vendor</h3>
-            <div className={styles.formGroup}>
-              <label style={{ width: '30%' }}>Vendor Email<span style={{ color: "red" }}>*</span></label>
-              <input className="form-control" name='Email' type='email' placeholder='xxx@mail.com' value={form.Email} style={{ width: '100%' }}
-                onChange={handleChange}
-              />
-            </div>
-            <div className={styles.buttonGroup}>
-              <button className={styles.submitBtn} onClick={handleSendEmail}>Send Email</button>
-              <button className={styles.cancelBtn} onClick={() => setisOpen(false)} >Close</button>
-            </div>
-          </div>
-        </Modal>
       </div>
     </section>
   );
