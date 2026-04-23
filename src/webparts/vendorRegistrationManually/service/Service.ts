@@ -154,6 +154,12 @@ export default class Service {
       const gst = item.GST?.toString().trim();
       const Pan = item.Pan?.toString().trim();
       if (gst != undefined) {
+        const IsValid = this.validateGST(gst);
+        if (!IsValid) {
+          console.log(`Please enter valid GST No.: ${gst}`);
+          alert("Please enter valid GST No.");
+          return;
+        }
         const isExists = await this.checkGSTExists(gst);
         if (isExists) {
           console.log(`GST already exists: ${gst}`);
@@ -231,4 +237,8 @@ export default class Service {
     return results;
   };
 
+  public validateGST = (value: string): boolean => {
+    const regex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    return regex.test(value.toUpperCase());
+  };
 }

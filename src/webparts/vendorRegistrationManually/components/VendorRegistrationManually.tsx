@@ -303,6 +303,12 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
       alert("Pan No is Required ❗");
       return;
     }
+    const IsValid = service.validateGST(gst);
+    if (!IsValid) {
+      console.log(`Please enter valid GST No.: ${gst}`);
+      alert("Please enter valid GST No.");
+      return;
+    }
     const dateOnly = new Date(form.CommencementDate);
     const payload = {
       Title: form.Title,
@@ -410,7 +416,14 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
           return;
         }
       }
+      
       const gst = form.GST?.toString().trim();
+      const IsValid = service.validateGST(gst);
+      if (!IsValid) {
+        console.log(`Please enter valid GST No.: ${gst}`);
+        alert("Please enter valid GST No.");
+        return;
+      }
       //  GST validation
       if (!form.Pan) {
         alert("Pan No Required ❗");
