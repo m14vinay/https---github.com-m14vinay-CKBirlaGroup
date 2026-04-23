@@ -15,6 +15,7 @@ import { Environment, EnvironmentType } from '@microsoft/sp-core-library';
 import * as microsoftTeams from "@microsoft/teams-js";
 export interface IQrDetailsStatusWebPartProps {
   description: string;
+  requestId: string;
 }
 
 export default class QrDetailsStatusWebPart extends BaseClientSideWebPart<IQrDetailsStatusWebPartProps> {
@@ -33,7 +34,8 @@ export default class QrDetailsStatusWebPart extends BaseClientSideWebPart<IQrDet
         userDisplayName: this.context.pageContext.user.displayName,
         siteUrl: this.context.pageContext.web.absoluteUrl,
         spHttpClient: this.context.spHttpClient,
-        listName: 'QuotationApproval'
+        listName: 'QuotationApproval',
+        requestId: this.properties.requestId
       }
     );
 
@@ -129,6 +131,9 @@ export default class QrDetailsStatusWebPart extends BaseClientSideWebPart<IQrDet
               groupFields: [
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel
+                }),
+                PropertyPaneTextField('requestId', {
+                  label: 'Request ID'
                 })
               ]
             }

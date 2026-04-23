@@ -111,9 +111,7 @@ export default class FinanceReportWebPart extends BaseClientSideWebPart<IFinance
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
   }
-protected get dataVersion(): Version {
-  return Version.parse('1.0');
-}
+  protected dataVersion: Version = Version.parse('1.0');
   //protected dataVersion: Version = Version.parse('1.0');
   // protected set dataVersion(value: Version) {
   //   this._dataVersion = value;
