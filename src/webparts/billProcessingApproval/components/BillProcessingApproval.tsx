@@ -671,7 +671,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                 <button name='btnPaid' style={{ display: showPaidButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handlePaid}>Paid</button>
                 <button name='btnhold' style={{ display: showHoldButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleHold}>Hold</button>
                 <button name='btncancel' className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
-                 <button name='btnSendEmail' style={{ display: showEmailButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleEmail}>Send Email to Vendor</button>
+                 <button name='btnSendEmail' style={{ display: showHoldButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleEmail}>Send Email to Vendor</button>
               </div>
             </div>
           </div>
