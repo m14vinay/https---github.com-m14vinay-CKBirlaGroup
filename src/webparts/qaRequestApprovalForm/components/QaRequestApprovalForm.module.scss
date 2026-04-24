@@ -211,7 +211,7 @@ button:hover {
 }
 
 .timelineItem.pending .timelineMarker {
-  background-color: #bdbdbd;
+  background-color: #e78719;
 }
 
 .timelineContent {
@@ -238,6 +238,26 @@ button:hover {
 .statusTextApproved {
   color: #00a651;
   font-weight: 700;
+}
+
+.approvalBar {
+  position: relative;
+  height: 50px;         // ✅ FIXED HEIGHT (important)
+  display: flex;
+  align-items: center;
+}
+
+.approvalBar::after {
+  content: "";
+  position: absolute;
+  right: -20px;
+  top: 0;
+  border-top: 25px solid transparent;
+  border-bottom: 25px solid transparent;
+  border-left: 20px solid #198754; // green
+}
+.approvalBar {
+  overflow: hidden;   // optional
 }
 
 .statusTextRejected {

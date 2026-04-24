@@ -1,671 +1,376 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { SPHttpClient } from '@microsoft/sp-http';
 import { IQaRequestApprovalFormProps } from './IQaRequestApprovalFormProps';
 import styles from './QaRequestApprovalForm.module.scss';
-import { Spinner, SpinnerSize } from '@fluentui/react';
-
-type TApprovalStatus = 'Approved' | 'Rejected';
-type TTimelineStatus = 'approved' | 'rejected' | 'pending';
-
-interface IAttachmentFile {
-  FileName: string;
-  ServerRelativeUrl: string;
-}
-
-interface IApprovalItem {
-  Status?: string;
-  ProjectTitle?: string;
-  ProjectReffNo?: string;
-  ProjectDescription?: string;
-  TotalProjectAmount?: string | number;
-  ApplicableTaxes?: string | number;
-  Vendor1?: string;
-  Vendor2?: string;
-  Vendor3?: string;
-  Quote1?: string | number;
-  Quote2?: string | number;
-  Quote3?: string | number;
-  Selectedvendor?: string;
-  SelectedQuote?: string | number;
-  Department?: string;
-  Advancepayment?: string;
-  ApprovalPath?: string;
-  ApproverComment1?: string;
-  AttachmentFiles?: IAttachmentFile[];
-  [key: string]: any;
-  ActionDate1?: string;
-  ActionDate2?: string;
-  ActionDate3?: string;
-}
-
-interface IPurchaseOrderItem {
-  Description?: string;
-  Quantity?: string | number;
-  Rate?: string | number;
-  Amount?: string | number;
-}
-
-interface IUserLookup {
-  Id?: number;
-  Title?: string;
-}
-interface IApprovalItem {
-  CurrentStatus?: string; 
-}
-
-interface IDepartmentApproverData {
-  Departmenthead?: IUserLookup;
-  Approval1?: IUserLookup;
-  Approval2?: IUserLookup;
-  Approval3?: IUserLookup;
-  Approval4?: IUserLookup;
-}
-
-interface IHistoryItem {
-  UserName?: string;
-  UserAction?: string;
-  UserComment?: string;
-  ActionDate?: string;
-  Designation?: string;
-}
-
-interface IListResponse<T> {
-  value?: T[];
-}
-
-const STEP_DESIGNATION_MAP: Record<number, string> = {
-  1: 'Request Initiator',
-  2: 'Department Head',
-  3: 'Approver 1',
-  4: 'Approver 2',
-  5: 'Approver 3',
-  6: 'Approver 4'
-};
-
-const FINAL_STEP = 6;
 
 export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (props) => {
-  const [poItems, setPoItems] = React.useState<IPurchaseOrderItem[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [data, setData] = React.useState<IApprovalItem | null>(null);
-  const [statusMsg, setStatusMsg] = React.useState('');
-  const [comment, setComment] = React.useState('');
-  const [history, setHistory] = React.useState<IHistoryItem[]>([]);
-  const [isActionDone, setIsActionDone] = React.useState(false);
-  const [approverData, setApproverData] = React.useState<IDepartmentApproverData | null>(null);
-  const [currentStep, setCurrentStep] = React.useState(1);
 
+  const [poItems, setPoItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<any>(null);
+  const [statusMsg, setStatusMsg] = useState("");
+  const [comment, setComment] = useState("");
+  const [history, setHistory] = useState<any[]>([]);
+  const [isActionDone, setIsActionDone] = useState(false);
+  const [approverData, setApproverData] = useState<any>(null);
+  const [currentStep, setCurrentStep] = useState(1);
+
+  // ================= COMMON =================
   const params = new URLSearchParams(window.location.search);
-const itemId =
-  Number(params.get('RequestId')) ||
-  Number(params.get('requestId')) ||
-  Number(params.get('id')) ||
-  Number(params.get('ID'));
-  const requestLabel = itemId ? `PRJ-${itemId}` : '';
+  const itemId =
+  Number(params.get("requestId")) ||
+  Number(params.get("RequestId")) ||
+  Number(params.get("id"));
 
   const isReadOnly =
     isActionDone ||
-    data?.CurrentStatus === 'Approved' ||
-    data?.CurrentStatus === 'Rejected' ||
-    statusMsg.includes("successfully");
+    data?.Status === "Approved" ||
+    data?.Status === "Rejected";
 
-  const fetchFromList = React.useCallback(async <T,>(url: string): Promise<T> => {
-    const response = await props.spHttpClient.get(url, SPHttpClient.configurations.v1);
-    return response.json() as Promise<T>;
-  }, [props.spHttpClient]);
+const requestLabel = data?.ProjectTitle
+  ? `PRJ-${itemId}`
+  : `PRJ-${itemId}`;
 
-  const formatTimelineDate = (value?: string): string => {
-    if (!value) {
-      return '';
-    }
-
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('en-IN');
+  const fetchFromList = async (url: string) => {
+    const res = await props.spHttpClient.get(url, SPHttpClient.configurations.v1);
+    return res.json();
   };
 
-  // const getDesignationByStep = (step: number): string => STEP_DESIGNATION_MAP[step] || 'Approver';
+  const formatTimelineDate = (value: string) => {
+    if (!value) return "";
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? "" : d.toLocaleString("en-IN");
+  };
 
-  const getDesignationByStep = (step: number): string => STEP_DESIGNATION_MAP[step] || 'Approver';
+  const normalizeTimelineValue = (value?: string): string =>
+    String(value || "").toLowerCase().replace(/\s+/g, "").trim();
 
-  const getUser = React.useCallback(async (): Promise<IUserLookup> => {
-    return fetchFromList<IUserLookup>(`${props.siteUrl}/_api/web/currentuser`);
-  }, [fetchFromList, props.siteUrl]);
-
-  const getUserFromStep = React.useCallback(async (step: number): Promise<string> => {
-    if (step === 1) {
-      const currentUser = await getUser();
-      return currentUser.Title || '';
-    }
-
-    if (!approverData) {
-      return '';
-    }
-
-    const approverMap: Record<number, string> = {
-      2: approverData.Departmenthead?.Title || '',
-      3: approverData.Approval1?.Title || '',
-      4: approverData.Approval2?.Title || '',
-      5: approverData.Approval3?.Title || '',
-      6: approverData.Approval4?.Title || ''
-    };
-
-    return approverMap[step] || '';
-  }, [approverData, getUser]);
-
-  const fetchHistory = React.useCallback(async () => {
-    if (!itemId) {
-      return;
-    }
+  // ================= FETCH =================
+  const fetchData = async () => {
+    if (!itemId) return;
 
     try {
-      const response = await fetchFromList<IListResponse<IHistoryItem>>(
-        `${props.siteUrl}/_api/web/lists/getbytitle('History')/items?$filter=FID eq ${itemId}&$orderby=Created asc`
-      );
-
-      setHistory(response.value || []);
-    } catch (error) {
-      console.error('Failed to load history:', error);
-    }
-  }, [fetchFromList, itemId, props.siteUrl]);
-
-  const fetchData = React.useCallback(async () => {
-    if (!itemId) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const itemResponse = await fetchFromList<IApprovalItem>(
-        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles,Approval1,Approval2,Approval3&$select=*,Approval1/Title,Approval2/Title,Approval3/Title`
-      );
-
-      const departmentName = String(itemResponse.Department || '').replace(/'/g, "''");
-      const [purchaseOrderResponse, departmentResponse] = await Promise.all([
-        fetchFromList<IListResponse<IPurchaseOrderItem>>(
-          `${props.siteUrl}/_api/web/lists/getbytitle('PurchaseOrderDetails')/items?$filter=QuotationIdId eq ${itemId}`
-        ),
-        departmentName
-          ? fetchFromList<IListResponse<IDepartmentApproverData>>(
-            `${props.siteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?
-$filter=DepartmentName eq '${departmentName}'
-&$select=Departmenthead/Id,Departmenthead/Title,
-Approval1/Id,Approval1/Title,
-Approval2/Id,Approval2/Title,
-Approval3/Id,Approval3/Title,
-Approval4/Id,Approval4/Title
-&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4`
-          )
-          : Promise.resolve({ value: [] })
+      const [itemRes, poRes] = await Promise.all([
+        fetchFromList(`${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles`),
+        fetchFromList(`${props.siteUrl}/_api/web/lists/getbytitle('PurchaseOrderDetails')/items?$filter=QuotationIdId eq ${itemId}`)
       ]);
 
-      setData(itemResponse);
-      // setComment(itemResponse.ApproverComment1 || '');
-      setPoItems(purchaseOrderResponse.value || []);
-      setApproverData(departmentResponse.value?.[0] || null);
-    } catch (error) {
-      console.error('Failed to load approval request:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchFromList, itemId, props.listName, props.siteUrl]);
+      setData(itemRes);
+      const deptRes = await fetchFromList(
+  `${props.siteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?$filter=DepartmentName eq '${itemRes.Department}'&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4`
+);
 
-  const createHistoryItem = React.useCallback(async (payload: Record<string, unknown>): Promise<void> => {
-    await props.spHttpClient.post(
-      `${props.siteUrl}/_api/web/lists/getbytitle('History')/items`,
-      SPHttpClient.configurations.v1,
-      {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      }
-    );
-  }, [props.siteUrl, props.spHttpClient]);
+      setApproverData(deptRes.value[0]);
+      setComment(itemRes.ApproverComment1 || "");
+      setPoItems(poRes.value || []);
 
-  // Keep the history timeline in sync with each approval action.
-  const handleSaveHistory = React.useCallback(async (id: number, userAction: TApprovalStatus, userName: string, userDesignation: string) => {
-    try {
-      // const userName = await getUserFromStep(currentStep);
-
-      await createHistoryItem({
-        Title: 'QA',
-        FID: id,
-        UserName: userName,
-        UserAction: userAction,
-        UserComment: comment,
-        ActionDate: new Date().toISOString(),
-        Designation: userDesignation
-      });
-    } catch (error) {
-      console.error('History save failed:', error);
-    }
-  }, [comment, createHistoryItem, currentStep, getUserFromStep]);
-
-
-  const handleApproveReject = async (action:string) => {
-    try {
-      setLoading(true);
-
-      if (!comment) return alert("Comment is required.");
-      if (!itemId || !data) return;
-
-      // 🔹 CURRENT USER
-      const currentUser = await props.spHttpClient.get(
-        `${props.siteUrl}/_api/web/currentuser`,
-        SPHttpClient.configurations.v1
-      ).then(res => res.json());
-
-      // 🔐 SECURITY CHECK (IMPORTANT)
-      if (Number(data.AssignedToEmailId) !== currentUser.Id) {
-        alert("You are not authorized ❌");
-        return;
-      }
-
-      let payload: any = {};
-
-      let userDesignation = "";
-
-      // 🔥 STEP DETECTION BASED ON AssignedTo (BEST)
-
-      if(action == "Rejected"){
-        // STEP 1
-      if (data.AssignedToEmailId === data.Approval1Id && data.ActionDate1 === null) {
-
-        userDesignation = "Department Head"
-          payload = {
-            ApproverComment1: comment,
-            ActionDate1: new Date().toISOString(),
-            AssignedToEmailId: null,
-            AssignedTo: "Rejected",
-            Status: "Rejected",
-            CurrentStatus: "Rejected"
-          };
-      }
-
-      // STEP 2
-      else if (data.AssignedToEmailId === data.Approval2Id && data.ActionDate2 === null) {
-        userDesignation = "Management 1"
-        
-          payload = {
-            ApproverComment2: comment,
-            ActionDate2: new Date().toISOString(),
-            AssignedToEmailId: null,
-            AssignedTo: "Rejected",
-            Status: "Rejected",
-            CurrentStatus: "Rejected"
-          };
-      }
-
-      // FINAL STEP
-      else if (data.AssignedToEmailId === data.Approval3Id) {
-        userDesignation = "Management 2"
-        payload = {
-          ApproverComment3: comment,
-          ActionDate3: new Date().toISOString(),
-          AssignedToEmailId: null,
-          AssignedTo: "Rejected",
-          Status: "Rejected",
-          CurrentStatus: "Rejected"
-        };
-      }
-      }
-      
-      else if(action === "Approved"){
-        // STEP 1
-        if (data.AssignedToEmailId === data.Approval1Id && data.ActionDate1 === null) {
-
-          userDesignation = "Department Head"
-          if(data.Approval2Id){
-            payload = {
-              ApproverComment1: comment,
-              ActionDate1: new Date().toISOString(),
-              AssignedToEmailId: Number(data.Approval2Id) || null,
-              AssignedTo: data.Approval2?.Title,
-              Status: "Pending"
-            };
-          }
-          else{
-            payload = {
-              ApproverComment1: comment,
-              ActionDate1: new Date().toISOString(),
-              AssignedToEmailId: null,
-              AssignedTo: "Approved",
-              Status: "Approved",
-              CurrentStatus: "Approved"
-            };
-          }
-        }
-
-        // STEP 2
-        else if (data.AssignedToEmailId === data.Approval2Id && data.ActionDate2 === null) {
-          userDesignation = "Management 1"
-          if(data.Approval3Id){
-            payload = {
-              ApproverComment2: comment,
-              ActionDate2: new Date().toISOString(),
-              AssignedToEmailId: Number(data.Approval3Id) || null,
-              AssignedTo: data.Approval3?.Title,
-              Status: "Pending"
-            };
-          }
-          else{
-            payload = {
-              ApproverComment2: comment,
-              ActionDate2: new Date().toISOString(),
-              AssignedToEmailId: null,
-              AssignedTo: "Approved",
-              Status: "Approved",
-              CurrentStatus: "Approved"
-            };
-          }
-        }
-
-        // FINAL STEP
-        else if (data.AssignedToEmailId === data.Approval3Id) {
-          userDesignation = "Management 2"
-          payload = {
-            ApproverComment3: comment,
-            ActionDate3: new Date().toISOString(),
-            AssignedToEmailId: null,
-            AssignedTo: "Approved",
-            Status: "Approved",
-            CurrentStatus: "Approved"
-          };
-        }
-      }
-
-      if (Object.keys(payload).length === 0) {
-        alert("No approval action available ❌");
-        return;
-      }
-
-      console.log("FINAL PAYLOAD:", payload);
-
-      // 🔹 UPDATE ITEM
-      await props.spHttpClient.post(
-        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
-        SPHttpClient.configurations.v1,
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'IF-MATCH': '*',
-            'X-HTTP-Method': 'MERGE'
-          },
-          body: JSON.stringify(payload)
-        }
-      );
-
-      // 🔹 HISTORY SAVE
-      await handleSaveHistory(itemId, "Approved", currentUser.Title, userDesignation);
-
-      alert( action + " Successfully ✅");
-
-      // 🔹 UI UPDATE (IMPORTANT)
-      setData(prev => prev ? { ...prev, ...payload } : prev);
-      setIsActionDone(true);
-
-      // 🔹 REDIRECT
-  window.location.assign(
-    `${props.siteUrl}/SitePages/Dashboard.aspx`
-  );
-
-    } catch (error) {
-      console.error("APPROVE ERROR:", error);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
-const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
 
+  const fetchHistory = async () => {
+    if (!itemId) return;
+
+    try {
+      const res = await fetchFromList(
+        `${props.siteUrl}/_api/web/lists/getbytitle('History')/items?$filter=FID eq ${itemId} and Title eq 'QA'&$orderby=Created asc`
+      );
+      setHistory(res.value || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  // ================= HISTORY FUNCTIONS =================
+
+const getUser = async (): Promise<any> => {
+  const res = await props.spHttpClient.get(
+    `${props.siteUrl}/_api/web/currentuser`,
+    SPHttpClient.configurations.v1
+  );
+  return res.json();
+};
+
+const getUserFromListByStep = async (step: number): Promise<string> => {
+  if (step === 1) {
+    const currentUser = await getUser();
+    return currentUser.Title;
+  }
+
+  if (!approverData) return "";
+
+  switch (step) {
+    case 2: return approverData.Departmenthead?.Title || "";
+    case 3: return approverData.Approval1?.Title || "";
+    case 4: return approverData.Approval2?.Title || "";
+    case 5: return approverData.Approval3?.Title || "";
+    case 6: return approverData.Approval4?.Title || "";
+    default: return "";
+  }
+};
+
+const createHistoryItem = async (payload: any): Promise<void> => {
+  await props.spHttpClient.post(
+    `${props.siteUrl}/_api/web/lists/getbytitle('History')/items`,
+    SPHttpClient.configurations.v1,
+    {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }
+  );
+};
+
+const handleSaveHistory = async (id: number, userAction: string) => {
+  try {
+
+    const userName = await getUserFromListByStep(currentStep);
+    const designation = getDesignationByStep(currentStep);
+
+    await createHistoryItem({
+      Title: 'QA',
+      FID: id,
+      UserName: userName,
+      UserAction: userAction,
+      UserComment: comment,
+      ActionDate: new Date().toISOString(),
+      Designation: designation   // ✅ FIXED
+    });
+
+  } catch (error) {
+    console.error("History error:", error);
+  }
+};
+  
+  // ================= UPDATE =================
+const updateStatus = async (status: string) => {
   if (!comment.trim()) {
-    setStatusMsg('Enter comment before taking action.');
+    setStatusMsg("❌ Enter comment");
     return;
   }
 
   try {
-
-    // 🔴 SAFETY CHECK
-    if (!approverData) {
-      setStatusMsg("Approver configuration missing ❌");
-      return;
-    }
-
-    // ✅ STEP CALCULATION (FIXED)
-    const step =
-      !data?.ActionDate1 ? 1 :
-      !data?.ActionDate2 ? 2 :
-      !data?.ActionDate3 ? 3 :
-      4;
-
-    let payload: any = {};
-
-    // 🔴 REJECT (highest priority)
-    if (status === "Rejected") {
-      payload = {
-        CurrentStatus: "Rejected",
-        AssignedTo: "",
-        AssignedToEmailId: null
-      };
-    }
-
-    // ✅ STEP 1 → move to Approval2
-    else if (step === 1) {
-      payload = {
-        ApproverComment1: comment,
-        ActionDate1: new Date().toISOString(),
-
-        AssignedTo: approverData?.Approval2?.Title || "",
-        AssignedToEmailId: approverData?.Approval2?.Id || null,
-
-        CurrentStatus: "Pending"
-      };
-    }
-
-    // ✅ STEP 2 → move to Approval3
-    else if (step === 2) {
-      payload = {
-        ApproverComment2: comment,
-        ActionDate2: new Date().toISOString(),
-
-        AssignedTo: approverData?.Approval3?.Title || "",
-        AssignedToEmailId: approverData?.Approval3?.Id || null,
-
-        CurrentStatus: "Pending"
-      };
-    }
-
-    // ✅ FINAL STEP
-    else if (step === 3) {
-      payload = {
-        ApproverComment3: comment,
-        ActionDate3: new Date().toISOString(),
-
-        AssignedTo: "",
-        AssignedToEmailId: null,
-
-        CurrentStatus: "Approved"
-      };
-    }
-
-    // ❌ SAFETY CHECK
-    if (Object.keys(payload).length === 0) {
-      setStatusMsg("No action available ❌");
-      return;
-    }
-
-    console.log("FINAL PAYLOAD:", payload);
-
-    // 🔹 UPDATE SHAREPOINT ITEM
+    // ================= UPDATE MAIN ITEM =================
     await props.spHttpClient.post(
       `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
       SPHttpClient.configurations.v1,
       {
         headers: {
-          Accept: 'application/json',
+          'Accept': 'application/json',
           'Content-Type': 'application/json',
           'IF-MATCH': '*',
           'X-HTTP-Method': 'MERGE'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          Status: status,
+          ApproverComment1: comment
+        })
       }
     );
 
-    // 🔹 SAVE HISTORY
-    await handleSaveHistory(itemId, status,'','');
+    // ================= SAVE HISTORY =================
+    await handleSaveHistory(itemId, status);
 
-    // 🔥 IMPORTANT → REFRESH FROM SERVER (NO LOCAL FAKE UPDATE)
-    await fetchData();
-    await fetchHistory();
+    // ================= STEP LOGIC =================
+    let nextStep = currentStep;
 
-    setStatusMsg(`${status} successfully.`);
+    if (status === "Approved") {
+      nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+    }
+
+    // If last approver reached → mark final approved
+    const maxSteps = 6; // change based on your columns
+
+    if (status === "Approved" && nextStep > maxSteps) {
+      await props.spHttpClient.post(
+        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+        SPHttpClient.configurations.v1,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'IF-MATCH': '*',
+            'X-HTTP-Method': 'MERGE'
+          },
+          body: JSON.stringify({
+            Status: "Approved"
+          })
+        }
+      );
+    }
+
+    // ================= UI UPDATE =================
+    setStatusMsg(`✅ ${status} done`);
     setIsActionDone(true);
 
-  } catch (error: any) {
-    console.error('Status update failed:', error);
-    setStatusMsg(error?.message || 'Unable to update the request.');
+    // Refresh timeline
+    await fetchHistory();
+
+  } catch (err: any) {
+    console.error("Update Error:", err);
+    setStatusMsg(err.message || "❌ Error occurred");
   }
+};
 
-}, [
-  comment,
-  data,
-  approverData,
-  fetchData,
-  fetchHistory,
-  handleSaveHistory,
-  itemId,
-  props.listName,
-  props.siteUrl,
-  props.spHttpClient
-]);
 
-[comment, currentStep, fetchHistory, handleSaveHistory, itemId, props.listName, props.siteUrl, props.spHttpClient];
+  useEffect(() => {
+    fetchData();
+    fetchHistory();
+  }, []);
 
-  React.useEffect(() => {
-    fetchData().catch(() => undefined);
-    fetchHistory().catch(() => undefined);
-  }, [fetchData, fetchHistory]);
-
-  const statusTextClassMap: Record<TTimelineStatus, string> = {
+  const statusTextClassMap: any = {
     approved: styles.statusTextApproved,
     rejected: styles.statusTextRejected,
     pending: styles.statusTextPending
   };
 
-  const getTimelineStatus = (actionValue?: string): TTimelineStatus => {
-    const action = (actionValue || '').toLowerCase();
-
-    if (action.includes('approved') || action.includes('submit') || action.includes('initiator')) {
-      return 'approved';
-    }
-
-    if (action.includes('rejected')) {
-      return 'rejected';
-    }
-
-    return 'pending';
+  const statusClassMap = {
+    approved: styles.approved,
+    rejected: styles.rejected,
+    pending: styles.pending
   };
 
-  if (!data) {
-    return <div>No data found.</div>;
+  const timelineItems = React.useMemo(() => {
+    const latestByStep = new Map<string, any>();
+
+    history.forEach((item) => {
+      const designationKey = normalizeTimelineValue(item.Designation);
+      const userNameKey = normalizeTimelineValue(item.UserName);
+      const key = designationKey || userNameKey || normalizeTimelineValue(item.UserAction);
+
+      if (key) {
+        latestByStep.set(key, item);
+      }
+    });
+
+    return Array.from(latestByStep.values());
+  }, [history]);
+
+  // const statusTextClassMap = {
+  //   approved: styles.statusTextApproved,
+  //   rejected: styles.statusTextRejected,
+  //   pending: styles.statusTextPending
+  // };
+
+  if (loading) return <div>Loading...</div>;
+  if (!data) return <div>No data</div>;
+
+  // ================= REUSABLE FIELD =================
+  const renderField = (label: string, value: any, required = false) => (
+    <div className={styles.formRow}>
+      <label>
+        {label} {required && <span className={styles.required}>*</span>}
+      </label>
+      <input value={value || ""} disabled />
+    </div>
+  );
+
+  // ================= UI =================
+const getDesignationByStep = (step: number): string => {
+  switch (step) {
+    case 1: return "Request Initiator";
+    case 2: return "Department Head";
+    case 3: return "Approver 1";
+    case 4: return "Approver 2";
+    case 5: return "Approver 3";
+    case 6: return "Approver 4";
+    default: return "Approver";
   }
+};
+
   return (
+    
     <div className={styles.container}>
-      {loading && (
-              <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: 'rgba(255,255,255,0.6)',
-                zIndex: 9999
-              }}>
-                <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
-                  <Spinner label="Processing..." size={SpinnerSize.large} />
-                </div>
-              </div>
-            )}
-      <div className={styles.mainLayout}>
+      <div className={styles.mainLayout}  >
+
+        
+
+        {/* ================= LEFT SIDE ================= */}
         <div className={styles.leftPanel}>
+
           <h4 className={styles.heading}>Quotation Request Approval Form</h4>
 
+          {/* ===== BASIC DETAILS ===== */}
           <div className={styles.formRow}>
             <label>Project Title *</label>
-            <input value={data.ProjectTitle || ''} disabled />
+            <input value={data.ProjectTitle || ""} disabled />
           </div>
 
           <div className={styles.formRow}>
             <label>Project Reference Number</label>
-            <input value={data.ProjectReffNo || ''} disabled />
+            <input value={data.ProjectReffNo || ""} disabled />
           </div>
 
           <div className={styles.formRow}>
             <label>Project Description *</label>
-            <input value={data.ProjectDescription || ''} disabled />
+            <input value={data.ProjectDescription || ""} disabled />
           </div>
 
           <div className={styles.formRow}>
             <label>Total Project Amount</label>
             <div className={styles.twoCol}>
-              <input value={data.TotalProjectAmount || ''} disabled />
+              <input value={data.TotalProjectAmount || ""} disabled />
               <span>Applicable Taxes</span>
-              <input value={data.ApplicableTaxes || ''} disabled />
+              <input value={data.ApplicableTaxes || ""} disabled />
             </div>
           </div>
 
-          {[1, 2, 3].map((vendorIndex) => (
-            <div key={vendorIndex} className={styles.formRow}>
-              <label>Vendor {vendorIndex} {vendorIndex === 1 && '*'}</label>
+          {/* ===== VENDORS ===== */}
+          {[1, 2, 3].map(i => (
+            <div key={i} className={styles.formRow}>
+              <label>Vendor {i} {i === 1 && "*"}</label>
               <div className={styles.twoCol}>
-                <input value={String(data[`Vendor${vendorIndex}`] || '')} disabled />
-                <span>Quote {vendorIndex}</span>
-                <input value={String(data[`Quote${vendorIndex}`] || '')} disabled />
+                <input value={data[`Vendor${i}`] || ""} disabled />
+                <span>Quote {i}</span>
+                <input value={data[`Quote${i}`] || ""} disabled />
               </div>
             </div>
           ))}
 
           <div className={styles.formRow}>
             <label>Selected Vendor *</label>
-            <input value={data.Selectedvendor || ''} disabled />
+            <input value={data.Selectedvendor || ""} disabled />
           </div>
 
           <div className={styles.formRow}>
             <label>Selected Quote *</label>
-            <input value={data.SelectedQuote || ''} disabled />
+            <input value={data.SelectedQuote || ""} disabled />
           </div>
 
           <div className={styles.formRow}>
             <label>Department *</label>
-            <input value={data.Department || ''} disabled />
+            <input value={data.Department || ""} disabled />
           </div>
 
           <div className={styles.formRow}>
             <label>Advance Payment *</label>
-            <input value={data.Advancepayment || ''} disabled />
+            <input value={data.Advancepayment || ""} disabled />
           </div>
 
           <div className={styles.formRow}>
             <label>Approval Path *</label>
-            <input value={data.ApprovalPath || ''} disabled />
+            <input value={data.ApprovalPath || ""} disabled />
           </div>
 
+          {/* ===== ATTACHMENTS ===== */}
           <div className={styles.formRow}>
             <label>Attachments</label>
-            {data.AttachmentFiles?.length ? (
-              data.AttachmentFiles.map((file) => (
-                <div key={file.FileName}>
-                  <a href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
-                    {file.FileName}
-                  </a>
-                </div>
-              ))
-            ) : (
-              <div>No files</div>
-            )}
+            {data.AttachmentFiles?.length ? data.AttachmentFiles.map((f: any) => (
+              <div key={f.FileName}>
+                <a href={f.ServerRelativeUrl} target="_blank">
+                  {f.FileName}
+                </a>
+              </div>
+            )) : <div>No files</div>}
           </div>
 
+          {/* ===== PO ===== */}
           <div className={styles.poSection}>
             <h5>Purchase Order Details</h5>
 
@@ -677,112 +382,122 @@ const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
                 <div>Amount</div>
               </div>
 
-              {poItems.length > 0 ? (
-                poItems.map((item, index) => (
-                  <div key={`${item.Description || 'po'}-${index}`} className={styles.poRow}>
-                    <input value={item.Description || ''} disabled />
-                    <input value={item.Quantity || ''} disabled />
-                    <input value={item.Rate || ''} disabled />
-                    <input value={item.Amount || ''} disabled />
-                  </div>
-                ))
-              ) : (
-                <div className={styles.emptyState}>No purchase order details found.</div>
-              )}
+              {poItems.map((item, i) => (
+                <div key={i} className={styles.poRow}>
+                  <input value={item.Description || ""} disabled />
+                  <input value={item.Quantity || ""} disabled />
+                  <input value={item.Rate || ""} disabled />
+                  <input value={item.Amount || ""} disabled />
+                </div>
+              ))}
             </div>
           </div>
 
+          {/* ===== COMMENT ===== */}
           <div className={styles.formRow}>
             <label>Approver Comments *</label>
             <textarea
               value={comment}
-              onChange={(event) => setComment(event.target.value)}
+              onChange={(e) => setComment(e.target.value)}
               disabled={isReadOnly}
             />
           </div>
 
+          {/* ===== BUTTONS ===== */}
           <div className={styles.buttonContainer}>
             <button
-              className={styles.ApproveBtn}
-              onClick={() => handleApproveReject("Approved").catch(() => undefined)}
-              disabled={isReadOnly}
-            >
-              Approve
-            </button>
+  className={styles.ApproveBtn}
+  onClick={() => updateStatus("Approved")}
+  disabled={isReadOnly}
+>
+  Approve
+</button>
 
-            <button
-              className={styles.RejectBtn}
-              onClick={() => handleApproveReject('Rejected').catch(() => undefined)}
-              disabled={isReadOnly}
-            >
-              Reject
-            </button>
+<button
+  className={styles.RejectBtn}
+  onClick={() => updateStatus("Rejected")}
+  disabled={isReadOnly}
+>
+  Reject
+</button>
 
-            <button
-              className={styles.cancelBtn}
-              onClick={() => window.history.back()}
-            >
-              Back
-            </button>
+<button
+  className={styles.cancelBtn}
+  onClick={() => window.history.back()}
+>
+  Back
+</button>
           </div>
 
-          {statusMsg && <div className={styles.statusMessage}>{statusMsg}</div>}
+          {statusMsg && <div>{statusMsg}</div>}
+
         </div>
 
+        {/* ================= RIGHT SIDE TIMELINE ================= */}
         <div className={styles.rightTimeline}>
-          <h4 className={styles.timelineHeader}>Timeline - {requestLabel}</h4>
 
-          <div className={styles.timelineBody}>
-            {history.length > 0 ? history.map((item, index) => {
-              const status = getTimelineStatus(item.UserAction);
+          <h4 className={styles.timelineHeader}>
+            Timeline - {requestLabel}
+          </h4>
 
-              return (
-                <div
-                  key={`${item.UserName || 'history'}-${index}`}
-                  className={`${styles.timelineItem} ${styles[status]}`}
-                >
-                  <div className={styles.timelineMarker}></div>
+<div className={styles.timelineBody}>
+  {timelineItems.length > 0 ? timelineItems.map((item, index) => {
+    const action = normalizeTimelineValue(item.UserAction);
+    const isApproved =
+      action.includes("approved") ||
+      action.includes("submit") ||
+      action.includes("initiator");
+    const isRejected = action.includes("rejected") || action.includes("reject");
 
-                  <div className={styles.timelineContent}>
-                    <div className={styles.timelineStepTitle}>
-                      {item.Designation || item.UserName}
-                    </div>
+    const status = isApproved
+      ? "approved"
+      : isRejected
+        ? "rejected"
+        : "pending";
 
-                    {item.Designation !== "Request Initiator" ? (
-                      <div className={styles.timelineText}>
-                        <b>Approver Name:</b> {item.UserName || '-'}
-                      </div>
-                    ) : (
-                      <div className={styles.timelineText}>
-                        <b>Initiator:</b> {item.UserName || '-'}
-                      </div>
-                    )}
+    return (
+      <div
+        key={`${normalizeTimelineValue(item.Designation)}-${normalizeTimelineValue(item.UserName)}-${index}`}
+        className={`${styles.timelineItem} ${styles[status]}`}
+      >
+        <div className={styles.timelineMarker}></div>
 
-                    {item.UserAction && item.Designation !== "Request Initiator" && (
-                      <div className={`${styles.timelineText} ${statusTextClassMap[status]}`}>
-                        <b>Action Taken:</b> {item.UserAction}
-                      </div>
-                    )}
-
-                    {item.ActionDate && (
-                      <div className={styles.timelineText}>
-                        <b>Action Date:</b> {formatTimelineDate(item.ActionDate)}
-                      </div>
-                    )}
-
-                    {item.UserComment && (
-                      <div className={styles.timelineText}>
-                        <b>Comments:</b> {item.UserComment}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            }) : (
-              <div>No history found.</div>
-            )}
+        <div className={styles.timelineContent}>
+          <div className={styles.timelineStepTitle}>
+            {item.Designation || item.UserName}
           </div>
+
+          <div className={styles.timelineText}>
+            <b>Approver Name:</b> {item.UserName}
+          </div>
+
+          {item.UserAction && (
+            <div className={`${styles.timelineText} ${statusTextClassMap[status] || ""}`}>
+              <b>Action Taken:</b> {item.UserAction}
+            </div>
+          )}
+
+          {item.ActionDate && (
+            <div className={styles.timelineText}>
+              <b>Action Date:</b> {formatTimelineDate(item.ActionDate)}
+            </div>
+          )}
+
+          {item.UserComment && (
+            <div className={styles.timelineText}>
+              <b>Comments:</b> {item.UserComment}
+            </div>
+          )}
         </div>
+      </div>
+    );
+  }) : (
+    <div>No history found</div>
+  )}
+</div>
+
+        </div>
+
       </div>
     </div>
   );

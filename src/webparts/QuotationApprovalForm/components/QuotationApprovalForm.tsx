@@ -655,6 +655,7 @@ const [form, setForm] = React.useState<IForm>({
       if (!itemId) {
         // ✅ CREATE
         const res = await service.createItem(payload);
+        setItemId(res.Id);
         // SAVE PO DETAILS
         await service.deletePurchaseOrderDetailsByQuotationId(res.Id);
 
@@ -837,7 +838,6 @@ if (!selectedApprover) {
       if (!itemId) {
         // ✅ CREATE
         const res = await service.createItem(payload);
-
         setItemId(res.Id);
       
 
