@@ -440,6 +440,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   //SAVE DRAFT DATA
 
   const handleSaveOrUpdate = async () => {
+     try {
     setLoading(true);
     // 🔹 Validations
     if (!form.projectCode) return alert("Enter Project Code");
@@ -469,7 +470,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       CurrentStatus: 'Draft'
     };
 
-    try {
+   
       if (!itemId) {
         // 🔹 CREATE
         const res = await service.createItem(payload);
@@ -498,6 +499,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
         }
         alert("Request Updated Successfully ✅");
       }
+    
     } catch (error) {
       console.error(error);
       alert("Error Occurred,Please Contact To System Administrator.❌");
@@ -669,7 +671,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
               <div className={styles.leftPanelHeader}>
                 <h4>PO Approval Form</h4>
               </div>
-              <button style={{ backgroundColor: 'purple', color: 'white', fontSize: 'bold', width: '100%' }} onClick={handleDownload}>Download Purchase Order</button>
+              {/* <button style={{ backgroundColor: 'purple', color: 'white', fontSize: 'bold', width: '100%' }} onClick={handleDownload}>Download Purchase Order</button> */}
               <div></div>
               <label>Project Code <span className={styles.required}>*</span> </label>
               <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange} />

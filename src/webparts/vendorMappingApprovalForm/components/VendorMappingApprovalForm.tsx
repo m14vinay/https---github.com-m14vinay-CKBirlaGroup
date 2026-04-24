@@ -22,6 +22,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
     CurrentStatus: '',
     RequestNo: '',
     AssignedTo: '',
+    vendorId:'',
     AuthorId: '',
     Created: '',
     Actiondate1: '',
@@ -40,7 +41,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
   const [currentUser, setCurrentUser] = React.useState('');
   const [isDisabled, setIsDisabled] = useState(false);
   const [loading, setLoading] = React.useState(false);
-
+  const [vendorId, setVendorId] = useState<string>('');
 
 
 
@@ -109,7 +110,10 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
 
             files: null
           }));
-
+      
+          const value = result.VendorName || '';
+          const Id = value.split("/")[1].split("-")[0];
+         setVendorId(Id);
           if (!result.Actiondate1) {
             setIsDisabled(false);  // enable
           } else {
@@ -293,8 +297,16 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
                 <label>Additional Information & Remarks</label>
                 <input name="vendorDescription" value={form.vendorDescription} readOnly style={{ backgroundColor: "lightgray" }} />
               </div>
-
-
+             
+            <p>If you want to verfiy the document.
+                <a
+                  href={`https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/VendorRegistrationDetails.aspx?RequestId=${vendorId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Click Here
+                </a>
+              </p>
               <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
                 <label>
                   Attachments <span className={styles.required}>*</span>

@@ -301,13 +301,13 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
    
     //  GST validation
     if (!gst) {
-      alert("GST is Required ❗");
+      alert("GST is Required ");
       return;
     }
     
     const isExists = await service.checkGSTExists(gst, itemId || undefined);
     if (isExists) {
-      alert(`GST ${gst} Already Exists ❌`);
+      alert(`GST ${gst} Already Exists `);
       return;
     }
     const dateOnly = new Date(form.CommencementDate);
@@ -366,7 +366,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
           await service.updateItem(res.Id, {
             VendorCode: `CKBCSL/${res.Id}`
           });
-          alert("Saved Successfully.✅");
+          alert("Reqyest Saved Successfully.");
         }
         else {
           alert("Data Not Saved.");
@@ -379,7 +379,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
             await service.uploadFile(itemId, form.files[i]);
           }
         }
-        alert("Updated Successfully.✅");
+        alert("Request Updated Successfully");
       }
     } catch (error) {
       console.error(error);
@@ -467,7 +467,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
             await service.uploadFile(itemId, form.files[i]);
           }
         }
-        alert("Submitted Successfully.✅");
+        alert("Request Submitted Successfully.✅");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
       }
@@ -481,7 +481,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
             await service.updateItem(res.Id, {
               VendorCode: `CKBCSL/${res.Id}`
             });
-            alert("Submitted Successfully.✅");
+            alert("Request Submitted Successfully.✅");
             const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
             window.location.assign(url);
           }
@@ -550,7 +550,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
         await service.updateItem(res[0].Id, {
           VendorCode: `CKBCSL/${res[0].Id}`
         });
-        alert("Submitted Successfully.✅");
+        alert("Request Submitted Successfully.✅");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
       }
