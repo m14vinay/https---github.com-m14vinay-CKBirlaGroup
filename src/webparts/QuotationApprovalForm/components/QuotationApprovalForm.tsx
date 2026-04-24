@@ -274,6 +274,26 @@ const [form, setForm] = React.useState<IForm>({
     setPoItems((prev) => [...prev, { ...INITIAL_PO_ROW }]);
   };
 
+  const handlecheckamount = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setForm({
+        ...form,
+        [name]: value
+      });
+      const selectedQuote = Number(value || 0);
+const totalAmount = Number(form.TotalProjectAmount || 0);
+
+if (selectedQuote > totalAmount) {
+  setForm(prev => ({
+    ...prev,
+    SelectedQuote: 0
+  }));
+
+  alert("Selected Quote cannot be greater than Total Project Amount.");
+  return;
+}
+  }
+      
   // Remove one purchase order row while keeping at least one visible.
   const removePurchaseOrderRow = (index: number) => {
     setPoItems((prev) => {
@@ -864,7 +884,7 @@ if (!selectedApprover) {
             await service.uploadFile(res.Id, form.files[i]);
           }
         }
-        alert("Submitted Successfully ✅");
+        alert("Request Submitted Successfully");
 
         setTimeout(() => {
           window.location.href = "https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/Dashboard.aspx";
@@ -909,7 +929,7 @@ if (!selectedApprover) {
         for (let i = 0; i < form.files.length; i++) {
           await service.uploadFile(itemId, form.files[i]);
         }
-        alert("Submitted Successfully ✅");
+        alert("Request Submitted Successfully");
 
         setTimeout(() => {
           window.location.href = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
@@ -1026,7 +1046,7 @@ if (!selectedApprover) {
         <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
 
           <label>Selected Quote <span className={styles.required}>*</span></label>
-          <input name="SelectedQuote" value={form.SelectedQuote} onChange={handleChange} type='number' />
+          <input name="SelectedQuote" value={form.SelectedQuote} onChange={handlecheckamount} type='number' />
           
 
               {/* Department and approval section */}
