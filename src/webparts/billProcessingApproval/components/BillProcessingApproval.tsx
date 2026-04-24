@@ -242,7 +242,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       if (form.ActionDate1 == '') {
         const UserApproval2 = await service.getUserById(form.Approver2Id);
         payload = {
-          ApproverComment1: form.Comments,
+          ApproverComment1: form.ApprovalComment,
           CurrentStatus: 'Pending',
           ActionDate1: new Date().toLocaleDateString('en-GB'),
           AssignedTo: UserApproval2?.Title,
@@ -256,7 +256,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       else if (form.ActionDate2 == '') {
         const UserApproval3 = await service.getUserById(form.Approver3Id);
         payload = {
-          ApproverComment2: form.Comments,
+          ApproverComment2: form.ApprovalComment,
           CurrentStatus: 'Pending',
           ActionDate2: new Date().toLocaleDateString('en-GB'),
           AssignedTo: UserApproval3?.Title,
@@ -270,7 +270,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       else if (form.ActionDate3 == '') {
         const UserApproval5 = await service.getUserById(form.Approver5Id);
         payload = {
-          ApproverComment3: form.Comments,
+          ApproverComment3: form.ApprovalComment,
           CurrentStatus: 'Pending',
           ActionDate3: new Date().toLocaleDateString('en-GB'),
           AssignedTo: UserApproval5?.Title,
@@ -283,7 +283,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       }
       else if (form.ActionDate5 == '') {
         payload = {
-          ApproverComment5: form.Comments,
+          ApproverComment5: form.ApprovalComment,
           CurrentStatus: 'Approved',
           ActionDate5: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Approved',
@@ -342,7 +342,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       if (form.ActionDate1 == '') {
         const UserApproval2 = await service.getUserById(form.Approver2Id);
         payload = {
-          ApproverComment1: form.Comments,
+          ApproverComment1: form.ApprovalComment,
           CurrentStatus: 'Rejected',
           ActionDate1: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Rejected',
@@ -356,7 +356,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       else if (form.ActionDate2 == '') {
         const UserApproval3 = await service.getUserById(form.Approver3Id);
         payload = {
-          ApproverComment2: form.Comments,
+          ApproverComment2: form.ApprovalComment,
           CurrentStatus: 'Rejected',
           ActionDate2: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Rejected',
@@ -370,7 +370,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       else if (form.ActionDate3 == '') {
         const UserApproval5 = await service.getUserById(form.Approver5Id);
         payload = {
-          ApproverComment3: form.Comments,
+          ApproverComment3: form.ApprovalComment,
           CurrentStatus: 'Rejected',
           ActionDate3: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Rejected',
@@ -383,7 +383,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       }
       else if (form.ActionDate5 == '') {
         payload = {
-          ApproverComment5: form.Comments,
+          ApproverComment5: form.ApprovalComment,
           CurrentStatus: 'Rejected',
           ActionDate5: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Rejected',
@@ -420,7 +420,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       let NextSequence = 0;
       if (!itemId) return;
       payload = {
-        ApproverComment5: form.Comments,
+        ApproverComment5: form.ApprovalComment,
         CurrentStatus: 'Hold',
         ActionDate5: new Date().toLocaleDateString('en-GB'),
         AssignedTo: 'Hold',
@@ -452,7 +452,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       let NextSequence = 0;
       if (!itemId) return;
       payload = {
-        ApproverComment5: form.Comments,
+        ApproverComment5: form.ApprovalComment,
         CurrentStatus: 'Resume',
         ActionDate5: new Date().toLocaleDateString('en-GB'),
         AssignedTo: 'Resume',
@@ -485,7 +485,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       if (!itemId) return;
       if (form.ActionDate5 == '') {
         payload = {
-          ApproverComment5: form.Comments,
+          ApproverComment5: form.ApprovalComment,
           CurrentStatus: 'Approved',
           ActionDate5: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Approved',
