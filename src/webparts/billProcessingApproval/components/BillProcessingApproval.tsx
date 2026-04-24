@@ -57,6 +57,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
   const [showResumeButton, setShowResumeButton] = React.useState(false);
   const [showHoldButton, setShowHoldButton] = React.useState(false);
   const [showEmailButton, setShowEmailButton] = React.useState(false);
+  const [showRejectButton, setShowRejectButton] = React.useState(false);
   const [isOpen, setisOpen] = React.useState(false);
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
@@ -484,6 +485,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
         const updatedData = await service.updateItem(itemId, payload);
         await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.ApprovalComment);
         setShowEmailButton(true);
+        setShowRejectButton(false);
         setShowPaidButton(false);
         alert("Request Approved Successfully.");
       }
@@ -651,7 +653,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
               </div>
               <div className={styles.buttonGroup}>
                 <button name='btnapprove' style={{ display: showApproveButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleApprove}>Approve</button>
-                <button name='btnReject' className={styles.RejectBtn} onClick={handleReject}>Reject</button>
+                <button name='btnReject' style={{ display: showRejectButton ? 'block' : 'none' }}  className={styles.RejectBtn} onClick={handleReject}>Reject</button>
                 <button name='btnResume' style={{ display: showResumeButton ? 'block' : 'none' }} className={styles.RejectBtn} onClick={handleResume}>Resume</button>
                 <button name='btnPaid' style={{ display: showPaidButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handlePaid}>Paid</button>
                 <button name='btnhold' style={{ display: showHoldButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleHold}>Hold</button>
