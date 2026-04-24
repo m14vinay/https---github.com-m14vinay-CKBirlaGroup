@@ -134,7 +134,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             setAssignedToEmail(User.Id);
           }
           loadAttachments(id);
-          if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 == '' && result.CurrentStatus == 'Pending') {
+          if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 == null && result.CurrentStatus == 'Pending') {
             setShowApproveButton(false);
             setShowResumeButton(false);
             setShowPaidButton(true);
@@ -148,20 +148,20 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             setShowHoldButton(false);
             setShowEmailButton(false);
           }
-          else if (result.CurrentStatus == 'Hold') {
+          else if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 != '' && result.CurrentStatus == 'Hold') {
             setShowResumeButton(true);
             setShowApproveButton(false);
             setShowPaidButton(false);
             setShowEmailButton(false);
           }
-          else if (result.CurrentStatus == 'Resume') {
+          else if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 != '' && result.CurrentStatus == 'Resume') {
             setShowResumeButton(false);
             setShowHoldButton(true);
             setShowApproveButton(false);
             setShowPaidButton(true);
             setShowEmailButton(false);
           }
-          else {
+          else if(result.ActionDate1 ==null || result.ActionDate2 == null || result.ActionDate3 == null){
             setShowResumeButton(false);
             setShowHoldButton(false);
             setShowApproveButton(true);
