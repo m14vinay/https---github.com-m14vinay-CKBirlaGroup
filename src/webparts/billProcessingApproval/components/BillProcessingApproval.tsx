@@ -141,34 +141,32 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             setShowHoldButton(false);
             setShowEmailButton(false);
           }
+          else if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 != '' && result.CurrentStatus == 'Pending') {
+            setShowResumeButton(false);
+            setShowApproveButton(false);
+            setShowPaidButton(true);
+            setShowHoldButton(true);
+            setShowEmailButton(false);
+          }
+          if (result.CurrentStatus == 'Hold') {
+            setShowResumeButton(true);
+            setShowApproveButton(false);
+            setShowPaidButton(false);
+            setShowEmailButton(false);
+          }
+          else if (result.CurrentStatus == 'Resume') {
+            setShowResumeButton(false);
+            setShowHoldButton(true);
+            setShowApproveButton(false);
+            setShowPaidButton(true);
+            setShowEmailButton(false);
+          }
           else {
-            if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 != '' && result.CurrentStatus != 'Approved') {
-              setShowResumeButton(false);
-              setShowApproveButton(false);
-              setShowPaidButton(true);      
-              setShowHoldButton(true);        
-              setShowEmailButton(false);
-            }
-            if (result.CurrentStatus == 'Hold') {
-              setShowResumeButton(true);
-              setShowApproveButton(false);
-              setShowPaidButton(false);              
-              setShowEmailButton(false);
-            }
-            else if (result.CurrentStatus == 'Resume') {
-              setShowResumeButton(false);
-              setShowHoldButton(true);
-              setShowApproveButton(false);
-              setShowPaidButton(true);
-              setShowEmailButton(false);
-            }
-            else {
-              setShowResumeButton(false);
-              setShowHoldButton(true);
-              setShowApproveButton(false);
-              setShowPaidButton(true);
-              setShowEmailButton(false);
-            }
+            setShowResumeButton(false);
+            setShowHoldButton(false);
+            setShowApproveButton(true);
+            setShowPaidButton(false);
+            setShowEmailButton(false);
           }
           const historydata = await service.GetHistoryItem(Number(id), "FBP");
           setHistory(historydata);
@@ -282,7 +280,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
         NextuserAction = 'Pending';
       }
       else if (form.ActionDate5 == '') {
-       const UserApproval5 = await service.getUserById(form.Approver5Id);
+        const UserApproval5 = await service.getUserById(form.Approver5Id);
         payload = {
           ApproverComment5: form.ApprovalComment,
           CurrentStatus: 'Pending',
@@ -672,7 +670,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                 <button name='btnPaid' style={{ display: showPaidButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handlePaid}>Paid</button>
                 <button name='btnhold' style={{ display: showHoldButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleHold}>Hold</button>
                 <button name='btncancel' className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
-                 <button name='btnSendEmail' style={{ display: showEmailButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleEmail}>Send Email to Vendor</button>
+                <button name='btnSendEmail' style={{ display: showEmailButton ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleEmail}>Send Email to Vendor</button>
               </div>
             </div>
           </div>
