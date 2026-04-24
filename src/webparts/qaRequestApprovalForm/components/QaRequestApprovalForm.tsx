@@ -19,18 +19,18 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
   // ================= COMMON =================
   const params = new URLSearchParams(window.location.search);
   const itemId =
-  Number(params.get("requestId")) ||
-  Number(params.get("RequestId")) ||
-  Number(params.get("id"));
+    Number(params.get("requestId")) ||
+    Number(params.get("RequestId")) ||
+    Number(params.get("id"));
 
   const isReadOnly =
     isActionDone ||
     data?.Status === "Approved" ||
     data?.Status === "Rejected";
 
-const requestLabel = data?.ProjectTitle
-  ? `PRJ-${itemId}`
-  : `PRJ-${itemId}`;
+  const requestLabel = data?.ProjectTitle
+    ? `PRJ-${itemId}`
+    : `PRJ-${itemId}`;
 
   const fetchFromList = async (url: string) => {
     const res = await props.spHttpClient.get(url, SPHttpClient.configurations.v1);
@@ -58,8 +58,8 @@ const requestLabel = data?.ProjectTitle
 
       setData(itemRes);
       const deptRes = await fetchFromList(
-  `${props.siteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?$filter=DepartmentName eq '${itemRes.Department}'&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4`
-);
+        `${props.siteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?$filter=DepartmentName eq '${itemRes.Department}'&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4`
+      );
 
       setApproverData(deptRes.value[0]);
       setComment(itemRes.ApproverComment1 || "");
@@ -86,108 +86,76 @@ const requestLabel = data?.ProjectTitle
   };
   // ================= HISTORY FUNCTIONS =================
 
-const getUser = async (): Promise<any> => {
-  const res = await props.spHttpClient.get(
-    `${props.siteUrl}/_api/web/currentuser`,
-    SPHttpClient.configurations.v1
-  );
-  return res.json();
-};
+  const getUser = async (): Promise<any> => {
+    const res = await props.spHttpClient.get(
+      `${props.siteUrl}/_api/web/currentuser`,
+      SPHttpClient.configurations.v1
+    );
+    return res.json();
+  };
 
-const getUserFromListByStep = async (step: number): Promise<string> => {
-  if (step === 1) {
-    const currentUser = await getUser();
-    return currentUser.Title;
-  }
-
-  if (!approverData) return "";
-
-  switch (step) {
-    case 2: return approverData.Departmenthead?.Title || "";
-    case 3: return approverData.Approval1?.Title || "";
-    case 4: return approverData.Approval2?.Title || "";
-    case 5: return approverData.Approval3?.Title || "";
-    case 6: return approverData.Approval4?.Title || "";
-    default: return "";
-  }
-};
-
-const createHistoryItem = async (payload: any): Promise<void> => {
-  await props.spHttpClient.post(
-    `${props.siteUrl}/_api/web/lists/getbytitle('History')/items`,
-    SPHttpClient.configurations.v1,
-    {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
+  const getUserFromListByStep = async (step: number): Promise<string> => {
+    if (step === 1) {
+      const currentUser = await getUser();
+      return currentUser.Title;
     }
-  );
-};
 
-const handleSaveHistory = async (id: number, userAction: string) => {
-  try {
+    if (!approverData) return "";
 
-    const userName = await getUserFromListByStep(currentStep);
-    const designation = getDesignationByStep(currentStep);
+    switch (step) {
+      case 2: return approverData.Departmenthead?.Title || "";
+      case 3: return approverData.Approval1?.Title || "";
+      case 4: return approverData.Approval2?.Title || "";
+      case 5: return approverData.Approval3?.Title || "";
+      case 6: return approverData.Approval4?.Title || "";
+      default: return "";
+    }
+  };
 
-    await createHistoryItem({
-      Title: 'QA',
-      FID: id,
-      UserName: userName,
-      UserAction: userAction,
-      UserComment: comment,
-      ActionDate: new Date().toISOString(),
-      Designation: designation   // ✅ FIXED
-    });
-
-  } catch (error) {
-    console.error("History error:", error);
-  }
-};
-  
-  // ================= UPDATE =================
-const updateStatus = async (status: string) => {
-  if (!comment.trim()) {
-    setStatusMsg("❌ Enter comment");
-    return;
-  }
-
-  try {
-    // ================= UPDATE MAIN ITEM =================
+  const createHistoryItem = async (payload: any): Promise<void> => {
     await props.spHttpClient.post(
-      `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+      `${props.siteUrl}/_api/web/lists/getbytitle('History')/items`,
       SPHttpClient.configurations.v1,
       {
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'IF-MATCH': '*',
-          'X-HTTP-Method': 'MERGE'
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          Status: status,
-          ApproverComment1: comment
-        })
+        body: JSON.stringify(payload)
       }
     );
+  };
 
-    // ================= SAVE HISTORY =================
-    await handleSaveHistory(itemId, status);
+  const handleSaveHistory = async (id: number, userAction: string) => {
+    try {
 
-    // ================= STEP LOGIC =================
-    let nextStep = currentStep;
+      const userName = await getUserFromListByStep(currentStep);
+      const designation = getDesignationByStep(currentStep);
 
-    if (status === "Approved") {
-      nextStep = currentStep + 1;
-      setCurrentStep(nextStep);
+      await createHistoryItem({
+        Title: 'QA',
+        FID: id,
+        UserName: userName,
+        UserAction: userAction,
+        UserComment: comment,
+        ActionDate: new Date().toISOString(),
+        Designation: designation   // ✅ FIXED
+      });
+
+    } catch (error) {
+      console.error("History error:", error);
+    }
+  };
+
+  // ================= UPDATE =================
+  const updateStatus = async (status: string) => {
+    if (!comment.trim()) {
+      setStatusMsg("❌ Enter comment");
+      return;
     }
 
-    // If last approver reached → mark final approved
-    const maxSteps = 6; // change based on your columns
-
-    if (status === "Approved" && nextStep > maxSteps) {
+    try {
+      // ================= UPDATE MAIN ITEM =================
       await props.spHttpClient.post(
         `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
         SPHttpClient.configurations.v1,
@@ -199,24 +167,56 @@ const updateStatus = async (status: string) => {
             'X-HTTP-Method': 'MERGE'
           },
           body: JSON.stringify({
-            Status: "Approved"
+            Status: status,
+            ApproverComment1: comment
           })
         }
       );
+
+      // ================= SAVE HISTORY =================
+      await handleSaveHistory(itemId, status);
+
+      // ================= STEP LOGIC =================
+      let nextStep = currentStep;
+
+      if (status === "Approved") {
+        nextStep = currentStep + 1;
+        setCurrentStep(nextStep);
+      }
+
+      // If last approver reached → mark final approved
+      const maxSteps = 6; // change based on your columns
+
+      if (status === "Approved" && nextStep > maxSteps) {
+        await props.spHttpClient.post(
+          `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+          SPHttpClient.configurations.v1,
+          {
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'IF-MATCH': '*',
+              'X-HTTP-Method': 'MERGE'
+            },
+            body: JSON.stringify({
+              Status: "Approved"
+            })
+          }
+        );
+      }
+
+      // ================= UI UPDATE =================
+      setStatusMsg(`✅ ${status} done`);
+      setIsActionDone(true);
+
+      // Refresh timeline
+      await fetchHistory();
+
+    } catch (err: any) {
+      console.error("Update Error:", err);
+      setStatusMsg(err.message || "❌ Error occurred");
     }
-
-    // ================= UI UPDATE =================
-    setStatusMsg(`✅ ${status} done`);
-    setIsActionDone(true);
-
-    // Refresh timeline
-    await fetchHistory();
-
-  } catch (err: any) {
-    console.error("Update Error:", err);
-    setStatusMsg(err.message || "❌ Error occurred");
-  }
-};
+  };
 
 
   useEffect(() => {
@@ -272,24 +272,24 @@ const updateStatus = async (status: string) => {
   );
 
   // ================= UI =================
-const getDesignationByStep = (step: number): string => {
-  switch (step) {
-    case 1: return "Request Initiator";
-    case 2: return "Department Head";
-    case 3: return "Approver 1";
-    case 4: return "Approver 2";
-    case 5: return "Approver 3";
-    case 6: return "Approver 4";
-    default: return "Approver";
-  }
-};
+  const getDesignationByStep = (step: number): string => {
+    switch (step) {
+      case 1: return "Request Initiator";
+      case 2: return "Department Head";
+      case 3: return "Approver 1";
+      case 4: return "Approver 2";
+      case 5: return "Approver 3";
+      case 6: return "Approver 4";
+      default: return "Approver";
+    }
+  };
 
   return (
-    
+
     <div className={styles.container}>
       <div className={styles.mainLayout}  >
 
-        
+
 
         {/* ================= LEFT SIDE ================= */}
         <div className={styles.leftPanel}>
@@ -406,27 +406,27 @@ const getDesignationByStep = (step: number): string => {
           {/* ===== BUTTONS ===== */}
           <div className={styles.buttonContainer}>
             <button
-  className={styles.ApproveBtn}
-  onClick={() => updateStatus("Approved")}
-  disabled={isReadOnly}
->
-  Approve
-</button>
+              className={styles.ApproveBtn}
+              onClick={() => updateStatus("Approved")}
+              disabled={isReadOnly}
+            >
+              Approve
+            </button>
 
-<button
-  className={styles.RejectBtn}
-  onClick={() => updateStatus("Rejected")}
-  disabled={isReadOnly}
->
-  Reject
-</button>
+            <button
+              className={styles.RejectBtn}
+              onClick={() => updateStatus("Rejected")}
+              disabled={isReadOnly}
+            >
+              Reject
+            </button>
 
-<button
-  className={styles.cancelBtn}
-  onClick={() => window.history.back()}
->
-  Back
-</button>
+            <button
+              className={styles.cancelBtn}
+              onClick={() => window.history.back()}
+            >
+              Back
+            </button>
           </div>
 
           {statusMsg && <div>{statusMsg}</div>}
@@ -440,62 +440,140 @@ const getDesignationByStep = (step: number): string => {
             Timeline - {requestLabel}
           </h4>
 
-<div className={styles.timelineBody}>
-  {timelineItems.length > 0 ? timelineItems.map((item, index) => {
-    const action = normalizeTimelineValue(item.UserAction);
-    const isApproved =
-      action.includes("approved") ||
-      action.includes("submit") ||
-      action.includes("initiator");
-    const isRejected = action.includes("rejected") || action.includes("reject");
+          <div className={styles.timelineBody}>
 
-    const status = isApproved
-      ? "approved"
-      : isRejected
-        ? "rejected"
-        : "pending";
+            {(() => {
+              const safeHistory = Array.isArray(timelineItems) ? timelineItems : [];
 
-    return (
-      <div
-        key={`${normalizeTimelineValue(item.Designation)}-${normalizeTimelineValue(item.UserName)}-${index}`}
-        className={`${styles.timelineItem} ${styles[status]}`}
-      >
-        <div className={styles.timelineMarker}></div>
+              // ✅ STEP 1: Remove duplicate (latest per designation/user)
+              const latestMap: Record<string, any> = {};
 
-        <div className={styles.timelineContent}>
-          <div className={styles.timelineStepTitle}>
-            {item.Designation || item.UserName}
+              safeHistory.forEach((item: any) => {
+                const key = (item.Designation ||"")
+                  .toString()
+                  .toLowerCase()
+                  .replace(/\s+/g, "")   // extra safety
+                  .trim();
+
+                const currentDate = new Date(item.ActionDate || item.Created || 0).getTime();
+                const existingDate = latestMap[key]
+                  ? new Date(latestMap[key].ActionDate || latestMap[key].Created || 0).getTime()
+                  : 0;
+
+                if (!latestMap[key] || currentDate > existingDate) {
+                  latestMap[key] = item;
+                }
+              });
+
+              // ✅ SAFE conversion (no Object.values error)
+              const uniqueItems = Object.keys(latestMap).map((key) => latestMap[key]);
+
+              // ✅ STEP 2: FIXED WORKFLOW ORDER (IMPORTANT)
+const stepOrder = [
+  "requestinitiator",
+  "departmenthead",
+  "approver1",
+  "approver2",
+  "approver3",
+  "approver4"
+];
+
+uniqueItems.sort((a: any, b: any) => {
+  const aKey = (a.Designation || "")
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .trim();
+
+  const bKey = (b.Designation || "")
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .trim();
+
+  return stepOrder.indexOf(aKey) - stepOrder.indexOf(bKey);
+});
+
+              // // ✅ STEP 2: Sort by date (safe)
+              // uniqueItems.sort(
+              //   (a: any, b: any) =>
+              //     new Date(a.ActionDate || a.Created || 0).getTime() -
+              //     new Date(b.ActionDate || b.Created || 0).getTime()
+              // );
+
+              // ✅ STEP 3: Render
+              return uniqueItems.length > 0 ? (
+                uniqueItems.map((item: any, index: number) => {
+
+                  const action = (item.UserAction || "").toLowerCase();
+
+                  // ✅ FIXED STATUS LOGIC (IMPORTANT)
+                  let status: "approved" | "rejected" | "pending" = "pending";
+
+                  if (action.includes("reject")) {
+                    status = "rejected";
+                  } else if (
+                    action.includes("approve") ||
+                    action.includes("submit") ||
+                    action.includes("initiator")
+                  ) {
+                    status = "approved";
+                  }
+
+                  return (
+                    <div
+                      key={`${item.Designation}-${index}`}
+                      className={`${styles.timelineItem} ${styles[status]}`}
+                    >
+                      <div className={styles.timelineMarker}></div>
+
+                      <div className={styles.timelineContent}>
+
+                        <div className={styles.timelineStepTitle}>
+                          {item.Designation || item.UserName}
+                        </div>
+
+                        {/* ✅ Initiator fix */}
+                        {item.Designation === "Request Initiator" ? (
+                          <div className={styles.timelineText}>
+                            <b>Initiator:</b> {item.UserName || "-"}
+                          </div>
+                        ) : (
+                          <div className={styles.timelineText}>
+                            <b>Approver Name:</b> {item.UserName || "-"}
+                          </div>
+                        )}
+
+                        {/* ✅ Action */}
+                        {item.UserAction && item.Designation !== "Request Initiator" && (
+                          <div className={`${styles.timelineText} ${statusTextClassMap[status] || ""}`}>
+                            <b>Action Taken:</b> {item.UserAction}
+                          </div>
+                        )}
+
+                        {/* ✅ Date */}
+                        {(item.ActionDate || item.Created) && (
+                          <div className={styles.timelineText}>
+                            <b>Action Date:</b>{" "}
+                            {formatTimelineDate(item.ActionDate || item.Created)}
+                          </div>
+                        )}
+
+                        {/* ✅ Comments */}
+                        {item.UserComment && (
+                          <div className={styles.timelineText}>
+                            <b>Comments:</b> {item.UserComment}
+                          </div>
+                        )}
+
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div>No history found</div>
+              );
+            })()}
+
           </div>
-
-          <div className={styles.timelineText}>
-            <b>Approver Name:</b> {item.UserName}
-          </div>
-
-          {item.UserAction && (
-            <div className={`${styles.timelineText} ${statusTextClassMap[status] || ""}`}>
-              <b>Action Taken:</b> {item.UserAction}
-            </div>
-          )}
-
-          {item.ActionDate && (
-            <div className={styles.timelineText}>
-              <b>Action Date:</b> {formatTimelineDate(item.ActionDate)}
-            </div>
-          )}
-
-          {item.UserComment && (
-            <div className={styles.timelineText}>
-              <b>Comments:</b> {item.UserComment}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }) : (
-    <div>No history found</div>
-  )}
-</div>
-
         </div>
 
       </div>
