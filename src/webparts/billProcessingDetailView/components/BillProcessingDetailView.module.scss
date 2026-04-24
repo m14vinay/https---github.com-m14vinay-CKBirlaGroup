@@ -358,25 +358,3 @@ button {
 .searchBox .content {
   padding: 15px;
 }
-.modal .searchBox {
-  box-shadow: none;
-  padding-bottom: 50px;
-  width: 500px;
-}
-
-.modal .searchBox .formGroup {
-  display: flex;
-  margin-bottom: 10px;
-  padding: 3px 15px;
-}
-
-.modal .searchBox .form-group label.modalLabel {
-  display: inline-block;
-  width: 30%;
-}
-
-.modal .searchBox .form-group input.modalInput {
-  height: 34px;
-  padding: 5px 10px;
-  width: 100%;
-}
