@@ -134,26 +134,25 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             setAssignedID(User.Title);
             setAssignedToEmail(User.Id);
           }
-          if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 == '' && result.CurrentStatus == 'Approved') {
-            setShowApproveButton(false);
-            setShowResumeButton(true);
-            setShowPaidButton(true);
-            setShowHoldButton(true);
+          if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 == '' && result.CurrentStatus == 'Pending') {
+            setShowApproveButton(true);
+            setShowResumeButton(false);
+            setShowPaidButton(false);
+            setShowHoldButton(false);
             setShowEmailButton(false);
           }
           else {
-            if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 != '' && result.CurrentStatus == 'Approved') {
+            if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 != '' && result.CurrentStatus != 'Approved') {
               setShowResumeButton(false);
               setShowApproveButton(false);
-              setShowPaidButton(false);
-              setShowResumeButton(false);
-              setShowEmailButton(true);
+              setShowPaidButton(true);      
+              setShowHoldButton(true);        
+              setShowEmailButton(false);
             }
             if (result.CurrentStatus == 'Hold') {
               setShowResumeButton(true);
               setShowApproveButton(false);
-              setShowPaidButton(false);
-              setShowResumeButton(false);
+              setShowPaidButton(false);              
               setShowEmailButton(false);
             }
             else if (result.CurrentStatus == 'Resume') {
@@ -165,9 +164,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             }
             else {
               setShowResumeButton(false);
-              setShowHoldButton(false);
-              setShowApproveButton(true);
-              setShowPaidButton(false);
+              setShowHoldButton(true);
+              setShowApproveButton(false);
+              setShowPaidButton(true);
               setShowEmailButton(false);
             }
           }
