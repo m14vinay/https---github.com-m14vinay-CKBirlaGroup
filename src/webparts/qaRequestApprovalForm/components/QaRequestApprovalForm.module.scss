@@ -155,6 +155,18 @@ button:hover {
   color: #333;
 }
 
+// .timelineMarker.pending {
+//   background-color: #e38111;
+// }
+
+// .timelineMarker.approved {
+//   background-color: #28a745;
+// }
+
+// .timelineMarker.rejected {
+//   background-color: #dc3545;
+// }
+
 .timelineBody {
   position: relative;
   padding-left: 45px;
@@ -211,7 +223,15 @@ button:hover {
 }
 
 .timelineItem.pending .timelineMarker {
-  background-color: #bdbdbd;
+  background-color:  #ff9800;
+}
+
+.timelineItem.pending .timelineMarker::after {
+  content: "\2714";
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .timelineContent {
@@ -238,6 +258,26 @@ button:hover {
 .statusTextApproved {
   color: #00a651;
   font-weight: 700;
+}
+
+.approvalBar {
+  position: relative;
+  height: 50px;
+  display: flex;
+  align-items: center;
+}
+
+.approvalBar::after {
+  content: "";
+  position: absolute;
+  right: -20px;
+  top: 0;
+  border-top: 25px solid transparent;
+  border-bottom: 25px solid transparent;
+  border-left: 20px solid #198754; // green
+}
+.approvalBar {
+  overflow: hidden;   // optional
 }
 
 .statusTextRejected {
