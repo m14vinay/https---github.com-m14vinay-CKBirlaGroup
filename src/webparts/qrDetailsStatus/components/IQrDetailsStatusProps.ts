@@ -9,4 +9,5 @@ export interface IQrDetailsStatusProps {
   siteUrl: string;
   spHttpClient: SPHttpClient;
   listName: string;
+  requestId?: string;
 }

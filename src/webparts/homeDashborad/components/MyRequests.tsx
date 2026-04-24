@@ -32,22 +32,22 @@ export default function MyRequests() {
         if(row["@odata.type"]){
             switch(row["@odata.type"]){
                 case '#SP.Data.QuotationApprovalListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Quotation-Details.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Quotation-Details.aspx?RequestId=" + row.Id,"_self");
                     break;
                 case '#SP.Data.PoApprovalListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchaseOrderView.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchaseOrderView.aspx?RequestId=" + row.Id,"_self");
                     break;
                 case '#SP.Data.VendorMappingListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingDetails.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingDetails.aspx?RequestId=" + row.Id,"_self");
                     break;
                 case '#SP.Data.Remb_x005f_ExpanseMasterListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementDetails.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementDetails.aspx?RequestId=" + row.Id,"_self");
                     break;  
                 case '#SP.Data.BillProcessingListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Bill-Processing-Detail.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Bill-Processing-Detail.aspx?RequestId=" + row.Id,"_self");
                     break;  
                 case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Detail.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Detail.aspx?RequestId=" + row.Id,"_self");
                     break;         
                 default:
                     alert("Page not found");
@@ -62,22 +62,22 @@ export default function MyRequests() {
         if(row["@odata.type"]){
             switch(row["@odata.type"]){
                 case '#SP.Data.QuotationApprovalListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationForm.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/QuotationForm.aspx?RequestId=" + row.Id,"_self");
                     break;
                 case '#SP.Data.PoApprovalListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchsaseOrderRequest.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/PurchsaseOrderRequest.aspx?RequestId=" + row.Id,"_self");
                     break;
                 case '#SP.Data.VendorMappingListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingForm.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/VendorMappingForm.aspx?RequestId=" + row.Id,"_self");
                     break;
                 case '#SP.Data.Remb_x005f_ExpanseMasterListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementRequestForm.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/ReimbursementRequestForm.aspx?RequestId=" + row.Id,"_self");
                     break;  
                 case '#SP.Data.BillProcessingListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Bill.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/Bill.aspx?RequestId=" + row.Id,"_self");
                     break;  
                 case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
-                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Request.aspx?RequestId=" + row.Id,"_blank");
+                    window.open(context.pageContext.web.absoluteUrl + "/SitePages/NEIBT-Admin-Request.aspx?RequestId=" + row.Id,"_self");
                     break;         
                 default:
                     alert("Page not found");
@@ -245,7 +245,7 @@ export default function MyRequests() {
                     {table.getRowModel().rows.map((row) => (
                         <tr key={row.id}>
                         {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id}>
+                            <td key={cell.id} style={{maxWidth:"250px"}}>
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                             </td>
                         ))}

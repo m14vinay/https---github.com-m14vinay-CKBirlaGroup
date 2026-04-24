@@ -257,7 +257,7 @@ Approval4/Id,Approval4/Title
       ).then(res => res.json());
 
       // 🔐 SECURITY CHECK (IMPORTANT)
-      if (Number(data.AssignedToEmailId) !== currentUser.Id) {
+      if (Number(data.AssignedToEmailId) !== currentUser.Id && Number(data.AssignedToEmail2Id) !== currentUser.Id) {
         alert("You are not authorized ❌");
         return;
       }
@@ -278,6 +278,8 @@ Approval4/Id,Approval4/Title
             ActionDate1: new Date().toISOString(),
             AssignedToEmailId: null,
             AssignedTo: "Rejected",
+            AssignedToEmail2Id: null,
+            AsisgnedTo2: "Rejected",
             Status: "Rejected",
             CurrentStatus: "Rejected"
           };
@@ -292,6 +294,8 @@ Approval4/Id,Approval4/Title
             ActionDate2: new Date().toISOString(),
             AssignedToEmailId: null,
             AssignedTo: "Rejected",
+            AssignedToEmail2Id: null,
+            AsisgnedTo2: "Rejected",
             Status: "Rejected",
             CurrentStatus: "Rejected"
           };
@@ -305,6 +309,8 @@ Approval4/Id,Approval4/Title
           ActionDate3: new Date().toISOString(),
           AssignedToEmailId: null,
           AssignedTo: "Rejected",
+          AssignedToEmail2Id: null,
+          AsisgnedTo2: "Rejected",
           Status: "Rejected",
           CurrentStatus: "Rejected"
         };
@@ -316,7 +322,18 @@ Approval4/Id,Approval4/Title
         if (data.AssignedToEmailId === data.Approval1Id && data.ActionDate1 === null) {
 
           userDesignation = "Department Head"
-          if(data.Approval2Id){
+          if(data.TotalProjectAmount && Number(data.TotalProjectAmount) > 200000 && data.Approval2Id && data.Approval3Id){
+            payload = {
+              ApproverComment1: comment,
+              ActionDate1: new Date().toISOString(),
+              AssignedToEmailId: Number(data.Approval2Id) || null,
+              AssignedTo: data.Approval2?.Title,
+              AssignedToEmail2Id: Number(data.Approval3Id) || null,
+              AsisgnedTo2: data.Approval3?.Title,
+              Status: "Pending"
+            };
+          }
+          else if(data.Approval2Id){ 
             payload = {
               ApproverComment1: comment,
               ActionDate1: new Date().toISOString(),
@@ -338,26 +355,48 @@ Approval4/Id,Approval4/Title
         }
 
         // STEP 2
-        else if (data.AssignedToEmailId === data.Approval2Id && data.ActionDate2 === null) {
+        else if (data.AssignedToEmailId === data.Approval2Id && data.ActionDate2 === null && currentUser.Id === data.AssignedToEmailId) {
           userDesignation = "Management 1"
-          if(data.Approval3Id){
-            payload = {
-              ApproverComment2: comment,
-              ActionDate2: new Date().toISOString(),
-              AssignedToEmailId: Number(data.Approval3Id) || null,
-              AssignedTo: data.Approval3?.Title,
-              Status: "Pending"
-            };
+          if(data.AssignedToEmail2Id === null){
+            if(data.Approval3Id){
+              payload = {
+                ApproverComment2: comment,
+                ActionDate2: new Date().toISOString(),
+                AssignedToEmailId: Number(data.Approval3Id) || null,
+                AssignedTo: data.Approval3?.Title,
+                Status: "Pending"
+              };
+            }
+            else{
+              payload = {
+                ApproverComment2: comment,
+                ActionDate2: new Date().toISOString(),
+                AssignedToEmailId: null,
+                AssignedTo: "Approved",
+                Status: "Approved",
+                CurrentStatus: "Approved"
+              };
+            }
           }
           else{
-            payload = {
-              ApproverComment2: comment,
-              ActionDate2: new Date().toISOString(),
-              AssignedToEmailId: null,
-              AssignedTo: "Approved",
-              Status: "Approved",
-              CurrentStatus: "Approved"
-            };
+            if(data.ActionDate3){
+              payload = {
+                ApproverComment2: comment,
+                ActionDate2: new Date().toISOString(),
+                AssignedToEmailId: null,
+                AssignedTo: "Approved",
+                AssignedToEmail2Id: null,
+                AsisgnedTo2: "Approved",
+                Status: "Approved",
+                CurrentStatus: "Approved"
+              };
+            }
+            else{
+              payload = {
+                ApproverComment2: comment,
+                ActionDate2: new Date().toISOString()
+              };
+            }
           }
         }
 
@@ -369,9 +408,33 @@ Approval4/Id,Approval4/Title
             ActionDate3: new Date().toISOString(),
             AssignedToEmailId: null,
             AssignedTo: "Approved",
+            AssignedToEmail2Id: null,
+            AsisgnedTo2: "Approved",
             Status: "Approved",
             CurrentStatus: "Approved"
           };
+        }
+        // FINAL STEP
+        else if (data.AssignedToEmail2Id === data.Approval3Id) {
+          userDesignation = "Management 2"
+          if(data.ActionDate2){
+              payload = {
+                ApproverComment3: comment,
+                ActionDate3: new Date().toISOString(),
+                AssignedToEmailId: null,
+                AssignedTo: "Approved",
+                AssignedToEmail2Id: null,
+                AsisgnedTo2: "Approved",
+                Status: "Approved",
+                CurrentStatus: "Approved"
+              };
+            }
+            else{
+              payload = {
+                ApproverComment3: comment,
+                ActionDate3: new Date().toISOString()
+              };
+            }
         }
       }
 
@@ -395,6 +458,12 @@ Approval4/Id,Approval4/Title
           },
           body: JSON.stringify(payload)
         }
+      ).then(r => r.json())
+      .then(r => 
+        console.log(r)
+      )
+      .catch(err => 
+        console.log(err)
       );
 
       // 🔹 HISTORY SAVE
@@ -407,9 +476,7 @@ Approval4/Id,Approval4/Title
       setIsActionDone(true);
 
       // 🔹 REDIRECT
-  window.location.assign(
-    `${props.siteUrl}/SitePages/Dashboard.aspx`
-  );
+  //window.location.assign(`${props.siteUrl}/SitePages/Dashboard.aspx`);
 
     } catch (error) {
       console.error("APPROVE ERROR:", error);

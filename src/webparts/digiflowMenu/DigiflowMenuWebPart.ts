@@ -7,6 +7,8 @@ import {
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
+import { Environment, EnvironmentType } from '@microsoft/sp-core-library';
+import * as microsoftTeams from '@microsoft/teams-js';
 
 import * as strings from 'DigiflowMenuWebPartStrings';
 import DigiflowMenu from './components/DigiflowMenu';
@@ -22,12 +24,9 @@ export default class DigiflowMenuWebPart extends BaseClientSideWebPart<IDigiflow
   private _environmentMessage: string = '';
 
   public render(): void {
-    const element: React.ReactElement<IDigiflowMenuProps> = React.createElement(
-      DigiflowMenu,
-      {
-        context:this.context
-      }
-    );
+    const element: React.ReactElement<IDigiflowMenuProps> = React.createElement(DigiflowMenu, {
+      context: this.context
+    });
 
     ReactDom.render(element, this.domElement);
   }
@@ -42,19 +41,19 @@ export default class DigiflowMenuWebPart extends BaseClientSideWebPart<IDigiflow
 
   private _getEnvironmentMessage(): Promise<string> {
     if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
-        .then(context => {
+      return microsoftTeams.app.getContext()
+        .then((context: any) => {
           let environmentMessage: string = '';
           switch (context.app.host.name) {
             case 'Office': // running in Office
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
+              environmentMessage = Environment.type === EnvironmentType.Local ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
               break;
             case 'Outlook': // running in Outlook
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
+              environmentMessage = Environment.type === EnvironmentType.Local ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
               break;
             case 'Teams': // running in Teams
             case 'TeamsModern':
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
+              environmentMessage = Environment.type === EnvironmentType.Local ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
               break;
             default:
               environmentMessage = strings.UnknownEnvironment;
@@ -64,7 +63,7 @@ export default class DigiflowMenuWebPart extends BaseClientSideWebPart<IDigiflow
         });
     }
 
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
+    return Promise.resolve(Environment.type === EnvironmentType.Local ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
   }
 
   protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
@@ -89,9 +88,10 @@ export default class DigiflowMenuWebPart extends BaseClientSideWebPart<IDigiflow
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
-  protected get dataVersion(): Version {
-    return Version.parse('1.0');
-  }
+//protected dataVersion: Version = Version.parse('1.0');
+protected get dataVersion(): Version {
+   return Version.parse('1.0');
+ }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {

@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { SPHttpClient } from '@microsoft/sp-http';
 import { IQrDetailsStatusProps } from './IQrDetailsStatusProps';
@@ -124,10 +124,19 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
   }, []);
 
   if (loading) return <div>Loading...</div>;
-  if (!data) return <div>No data found</div>;
+  if (!itemId) {
+    return (
+      <div style={{ padding: '16px' }}>
+        Please provide a Request ID in the web part settings or open this page with <code>?RequestId=123</code>.
+      </div>
+    );
+  }
+
+  if (!data) return <div>No data found for Request ID {itemId}.</div>;
 
   const requestLabel = data.RequestNo || `PRJ-${itemId}`;
   const currentStatus = data.CurrentStatus || 'Pending';
+  const currentStatusKey = normalizeValue(currentStatus);
   const approvalPathNames = String(data.ApprovalPath || '')
     .split('>')
     .map((value: string) => value.replace(/^\d+\.\s*/, '').trim())
@@ -137,6 +146,9 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
     (h.UserAction || "").toLowerCase().includes("approved") ||
     (h.UserAction || "").toLowerCase().includes("submit")
   );
+
+  const rejectedKeywords = ['reject', 'rejected', 'declined', 'decline'];
+  const approvedKeywords = ['approved', 'submit', 'submitted'];
 
   // Keep only the latest history item for each designation so the UI does not repeat the same step.
   const getLatestHistoryByDesignation = (items: IHistoryItem[]): IHistoryItem[] => {
@@ -148,6 +160,14 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
     return Object.keys(latestByDesignation).map((key) => latestByDesignation[key]);
   };
+
+  const latestHistoryByDesignation = history.reduce((acc: Record<string, IHistoryItem>, curr: IHistoryItem) => {
+    const designationKey = normalizeValue(curr.Designation || curr.UserName);
+    if (designationKey) {
+      acc[designationKey] = curr;
+    }
+    return acc;
+  }, {} as Record<string, IHistoryItem>);
 
   const latestApprovedHistory = getLatestHistoryByDesignation(approvedHistory);
   const latestTimelineHistory = getLatestHistoryByDesignation(history);
@@ -168,32 +188,36 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
   const workflowSteps = departmentWorkflowSteps.length > 0 ? departmentWorkflowSteps : fallbackWorkflowSteps;
 
-  // The top strip shows the latest approved step on the left and only still-pending steps on the right.
-  const latestApprovedTopItem = latestApprovedHistory.length > 0
-    ? latestApprovedHistory[latestApprovedHistory.length - 1]
-    : null;
   const approvedNames = latestApprovedHistory.map((item: IHistoryItem) => normalizeValue(item.UserName || item.Designation));
-  const pendingTopSteps = workflowSteps.filter((step: IWorkflowStep, index: number, arr: IWorkflowStep[]) => {
-    const normalizedUserName = normalizeValue(step.userName);
-    if (!normalizedUserName) {
-      return false;
-    }
-
-    const isApproved = approvedNames.indexOf(normalizedUserName) !== -1;
-    const isDuplicate = arr.findIndex((candidate: IWorkflowStep) => normalizeValue(candidate.userName) === normalizedUserName) !== index;
-    return !isApproved && !isDuplicate;
-  });
+  const topWorkflowSteps = workflowSteps
+    .filter((step: IWorkflowStep, index: number, arr: IWorkflowStep[]) => {
+      const normalizedUserName = normalizeValue(step.userName);
+      return !!normalizedUserName
+        && arr.findIndex((candidate: IWorkflowStep) => normalizeValue(candidate.userName) === normalizedUserName) === index;
+    })
+    .map((step: IWorkflowStep) => {
+      const normalizedUserName = normalizeValue(step.userName);
+      const normalizedDesignation = normalizeValue(step.designation);
+      const historyItem = latestHistoryByDesignation[normalizedDesignation] || latestHistoryByDesignation[normalizedUserName];
+      const status = getTimelineStatus(historyItem?.UserAction, historyItem?.UserComment);
+      return {
+        ...step,
+        isApproved: status === 'approved',
+        isRejected: status === 'rejected'
+      };
+    });
 
   // Timeline colors are driven from the saved action text.
-  const getTimelineStatus = (actionValue?: string): 'approved' | 'rejected' | 'pending' => {
+  function getTimelineStatus(actionValue?: string, commentValue?: string): 'approved' | 'rejected' | 'pending' {
     const action = (actionValue || '').toLowerCase();
+    const comment = (commentValue || '').toLowerCase();
 
-    if (action.includes('approved') || action.includes('submit')) {
-      return 'approved';
+    if (rejectedKeywords.some((keyword) => action.indexOf(keyword) !== -1 || comment.indexOf(keyword) !== -1)) {
+      return 'rejected';
     }
 
-    if (action.includes('reject')) {
-      return 'rejected';
+    if (approvedKeywords.some((keyword) => action.indexOf(keyword) !== -1 || comment.indexOf(keyword) !== -1)) {
+      return 'approved';
     }
 
     return 'pending';
@@ -201,14 +225,14 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
   const getTimelineMarker = (status: 'approved' | 'rejected' | 'pending'): string => {
     if (status === 'approved') {
-      return '✓';
+      return '\u2713';
     }
 
     if (status === 'rejected') {
-      return '×';
+      return '\u00d7';
     }
 
-    return '•';
+    return '\u2022';
   };
 
   const timelineStatusClassMap = {
@@ -217,10 +241,24 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
     pending: styles.pending
   };
 
+  const currentStatusClass =
+    currentStatusKey.indexOf('reject') !== -1
+      ? styles.rejectedText
+      : currentStatusKey.indexOf('approved') !== -1 || currentStatusKey.indexOf('submit') !== -1
+        ? styles.approvedText
+        : styles.pendingText;
+
+  const currentStatusColor =
+    currentStatusKey.indexOf('reject') !== -1
+      ? '#e53935'
+      : currentStatusKey.indexOf('approved') !== -1 || currentStatusKey.indexOf('submit') !== -1
+        ? '#10b981'
+        : '#f7b500';
+
   return (
     <div className={styles.container}>
 
-      <div className={styles.heading}>
+      <div className={styles.header}>
         Quotation Request Details & Status
       </div>
 
@@ -233,38 +271,25 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
           <div className={styles.topSummary}>
             <div className={styles.requestCode}>{requestLabel}</div>
             <div className={styles.currentStatus}>
-              Current Status : <strong>{currentStatus}</strong>
+              Current Status : <strong style={{ color: currentStatusColor }}>{currentStatus}</strong>
             </div>
           </div>
 
           <div className={styles.approverFlow}>
-            {latestApprovedTopItem && (
-              <div className={styles.departmentStep}>
-                <div className={styles.approverName}>{latestApprovedTopItem.UserName}</div>
-                <div className={styles.approverRole}>{latestApprovedTopItem.Designation}</div>
-                <div className={styles.approverStatus}>Approved</div>
+            {topWorkflowSteps.map((item, i) => (
+              <div
+                key={`${item.designation}-${item.userName}-${i}`}
+                className={`${styles.managementStep} ${item.isRejected ? styles.rejectedArrow : item.isApproved ? styles.approvedArrow : styles.pendingArrow}`}
+              >
+                <div className={styles.approverName}>{item.userName}</div>
+                <div className={styles.approverRole}>{item.designation || 'Pending Approval'}</div>
+                <div
+                  className={`${styles.approverStatus} ${item.isRejected ? styles.rejectedStatusText : item.isApproved ? styles.approvedStatusText : styles.pendingStatusText}`}
+                >
+                  {item.isRejected ? 'Rejected' : item.isApproved ? 'Approved' : 'Pending'}
+                </div>
               </div>
-            )}
-
-            <div className={styles.approverFlow}>
-
-              {latestApprovedTopItem && (
-                <div className={styles.departmentStep}>
-                  <div className={styles.approverName}>{latestApprovedTopItem.UserName}</div>
-                  <div className={styles.approverRole}>{latestApprovedTopItem.Designation}</div>
-                  <div className={styles.approverStatus}>Approved</div>
-                </div>
-              )}
-
-              {pendingTopSteps.map((item: IWorkflowStep, i: number) => (
-                <div key={i} className={styles.managementStep}>
-                  <div className={styles.approverName}>{item.userName}</div>
-                  <div className={styles.approverRole}>{item.designation || 'Pending Approval'}</div>
-                  <div className={styles.approverStatus}>Pending</div>
-                </div>
-              ))}
-
-            </div>
+            ))}
           </div>
 
           {/* ================= FORM ================= */}
@@ -370,7 +395,7 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
             const timelineStatus =
               item.Designation === "Request Initiator"
                 ? "approved"
-                : getTimelineStatus(item.UserAction);
+                : getTimelineStatus(item.UserAction, item.UserComment);
             const status =
               timelineStatus === 'approved'
                 ? 'Approved'
@@ -387,7 +412,7 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
                 <div className={styles.timelineText}>
                   <b>{item.Designation}</b>
 
-                  {/* ✅ Initiator case */}
+                  {/* ? Initiator case */}
                   {item.Designation === "Request Initiator" ? (
                     <>
                       <div>Initiator: {item.UserName}</div>
@@ -426,3 +451,5 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 };
 
 export default QrDetailsStatus;
+
+

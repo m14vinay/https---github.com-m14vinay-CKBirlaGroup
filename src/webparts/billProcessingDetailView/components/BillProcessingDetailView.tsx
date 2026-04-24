@@ -1,16 +1,11 @@
 import * as React from 'react';
 import styles from './BillProcessingDetailView.module.scss';
 import { IBillProcessingDetailViewProps } from './IBillProcessingDetailViewProps';
-import { SPHttpClient } from '@microsoft/sp-http';
-import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
+import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption, Modal } from '@fluentui/react';
 import SharePointService from '../service/Service';
-import { PageContext } from '@microsoft/sp-page-context';
 import { Spinner, SpinnerSize } from '@fluentui/react';
-import { isBoolean } from 'lodash';
+import 'bootstrap/dist/css/bootstrap.min.css';
 const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (props) => {
-
-  // State
-  // State
   const [form, setForm] = React.useState({
     RequestNo: '',
     ProjectCode: '',
@@ -33,7 +28,9 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
     AttachedSignedPO: false,
     ApprovalPath: '',
     OccupiedAmount: '',
-    RemainingAmount: ''
+    RemainingAmount: '',
+    Email: '',
+    ApproverComment5: ''
   });
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
@@ -41,7 +38,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
   const [loading, setLoading] = React.useState(false);
   const [History, setHistory] = React.useState<any[]>([]);
   const [isChecked, setIsChecked] = React.useState(false);
-
+  const [isOpen, setisOpen] = React.useState(false);
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -97,7 +94,8 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
           CurrentStatus: result.CurrentStatus,
           ApprovalPath: result.ApprovalPath,
           OccupiedAmount: result.OccupiedAmount,
-          RemainingAmount: result.RemainingAmount
+          RemainingAmount: result.RemainingAmount,
+          ApproverComment5: result.ApproverComment5 || ''
         }));
         const historydata = await service.GetHistoryItem(Number(id), "FBP");
         setHistory(historydata);
@@ -112,10 +110,56 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
       setLoading(false);
     }
   };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
   const handleCancel = () => {
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);
   };
+  const handleEmail = async () => {
+    if (form.vendorcode != '') {
+      const vendor = await service.getVendorEmailByVendorCode(form.vendorcode);
+      if (vendor != null) {
+        setForm(
+          prev => ({
+            ...prev,
+            Email: vendor.EmailId || ''
+          }));
+      }
+    }
+    setisOpen(true);
+  }
+  const handleSendEmail = async () => {
+    if (!form.Email || !form.Email.includes('@')) {
+      setisOpen(true);
+      alert('Please enter correct email address.');
+      return;
+
+    }
+    setLoading(true);
+    const payload = {
+      Title: form.VendorName,
+      VendorEmail: form.Email,
+      Comment: form.ApproverComment5,
+      Subject: 'Invoice is released to your account.',
+      Message: 'Your invoice amount is released to you with the mentioned details.'
+    };
+    try {
+      const res = await service.createEmailList(payload);
+      if (res.Id > 0) {
+        alert("Email Send Successfully.✅");
+        setisOpen(false);
+      }
+    }
+    catch (error) {
+      console.error(error);
+    }
+    finally {
+      setLoading(false);
+    }
+  }
   return (
     <section>
       {loading && (
@@ -134,6 +178,24 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
         </div>
       )}
       <div className={styles.container}>
+        <Modal
+          isOpen={isOpen}
+          onDismiss={() => setisOpen(false)}
+          isBlocking={true}>
+          <div className={styles.searchBox} style={{ marginBottom: "0px" }}>
+            <h3>Send Email To Vendor</h3>
+            <div className={styles.formGroup} style={{ display: "inline-flex", padding: "10px 10px 10px 10px" }}>
+              <label style={{ width: '30%' }}>Vendor Email<span style={{ color: "red" }}>*</span></label>
+              <input className="form-control" name='Email' type='email' placeholder='xxx@mail.com' value={form.Email} style={{ width: '70%' }}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.buttonGroup} style={{ padding: "10px 10px 10px 10px" }}>
+              <button className={styles.submitBtn} onClick={handleSendEmail}>Send Email</button>
+              <button className={styles.cancelBtn} onClick={() => setisOpen(false)} >Close</button>
+            </div>
+          </div>
+        </Modal>
         <div className={styles.header}>
           <h4>Bill Processing Details & Status</h4>
         </div>
@@ -232,6 +294,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
               )}
               <div className={styles.buttonGroup}>
                 <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
+                <button name='btnSendEmail' style={{ display: form.ApproverComment5 != '' ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleEmail}>Send Email to Vendor</button>
               </div>
             </div>
           </div>

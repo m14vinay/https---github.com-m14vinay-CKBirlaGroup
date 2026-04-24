@@ -2,7 +2,7 @@ import * as React from 'react';
 import styles from './BillProcessingApproval.module.scss';
 import { IBillProcessingApprovalProps } from './IBillProcessingApprovalProps';
 import { SPHttpClient } from '@microsoft/sp-http';
-import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@fluentui/react';
+import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption, Modal } from '@fluentui/react';
 import SharePointService from '../service/Service';
 import { PageContext } from '@microsoft/sp-page-context';
 import { Spinner, SpinnerSize } from '@fluentui/react';
@@ -41,7 +41,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     ApprovalComment: '',
     ApprovalPath: '',
     OccupiedAmount: '',
-    RemainingAmount: ''
+    RemainingAmount: '',
+    Email: '',
+    ApproverComment5: ''
   });
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
@@ -54,6 +56,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
   const [showPaidButton, setShowPaidButton] = React.useState(false);
   const [showResumeButton, setShowResumeButton] = React.useState(false);
   const [showHoldButton, setShowHoldButton] = React.useState(false);
+  const [showEmailButton, setShowEmailButton] = React.useState(false);
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
@@ -91,7 +94,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       console.log("Result:", result);
       const currentuser = await service.getUser();
       const User = await service.getUserById(currentuser.Id);
-      if (result.AssignedTo === currentuser.Title) {
+      if ((result.AssignedTo === currentuser.Title)) {
         if (result.CurrentStatus === 'Pending' || result.CurrentStatus === 'Approved') {
           setItemId(result.Id);
           setForm(prev => ({
@@ -123,7 +126,8 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             Approver5Id: result.Approver5Id || 0,
             ApprovalPath: result.ApprovalPath,
             OccupiedAmount: result.OccupiedAmount,
-            RemainingAmount: result.RemainingAmount
+            RemainingAmount: result.RemainingAmount,
+            ApproverComment5: result.ApproverComment5 || ''
           }));
           if (User?.Id) {
             setAssignedID(User.Title);
@@ -134,25 +138,36 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             setShowResumeButton(true);
             setShowPaidButton(true);
             setShowHoldButton(true);
+            setShowEmailButton(false);
           }
           else {
+            if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 != '' && result.CurrentStatus == 'Approved') {
+              setShowResumeButton(fail);
+              setShowApproveButton(false);
+              setShowPaidButton(false);
+              setShowResumeButton(false);
+              setShowEmailButton(true);
+            }
             if (result.CurrentStatus == 'Hold') {
               setShowResumeButton(true);
               setShowApproveButton(false);
               setShowPaidButton(false);
               setShowResumeButton(false);
+              setShowEmailButton(false);
             }
             else if (result.CurrentStatus == 'Resume') {
               setShowResumeButton(false);
               setShowHoldButton(true);
               setShowApproveButton(false);
               setShowPaidButton(true);
+              setShowEmailButton(false);
             }
             else {
               setShowResumeButton(false);
               setShowHoldButton(false);
               setShowApproveButton(true);
               setShowPaidButton(false);
+              setShowEmailButton(false);
             }
           }
           const historydata = await service.GetHistoryItem(Number(id), "FBP");
@@ -190,7 +205,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             ApprovalComment: '',
             ApprovalPath: '',
             OccupiedAmount: '',
-            RemainingAmount: ''
+            RemainingAmount: '',
+            Email: '',
+            ApproverComment5: ''
           });
           alert("Request Record is already Rejected.");
           return;
@@ -332,9 +349,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
           AssignedToEmailId: 0
         };
         CurrentSequence = 1;
-        NextSequence=2;
-        CurrentUserAction='Rejected';
-        NextuserAction='Rejected';
+        NextSequence = 2;
+        CurrentUserAction = 'Rejected';
+        NextuserAction = 'Rejected';
       }
       else if (form.ActionDate2 == '') {
         const UserApproval3 = await service.getUserById(form.Approver3Id);
@@ -346,9 +363,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
           AssignedToEmailId: 0
         };
         CurrentSequence = 2;
-        NextSequence=3;
-        CurrentUserAction='Rejected';
-        NextuserAction='Rejected';
+        NextSequence = 3;
+        CurrentUserAction = 'Rejected';
+        NextuserAction = 'Rejected';
       }
       else if (form.ActionDate3 == '') {
         const UserApproval5 = await service.getUserById(form.Approver5Id);
@@ -360,9 +377,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
           AssignedToEmailId: 0
         };
         CurrentSequence = 3;
-        NextSequence=4;
-        CurrentUserAction='Rejected';
-        NextuserAction='Rejected';
+        NextSequence = 4;
+        CurrentUserAction = 'Rejected';
+        NextuserAction = 'Rejected';
       }
       else if (form.ActionDate5 == '') {
         payload = {
@@ -373,9 +390,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
           AssignedToEmailId: 0
         };
         CurrentSequence = 4;
-        NextSequence=0;
-        CurrentUserAction='Rejected';
-        NextuserAction='';
+        NextSequence = 0;
+        CurrentUserAction = 'Rejected';
+        NextuserAction = '';
       }
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
@@ -398,9 +415,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       if (!form.ApprovalComment) return alert("Comment is required.");
       let payload = {};
       let CurrentSequence = 4;
-      let CurrentUserAction='Hold';
-      let NextuserAction='';
-      let NextSequence=0;
+      let CurrentUserAction = 'Hold';
+      let NextuserAction = '';
+      let NextSequence = 0;
       if (!itemId) return;
       payload = {
         ApproverComment5: form.Comments,
@@ -430,9 +447,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       if (!form.ApprovalComment) return alert("Comment is required.");
       let payload = {};
       let CurrentSequence = 4;
-      let CurrentUserAction='Resume';
-      let NextuserAction='';
-      let NextSequence=0;
+      let CurrentUserAction = 'Resume';
+      let NextuserAction = '';
+      let NextSequence = 0;
       if (!itemId) return;
       payload = {
         ApproverComment5: form.Comments,
@@ -462,9 +479,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       if (!form.ApprovalComment) return alert("Comment is required.");
       let payload = {};
       let CurrentSequence = 4;
-      let CurrentUserAction='Approved';
-      let NextuserAction='';
-      let NextSequence=0;
+      let CurrentUserAction = 'Approved';
+      let NextuserAction = '';
+      let NextSequence = 0;
       if (!itemId) return;
       if (form.ActionDate5 == '') {
         payload = {
