@@ -181,7 +181,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
         <Modal
           isOpen={isOpen}
           onDismiss={() => setisOpen(false)}
-          isBlocking={false}>
+          isBlocking={true}>
           <div className={styles.searchBox} style={{ marginBottom: "0px" }}>
             <h3>Send Email To Vendor</h3>
             <div className={styles.formGroup} style={{ display: "inline-flex", padding: "10px 10px 10px 10px" }}>
