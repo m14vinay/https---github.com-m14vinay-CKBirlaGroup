@@ -112,11 +112,9 @@ export default class DocumentUploadWebPart extends BaseClientSideWebPart<IDocume
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 //protected dataVersion: Version = Version.parse('1.0');
-  private _dataVersion: Version = Version.parse('1.0');
- protected get dataVersion(): Version {
-  return Version.parse('1.0');
-}
- 
+protected get dataVersion(): Version {
+   return Version.parse('1.0');
+ }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {

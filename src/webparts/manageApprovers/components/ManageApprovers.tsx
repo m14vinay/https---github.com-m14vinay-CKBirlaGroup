@@ -1285,7 +1285,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
                 showtooltip={true}
                 required={true}
                 disabled={false}
-                searchTextLimit={2}      
+                 searchTextLimit={2}      
                 resolveDelay={1000}          
                 principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
                 defaultSelectedUsers={[form.ApproverEMail]}

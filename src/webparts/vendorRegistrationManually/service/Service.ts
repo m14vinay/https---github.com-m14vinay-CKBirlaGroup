@@ -2,24 +2,24 @@ import { SPHttpClient } from '@microsoft/sp-http';
 export default class Service {
 
   private context: any;
-  private listname="AllVendor";
+  private listname = "AllVendor";
   constructor(context: any) {
     this.context = context;
   }
 
   // Save the Record
- public async createItem(data: any): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;   
+  public async createItem(data: any): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;
     const response = await this.context.spHttpClient.post(
       url,
-     SPHttpClient.configurations.v1,
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        }
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      }
     );
     return response.json();
   }
@@ -52,11 +52,11 @@ export default class Service {
       SPHttpClient.configurations.v1,
       {
         headers: {
-            'IF-MATCH': '*',
-            'X-HTTP-Method': 'MERGE',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+          'IF-MATCH': '*',
+          'X-HTTP-Method': 'MERGE',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(data)
       }
     );
@@ -79,30 +79,30 @@ export default class Service {
       }
     );
   }
-    // Fetch the Files from List
+  // Fetch the Files from List
   public async getAttachments(itemId: number): Promise<any[]> {
 
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles`;
 
-  const res = await this.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1,
-    {
-      headers: {
-        "Accept": "application/json;"
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          "Accept": "application/json;"
+        }
       }
-    }
-  );
+    );
 
-  const data = await res.json();
+    const data = await res.json();
 
-  return data.value; // array of attachments
-}
+    return data.value; // array of attachments
+  }
 
-// Delete
-public async deleteAttachmentFromSP(file: any) : Promise<void> {
-  
-     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getfilebyserverrelativeurl('${file.ServerRelativeUrl}')`;
+  // Delete
+  public async deleteAttachmentFromSP(file: any): Promise<void> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/getfilebyserverrelativeurl('${file.ServerRelativeUrl}')`;
 
     await this.context.spHttpClient.post(
       url,
@@ -115,64 +115,74 @@ public async deleteAttachmentFromSP(file: any) : Promise<void> {
       }
     );
 
-};
+  };
 
-public checkGSTExists = async (gst: string,currentId?:number): Promise<boolean> => {
+  public checkGSTExists = async (gst: string, currentId?: number): Promise<boolean> => {
 
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=GST eq '${gst}'`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=GST eq '${gst}'`;
 
-  const res = await this.context.spHttpClient.get(
-    url,
-    SPHttpClient.configurations.v1
-  );
-
-  const data = await res.json();
-if (currentId) {
-    return data.value.some((item: any) => item.Id !== currentId);
-  }
-  return data.value.length > 0;
-};
-
-// public checkPANExists = async (pan: string,currentId?:number): Promise<boolean> => {
-
-//   const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=GST eq '${pan}'`;
-
-//   const res = await this.context.spHttpClient.get(
-//     url,
-//     SPHttpClient.configurations.v1
-//   );
-
-//   const data = await res.json();
-// if (currentId) {
-//     return data.value.some((item: any) => item.Id !== currentId);
-//   }
-//   return data.value.length > 0;
-// };
-
-public saveToSharePoint = async (items: any[]) => {
-  const results: any[] = [];
-
-  for (const item of items) {
-    const gst = item.GST?.toString().trim();
-
-    //  Skip empty GST
-    if (!gst) continue;
-  const isExists = await this.checkGSTExists(gst);
-    // 🔥 GST check inside loop
-    
-    // Already exists → skip
-    if (isExists) {
-      console.log(`GST already exists: ${gst}`);
-      alert("GST already exists");
-      continue;
-    }
-  const utc_days = Math.floor(item.CommencementDate - 25569);
-  const utc_value = utc_days * 86400; 
-
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;   
-    const response = await this.context.spHttpClient.post(
+    const res = await this.context.spHttpClient.get(
       url,
-     SPHttpClient.configurations.v1,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    if (currentId) {
+      return data.value.some((item: any) => item.Id !== currentId);
+    }
+    return data.value.length > 0;
+  };
+  public checkPanExists = async (Pan: string, currentId?: number): Promise<boolean> => {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=Pan eq '${Pan}'`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+    if (currentId) {
+      return data.value.some((item: any) => item.Id !== currentId);
+    }
+    return data.value.length > 0;
+  };
+
+  public saveToSharePoint = async (items: any[]) => {
+    const results: any[] = [];
+
+    for (const item of items) {
+      const gst = item.GST?.toString().trim();
+      const Pan = item.Pan?.toString().trim();
+      if (gst != undefined) {
+        const IsValid = this.validateGST(gst);
+        if (!IsValid) {
+          console.log(`Please enter valid GST No.: ${gst}`);
+          alert("Please enter valid GST No.");
+          return;
+        }
+        const isExists = await this.checkGSTExists(gst);
+        if (isExists) {
+          console.log(`GST already exists: ${gst}`);
+          alert("GST already exists");
+          return;
+        }
+      }
+      if (Pan !== undefined) {
+        const ispanExists = await this.checkPanExists(Pan);
+        if (ispanExists) {
+          console.log(`Pan already exists: ${Pan}`);
+          alert("Pan No already exists");
+          return;
+        }
+      }
+
+      const utc_days = Math.floor(item.CommencementDate - 25569);
+      const utc_value = utc_days * 86400;
+
+      const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items`;
+      const response = await this.context.spHttpClient.post(
+        url,
+        SPHttpClient.configurations.v1,
         {
           headers: {
             'Accept': 'application/json',
@@ -180,51 +190,55 @@ public saveToSharePoint = async (items: any[]) => {
           },
           body: JSON.stringify({
             Title: item.Title,
-      YearofEstablishment: item.YearofEstablishment,   
-      GST:gst,
-      CommencementDate: new Date(utc_value * 1000),
-      Pan: item.Pan,
-      Tin:item.Tin,
-      CentralSalesTaxNo:item.CentralSalesTaxNo,
-      ServiceTaxRegNo:item.ServiceTaxRegNo,
-      NatureofService:item.NatureofService,
-      MSMERegistrationNo:item.MSMERegistrationNo,
-      ESICNo:item.ESICNo,
-      ExciseRegisterNo:item.ExciseRegisterNo,
-      WorkContractTaxNo:item.WorkContractTaxNo,
-      FullAddress:item.FullAddress,
-      TelephoneNo:item.TelephoneNo,
-      FaxNo:item.FaxNo,
-      EmailId:item.EmailId,
-      ContactPerson:item.ContactPerson,
-      RegFullAddress:item.RegFullAddress,
-      RegTelephoneNo:item.RegTelephoneNo,
-      RegFaxNo:item.RegFaxNo,
-      RegEmailId:item.RegEmailId,
-      RegContactPerson:item.RegContactPerson,
-      Manufacturer:item.Manufacturer,
-      AuthorizedAgent:item.AuthorizedAgent,
-      Trader:item.Trader,
-      ConsultingCompany:item.ConsultingCompany,
-      Other:item.Other,
-      ConstitutionofOrganization:item.ConstitutionofOrganization,
-      Name:item.Name,
-      Address:item.Address,
-      ContactNo:item.ContactNo,
-      Details:item.Details,
-      BankName:item.BankName,
-      BankAddress:item.BankAddress,
-      NameinBankAccount:item.NameinBankAccount,
-      BankAccountNo:item.BankAccountNo,
-      BankIFSCMICRCode:item.BankIFSCMICRCode,
-      CurrentStatus:'Completed'
+            YearofEstablishment: item.YearofEstablishment,
+            GST: gst,
+            CommencementDate: new Date(utc_value * 1000),
+            Pan: item.Pan,
+            Tin: item.Tin,
+            CentralSalesTaxNo: item.CentralSalesTaxNo,
+            ServiceTaxRegNo: item.ServiceTaxRegNo,
+            NatureofService: item.NatureofService,
+            MSMERegistrationNo: item.MSMERegistrationNo,
+            ESICNo: item.ESICNo,
+            ExciseRegisterNo: item.ExciseRegisterNo,
+            WorkContractTaxNo: item.WorkContractTaxNo,
+            FullAddress: item.FullAddress,
+            TelephoneNo: item.TelephoneNo,
+            FaxNo: item.FaxNo,
+            EmailId: item.EmailId,
+            ContactPerson: item.ContactPerson,
+            RegFullAddress: item.RegFullAddress,
+            RegTelephoneNo: item.RegTelephoneNo,
+            RegFaxNo: item.RegFaxNo,
+            RegEmailId: item.RegEmailId,
+            RegContactPerson: item.RegContactPerson,
+            Manufacturer: item.Manufacturer,
+            AuthorizedAgent: item.AuthorizedAgent,
+            Trader: item.Trader,
+            ConsultingCompany: item.ConsultingCompany,
+            Other: item.Other,
+            ConstitutionofOrganization: item.ConstitutionofOrganization,
+            Name: item.Name,
+            Address: item.Address,
+            ContactNo: item.ContactNo,
+            Details: item.Details,
+            BankName: item.BankName,
+            BankAddress: item.BankAddress,
+            NameinBankAccount: item.NameinBankAccount,
+            BankAccountNo: item.BankAccountNo,
+            BankIFSCMICRCode: item.BankIFSCMICRCode,
+            CurrentStatus: 'Completed'
           })
         }
-    );
-    const data = await response.json();
-    results.push(data);
-  }
-  return results;
-};
+      );
+      const data = await response.json();
+      results.push(data);
+    }
+    return results;
+  };
 
+  public validateGST = (value: string): boolean => {
+    const regex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    return regex.test(value.toUpperCase());
+  };
 }

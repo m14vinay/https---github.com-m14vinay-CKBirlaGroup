@@ -4,6 +4,8 @@ export default class Service {
   private context: any;
   private HistoryList = "History";
   private BillProcessing = "BillProcessing";
+    private Vendor="AllVendor";
+  private EmailList="EmailToVendor";
   constructor(context: any) {
     this.context = context;
   }
@@ -58,5 +60,31 @@ export default class Service {
     );
     const data = await response.json();
     return data.value;
+  }
+  // GetVendorEmail
+   public async getVendorEmailByVendorCode(VendorCode: string): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Vendor}')/items?$filter=VendorCode eq '${VendorCode}'`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0] : null;
+  }
+  //Create Send Email
+   public async createEmailList(data: any): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.EmailList}')/items`;
+    const response = await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      }
+    );
+    return response.json();
   }
 };
