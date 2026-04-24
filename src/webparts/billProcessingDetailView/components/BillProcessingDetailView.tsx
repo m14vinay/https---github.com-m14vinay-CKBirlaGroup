@@ -50,8 +50,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
   React.useEffect(() => {
     const id = getIdFromQueryString();
     if (id) {
-      handleFetchById(id);
-      loadAttachments(id);
+      handleFetchById(id);     
     }
   }, []);
   const loadAttachments = async (id: number) => {
@@ -72,6 +71,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
       console.log("Result:", result);
       const currentuser = await service.getUser();
       if (result.Author.Id == currentuser.Id) {
+        loadAttachments(id);
         setItemId(result.Id);
         setForm(prev => ({
           ...prev,
