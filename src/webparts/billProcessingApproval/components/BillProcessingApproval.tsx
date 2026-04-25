@@ -69,7 +69,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     const id = getIdFromQueryString();
     if (id) {
       handleFetchById(id);
-      loadAttachments(id);
+      
     }
   }, []);
   const loadAttachments = async (id: number) => {
@@ -81,6 +81,13 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       console.error(error);
     }
   };
+
+  React.useEffect(() => {
+      if (itemId) {
+        loadAttachments(itemId);
+        
+      }
+    }, [itemId]);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });

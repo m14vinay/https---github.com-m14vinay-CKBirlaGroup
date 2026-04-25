@@ -482,7 +482,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
           }
         }
-        alert("Request Saved Successfully.✅");
+        alert("Request Saved Successfully.");
         const counterResult = await CounterfyPOCategory();
         await service.updateItem(res.Id, {
           RequestNo: counterResult.requestNo
@@ -497,7 +497,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
             await service.uploadFile(itemId, form.files[i]);
           }
         }
-        alert("Request Updated Successfully ✅");
+        alert("Request Updated Successfully ");
       }
     
     } catch (error) {
@@ -595,7 +595,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
             await service.uploadFile(itemId, form.files[i]);
           }
         }
-        alert("Request Submitted Successfully.✅");
+        alert("Request Submitted Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
       }
@@ -616,7 +616,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
             for (let i = 0; i < form.files.length; i++) {
               await service.uploadFile(res.Id, form.files[i]);
             }
-            alert("Request Submitted Successfully.✅");
+            alert("Request Submitted Successfully.");
             const counterResult = await CounterfyPOCategory();
             await service.updateItem(res.Id, {
               RequestNo: counterResult.requestNo

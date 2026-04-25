@@ -120,6 +120,21 @@ Approver/Id,Approver/Title&$expand=Approver`;
     return item;
   }
 
+  public async getItemByProjectCode(requestNo: string): Promise<any> {
+  
+      const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=ProjectCode eq '${requestNo}'`;
+      const res = await this.context.spHttpClient.get(
+        url,
+        SPHttpClient.configurations.v1
+      );
+  
+      const item = await res.json();
+     
+     
+    
+    return item;
+  }
+
 
 // Fetch QuotationApproval Record
   public async getRequestDetails (requestNo: string) :Promise<any> {

@@ -249,6 +249,14 @@ const handleprojectNoExist = async () => {
       return;
     }
     try {
+    //     const check = await service.getItemByProjectCode(value);
+
+    // // 🔒 Safety check
+    // if (check && check.CurrentStatus === 'Approved') {
+    //   alert("This Project Code is Already Approved.");
+    //   return;
+    // }
+       
       // 🔹 Service call to fetch request details
       const result = await service.getRequestDetails(value);
       if (result.length > 0) {
@@ -374,7 +382,7 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
             await service.uploadFile(res.Id, form.files[i]);
           }
         }
-        alert("Request Saved Successfully.✅");
+        alert("Request Saved Successfully.");
         await service.updateItem(res.Id, {
           RequestNo: `VMR-${res.Id}`
         });
@@ -388,7 +396,7 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
             await service.uploadFile(itemId, form.files[i]);
           }
         }
-        alert("Request Updated Successfully.✅");
+        alert("Request Updated Successfully.");
       }
     } catch (error) {
       console.error(error);
@@ -433,7 +441,7 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
             await service.uploadFile(itemId, form.files[i]);
           }
         }
-        alert("Request Submitted Successfully.✅");
+        alert("Request Submitted Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
       }
@@ -448,7 +456,7 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
             await service.uploadFile(res.Id, form.files[i]);
           }
         }
-        alert("Request Submitted Successfully.✅");
+        alert("Request Submitted Successfully.");
         await service.updateItem(res.Id, {
           RequestNo: `VMR-${res.Id}`
         });
