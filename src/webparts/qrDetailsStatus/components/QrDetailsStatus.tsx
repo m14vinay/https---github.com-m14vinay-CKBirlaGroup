@@ -5,7 +5,7 @@ import { IQrDetailsStatusProps } from './IQrDetailsStatusProps';
 import styles from './QrDetailsStatus.module.scss';
 import SharePointService from '../service/Service'
 import { Spinner, SpinnerSize } from '@fluentui/react';
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
   const [form, setForm] = React.useState({
@@ -166,7 +166,7 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
           <h4>Quotation Request Details & Status</h4>
         </div>
         <div className={styles.row}>
-          <div className={styles['col-md-9']}>
+          <div className="col-md-9">
             <div className={styles.leftPanel}>
               <div className={styles.leftPanelHeader}>
                 <h4></h4>
@@ -183,13 +183,13 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
                     statusClass = `${styles.statusBox}`;
                   }
                   else if (item.UserAction === "Rejected") {
-                    statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+                    statusClass = `${styles.statusBox} ${styles.rejected}`;
                   }
                   else if (item.UserAction === "Upcoming") {
                     statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
                   }
                   else if (item.UserAction === "Pending") {
-                    statusClass = `${styles.statusBox} ${styles.pendingBox}`;
+                    statusClass = `${styles.statusBox} ${styles.pending}`;
                   }
                   return (
                     <div className={statusClass} key={index}>
@@ -328,14 +328,8 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
                 </div>
               </div>
             </div>
-
           </div>
-
-
-
-
-
-          <div className={styles['col-md-3']}>
+          <div className="col-md-3">
             <div className={styles.rightPanel}>
               <div className={styles.rightPanelHeader}>
                 <h4>Timeline of the Request - {form.RequestNo}</h4>
@@ -358,7 +352,7 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
                             : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : ""
                       }
                     >
-                      <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
+                      <span className={styles.poHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
                       <span><b>{isInitiated ? "Initiator" : "Approver Name:"} </b>{item.UserName}</span>
                       {item.UserAction && (
                         <span>
@@ -369,7 +363,7 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : ""
+                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingStatusText : ""
                             }
                           >
                             {item.UserAction}
