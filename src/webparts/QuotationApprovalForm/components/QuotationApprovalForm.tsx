@@ -699,12 +699,10 @@ if (selectedQuote > totalAmount) {
             await service.uploadFile(res.Id, form.files[i]);
           }
         }
-
-        alert("Request Saved Successfully ✅");
-
         await service.updateItem(res.Id, {
           RequestNo: `PRJ-${res.Id}`
         });
+        alert("Request Saved Successfully ✅");      
       }
       else {
         // ✅ UPDATE
