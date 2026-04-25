@@ -335,8 +335,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
     if (NextUserAction != '') {
       const payload = {
         UserAction: NextUserAction,
-        ActionDate: new Date().toISOString(),
-        UserComment: comment
+        ActionDate: new Date().toISOString()        
       };
       await service.UpdateHistoryItem(id, payload, 'REM', NextSequence);
     }
@@ -362,6 +361,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedToEmailId: 0
           };        
         }
+        CurrentUserAction='Rejected';
+        CurrentSequence=1;
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
         if (form.ActionDate1 == '') {
@@ -373,6 +374,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };        
+          CurrentUserAction='Rejected';
+        CurrentSequence=1;
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.CFOEmailId);
@@ -383,6 +386,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };          
+          CurrentUserAction='Rejected';
+        CurrentSequence=2;
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -393,6 +398,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };       
+          CurrentUserAction='Rejected';
+        CurrentSequence=3;
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -401,7 +408,9 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate4: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };          
+          };        
+          CurrentUserAction='Rejected';
+        CurrentSequence=4;  
         }
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -413,7 +422,9 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };          
+          };         
+          CurrentUserAction='Rejected';
+        CurrentSequence=1; 
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.ComplianceHeadEmailId);
@@ -423,7 +434,9 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate2: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };          
+          };     
+          CurrentUserAction='Rejected';
+        CurrentSequence=2;     
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -434,6 +447,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
           };          
+          CurrentUserAction='Rejected';
+        CurrentSequence=3;
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -442,7 +457,9 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate4: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };        
+          };    
+          CurrentUserAction='Rejected';
+        CurrentSequence=4;    
         }
       }
       if (payload != '') {

@@ -22,7 +22,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
     CurrentStatus: '',
     RequestNo: '',
     AssignedTo: '',
-    vendorId:'',
+    vendorId: '',
     AuthorId: '',
     Created: '',
     Actiondate1: '',
@@ -110,10 +110,10 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
 
             files: null
           }));
-      
+
           const value = result.VendorName || '';
           const Id = value.split("/")[1].split("-")[0];
-         setVendorId(Id);
+          setVendorId(Id);
           if (!result.Actiondate1) {
             setIsDisabled(false);  // enable
           } else {
@@ -148,7 +148,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
     try {
       setLoading(true);
       if (!approverComment) return alert("Approver Comment required");
-    let payload = {};
+      let payload = {};
       let CurrentSequence = 0;
       let NextSequence = 0;
       let CurrentUserAction = '';
@@ -156,18 +156,18 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
 
       if (!itemId) return;
       payload = {
-          ApproverComment: approverComment,
-          CurrentStatus: 'Approved',
-          Actiondate1: new Date().toLocaleDateString('en-GB'),
-          AssignedTo:'Approved',
-          AssignedToEmailId: null,
-         
-        };
-        CurrentSequence = 1;
-        CurrentUserAction = 'Approved';
-       if (payload != '') {
+        ApproverComment: approverComment,
+        CurrentStatus: 'Approved',
+        Actiondate1: new Date().toLocaleDateString('en-GB'),
+        AssignedTo: 'Approved',
+        AssignedToEmailId: null,
+
+      };
+      CurrentSequence = 1;
+      CurrentUserAction = 'Approved';
+      if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
-        await handleSaveApproveHistory(itemId, CurrentUserAction,  CurrentSequence,  approverComment);
+        await handleSaveApproveHistory(itemId, CurrentUserAction, CurrentSequence, approverComment);
         alert("Request Approved Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
@@ -191,33 +191,34 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
       };
       await service.UpdateHistoryItem(id, payload, 'VMR', CurrentSequence);
     }
-    
+
   };
- 
+
 
   const handleReject = async () => {
     try {
       setLoading(true);
       if (!approverComment) return alert("Approver Comment required");
       if (!itemId) return;
-        let payload = {};
+      let payload = {};
       let CurrentSequence = 0;
       let NextSequence = 0;
       let CurrentUserAction = '';
       let NextuserAction = '';
       if (!itemId) return;
-       payload = {
-          ApproverComment: approverComment,
-          CurrentStatus: 'Rejected',
-          Actiondate1: new Date().toLocaleDateString('en-GB'),
-          AssignedTo: 'Rejected',
-          AssignedToEmailId: null
-        };
-       
-      
+      payload = {
+        ApproverComment: approverComment,
+        CurrentStatus: 'Rejected',
+        Actiondate1: new Date().toLocaleDateString('en-GB'),
+        AssignedTo: 'Rejected',
+        AssignedToEmailId: null
+      };
+      CurrentUserAction = 'Rejected';
+      CurrentSequence = 1;
+
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
-        await handleSaveApproveHistory(itemId, CurrentUserAction, CurrentSequence,  approverComment);
+        await handleSaveApproveHistory(itemId, CurrentUserAction, CurrentSequence, approverComment);
         alert("Request Rejected Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
@@ -295,8 +296,8 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
                 <label>Additional Information & Remarks</label>
                 <input name="vendorDescription" value={form.vendorDescription} readOnly style={{ backgroundColor: "lightgray" }} />
               </div>
-             
-            <p>If you want to verfiy the document.
+
+              <p>If you want to verfiy the document.
                 <a
                   href={`https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/VendorRegistrationDetails.aspx?RequestId=${vendorId}`}
                   target="_blank"
@@ -342,7 +343,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
                 <h4>Timeline of the Request - {form.RequestNo}</h4>
               </div>
               <ul>
-                 {history.map((item, index) => {
+                {history.map((item, index) => {
                   const isApproved = item.UserAction === "Approved";
                   const isRejected = item.UserAction === "Rejected";
                   const isInitiated = item.UserAction === "Request Initiator";

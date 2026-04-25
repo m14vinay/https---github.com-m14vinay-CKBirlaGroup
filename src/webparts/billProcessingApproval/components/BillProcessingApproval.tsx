@@ -319,8 +319,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     if (NextUserAction != '') {
       const payload = {
         UserAction: NextUserAction,
-        ActionDate: new Date().toISOString(),
-        UserComment: comment
+        ActionDate: new Date().toISOString()        
       };
       await service.UpdateHistoryItem(id, payload, 'FBP', NextSequence);
     }
@@ -345,6 +344,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
         };       
+        CurrentUserAction='Rejected';
+        CurrentSequence=1;
+
       }
       else if (form.ActionDate2 == '') {
         const UserApproval3 = await service.getUserById(form.Approver3Id);
@@ -355,6 +357,8 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
         };        
+        CurrentUserAction='Rejected';
+        CurrentSequence=2;
       }
       else if (form.ActionDate3 == '') {
         const UserApproval5 = await service.getUserById(form.Approver5Id);
@@ -365,6 +369,8 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
         };        
+        CurrentUserAction='Rejected';
+        CurrentSequence=3;
       }
       else if (form.ActionDate5 == '') {
         payload = {
@@ -373,7 +379,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
           ActionDate5: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
-        };       
+        };      
+        CurrentUserAction='Rejected';
+        CurrentSequence=4; 
       }
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
