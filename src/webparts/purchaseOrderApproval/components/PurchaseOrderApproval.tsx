@@ -281,9 +281,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
     }
     if (NextUserAction != '') {
       const payload = {
-        UserAction: NextUserAction,
-        ActionDate: new Date().toISOString(),
-        UserComment: comment
+        UserAction: NextUserAction       
       };
       await service.UpdateHistoryItem(id, payload, 'PO', NextSequence);
     }

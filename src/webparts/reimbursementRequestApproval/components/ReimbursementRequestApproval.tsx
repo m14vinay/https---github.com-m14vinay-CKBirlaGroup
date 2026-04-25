@@ -334,8 +334,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
     }
     if (NextUserAction != '') {
       const payload = {
-        UserAction: NextUserAction,
-        ActionDate: new Date().toISOString()        
+        UserAction: NextUserAction     
       };
       await service.UpdateHistoryItem(id, payload, 'REM', NextSequence);
     }
