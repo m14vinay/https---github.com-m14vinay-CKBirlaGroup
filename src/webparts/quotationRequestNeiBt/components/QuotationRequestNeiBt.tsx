@@ -154,6 +154,20 @@ const loadAttachments = async (id:number) => {
     setLoading(false);
   }
 };
+const handlecheckamount = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: value
+    });
+    if (Number(value) > (form.TotalProjectAmount)) {
+      setForm(prev => ({
+        ...prev,
+        SelectedQuote: ''
+      }));
+      alert("Please Enter SelectedQuote Amount Less or Equal To Total Project Amount.");
+    }
+  }
 
   const handleCancel = () => {
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;

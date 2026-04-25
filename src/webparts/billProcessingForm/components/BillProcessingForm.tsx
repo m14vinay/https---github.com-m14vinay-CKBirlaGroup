@@ -362,7 +362,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
           }
-          alert("Request Saved Successfully.✅");
+          alert("Request Saved Successfully.");
           await service.updateItem(res.Id, {
             RequestNo: `FBP-${res.Id}`
           });
@@ -375,7 +375,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
             await service.uploadFile(itemId, form.files[i]);
           }
         }
-        alert("Request Updated Successfully ✅");
+        alert("Request Updated Successfully ");
       }
     } catch (error) {
       console.error(error);
@@ -623,8 +623,15 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                   <h6>Templates</h6>
                 </div>
                 <ol>
-                  <li>
-                  </li>
+                  <p>
+                    <a
+                      href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/Cheque_Payment_Form_v1.0.xlsx"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                     Cheque_Payment_Form_v1.0.xlsx
+                    </a>
+                  </p>
                 </ol>
               </div>
               {/* Guidelines */}

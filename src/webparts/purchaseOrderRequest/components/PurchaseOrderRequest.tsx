@@ -440,6 +440,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   //SAVE DRAFT DATA
 
   const handleSaveOrUpdate = async () => {
+     try {
     setLoading(true);
     // 🔹 Validations
     if (!form.projectCode) return alert("Enter Project Code");
@@ -469,7 +470,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       CurrentStatus: 'Draft'
     };
 
-    try {
+   
       if (!itemId) {
         // 🔹 CREATE
         const res = await service.createItem(payload);
@@ -481,7 +482,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
           }
         }
-        alert("Request Saved Successfully.✅");
+        alert("Request Saved Successfully.");
         const counterResult = await CounterfyPOCategory();
         await service.updateItem(res.Id, {
           RequestNo: counterResult.requestNo
@@ -496,8 +497,9 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
             await service.uploadFile(itemId, form.files[i]);
           }
         }
-        alert("Request Updated Successfully ✅");
+        alert("Request Updated Successfully ");
       }
+    
     } catch (error) {
       console.error(error);
       alert("Error Occurred,Please Contact To System Administrator.❌");
@@ -593,7 +595,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
             await service.uploadFile(itemId, form.files[i]);
           }
         }
-        alert("Request Submitted Successfully.✅");
+        alert("Request Submitted Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
       }
@@ -614,7 +616,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
             for (let i = 0; i < form.files.length; i++) {
               await service.uploadFile(res.Id, form.files[i]);
             }
-            alert("Request Submitted Successfully.✅");
+            alert("Request Submitted Successfully.");
             const counterResult = await CounterfyPOCategory();
             await service.updateItem(res.Id, {
               RequestNo: counterResult.requestNo
@@ -669,7 +671,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
               <div className={styles.leftPanelHeader}>
                 <h4>PO Approval Form</h4>
               </div>
-              <button style={{ backgroundColor: 'purple', color: 'white', fontSize: 'bold', width: '100%' }} onClick={handleDownload}>Download Purchase Order</button>
+              {/* <button style={{ backgroundColor: 'purple', color: 'white', fontSize: 'bold', width: '100%' }} onClick={handleDownload}>Download Purchase Order</button> */}
               <div></div>
               <label>Project Code <span className={styles.required}>*</span> </label>
               <input name="projectCode" value={form.projectCode} onChange={handleRequestNoChange} />

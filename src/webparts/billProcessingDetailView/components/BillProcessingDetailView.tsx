@@ -50,7 +50,8 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
   React.useEffect(() => {
     const id = getIdFromQueryString();
     if (id) {
-      handleFetchById(id);     
+      handleFetchById(id);
+      
     }
   }, []);
   const loadAttachments = async (id: number) => {
@@ -62,6 +63,13 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
       console.error(error);
     }
   };
+
+   React.useEffect(() => {
+        if (itemId) {
+          loadAttachments(itemId);
+          
+        }
+      }, [itemId]);
   //FETCH DATA-----
   const handleFetchById = async (id: number) => {
     try {
