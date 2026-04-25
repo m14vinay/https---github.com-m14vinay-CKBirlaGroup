@@ -374,8 +374,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment1: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate1: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: (UserApproval2?.Title),
-            AssignedToEmailId: Number(UserApproval2?.Id)
+            AssignedTo: 'Rejected',
+            AssignedToEmailId: 0
           };
           CurrentSequence = 1;
           CurrentUserAction = 'Rejected';
@@ -388,8 +388,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment2: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate2: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: (UserApproval3?.Title),
-            AssignedToEmailId: Number(UserApproval3?.Id)
+            AssignedTo: 'Rejected',
+            AssignedToEmailId: 0
           };
           CurrentSequence = 2;
           CurrentUserAction = 'Rejected';
@@ -402,8 +402,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment3: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate3: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: (UserApproval4?.Title),
-            AssignedToEmailId: Number(UserApproval4?.Id)
+            AssignedTo: 'Rejected',
+            AssignedToEmailId: 0
           };
           CurrentSequence = 3;
           CurrentUserAction = 'Rejected';
@@ -431,8 +431,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment1: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate1: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: (UserApproval2?.Title),
-            AssignedToEmailId: Number(UserApproval2?.Id)
+            AssignedTo: 'Rejected',
+            AssignedToEmailId: 0
           };
           CurrentSequence = 1;
           CurrentUserAction = 'Rejected';
@@ -445,8 +445,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment2: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate2: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: (UserApproval3?.Title),
-            AssignedToEmailId: Number(UserApproval3?.Id)
+            AssignedTo: 'Rejected',
+            AssignedToEmailId: 0
           };
           CurrentSequence = 2;
           CurrentUserAction = 'Rejected';
@@ -459,8 +459,8 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ApproverComment3: form.Comments,
             CurrentStatus: 'Rejected',
             ActionDate3: new Date().toLocaleDateString('en-GB'),
-            AssignedTo: (UserApproval4?.Title),
-            AssignedToEmailId: Number(UserApproval4?.Id)
+            AssignedTo: 'Rejected',
+            AssignedToEmailId: 0
           };
           CurrentSequence = 3;
           CurrentUserAction = 'Rejected';
