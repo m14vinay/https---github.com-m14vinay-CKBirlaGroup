@@ -95,7 +95,12 @@ export default function MyRequests() {
             header: () => <span>Project Title</span>
         }),
         columnHelper.accessor('ProjectDescription', {
-            header: () => 'Description'
+            header: () => 'Description',
+            cell: info => (
+        <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+            {info.getValue()}
+        </div>
+    )
         }),
         columnHelper.accessor('Department', {
             header: () => <span>Department</span>,
