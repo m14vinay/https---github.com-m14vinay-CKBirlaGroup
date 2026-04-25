@@ -750,7 +750,7 @@ if (selectedQuote > totalAmount) {
       if (!form.Advancepayment) return alert("Please Select Advance Payment");
       if ((!form.files || form.files.length === 0) && (!attachments || attachments.length === 0)) return alert("Attach files");
       const dataApprover = await service.getDepartmentApprovers(form.Department);
-    const currentuser = await service.getUser();
+      const currentuser = await service.getUser();
       const approver = dataApprover[0];
       const user = await service.getUserById(approver?.Approval1?.Id);
 
@@ -780,10 +780,9 @@ if (selectedQuote > totalAmount) {
           AssignedTo: approver?.Approval1?.Title,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
-          Approval1Id: dataApprover[0]?.Approval1?.Id || null,
-          Approval2Id: dataApprover[0]?.Approval2?.Id || null,
-          Approval3Id: dataApprover[0]?.Approval3?.Id || null,
-          //Approval3Id: approver3Id? Number(approver3Id)  : null,
+          Approval1Id: Number(dataApprover[0]?.Approval1?.Id || null),
+          Approval2Id: Number(dataApprover[0]?.Approval2?.Id || null),
+          Approval3Id: Number(dataApprover[0]?.Approval3?.Id || null),          
           CurrentStatus: "Pending"
         };
 
@@ -818,7 +817,6 @@ if (!selectedApprover) {
             Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
             CurrentStatus: "Pending"
           };
-
         }
       }
       else {
@@ -842,30 +840,21 @@ if (!selectedApprover) {
           ApprovalPath: form.ApprovalPath || "",
           AssignedTo: approver?.Approval1?.Title || "",
           AssignedToEmailId: approver?.Approval1?.Id || null,
-          Approval1Id: dataApprover[0].Approval1.Id || null,
-          Approval2Id: dataApprover[0].Approval2.Id || null,
-          Approval3Id: dataApprover[0].Approval3.Id || null,
-          // Approval1Id: (approvalChain.length > 0 ? approvalChain[0].id : null),
-          // Approval2Id: (approvalChain.length > 1 ? approvalChain[1].id : null),
-          // Approval3Id: (approvalChain.length > 2 ? approvalChain[2].id : null),
+          Approval1Id: Number(dataApprover[0].Approval1.Id || null),
+          Approval2Id: Number(dataApprover[0].Approval2.Id || null),
+          Approval3Id: Number(dataApprover[0].Approval3.Id || null),        
           CurrentStatus: "Pending"
         };
-
       }
 
       if (!itemId) {
         // ✅ CREATE
         const res = await service.createItem(payload);
         setItemId(res.Id);
-      
-
-        // SAVE PO DETAILS
         await service.deletePurchaseOrderDetailsByQuotationId(res.Id);
-
         for (let i = 0; i < poItems.length; i++) {
           const row = poItems[i];
           if (!row.description) continue;
-
           await service.createPurchaseOrderDetail({
             Title: row.description,
             Description: row.description,
@@ -875,7 +864,6 @@ if (!selectedApprover) {
             QuotationIdId: res.Id
           });
         }
-
         // 🔹 Attachments
         if (form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
@@ -883,29 +871,27 @@ if (!selectedApprover) {
           }
         }
         alert("Request Submitted Successfully");
-
         setTimeout(() => {
           window.location.href = "https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/Dashboard.aspx";
         }, 800);
-
         await service.updateItem(res.Id, {
           RequestNo: `PRJ-${res.Id}`
         });
         if (Number(form.TotalProjectAmount) <= 200000)
         {
             await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-            await handleSaveHistory(res.Id, 'QA',user.Title, 'Pending', 'Department Head', new Date(), 1);
+            await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
         }
         else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
         await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-        await handleSaveHistory(res.Id, 'QA',user.Title, 'Pending', 'Department Head', new Date(), 1);
-        await handleSaveHistory(res.Id, 'QA',user.Title, 'Upcoming', 'Management1', new Date(), 2);
+        await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
+        await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval2?.Id.Title, 'Upcoming', 'Management1', new Date(), 2);
         }
-        else{
+        else{          
         await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-        await handleSaveHistory(res.Id, 'QA',user.Title, 'Pending', 'Department Head', new Date(), 1);
-        await handleSaveHistory(res.Id, 'QA',user.Title, 'Upcoming', 'Management1', new Date(), 2);
-         await handleSaveHistory(res.Id, 'QA',user.Title, 'Upcoming', 'Management2', new Date(), 3);
+        await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
+        await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval2?.Title, 'Upcoming', 'Management1', new Date(), 2);
+         await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval3?.Title, 'Upcoming', 'Management2', new Date(), 3);
         }
       } else {
         // ✅ UPDATE

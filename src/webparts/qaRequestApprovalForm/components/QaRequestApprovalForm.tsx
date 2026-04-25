@@ -50,7 +50,7 @@ interface IUserLookup {
   Title?: string;
 }
 interface IApprovalItem {
-  CurrentStatus?: string; 
+  CurrentStatus?: string;
 }
 
 interface IDepartmentApproverData {
@@ -85,6 +85,26 @@ const STEP_DESIGNATION_MAP: Record<number, string> = {
 const FINAL_STEP = 6;
 
 export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (props) => {
+const fixSequence = (designation: string) => {
+  const key = (designation || "").toLowerCase().replace(/\s+/g, "");
+
+  const map: any = {
+    "requestinitiator": 0,
+    "departmenthead": 1,
+    "management1": 2,
+    "approver1": 2,
+    "management2": 3,
+    "approver2": 3,
+    "management3": 4,
+    "approver3": 4,
+    "management4": 5,
+    "approver4": 5
+  };
+
+  return map[key] ?? 999;
+};
+
+
   const [poItems, setPoItems] = React.useState<IPurchaseOrderItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [data, setData] = React.useState<IApprovalItem | null>(null);
@@ -96,11 +116,11 @@ export const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (pro
   const [currentStep, setCurrentStep] = React.useState(1);
 
   const params = new URLSearchParams(window.location.search);
-const itemId =
-  Number(params.get('RequestId')) ||
-  Number(params.get('requestId')) ||
-  Number(params.get('id')) ||
-  Number(params.get('ID'));
+  const itemId =
+    Number(params.get('RequestId')) ||
+    Number(params.get('requestId')) ||
+    Number(params.get('id')) ||
+    Number(params.get('ID'));
   const requestLabel = itemId ? `PRJ-${itemId}` : '';
 
   const isReadOnly =
@@ -159,7 +179,8 @@ const itemId =
 
     try {
       const response = await fetchFromList<IListResponse<IHistoryItem>>(
-        `${props.siteUrl}/_api/web/lists/getbytitle('History')/items?$filter=FID eq ${itemId}&$orderby=Created asc`
+        `${props.siteUrl}/_api/web/lists/getbytitle('History')/items?$filter=FID eq ${itemId}&$select=UserName,UserAction,UserComment,ActionDate,Designation,Sequence,Created
+&$orderby=Sequence asc`
       );
 
       setHistory(response.value || []);
@@ -175,9 +196,11 @@ const itemId =
     }
 
     try {
-      const itemResponse = await fetchFromList<IApprovalItem>(
-        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$expand=AttachmentFiles,Approval1,Approval2,Approval3&$select=*,Approval1/Title,Approval2/Title,Approval3/Title`
-      );
+const itemResponse = await fetchFromList<IApprovalItem>(
+  `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?
+$select=*,Author/Title,Created/Title,Approval1/Title,Approval2/Title,Approval3/Title
+&$expand=Author,Approval1,Approval2,Approval3`
+);
 
       const departmentName = String(itemResponse.Department || '').replace(/'/g, "''");
       const [purchaseOrderResponse, departmentResponse] = await Promise.all([
@@ -211,12 +234,14 @@ Approval4/Id,Approval4/Title
 
   const createHistoryItem = React.useCallback(async (payload: Record<string, unknown>): Promise<void> => {
     await props.spHttpClient.post(
-      `${props.siteUrl}/_api/web/lists/getbytitle('History')/items`,
+      `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
       SPHttpClient.configurations.v1,
       {
         headers: {
           Accept: 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'IF-MATCH': '*',
+          'X-HTTP-Method': 'MERGE'
         },
         body: JSON.stringify(payload)
       }
@@ -243,7 +268,7 @@ Approval4/Id,Approval4/Title
   }, [comment, createHistoryItem, currentStep, getUserFromStep]);
 
 
-  const handleApproveReject = async (action:string) => {
+  const handleApproveReject = async (action: string) => {
     try {
       setLoading(true);
 
@@ -266,13 +291,13 @@ Approval4/Id,Approval4/Title
 
       let userDesignation = "";
 
-      // 🔥 STEP DETECTION BASED ON AssignedTo (BEST)
+      // STEP DETECTION BASED ON AssignedTo (BEST)
 
-      if(action == "Rejected"){
+      if (action == "Rejected") {
         // STEP 1
-      if (data.AssignedToEmailId === data.Approval1Id && data.ActionDate1 === null) {
+        if (data.AssignedToEmailId === data.Approval1Id && data.ActionDate1 === null) {
 
-        userDesignation = "Department Head"
+          userDesignation = "Department Head"
           payload = {
             ApproverComment1: comment,
             ActionDate1: new Date().toISOString(),
@@ -283,12 +308,12 @@ Approval4/Id,Approval4/Title
             Status: "Rejected",
             CurrentStatus: "Rejected"
           };
-      }
+        }
 
-      // STEP 2
-      else if (data.AssignedToEmailId === data.Approval2Id && data.ActionDate2 === null) {
-        userDesignation = "Management 1"
-        
+        // STEP 2
+        else if (data.AssignedToEmailId === data.Approval2Id && data.ActionDate2 === null) {
+          userDesignation = "Management 1"
+
           payload = {
             ApproverComment2: comment,
             ActionDate2: new Date().toISOString(),
@@ -299,30 +324,30 @@ Approval4/Id,Approval4/Title
             Status: "Rejected",
             CurrentStatus: "Rejected"
           };
+        }
+
+        // FINAL STEP
+        else if (data.AssignedToEmailId === data.Approval3Id) {
+          userDesignation = "Management 2"
+          payload = {
+            ApproverComment3: comment,
+            ActionDate3: new Date().toISOString(),
+            AssignedToEmailId: null,
+            AssignedTo: "Rejected",
+            AssignedToEmail2Id: null,
+            AsisgnedTo2: "Rejected",
+            Status: "Rejected",
+            CurrentStatus: "Rejected"
+          };
+        }
       }
 
-      // FINAL STEP
-      else if (data.AssignedToEmailId === data.Approval3Id) {
-        userDesignation = "Management 2"
-        payload = {
-          ApproverComment3: comment,
-          ActionDate3: new Date().toISOString(),
-          AssignedToEmailId: null,
-          AssignedTo: "Rejected",
-          AssignedToEmail2Id: null,
-          AsisgnedTo2: "Rejected",
-          Status: "Rejected",
-          CurrentStatus: "Rejected"
-        };
-      }
-      }
-      
-      else if(action === "Approved"){
+      else if (action === "Approved") {
         // STEP 1
         if (data.AssignedToEmailId === data.Approval1Id && data.ActionDate1 === null) {
 
           userDesignation = "Department Head"
-          if(data.TotalProjectAmount && Number(data.TotalProjectAmount) > 200000 && data.Approval2Id && data.Approval3Id){
+          if (data.TotalProjectAmount && Number(data.TotalProjectAmount) > 200000 && data.Approval2Id && data.Approval3Id) {
             payload = {
               ApproverComment1: comment,
               ActionDate1: new Date().toISOString(),
@@ -333,7 +358,7 @@ Approval4/Id,Approval4/Title
               Status: "Pending"
             };
           }
-          else if(data.Approval2Id){ 
+          else if (data.Approval2Id) {
             payload = {
               ApproverComment1: comment,
               ActionDate1: new Date().toISOString(),
@@ -342,7 +367,7 @@ Approval4/Id,Approval4/Title
               Status: "Pending"
             };
           }
-          else{
+          else {
             payload = {
               ApproverComment1: comment,
               ActionDate1: new Date().toISOString(),
@@ -357,8 +382,8 @@ Approval4/Id,Approval4/Title
         // STEP 2
         else if (data.AssignedToEmailId === data.Approval2Id && data.ActionDate2 === null && currentUser.Id === data.AssignedToEmailId) {
           userDesignation = "Management 1"
-          if(data.AssignedToEmail2Id === null){
-            if(data.Approval3Id){
+          if (data.AssignedToEmail2Id === null) {
+            if (data.Approval3Id) {
               payload = {
                 ApproverComment2: comment,
                 ActionDate2: new Date().toISOString(),
@@ -367,7 +392,7 @@ Approval4/Id,Approval4/Title
                 Status: "Pending"
               };
             }
-            else{
+            else {
               payload = {
                 ApproverComment2: comment,
                 ActionDate2: new Date().toISOString(),
@@ -378,8 +403,8 @@ Approval4/Id,Approval4/Title
               };
             }
           }
-          else{
-            if(data.ActionDate3){
+          else {
+            if (data.ActionDate3) {
               payload = {
                 ApproverComment2: comment,
                 ActionDate2: new Date().toISOString(),
@@ -391,7 +416,7 @@ Approval4/Id,Approval4/Title
                 CurrentStatus: "Approved"
               };
             }
-            else{
+            else {
               payload = {
                 ApproverComment2: comment,
                 ActionDate2: new Date().toISOString()
@@ -417,24 +442,24 @@ Approval4/Id,Approval4/Title
         // FINAL STEP
         else if (data.AssignedToEmail2Id === data.Approval3Id) {
           userDesignation = "Management 2"
-          if(data.ActionDate2){
-              payload = {
-                ApproverComment3: comment,
-                ActionDate3: new Date().toISOString(),
-                AssignedToEmailId: null,
-                AssignedTo: "Approved",
-                AssignedToEmail2Id: null,
-                AsisgnedTo2: "Approved",
-                Status: "Approved",
-                CurrentStatus: "Approved"
-              };
-            }
-            else{
-              payload = {
-                ApproverComment3: comment,
-                ActionDate3: new Date().toISOString()
-              };
-            }
+          if (data.ActionDate2) {
+            payload = {
+              ApproverComment3: comment,
+              ActionDate3: new Date().toISOString(),
+              AssignedToEmailId: null,
+              AssignedTo: "Approved",
+              AssignedToEmail2Id: null,
+              AsisgnedTo2: "Approved",
+              Status: "Approved",
+              CurrentStatus: "Approved"
+            };
+          }
+          else {
+            payload = {
+              ApproverComment3: comment,
+              ActionDate3: new Date().toISOString()
+            };
+          }
         }
       }
 
@@ -459,24 +484,21 @@ Approval4/Id,Approval4/Title
           body: JSON.stringify(payload)
         }
       ).then(r => r.json())
-      .then(r => 
-        console.log(r)
-      )
-      .catch(err => 
-        console.log(err)
-      );
+        .then(r =>
+          console.log(r)
+        )
+        .catch(err =>
+          console.log(err)
+        );
 
       // 🔹 HISTORY SAVE
-      await handleSaveHistory(itemId, "Approved", currentUser.Title, userDesignation);
-
-      alert( action + " Successfully ✅");
-
-      // 🔹 UI UPDATE (IMPORTANT)
-      setData(prev => prev ? { ...prev, ...payload } : prev);
+      await handleSaveHistory(itemId, action as TApprovalStatus, currentUser.Title, userDesignation);
+      // 🔹 SUCCESS MESSAGE
+      setStatusMsg(`${action} Successfully ✅`);
       setIsActionDone(true);
 
-      // 🔹 REDIRECT
-  //window.location.assign(`${props.siteUrl}/SitePages/Dashboard.aspx`);
+      window.location.href = `${props.siteUrl}/SitePages/Dashboard.aspx`;
+
 
     } catch (error) {
       console.error("APPROVE ERROR:", error);
@@ -484,130 +506,130 @@ Approval4/Id,Approval4/Title
       setLoading(false);
     }
   };
-const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
+  const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
 
-  if (!comment.trim()) {
-    setStatusMsg('Enter comment before taking action.');
-    return;
-  }
-
-  try {
-
-    // 🔴 SAFETY CHECK
-    if (!approverData) {
-      setStatusMsg("Approver configuration missing ❌");
+    if (!comment.trim()) {
+      setStatusMsg('Enter comment before taking action.');
       return;
     }
 
-    // ✅ STEP CALCULATION (FIXED)
-    const step =
-      !data?.ActionDate1 ? 1 :
-      !data?.ActionDate2 ? 2 :
-      !data?.ActionDate3 ? 3 :
-      4;
+    try {
 
-    let payload: any = {};
-
-    // 🔴 REJECT (highest priority)
-    if (status === "Rejected") {
-      payload = {
-        CurrentStatus: "Rejected",
-        AssignedTo: "",
-        AssignedToEmailId: null
-      };
-    }
-
-    // ✅ STEP 1 → move to Approval2
-    else if (step === 1) {
-      payload = {
-        ApproverComment1: comment,
-        ActionDate1: new Date().toISOString(),
-
-        AssignedTo: approverData?.Approval2?.Title || "",
-        AssignedToEmailId: approverData?.Approval2?.Id || null,
-
-        CurrentStatus: "Pending"
-      };
-    }
-
-    // ✅ STEP 2 → move to Approval3
-    else if (step === 2) {
-      payload = {
-        ApproverComment2: comment,
-        ActionDate2: new Date().toISOString(),
-
-        AssignedTo: approverData?.Approval3?.Title || "",
-        AssignedToEmailId: approverData?.Approval3?.Id || null,
-
-        CurrentStatus: "Pending"
-      };
-    }
-
-    // ✅ FINAL STEP
-    else if (step === 3) {
-      payload = {
-        ApproverComment3: comment,
-        ActionDate3: new Date().toISOString(),
-
-        AssignedTo: "",
-        AssignedToEmailId: null,
-
-        CurrentStatus: "Approved"
-      };
-    }
-
-    // ❌ SAFETY CHECK
-    if (Object.keys(payload).length === 0) {
-      setStatusMsg("No action available ❌");
-      return;
-    }
-
-    console.log("FINAL PAYLOAD:", payload);
-
-    // 🔹 UPDATE SHAREPOINT ITEM
-    await props.spHttpClient.post(
-      `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
-      SPHttpClient.configurations.v1,
-      {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'IF-MATCH': '*',
-          'X-HTTP-Method': 'MERGE'
-        },
-        body: JSON.stringify(payload)
+      // 🔴 SAFETY CHECK
+      if (!approverData) {
+        setStatusMsg("Approver configuration missing ❌");
+        return;
       }
-    );
 
-    // 🔹 SAVE HISTORY
-    await handleSaveHistory(itemId, status,'','');
+      // ✅ STEP CALCULATION (FIXED)
+      const step =
+        !data?.ActionDate1 ? 1 :
+          !data?.ActionDate2 ? 2 :
+            !data?.ActionDate3 ? 3 :
+              4;
 
-    // 🔥 IMPORTANT → REFRESH FROM SERVER (NO LOCAL FAKE UPDATE)
-    await fetchData();
-    await fetchHistory();
+      let payload: any = {};
 
-    setStatusMsg(`${status} successfully.`);
-    setIsActionDone(true);
+      // 🔴 REJECT (highest priority)
+      if (status === "Rejected") {
+        payload = {
+          CurrentStatus: "Rejected",
+          AssignedTo: "",
+          AssignedToEmailId: null
+        };
+      }
 
-  } catch (error: any) {
-    console.error('Status update failed:', error);
-    setStatusMsg(error?.message || 'Unable to update the request.');
-  }
+      // ✅ STEP 1 → move to Approval2
+      else if (step === 1) {
+        payload = {
+          ApproverComment1: comment,
+          ActionDate1: new Date().toISOString(),
 
-}, [
-  comment,
-  data,
-  approverData,
-  fetchData,
-  fetchHistory,
-  handleSaveHistory,
-  itemId,
-  props.listName,
-  props.siteUrl,
-  props.spHttpClient
-]);
+          AssignedTo: approverData?.Approval2?.Title || "",
+          AssignedToEmailId: approverData?.Approval2?.Id || null,
 
-[comment, currentStep, fetchHistory, handleSaveHistory, itemId, props.listName, props.siteUrl, props.spHttpClient];
+          CurrentStatus: "Pending"
+        };
+      }
+
+      // ✅ STEP 2 → move to Approval3
+      else if (step === 2) {
+        payload = {
+          ApproverComment2: comment,
+          ActionDate2: new Date().toISOString(),
+
+          AssignedTo: approverData?.Approval3?.Title || "",
+          AssignedToEmailId: approverData?.Approval3?.Id || null,
+
+          CurrentStatus: "Pending"
+        };
+      }
+
+      // ✅ FINAL STEP
+      else if (step === 3) {
+        payload = {
+          ApproverComment3: comment,
+          ActionDate3: new Date().toISOString(),
+
+          AssignedTo: "",
+          AssignedToEmailId: null,
+
+          CurrentStatus: "Approved"
+        };
+      }
+
+      // ❌ SAFETY CHECK
+      if (Object.keys(payload).length === 0) {
+        setStatusMsg("No action available ❌");
+        return;
+      }
+
+      console.log("FINAL PAYLOAD:", payload);
+
+      // 🔹 UPDATE SHAREPOINT ITEM
+      await props.spHttpClient.post(
+        `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})`,
+        SPHttpClient.configurations.v1,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'IF-MATCH': '*',
+            'X-HTTP-Method': 'MERGE'
+          },
+          body: JSON.stringify(payload)
+        }
+      );
+
+      // 🔹 SAVE HISTORY
+      await handleSaveHistory(itemId, status, '', '');
+
+      // IMPORTANT → REFRESH FROM SERVER (NO LOCAL FAKE UPDATE)
+      await fetchData();
+      await fetchHistory();
+
+      setStatusMsg(`${status} successfully.`);
+      setIsActionDone(true);
+
+    } catch (error: any) {
+      console.error('Status update failed:', error);
+      setStatusMsg(error?.message || 'Unable to update the request.');
+    }
+
+  }, [
+    comment,
+    data,
+    approverData,
+    fetchData,
+    fetchHistory,
+    handleSaveHistory,
+    itemId,
+    props.listName,
+    props.siteUrl,
+    props.spHttpClient
+  ]);
+
+  [comment, currentStep, fetchHistory, handleSaveHistory, itemId, props.listName, props.siteUrl, props.spHttpClient];
 
   React.useEffect(() => {
     fetchData().catch(() => undefined);
@@ -620,63 +642,59 @@ const updateStatus = React.useCallback(async (status: TApprovalStatus) => {
     pending: styles.statusTextPending
   };
 
-{/* ================= RIGHT SIDE TIMELINE ================= */}
-<div className={styles.rightTimeline}>
+  {/* ================= RIGHT SIDE TIMELINE ================= */ }
+  <div className={styles.rightTimeline}>
 
-  <h4 className={styles.timelineHeader}>
-    Timeline - {requestLabel}
-  </h4>
+    <h4 className={styles.timelineHeader}>
+      Timeline - {requestLabel}
+    </h4>
 
-  <div className={styles.timelineBody}>
-
-
-
-
+    <div className={styles.timelineBody}>
+    </div>
   </div>
-</div>
 
   if (!data) {
     return <div>No data found.</div>;
   }
-function getTimelineStatus(UserAction?: string): "approved" | "rejected" | "pending" {
-  const action = (UserAction || "").toLowerCase();
 
-  if (action.includes("reject")) {
-    return "rejected";
+
+  function getTimelineStatus(UserAction?: string): "approved" | "rejected" | "pending" {
+
+    const action = (UserAction || "").toLowerCase();
+
+    if (action.includes("reject")) return "rejected";
+
+    if (action.includes("approve")) return "approved";
+
+    if (action.includes("pending")) return "pending";
+
+    if (action.includes("upcoming")) return "pending";
+
+    if (action.includes("initiator")) return "approved";
+
+    return "pending";
   }
-
-  if (
-    action.includes("approve") ||
-    action.includes("approved") ||
-    action.includes("submit") ||
-    action.includes("initiator")
-  ) {
-    return "approved";
-  }
-
-  return "pending";
-}
 
   return (
     <div className={styles.container}>
       {loading && (
-              <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: 'rgba(255,255,255,0.6)',
-                zIndex: 9999
-              }}>
-                <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
-                  <Spinner label="Processing..." size={SpinnerSize.large} />
-                </div>
-              </div>
-            )}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.6)',
+          zIndex: 9999
+        }}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+            <Spinner label="Processing..." size={SpinnerSize.large} />
+          </div>
+        </div>
+      )}
       <div className={styles.mainLayout}>
         <div className={styles.leftPanel}>
-          <h4 className={styles.heading}>Quotation Request Approval Form</h4>
+          <h4 className={styles.heading}>Quotation Request Approval Form<h2 className={styles.timelineHeader}>{requestLabel}</h2></h4>
 
           <div className={styles.formRow}>
             <label>Project Title *</label>
@@ -821,99 +839,131 @@ function getTimelineStatus(UserAction?: string): "approved" | "rejected" | "pend
 
           <div className={styles.timelineBody}>
 
-            
            {(() => {
 
   const safeHistory = Array.isArray(history) ? history : [];
 
-  // ✅ REMOVE DUPLICATE (latest per designation)
-  const latestMap: Record<string, any> = {};
+  // ✅ STEP 1: NORMALIZE HISTORY USING FIXSEQUENCE
+  const latestBySeq: Record<number, any> = {};
 
   safeHistory.forEach((item: any) => {
-    const key = (item.Designation || "")
-      .toLowerCase()
-      .replace(/\s+/g, "")
-      .trim();
+    const seq = Number(item.Sequence ?? fixSequence(item.Designation));
 
-    const currentDate = new Date(item.ActionDate || item.Created || 0).getTime();
-    const existingDate = latestMap[key]
-      ? new Date(latestMap[key].ActionDate || latestMap[key].Created || 0).getTime()
+    const currentTime = new Date(item.ActionDate || item.Created || 0).getTime();
+    const existingTime = latestBySeq[seq]
+      ? new Date(latestBySeq[seq].ActionDate || latestBySeq[seq].Created || 0).getTime()
       : 0;
 
-    if (!latestMap[key] || currentDate > existingDate) {
-      latestMap[key] = item;
+    if (!latestBySeq[seq] || currentTime > existingTime) {
+      latestBySeq[seq] = item;
     }
   });
 
-const processedItems: any[] = Object.keys(latestMap).map(key => latestMap[key]);
-  // ✅ FIX ORDER
-  const stepOrder = [
-    "requestinitiator",
-    "departmenthead",
-    "management1",
-    "management2",
-    "management3",
-    "management4"
-  ];
+  // ✅ STEP 2: INITIATOR (CORRECT)
+const initiator =
+  data?.Author?.Title ||
+  data?.CreatedBy?.Title ||
+  "-";
 
-  processedItems.sort((a: any, b: any) => {
-    const aKey = (a.Designation || "").toLowerCase().replace(/\s+/g, "");
-    const bKey = (b.Designation || "").toLowerCase().replace(/\s+/g, "");
+  // ✅ STEP 3: BUILD FLOW (STRICT FROM QUOTATION LIST)
+const uniqueUsers = new Set<string>();
 
-    return stepOrder.indexOf(aKey) - stepOrder.indexOf(bKey);
+const steps = [
+  { seq: 0, name: "Request Initiator", user: initiator },
+  { seq: 1, name: "Department Head", user: data?.Approval1?.Title },
+  { seq: 2, name: "Management 1", user: data?.Approval2?.Title },
+  { seq: 3, name: "Management 2", user: data?.Approval3?.Title }
+]
+.filter(x => {
+  if (!x.user) return false;
+  if (uniqueUsers.has(x.user)) return false;
+  uniqueUsers.add(x.user);
+  return true;
+});
+
+  // ✅ STEP 4: BUILD FINAL ITEMS (NO DUPLICATE POSSIBLE)
+  let finalItems = steps.map(step => {
+    const historyItem = latestBySeq[step.seq];
+
+    return {
+      Sequence: step.seq,
+      Designation: step.name,
+      UserName: step.user,
+      UserAction: historyItem?.UserAction || "",
+      ActionDate: historyItem?.ActionDate || historyItem?.Created
+    };
   });
 
-return processedItems.length > 0 ? processedItems.map((item: any, index: number) => {
-    const status: "approved" | "rejected" | "pending" =
-      getTimelineStatus(item.UserAction);
+  // ✅ STEP 5: STATUS LOGIC (CORRECT)
+let lastApprovedSeq = -1;
+
+// find last approved
+finalItems.forEach(item => {
+  const action = (item.UserAction || "").toLowerCase();
+  if (action.includes("approve")) {
+    lastApprovedSeq = Math.max(lastApprovedSeq, item.Sequence);
+  }
+});
+
+// assign correct status
+finalItems = finalItems.map(item => {
+  const seq = item.Sequence;
+  const action = (item.UserAction || "").toLowerCase();
+
+  if (action.includes("approve")) return { ...item, UserAction: "Approved" };
+
+  if (action.includes("reject")) return { ...item, UserAction: "Rejected" };
+
+  if (seq === lastApprovedSeq + 1) {
+    return { ...item, UserAction: "Pending" };
+  }
+
+  if (seq > lastApprovedSeq + 1) {
+    return { ...item, UserAction: "Upcoming" };
+  }
+
+  return item;
+});
+
+  // ✅ STEP 6: RENDER
+  return finalItems.map((item: any, index: number) => {
+
+    const status = getTimelineStatus(item.UserAction);
 
     return (
-      <div
-        key={`${item.Designation}-${item.UserName}`}
-        className={`${styles.timelineItem} ${(styles as any)[status]}`}
-      >
+      <div key={index} className={`${styles.timelineItem} ${(styles as any)[status]}`}>
         <div className={styles.timelineMarker}></div>
 
         <div className={styles.timelineContent}>
           <div className={styles.timelineStepTitle}>
-            {item.Designation || item.UserName}
+            {item.Designation}
           </div>
 
-          {item.Designation !== "Request Initiator" ? (
-            <div className={styles.timelineText}>
-              <b>Approver Name:</b> {item.UserName || '-'}
-            </div>
-          ) : (
-            <div className={styles.timelineText}>
-              <b>Initiator:</b> {item.UserName || '-'}
-            </div>
-          )}
+          <div className={styles.timelineText}>
+            <b>
+              {item.Designation === "Request Initiator"
+                ? "Initiator"
+                : "Approver"}:
+            </b>{" "}
+            {item.UserName || "-"}
+          </div>
 
-          {item.UserAction && item.Designation !== "Request Initiator" && (
-            <div className={`${styles.timelineText} ${statusTextClassMap[status]}`}>
-              <b>Action Taken:</b> {item.UserAction}
-            </div>
-          )}
+          <div className={`${styles.timelineText} ${statusTextClassMap[status]}`}>
+            <b>Status:</b> {item.UserAction}
+          </div>
 
           {item.ActionDate && (
             <div className={styles.timelineText}>
-              <b>Action Date:</b> {formatTimelineDate(item.ActionDate)}
-            </div>
-          )}
-
-          {item.UserComment && (
-            <div className={styles.timelineText}>
-              <b>Comments:</b> {item.UserComment}
+              <b>Date:</b> {formatTimelineDate(item.ActionDate)}
             </div>
           )}
         </div>
       </div>
     );
-  }) : (
-    <div>No history found.</div>
-  );
+  });
 
 })()}
+
           </div>
         </div>
       </div>
