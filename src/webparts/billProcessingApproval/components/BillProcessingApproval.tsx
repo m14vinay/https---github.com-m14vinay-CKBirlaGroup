@@ -6,6 +6,7 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption, Modal } fro
 import SharePointService from '../service/Service';
 import { PageContext } from '@microsoft/sp-page-context';
 import { Spinner, SpinnerSize } from '@fluentui/react';
+import { set } from '@microsoft/sp-lodash-subset/lib/index';
 const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) => {
 
   // State
@@ -104,7 +105,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       const currentuser = await service.getUser();
       const User = await service.getUserById(currentuser.Id);
       if ((result.AssignedTo === currentuser.Title)) {
-        if (result.CurrentStatus === 'Pending' || result.CurrentStatus === 'Approved') {
+        if (result.CurrentStatus === 'Pending' || result.CurrentStatus === 'Approved' || result.CurrentStatus === 'Hold') {
           setItemId(result.Id);
           setForm(prev => ({
             ...prev,
@@ -143,30 +144,34 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             setAssignedToEmail(User.Id);
           }
           loadAttachments(id);
-          if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 == null && result.CurrentStatus == 'Pending') {
+          if (result.ActionDate1 != null && result.ActionDate2 != null && result.ActionDate3 != null && result.ActionDate5 == null && result.CurrentStatus == 'Pending') {
             setShowApproveButton(false);
             setShowResumeButton(false);
             setShowPaidButton(true);
+            setShowRejectButton(true);
             setShowHoldButton(true);
             setShowEmailButton(false);
           }
-          else if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 != '' && result.CurrentStatus == 'Approved') {
+          else if (result.ActionDate1 != null && result.ActionDate2 != null && result.ActionDate3 != null && result.ActionDate5 != null && result.CurrentStatus == 'Approved') {
             setShowResumeButton(false);
             setShowApproveButton(false);
             setShowPaidButton(false);
+            setShowRejectButton(true);
             setShowHoldButton(false);
             setShowEmailButton(false);
           }
-          else if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 != '' && result.CurrentStatus == 'Hold') {
+          else if (result.ActionDate1 != null && result.ActionDate2 != null && result.ActionDate3 != null && result.ActionDate5 != null && result.CurrentStatus == 'Hold') {
             setShowResumeButton(true);
             setShowApproveButton(false);
             setShowPaidButton(false);
+            setShowRejectButton(false);
             setShowEmailButton(false);
           }
-          else if (result.ActionDate1 != '' && result.ActionDate2 != '' && result.ActionDate3 != '' && result.ActionDate5 != '' && result.CurrentStatus == 'Resume') {
+          else if (result.ActionDate1 != null && result.ActionDate2 != null && result.ActionDate3 != null && result.ActionDate5 != null && result.CurrentStatus == 'Pending') {
             setShowResumeButton(false);
             setShowHoldButton(true);
             setShowApproveButton(false);
+            setShowRejectButton(true);
             setShowPaidButton(true);
             setShowEmailButton(false);
           }
@@ -174,6 +179,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             setShowResumeButton(false);
             setShowHoldButton(false);
             setShowApproveButton(true);
+            setShowRejectButton(true);
             setShowPaidButton(false);
             setShowEmailButton(false);
           }
@@ -407,7 +413,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     try {
       const UserApproval5 = await service.getUserById(form.Approver5Id);
       setLoading(true);
-      if (!form.ApprovalComment) return alert("Comment is required.");
+      //if (!form.ApprovalComment) return alert("Comment is required.");
       let payload = {};
       let CurrentSequence = 4;
       let CurrentUserAction = 'Hold';
@@ -442,16 +448,16 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     try {
       const UserApproval5 = await service.getUserById(form.Approver5Id);
       setLoading(true);
-      if (!form.ApprovalComment) return alert("Comment is required.");
+     // if (!form.ApprovalComment) return alert("Comment is required.");
       let payload = {};
       let CurrentSequence = 4;
-      let CurrentUserAction = 'Resume';
+      let CurrentUserAction = 'Pending';
       let NextuserAction = '';
       let NextSequence = 0;
       if (!itemId) return;
       payload = {
         ApproverComment5: form.ApprovalComment,
-        CurrentStatus: 'Resume',
+        CurrentStatus: 'Pending',
         ActionDate5: new Date().toLocaleDateString('en-GB'),
         AssignedTo: UserApproval5?.Title,
         AssignedToEmailId: Number(UserApproval5?.Id)
@@ -483,8 +489,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       let CurrentUserAction = 'Approved';
       let NextuserAction = '';
       let NextSequence = 0;
-      if (!itemId) return;
-      if (form.ActionDate5 == '') {
+      if (!itemId) return;     
         payload = {
           ApproverComment5: form.ApprovalComment,
           CurrentStatus: 'Approved',
@@ -492,13 +497,14 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
           AssignedTo: 'Approved',
           AssignedToEmailId: 0
         };
-      }
+      
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
         await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.ApprovalComment);
         setShowEmailButton(true);
         setShowRejectButton(false);
         setShowPaidButton(false);
+        setShowHoldButton(false);
         alert("Request Approved Successfully.");
       }
     } catch (error) {
@@ -529,7 +535,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     }
     setLoading(true);
     const payload = {
-      Title: form.VendorName,
+      Title: form.VendorName.split('-')[1],
       VendorEmail: form.Email,
       Comment: form.ApproverComment5,
       Subject: 'Invoice is released to your account.',

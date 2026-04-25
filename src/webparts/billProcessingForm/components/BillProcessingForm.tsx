@@ -361,11 +361,11 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         if (res.Id > 0 && form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
-          }
-          alert("Request Saved Successfully.");
+          }         
           await service.updateItem(res.Id, {
             RequestNo: `FBP-${res.Id}`
           });
+          alert("Request Saved Successfully.");
         }
       } else {
         // 🔹 UPDATE
