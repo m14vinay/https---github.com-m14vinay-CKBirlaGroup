@@ -416,7 +416,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
         await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.ApprovalComment);
-        alert("Request Approved Successfully.");
+        setShowRejectButton(false);
+        setShowPaidButton(false);
+        alert("Request Hold Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
         return;
@@ -449,7 +451,9 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
         await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, NextSequence, form.ApprovalComment);
-        alert("Request Approved Successfully.");
+        setShowRejectButton(true);
+        setShowPaidButton(true);
+        alert("Request Resumed Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
         return;

@@ -294,7 +294,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
               )}
               <div className={styles.buttonGroup}>
                 <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
-                <button name='btnSendEmail' style={{ display: form.ApproverComment5 != '' ? 'none' : 'none' }} className={styles.submitBtn} onClick={handleEmail}>Send Email to Vendor</button>
+                <button name='btnSendEmail' style={{ display: form.ApproverComment5 != '' ? 'block' : 'none' }} className={styles.submitBtn} onClick={handleEmail}>Send Email to Vendor</button>
               </div>
             </div>
           </div>
