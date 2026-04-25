@@ -8,9 +8,6 @@ import { PageContext } from '@microsoft/sp-page-context';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import { set } from '@microsoft/sp-lodash-subset/lib/index';
 const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) => {
-
-  // State
-  // State
   const [form, setForm] = React.useState({
     RequestNo: '',
     ProjectCode: '',
