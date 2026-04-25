@@ -88,7 +88,7 @@ export default function MyPendingRequests() {
         }),
         columnHelper.accessor('Created', {
             header: 'View',
-            cell: (info) => <span style={{cursor:"pointer"}}><Icon iconName="RedEye" onClick={() => openForm(info.row.original)}></Icon></span>
+            cell: (info) => <span style={{cursor:"pointer"}}><Icon iconName="Edit" onClick={() => openForm(info.row.original)}></Icon></span>
         })
     ]
     const [data, _setData] = useState<any[]>(() => []);
