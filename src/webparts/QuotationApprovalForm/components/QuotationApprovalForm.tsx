@@ -196,16 +196,12 @@ const [form, setForm] = React.useState<IForm>({
       const result = await service.getItemByRequestNo(id);
       const currentUser = await service.getUser();
       console.log("Result:", result);
-      if (
-        result.AuthorId !== currentUser.Id &&
-        result.AssignedTo !== currentUser.Id
-      ) {
-        alert("You Are Not Authorized ❌");
-        return;
-      }
-      if (result) {
-        setItemId(result.Id);
-
+       if(result.AuthorId!== currentUser.Id)
+      {
+         alert("You Are Not Authorized ❌ ");
+      } 
+         if (result.CurrentStatus==='Draft') {
+      setItemId(result.Id);
         setForm(prev => ({
           ...prev,
           ProjectTitle: result.ProjectTitle || '',
