@@ -357,10 +357,7 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
     // 🔹 Validations
     try {
       setLoading(true);
-      if (!form.projectCode) return alert("Enter Project Code");
-      if (!form.vendorName) return alert("Please Select Vendor");
-
-
+      
       // 🔹 Payload (common)
       const payload = {
 
