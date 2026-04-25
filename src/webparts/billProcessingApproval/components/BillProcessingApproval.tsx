@@ -344,11 +344,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
           ActionDate1: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
-        };
-        CurrentSequence = 1;
-        NextSequence = 2;
-        CurrentUserAction = 'Rejected';
-        NextuserAction = 'Rejected';
+        };       
       }
       else if (form.ActionDate2 == '') {
         const UserApproval3 = await service.getUserById(form.Approver3Id);
