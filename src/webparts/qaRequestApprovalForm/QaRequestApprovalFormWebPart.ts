@@ -36,7 +36,8 @@ export default class QaRequestApprovalFormWebPart extends BaseClientSideWebPart<
         // 🔥 IMPORTANT (Added)
         siteUrl: this.context.pageContext.web.absoluteUrl,
         spHttpClient: this.context.spHttpClient,
-        listName: 'QuotationApproval'
+        listName: 'QuotationApproval',
+         context: this.context
       }
     );
 
