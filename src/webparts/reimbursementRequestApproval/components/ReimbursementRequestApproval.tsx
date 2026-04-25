@@ -360,11 +360,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };
-          CurrentSequence = 1;
-          CurrentUserAction = 'Rejected';
-          NextSequence = 0;
-          NextuserAction = '';
+          };        
         }
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
@@ -376,11 +372,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };
-          CurrentSequence = 1;
-          CurrentUserAction = 'Rejected';
-          NextSequence = 2;
-          NextuserAction = 'Rejected';
+          };        
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.CFOEmailId);
@@ -390,11 +382,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate2: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };
-          CurrentSequence = 2;
-          CurrentUserAction = 'Rejected';
-          NextSequence = 3;
-          NextuserAction = 'Rejected';
+          };          
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -404,11 +392,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate3: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };
-          CurrentSequence = 3;
-          CurrentUserAction = 'Rejected';
-          NextSequence = 4;
-          NextuserAction = 'Rejected';
+          };       
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -417,11 +401,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate4: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };
-          CurrentSequence = 4;
-          CurrentUserAction = 'Rejected';
-          NextSequence = 0;
-          NextuserAction = '';
+          };          
         }
       }
       else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
@@ -433,11 +413,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate1: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };
-          CurrentSequence = 1;
-          CurrentUserAction = 'Rejected';
-          NextSequence = 2;
-          NextuserAction = 'Rejected';
+          };          
         }
         else if (form.ActionDate2 == '') {
           const UserApproval3 = await service.getUserById(form.ComplianceHeadEmailId);
@@ -447,11 +423,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate2: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };
-          CurrentSequence = 2;
-          CurrentUserAction = 'Rejected';
-          NextSequence = 3;
-          NextuserAction = 'Rejected';
+          };          
         }
         else if (form.ActionDate3 == '') {
           const UserApproval4 = await service.getUserById(form.FIApproverEmailId);
@@ -461,11 +433,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate3: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };
-          CurrentSequence = 3;
-          CurrentUserAction = 'Rejected';
-          NextSequence = 4;
-          NextuserAction = 'Rejected';
+          };          
         }
         else if (form.ActionDate4 == '') {
           payload = {
@@ -474,11 +442,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
             ActionDate4: new Date().toLocaleDateString('en-GB'),
             AssignedTo: 'Rejected',
             AssignedToEmailId: 0
-          };
-          CurrentSequence = 4;
-          CurrentUserAction = 'Rejected';
-          NextSequence = 0;
-          NextuserAction = '';
+          };        
         }
       }
       if (payload != '') {
