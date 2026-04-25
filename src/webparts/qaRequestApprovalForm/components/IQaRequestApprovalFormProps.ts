@@ -9,4 +9,5 @@ export interface IQaRequestApprovalFormProps {
   siteUrl: string;
   spHttpClient: SPHttpClient;
   listName: string;
+  context:any;
 }

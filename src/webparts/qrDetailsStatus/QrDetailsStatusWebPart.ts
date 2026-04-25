@@ -35,7 +35,8 @@ export default class QrDetailsStatusWebPart extends BaseClientSideWebPart<IQrDet
         siteUrl: this.context.pageContext.web.absoluteUrl,
         spHttpClient: this.context.spHttpClient,
         listName: 'QuotationApproval',
-        requestId: this.properties.requestId
+        requestId: this.properties.requestId,
+        context:this.context
       }
     );
 

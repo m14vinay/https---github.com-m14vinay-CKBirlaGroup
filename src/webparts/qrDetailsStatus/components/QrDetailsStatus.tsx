@@ -3,578 +3,402 @@ import { useEffect, useState } from 'react';
 import { SPHttpClient } from '@microsoft/sp-http';
 import { IQrDetailsStatusProps } from './IQrDetailsStatusProps';
 import styles from './QrDetailsStatus.module.scss';
+import SharePointService from '../service/Service'
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
-interface IAttachmentFile {
-  FileName: string;
-  ServerRelativeUrl: string;
-}
+const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
-interface IFormData {
-  RequestNo?: string;
-  CurrentStatus?: string;
-  ApprovalPath?: string;
-  ProjectTitle?: string;
-  ProjectReffNo?: string;
-  ProjectDescription?: string;
-  TotalProjectAmount?: string | number;
-  ApplicableTaxes?: string | number;
-  Vendor1?: string;
-  Vendor2?: string;
-  Vendor3?: string;
-  Quote1?: string | number;
-  Quote2?: string | number;
-  Quote3?: string | number;
-  Selectedvendor?: string;
-  SelectedQuote?: string | number;
-  Department?: string;
-  Advancepayment?: string;
-  AttachmentFiles?: IAttachmentFile[];
-  [key: string]: unknown;
-}
+  const [form, setForm] = React.useState({
+    ProjectTitle: '',
+    ProjectReffNo: '',
+    ProjectDescription: '',
+    TotalProjectAmount: 0,
+    ApplicableTaxes: 0,
+    Vendor1: '',
+    Vendor2: '',
+    Vendor3: '',
+    Quote1: '',
+    Quote2: '',
+    Quote3: '',
+    Selectedvendor: '',
+    SelectedQuote: '',
+    Department: '',
+    Advancepayment: 0,
+    ApprovalPath: '',
+    files: null,
+    attachments: [],
+    ApproverComment1: '',
+    CurrentStatus: '',
+    RequestNo: ''
 
-interface IHistoryItem {
-  Designation?: string;
-  UserName?: string;
-  UserAction?: string;
-  UserComment?: string;
-  ActionDate?: string;
-  Created?: string;
-}
+  });
+  const [poItems, setPoItems] = React.useState<any[]>([]);
+  const [itemId, setItemId] = React.useState<number | null>(null);
+  const service = new SharePointService(props.context);
+  const [approverComment, setApproverComment] = React.useState('');
+  const [attachments, setAttachments] = React.useState<any[]>([]);
+  const [History, setHistory] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(false);
 
-interface IUserLookup {
-  Title?: string;
-}
 
-interface IDepartmentApproverData {
-  Departmenthead?: IUserLookup;
-  Approval1?: IUserLookup;
-  Approval2?: IUserLookup;
-  Approval3?: IUserLookup;
-  Approval4?: IUserLookup;
-}
-
-interface IWorkflowStep {
-  designation: string;
-  userName: string;
-}
-
-interface ITimelineStep extends IWorkflowStep {
-  historyItem?: IHistoryItem;
-  timelineStatus: 'approved' | 'rejected' | 'pending';
-  statusLabel: 'Approved' | 'Rejected' | 'Pending';
-}
-
-interface IPurchaseOrderItem {
-  Description?: string;
-  Quantity?: string | number;
-  Rate?: string | number;
-  Amount?: string | number;
-}
-
-  const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
-  const [data, setData] = useState<IFormData | null>(null);
-  const [poItems, setPoItems] = useState<IPurchaseOrderItem[]>([]);
-  const [history, setHistory] = useState<IHistoryItem[]>([]);
-  const [approverData, setApproverData] = useState<IDepartmentApproverData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [currentUserName, setCurrentUserName] = useState<string>("");
-
-  const params = new URLSearchParams(window.location.search);
-  const getValidId = (value: string | null): number | null =>
-    value && !isNaN(Number(value)) ? Number(value) : null;
-
-  const itemId =
-    getValidId(props.requestId || null) ||
-    getValidId(params.get('RequestId')) ||
-    getValidId(params.get('requestId')) ||
-    getValidId(params.get('id')) ||
-    getValidId(params.get('ID')) ||
-    0;
-
-  const normalizeValue = (value?: string): string =>
-    String(value || '').toLowerCase().replace(/\s/g, '').trim();
-
-  const fetchHistory = async (): Promise<void> => {
-    const res = await props.spHttpClient.get(
-      `${props.siteUrl}/_api/web/lists/getbytitle('History')/items?$filter=FID eq ${itemId} and Title eq 'QA'&$orderby=Created asc`,
-      SPHttpClient.configurations.v1
-    );
-    const result = await res.json();
-    setHistory(result.value || []);
+  // --- 1️⃣ Get ID from query string ---
+  const getIdFromQueryString = (): number | null => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('RequestId');
+    return id ? parseInt(id, 10) : null;
   };
 
-  const fetchData = async (): Promise<void> => {
-    
-    const currentUserRes = await props.spHttpClient.get(
-      `${props.siteUrl}/_api/web/currentuser`,
-      SPHttpClient.configurations.v1
-    );
-    const currentUser = await currentUserRes.json();
+  // --- 3️⃣ Load data on mount ---
+  React.useEffect(() => {
+    const id = getIdFromQueryString();
+    if (id) {
+      handleFetchById(id);
 
-    if (!itemId) {
-      console.error('Invalid itemId:', itemId);
-      return;
     }
-
-    const res = await props.spHttpClient.get(
-      `${props.siteUrl}/_api/web/lists/getbytitle('${props.listName}')/items(${itemId})?$select=*,AttachmentFiles&$expand=AttachmentFiles`,
-      SPHttpClient.configurations.v1
-    );
-    const result: IFormData = await res.json();
-    setData(result);
-
-    if (result.Department) {
-      const safeDepartmentName = String(result.Department).replace(/'/g, "''");
-      const deptRes = await props.spHttpClient.get(
-        `${props.siteUrl}/_api/web/lists/getbytitle('DepartmentMaster')/items?$filter=DepartmentName eq '${safeDepartmentName}'&$expand=Departmenthead,Approval1,Approval2,Approval3,Approval4`,
-        SPHttpClient.configurations.v1
-      );
-      const deptData = await deptRes.json();
-      setApproverData((deptData.value && deptData.value[0]) || null);
-    }
-
-    const poRes = await props.spHttpClient.get(
-      `${props.siteUrl}/_api/web/lists/getbytitle('PurchaseOrderDetails')/items?$filter=QuotationIdId eq ${itemId}`,
-      SPHttpClient.configurations.v1
-    );
-    const poData = await poRes.json();
-    setPoItems(poData.value || []);
-  };
-
-  useEffect(() => {
-    const load = async (): Promise<void> => {
-      await fetchData();
-      await fetchHistory();
-      setLoading(false);
-    };
-
-    load().catch(() => {
-      setLoading(false);
-    });
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (!itemId) {
-    return (
-      <div style={{ padding: '16px' }}>
-        Please provide a Request ID in the web part settings or open this page with <code>?RequestId=123</code>.
-      </div>
-    );
-  }
-
-  if (!data) return <div>No data found for Request ID {itemId}.</div>;
-  
-
-  const requestLabel = data.RequestNo || `PRJ-${itemId}`;
-  const currentStatus = data.CurrentStatus || 'Pending';
-  const currentStatusKey = normalizeValue(currentStatus);
-  const approvalPathNames = String(data.ApprovalPath || '')
-    .split('>')
-    .map((value: string) => value.replace(/^\d+\.\s*/, '').trim())
-    .filter((value: string) => value);
-
-  const approvedKeywords = ['approved', 'submit', 'submitted'];
-  const rejectedKeywords = ['reject', 'rejected', 'declined', 'decline'];
-
-  const getTimelineStatus = (
-    actionValue?: string,
-    commentValue?: string
-  ): 'approved' | 'rejected' | 'pending' => {
-    const action = (actionValue || '').toLowerCase();
-    const comment = (commentValue || '').toLowerCase();
-
-    if (rejectedKeywords.some((keyword) => action.includes(keyword) || comment.includes(keyword))) {
-      return 'rejected';
+  const loadAttachments = async (id: number) => {
+    try {
+      const files = await service.getAttachments(id);
+      console.log("Attachments:", files);
+      setAttachments(files);
+    } catch (error) {
+      console.error(error);
     }
-
-    if (approvedKeywords.some((keyword) => action.includes(keyword) || comment.includes(keyword))) {
-      return 'approved';
-    }
-
-    return 'pending';
   };
 
-  const getLatestHistoryByStep = (items: IHistoryItem[]): Record<string, IHistoryItem> => {
-    return items.reduce((acc: Record<string, IHistoryItem>, curr: IHistoryItem) => {
-      const designationKey = normalizeValue(curr.Designation);
-      const userNameKey = normalizeValue(curr.UserName);
 
-      if (designationKey) {
-        acc[designationKey] = curr;
+  const loadPOData = async (id: number) => {
+    try {
+      const response = await service.getPurchaseOrderDetails(id);
+
+      console.log("PO Data:", response); // 👈 debug
+
+      setPoItems(response || []); // 👈 yaha data set hoga
+    } catch (error) {
+      console.error("Error fetching PO data:", error);
+    }
+  };
+  React.useEffect(() => {
+    if (itemId) {
+      loadAttachments(itemId);
+      loadPOData(itemId);
+      // 👈 dynamic ID use karo
+    }
+  }, [itemId]);
+
+
+  const handleFetchById = async (id: number) => {
+    try {
+      setLoading(true);
+      console.log("Calling API with ID:", id);
+
+      const result = await service.getItemByRequestNo(id);
+      const user = await service.getUser();
+      const historydata = await service.GetHistoryItem(id, "QA");
+      setHistory(historydata);
+      //  const purchaseOrderResponse= await service.createPurchaseOrderDetail(id);
+      // setPoItems(purchaseOrderResponse.value || []);
+      const currentUser = await service.getUser();
+      if (result.AuthorId !== currentUser.Id) {
+        alert("You Are Not Authorized ❌ ");
+      }
+      console.log("Result:", result);
+
+      if (result) {
+        setItemId(result.Id);
+
+        setForm(prev => ({
+          ...prev,
+          ProjectTitle: result.ProjectTitle || '',
+          ProjectReffNo: result.ProjectReffNo || '',
+          ProjectDescription: result.ProjectDescription || '',
+          TotalProjectAmount: result.TotalProjectAmount || 0,
+          ApplicableTaxes: result.ApplicableTaxes || 0,
+          Vendor1: result.Vendor1 || '',
+          Vendor2: result.Vendor2 || '',
+          Vendor3: result.Vendor3 || '',
+          Quote1: result.Quote1 || '',
+          Quote2: result.Quote2 || '',
+          Quote3: result.Quote3 || '',
+          Selectedvendor: result.Selectedvendor || '',
+          SelectedQuote: result.SelectedQuote || '',
+          Department: result.Department || '',
+          Advancepayment: result.Advancepayment || 0,
+          ApprovalPath: result.ApprovalPath || '',
+          CurrentStatus: result.CurrentStatus || '',
+          RequestNo: result.RequestNo || '',
+          files: null,
+
+        }));
+        setApproverComment(result.ApproverComment1 || '');
+      } else {
+        alert("No Data Found");
       }
 
-      if (userNameKey) {
-        acc[userNameKey] = curr;
-      }
-
-      return acc;
-    }, {} as Record<string, IHistoryItem>);
-  };
-
-  const latestHistoryByStep = getLatestHistoryByStep(history);
-
-  const initiatedHistoryItem = history.find(
-    (item: IHistoryItem) =>
-      normalizeValue(item.Designation) === normalizeValue('Request Initiator') ||
-      normalizeValue(item.UserAction) === normalizeValue('Request Initiator')
-  );
-
-  const departmentWorkflowSteps: IWorkflowStep[] = [
-    { designation: 'Department Head', userName: approverData?.Departmenthead?.Title || '' },
-    { designation: 'Management1', userName: approverData?.Approval1?.Title || '' },
-    { designation: 'Management2', userName: approverData?.Approval2?.Title || '' },
-    { designation: 'Management3', userName: approverData?.Approval3?.Title || '' },
-    { designation: 'Management4', userName: approverData?.Approval4?.Title || '' }
-  ].filter((step: IWorkflowStep) => step.userName);
-
-  const fallbackWorkflowSteps: IWorkflowStep[] = approvalPathNames.map((name: string, index: number) => ({
-    designation: index === 0 ? 'Department Head' : `Management ${index}`,
-    userName: name
-  }));
-
-  const workflowSteps =
-    departmentWorkflowSteps.length > 0
-      ? departmentWorkflowSteps
-      : fallbackWorkflowSteps.length > 0
-        ? fallbackWorkflowSteps
-        : [];
-
-  const topWorkflowSteps = workflowSteps.map((step: IWorkflowStep) => {
-    const normalizedUserName = normalizeValue(step.userName);
-    const normalizedDesignation = normalizeValue(step.designation);
-    const historyItem = latestHistoryByStep[normalizedDesignation] || latestHistoryByStep[normalizedUserName];
-    const status = getTimelineStatus(historyItem?.UserAction, historyItem?.UserComment);
-
-    return {
-      ...step,
-      isApproved: status === 'approved',
-      isRejected: status === 'rejected',
-      isPending: status === 'pending'
-    };
-  });
-  const timelineStatusClassMap = {
-    approved: styles.approved,
-    rejected: styles.rejected,
-    pending: styles.pending
-  };
-
-  const currentStatusClass =
-    currentStatusKey.indexOf('reject') !== -1
-      ? styles.rejectedText
-      : currentStatusKey.indexOf('approved') !== -1 || currentStatusKey.indexOf('submit') !== -1
-        ? styles.approvedText
-        : styles.pendingText;
-
-  const currentStatusColor =
-    currentStatusKey.indexOf('reject') !== -1
-      ? '#e53935'
-      : currentStatusKey.indexOf('approved') !== -1 || currentStatusKey.indexOf('submit') !== -1
-        ? '#10b981'
-        : '#f7b500';
-
-  const formatTimelineDate = (value?: string): string => {
-    if (!value) return '';
-    const d = new Date(value);
-    return isNaN(d.getTime()) ? '' : d.toLocaleString('en-IN');
-  };
-
-// ✅ SAFE HISTORY
-const safeHistory = Array.isArray(history) ? history : [];
-
-// ✅ INITIATOR (FIXED 100%)
-const initiatorName =
-  safeHistory.find(x =>
-    normalizeValue(x.Designation).includes('initiator')
-  )?.UserName ||
-  (data as any)?.Author?.Title ||
-  '';
-
-// ✅ FULL FIXED STEPS (NO FILTER ❌)
-const steps = [
-  { designation: 'Request Initiator', userName: initiatorName },
-  { designation: 'Department Head', userName: approverData?.Departmenthead?.Title || '' },
-  { designation: 'Management1', userName: approverData?.Approval1?.Title || '' },
-  {
-    designation: 'Management2',
-    userName:
-      approverData?.Approval2?.Title === approverData?.Approval1?.Title
-        ? `${approverData?.Approval2?.Title} (Level 2)`
-        : approverData?.Approval2?.Title || ''
-  }
-];
-
-// ✅ NORMALIZE KEY STRONG (MAIN FIX)
-const getKey = (val?: string) =>
-  normalizeValue(val);
-
-// ✅ BUILD LATEST MAP (ROBUST)
-const latestMap: Record<string, any> = {};
-
-safeHistory.forEach(item => {
-  const key = getKey(item.Designation);
-
-  if (!key) return;
-
-  const existing = latestMap[key];
-
-  const currentDate = new Date(
-    item.ActionDate || (item as any).Created || 0
-  ).getTime();
-
-  const existingDate = existing
-    ? new Date(existing.ActionDate || (existing as any).Created || 0).getTime()
-    : 0;
-
-  if (!existing || currentDate > existingDate) {
-    latestMap[key] = item;
-  }
-});
-
-// ✅ BUILD TIMELINE
-let lastApprovedIndex = -1;
-
-const timelineSteps = steps.map((step, index) => {
-  const key = getKey(step.designation);
-
-const historyItem = latestMap[key];
-
-  const action = (historyItem?.UserAction || '').toLowerCase();
-
-  let status: 'approved' | 'rejected' | 'pending' = 'pending';
-
-  if (action.includes('reject')) {
-    status = 'rejected';
-  } else if (action.includes('approve') || action.includes('submit')) {
-    status = 'approved';
-    lastApprovedIndex = index;
-  }
-
-  return {
-    ...step,
-    historyItem,
-    timelineStatus: status,
-    statusLabel:
-      status === 'approved'
-        ? 'Approved'
-        : status === 'rejected'
-        ? 'Rejected'
-        : 'Pending'
-  };
-});
-
-// ✅ FIX PENDING / UPCOMING
-timelineSteps.forEach((item, index) => {
-  if (item.timelineStatus === 'pending') {
-    if (index === lastApprovedIndex + 1) {
-      item.statusLabel = 'Pending';
-    } else if (index > lastApprovedIndex + 1) {
-      item.statusLabel = 'Upcoming';
+    } catch (error) {
+      console.error("Error Occurred,Please Contact To System Administrator.:", error);
     }
-  }
-});
-return (
-    
-    <div className={styles.container}>
-      <div className={styles.header}>Quotation Request Details & Status</div>
+    finally {
+      setLoading(false);
+    }
+  };
 
-      <div className={styles.mainLayout}>
-        <div className={styles.leftSection}>
-          <div className={styles.topSummary}>
-            <div className={styles.requestCode}>{requestLabel}</div>
-            <div className={styles.currentStatus}>
-              Current Status : <strong className={currentStatusClass} style={{ color: currentStatusColor }}>{currentStatus}</strong>
-            </div>
+  return (
+    <section>
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.6)',
+          zIndex: 9999
+        }}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+            <Spinner label="Processing..." size={SpinnerSize.large} />
           </div>
+        </div>
+      )}
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h4>Quotation Request Details & Status</h4>
+        </div>
+        <div className={styles.row}>
+          <div className={styles['col-md-9']}>
+            <div className={styles.leftPanel}>
+              <div className={styles.leftPanelHeader}>
+                <h4></h4>
+                <h4>Current Status:<span className={form.CurrentStatus === "Approved"
+                  ? styles.approved
+                  : form.CurrentStatus === "Rejected"
+                    ? styles.rejected
+                    : styles.pending}>{form.CurrentStatus}</span></h4>
+              </div>
+              <div className={styles.leftPanelStatusHeader}>
+                {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
+                  let statusClass = styles.statusBox;
+                  if (item.UserAction === "Approved") {
+                    statusClass = `${styles.statusBox}`;
+                  }
+                  else if (item.UserAction === "Rejected") {
+                    statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+                  }
+                  else if (item.UserAction === "Upcoming") {
+                    statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
+                  }
+                  else if (item.UserAction === "Pending") {
+                    statusClass = `${styles.statusBox} ${styles.pendingBox}`;
+                  }
+                  return (
+                    <div className={statusClass} key={index}>
+                      <div className={styles.content}>
+                        <h5>{item.UserName}</h5>
+                        <h6>{item.Designation}</h6>
+                        <h4>{item.UserAction}</h4>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className={styles.formGroup}>
+                <label>Project Title</label>
+                <input name="ProjectTitle" value={form.ProjectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Project Reference No</label>
+                <input name="ProjectReffNo" value={form.ProjectReffNo} readOnly style={{ backgroundColor: "lightgray" }} />
+              </div>
 
-          <div className={styles.approverFlow}>
-            {topWorkflowSteps.length > 0 ? (
-              topWorkflowSteps.map((item, i) => (
-                <div
-                  key={`${item.designation}-${item.userName}-${i}`}
-                  className={`${styles.managementStep} ${item.isRejected ? styles.rejectedArrow : item.isApproved ? styles.approvedArrow : styles.pendingArrow}`}
-                >
-                  <div className={styles.approverName}>{item.userName}</div>
-                  <div className={styles.approverRole}>{item.designation || 'Pending Approval'}</div>
-                  <div
-                    className={`${styles.approverStatus} ${item.isRejected ? styles.rejectedStatusText : item.isApproved ? styles.approvedStatusText : styles.pendingStatusText}`}
-                  >
-                    {item.isRejected ? 'Rejected' : item.isApproved ? 'Approved' : 'Pending'}
-                  </div>
+              <div className={styles.formGroup}>
+                <label>Project Description & Advance Payment Details</label>
+                <input name="projectDescription" value={form.ProjectDescription} readOnly style={{ backgroundColor: "lightgray" }} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Total Project Amount</label>
+                <input name="TotalProjectAmount" value={form.TotalProjectAmount} readOnly style={{ backgroundColor: "lightgray" }} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Applicable Taxes</label>
+                <input name="ApplicableTaxes" value={form.ApplicableTaxes} readOnly style={{ backgroundColor: "lightgray" }} />
+              </div>
+
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor 1 <span className={styles.required}>*</span></label>
+                  <input name="Vendor1" value={form.Vendor1} readOnly style={{ backgroundColor: "lightgray" }} />
                 </div>
-              ))
-            ) : (
-              <div style={{ fontSize: '12px', color: '#6b7280', padding: '8px 2px' }}>
-                No approver flow configured for this request.
+                <div className={styles.fieldBlock}>
+                  <label>Quote 1 <span className={styles.required}>*</span></label>
+                  <input name="Quote1" value={form.Quote1} readOnly style={{ backgroundColor: "lightgray" }} />
+                </div>
               </div>
-            )}
+
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor 2</label>
+                  <input name="Vendor2" value={form.Vendor2} readOnly style={{ backgroundColor: "lightgray" }} />
+
+                </div>
+                <div className={styles.fieldBlock}>
+                  <label>Quote 2</label>
+                  <input name="Quote2" value={form.Quote2} readOnly style={{ backgroundColor: "lightgray" }} />
+                </div>
+              </div>
+
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor 3</label>
+                  <input name="Quote2" value={form.Quote3} readOnly style={{ backgroundColor: "lightgray" }} />
+                </div>
+
+                <div className={styles.fieldBlock}>
+                  <label>Quote 3</label>
+                  <input name="Quote3" value={form.Quote3} readOnly style={{ backgroundColor: "lightgray" }} />
+
+                </div>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Select Vendor</label>
+                <input name="Selectedvendor" value={form.Selectedvendor} style={{ backgroundColor: "lightgray" }} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Select Quote</label>
+                <input name="SelectedQuote" value={form.SelectedQuote} style={{ backgroundColor: "lightgray" }} />
+
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Department</label>
+                <input name="Department" value={form.Department} style={{ backgroundColor: "lightgray" }} />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Advance Amount</label>
+                <input name="AdvancePayment" value={form.Advancepayment} style={{ backgroundColor: "lightgray" }} />
+              </div>
+
+
+              <div className={styles.formGroup}>
+                <label>Approval Path</label>
+                <input name="ApprovalPath" value={form.ApprovalPath} style={{ backgroundColor: "lightgray" }} />
+
+              </div>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "10px" }}>
+                <label>
+                  Attachments <span className={styles.required}></span>
+                </label>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", }}>
+                  {attachments.map((file: any, index: number) => (
+                    <a
+                      key={index}
+                      href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+                      {file.FileName}
+                    </a>
+                  ))}
+                </div>
+              </div>
+              <div className={styles.poSection}>
+                <h5>Purchase Order Details</h5>
+
+                <div className={styles.poTable}>
+                  <div className={styles.poRowHeader}>
+                    <div>Description</div>
+                    <div>Qty</div>
+                    <div>Rate</div>
+                    <div>Amount</div>
+                  </div>
+
+                  {poItems.length > 0 ? (
+                    poItems.map((item, index) => (
+                      <div key={`${item.Description || 'po'}-${index}`} className={styles.poRow}>
+                        <input value={item.Description || ''} disabled />
+                        <input value={item.Quantity || ''} disabled />
+                        <input value={item.Rate || ''} disabled />
+                        <input value={item.Amount || ''} disabled />
+                      </div>
+                    ))
+                  ) : (
+                    <div>No purchase order details found.</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          <div className={styles.formRow}>
-            <label>Project Title *</label>
-            <input value={data.ProjectTitle || ''} disabled />
-          </div>
 
-          <div className={styles.formRow}>
-            <label>Project Reference Number</label>
-            <input value={data.ProjectReffNo || ''} disabled />
-          </div>
 
-          <div className={styles.formRow}>
-            <label>Project Description *</label>
-            <input value={data.ProjectDescription || ''} disabled />
-          </div>
 
-          <div className={styles.formRow}>
-            <label>Total Project Amount</label>
-            <div className={styles.twoCol}>
-              <input value={data.TotalProjectAmount || ''} disabled />
-              <span>Applicable Taxes</span>
-              <input value={data.ApplicableTaxes || ''} disabled />
+
+          <div className={styles['col-md-3']}>
+            <div className={styles.rightPanel}>
+              <div className={styles.rightPanelHeader}>
+                <h4>Timeline of the Request - {form.RequestNo}</h4>
+              </div>
+              <ul>
+                {History.map((item, index) => {
+                  const isApproved = item.UserAction === "Approved";
+                  const isRejected = item.UserAction === "Rejected";
+                  const isInitiated = item.UserAction === "Request Initiator";
+                  const isUpcoming = item.UserAction === "Upcoming";
+                  const isPending = item.UserAction === "Pending";
+                  return (
+                    <li
+                      key={index}
+                      className={
+                        isApproved
+                          ? styles.tickIcon
+                          : isRejected
+                            ? styles.crossIcon
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : ""
+                      }
+                    >
+                      <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
+                      <span><b>{isInitiated ? "Initiator" : "Approver Name:"} </b>{item.UserName}</span>
+                      {item.UserAction && (
+                        <span>
+                          <b>Action Taken:{" "}</b>
+                          <span
+                            className={
+                              isApproved
+                                ? styles.apprStatus
+                                : isRejected
+                                  ? styles.rejStatus
+                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : ""
+                            }
+                          >
+                            {item.UserAction}
+                          </span>
+                        </span>
+                      )}
+                      {item.ActionDate && (<span><b>Action Date: </b>
+                        {new Date(item.ActionDate).toLocaleString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        }).replace(',', ' AT')}
+                      </span>
+                      )}
+                      {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           </div>
-
-          {[1, 2, 3].map((i) => (
-            <div key={i} className={styles.formRow}>
-              <label>Vendor {i}</label>
-              <div className={styles.twoCol}>
-                <input value={String(data[`Vendor${i}`] || '')} disabled />
-                <span>Quote {i}</span>
-                <input value={String(data[`Quote${i}`] || '')} disabled />
-              </div>
-            </div>
-          ))}
-
-          <div className={styles.formRow}>
-            <label>Select Vendor *</label>
-            <input value={data.Selectedvendor || ''} disabled />
-          </div>
-
-          <div className={styles.formRow}>
-            <label>Selected Quote *</label>
-            <input value={data.SelectedQuote || ''} disabled />
-          </div>
-
-          <div className={styles.formRow}>
-            <label>Department *</label>
-            <input value={data.Department || ''} disabled />
-          </div>
-
-          <div className={styles.formRow}>
-            <label>Advance Payment *</label>
-            <input value={data.Advancepayment || ''} disabled />
-          </div>
-
-          <div className={styles.formRow}>
-            <label>Approval Path *</label>
-            <input value={data.ApprovalPath || ''} disabled />
-          </div>
-
-          <div className={styles.formRow}>
-            <label>Attachments</label>
-            {data.AttachmentFiles?.length ? (
-              data.AttachmentFiles.map((f: IAttachmentFile) => (
-                <a
-                  key={f.FileName}
-                  className={styles.attachmentLink}
-                  href={f.ServerRelativeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {f.FileName}
-                </a>
-              ))
-            ) : (
-              <div>No files</div>
-            )}
-          </div>
-
-          <div className={styles.poSection}>
-            <div className={styles.poHeader}>Purchase Order Details</div>
-
-            {poItems.map((item, i) => (
-              <div key={i} className={styles.poRow}>
-                <input value={item.Description || ''} disabled />
-                <input value={item.Quantity || ''} disabled />
-                <input value={item.Rate || ''} disabled />
-                <input value={item.Amount || ''} disabled />
-              </div>
-            ))}
-          </div>
-        </div>
-
-
-<div className={styles.rightTimeline}>
-  <div className={styles.timelineTitle}>
-    Timeline of the Request - {requestLabel}
-  </div>
-
-  {timelineSteps.length > 0 ? (
-    timelineSteps.map((item, index) => (
-      <div
-        key={`${item.designation}-${item.userName}-${index}`}
-        className={styles.timelineItem}
-      >
-        <div
-          className={`${styles.timelineDot} ${
-            item.timelineStatus === 'approved'
-              ? styles.approved
-              : item.timelineStatus === 'rejected'
-              ? styles.rejected
-              : styles.pending
-          }`}
-        >
-          {item.timelineStatus === 'approved'
-            ? '✓'
-            : item.timelineStatus === 'rejected'
-            ? '×'
-            : '•'}
-        </div>
-
-        <div className={styles.timelineText}>
-          <b>{item.designation}</b>
-
-          {item.designation === 'Request Initiator' ? (
-            <>
-              <div>Initiator: {item.userName || '-'}</div>
-              <div>
-                Date & Time:{' '}
-                {item.historyItem?.ActionDate
-                  ? formatTimelineDate(item.historyItem.ActionDate)
-                  : '-'}
-              </div>
-            </>
-          ) : (
-            <>
-              <div>
-  Approver Name: {item.historyItem?.UserName || item.userName || '-'}
-</div>
-              <div>Action Taken: {item.statusLabel}</div>
-              <div>
-                Action Date:{' '}
-                {item.historyItem?.ActionDate
-                  ? formatTimelineDate(item.historyItem.ActionDate)
-                  : '-'}
-              </div>
-            </>
-          )}
-
-          {item.historyItem?.UserComment && (
-            <div>Comments: {item.historyItem.UserComment}</div>
-          )}
         </div>
       </div>
-    ))
-  ) : (
-    <div style={{ fontSize: '12px', color: '#6b7280' }}>
-      No timeline history found for this request yet.
-    </div>
-  )}
-</div>
-
-
-      </div>
-    </div>
+    </section>
   );
 };
-
 export default QrDetailsStatus;
+
+
