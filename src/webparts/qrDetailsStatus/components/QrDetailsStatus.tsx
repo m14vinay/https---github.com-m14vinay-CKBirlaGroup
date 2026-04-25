@@ -363,7 +363,7 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingStatusText : ""
+                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : ""
                             }
                           >
                             {item.UserAction}

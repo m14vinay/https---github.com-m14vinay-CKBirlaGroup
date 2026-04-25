@@ -10,7 +10,19 @@
 .header {
   margin-bottom: 15px;
 }
-
+.pendingStatusText
+{
+  color: #F6BE00;
+  font-weight: bold;
+}
+.poHeader
+{
+  border-bottom: 1px solid #848484;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+}
 .leftPanel {
   background: #fff;
   border-radius: 6px;
