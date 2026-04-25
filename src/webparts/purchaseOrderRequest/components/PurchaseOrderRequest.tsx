@@ -443,16 +443,16 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
      try {
     setLoading(true);
     // 🔹 Validations
-    if (!form.projectCode) return alert("Enter Project Code");
-    if (!form.POAmount) return alert("Enter POAmount");
-    if (!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
-    if (!form.POAmount) return alert("Please Choose POCategory");
-    if (
-      (!form.files || form.files.length === 0) &&
-      (!attachments || attachments.length === 0)
-    ) {
-      return alert("Please Attach files");
-    }
+    // if (!form.projectCode) return alert("Enter Project Code");
+    // if (!form.POAmount) return alert("Enter POAmount");
+    // if (!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
+    // if (!form.POAmount) return alert("Please Choose POCategory");
+    // if (
+    //   (!form.files || form.files.length === 0) &&
+    //   (!attachments || attachments.length === 0)
+    // ) {
+    //   return alert("Please Attach files");
+    // }
 
     // 🔹 Payload (common)
     const payload = {

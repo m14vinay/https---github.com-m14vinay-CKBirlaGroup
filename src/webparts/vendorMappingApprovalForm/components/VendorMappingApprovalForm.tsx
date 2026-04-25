@@ -213,9 +213,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
           AssignedTo: 'Rejected',
           AssignedToEmailId: null
         };
-        CurrentSequence = 1;
        
-        CurrentUserAction='Rejected';
       
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);

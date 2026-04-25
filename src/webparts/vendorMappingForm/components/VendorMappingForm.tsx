@@ -249,13 +249,16 @@ const handleprojectNoExist = async () => {
       return;
     }
     try {
-    //     const check = await service.getItemByProjectCode(value);
-
+        const check = await service.getItemByProjectCode(value);
     // // 🔒 Safety check
-    // if (check && check.CurrentStatus === 'Approved') {
-    //   alert("This Project Code is Already Approved.");
-    //   return;
-    // }
+   if (check && check.value && check.value.length > 0 && check.value[0].CurrentStatus === 'Approved') {
+      alert("This Project Code is Already Approved.");
+        setForm(prev => ({
+            ...prev,
+           projectCode:''
+            }));
+      return;
+    }
        
       // 🔹 Service call to fetch request details
       const result = await service.getRequestDetails(value);
@@ -268,7 +271,7 @@ const handleprojectNoExist = async () => {
             Department: result[0].Department || ''
           }));
         } else {
-          alert("This request is Not Approved.✅");
+          alert("This Request is Not Approved.✅");
           setForm(prev => ({
             ...prev,
            projectCode:''
@@ -286,7 +289,8 @@ const handleprojectNoExist = async () => {
             Department: ''
           }));
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error Fetching Data:", error);
       alert("Error fetching request details");
     }
@@ -353,10 +357,7 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
     // 🔹 Validations
     try {
       setLoading(true);
-      if (!form.projectCode) return alert("Enter Project Code");
-      if (!form.vendorName) return alert("Please Select Vendor");
-
-
+      
       // 🔹 Payload (common)
       const payload = {
 

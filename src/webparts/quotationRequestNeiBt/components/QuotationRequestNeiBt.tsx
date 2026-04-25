@@ -337,14 +337,14 @@ const handleSaveHistory = async (id: number, Title: string, UserName: string, Us
   // 🔹 Validations
   try {
     setLoading(true);
-   if(!form.ProjectTitle) return alert("Enter Project Title ");
-    if(!form.Vendor1) return alert("Enter Vendor1 ");
-    if(!form.Quote1) return alert("Enter Quote1");
-    if(!form.Selectedvendor) return alert("Please Select Vendor");
-    if(!form.SelectedQuote) return alert("Please Selected Quote");
-    if(!form.Department) return alert("Please Select Department Name");
-    if(!form.Advancepayment) return alert("Please Select Advance Payemnt");
-     if (!form.files || form.files.length === 0) return alert("Please Attach files");
+  //  if(!form.ProjectTitle) return alert("Enter Project Title ");
+  //   if(!form.Vendor1) return alert("Enter Vendor1 ");
+  //   if(!form.Quote1) return alert("Enter Quote1");
+  //   if(!form.Selectedvendor) return alert("Please Select Vendor");
+  //   if(!form.SelectedQuote) return alert("Please Selected Quote");
+  //   if(!form.Department) return alert("Please Select Department Name");
+  //   if(!form.Advancepayment) return alert("Please Select Advance Payemnt");
+  //    if (!form.files || form.files.length === 0) return alert("Please Attach files");
 const User=await service.getUserById(Number(form.Approval1Id));
   if(User?.Id)
   {

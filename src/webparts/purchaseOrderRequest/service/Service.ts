@@ -136,7 +136,7 @@ public async getRequestVendorDetails (requestNo: string) :Promise<any> {
 // Get Total Occupied Amount
 public async getTotaloccupiedAmount (requestNo: string) :Promise<any> {
  
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=ProjectCode eq '${requestNo}'`;
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=ProjectCode eq '${requestNo}' and CurrentStatus eq 'Approved'`;
 
     console.log("URL:",url)  
   const response = await this.context.spHttpClient.get(
