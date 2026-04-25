@@ -308,11 +308,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
           ActionDate1: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
-        };
-        CurrentSequence = 1;
-        NextSequence=0;
-        CurrentUserAction='Rejected';
-        NextuserAction='';
+        };       
       }
        
       else if (form.ActionDate1 === '') {
@@ -324,11 +320,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
           ActionDate1: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
-        };
-        CurrentSequence = 1;
-        NextSequence=2;
-        CurrentUserAction='Rejected';
-        NextuserAction='Rejected';
+        };        
       }
         
       else if (form.ActionDate2 === '') {
@@ -339,11 +331,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
           ActionDate5: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
-        };
-        CurrentSequence = 2;
-        NextSequence=0;
-        CurrentUserAction='Rejected';
-        NextuserAction='';
+        };        
       }
         if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);
