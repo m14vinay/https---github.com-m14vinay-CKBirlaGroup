@@ -173,6 +173,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     const id = getIdFromQueryString();
     if (id) {
       handleFetchById(id);
+      loadPurchaseOrderDetails(id);
     }
   }, []);
 
