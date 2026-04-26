@@ -292,6 +292,7 @@ const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (props) => 
           CurrentUserAction = 'Approved';
           NextSequence = 2;
           NextuserAction = 'Pending';
+          await handleSaveApproveHistory(itemId, CurrentUserAction, NextuserAction, CurrentSequence, 3, form.ApprovalComment);
         }
         else if (form.ActionDate2 == '' && currentuserApprove.Title === form.AssignedTo) {
           payload = {
@@ -544,19 +545,15 @@ const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (props) => 
 
                 <label>Select Vendor</label>
                 <input name="Selectedvendor" value={form.Selectedvendor} readOnly style={{ backgroundColor: "lightgray" }} />
-
                 <label>Select Quote</label>
                 <input name="SelectedQuote" value={form.SelectedQuote} readOnly style={{ backgroundColor: "lightgray" }} >
                 </input>
-
                 <label>Department</label>
                 <input name="Department" value={form.Department} readOnly style={{ backgroundColor: "lightgray" }} >
                 </input>
-
                 <label>Advance Amount</label>
                 <input name="AdvancePayment" value={form.Advancepayment} readOnly style={{ backgroundColor: "lightgray" }}>
                 </input>
-
                 <label>Approval Path</label>
                 <input name="ApprovalPath" value={form.ApprovalPath} readOnly style={{ backgroundColor: "lightgray" }}>
                 </input>
@@ -576,7 +573,6 @@ const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (props) => 
                 </div>
                 <div className={styles.poSection}>
                   <h5>Purchase Order Details</h5>
-
                   <div className={styles.poTable}>
                     <div className={styles.poRowHeader}>
                       <div>Description</div>
@@ -584,7 +580,6 @@ const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (props) => 
                       <div>Rate</div>
                       <div>Amount</div>
                     </div>
-
                     {poItems.length > 0 ? (
                       poItems.map((item, index) => (
                         <div key={`${item.Description || 'po'}-${index}`} className={styles.poRow}>
@@ -613,9 +608,6 @@ const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (props) => 
                 </div>
               </div>
             </div>
-
-
-
             {/* RIGHT PANEL */}
             <div className={styles['col-md-3']}>
               <div className={styles.rightPanel}>

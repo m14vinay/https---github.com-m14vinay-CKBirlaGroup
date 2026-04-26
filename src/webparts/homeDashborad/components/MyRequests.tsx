@@ -114,8 +114,8 @@ export default function MyRequests() {
             cell: (info) => <span>{new Date(info.row.original.Created).toLocaleDateString()}</span>
         }),
         columnHelper.accessor('Created', {
-            header: 'Approved Date',
-            cell: (info) => <span>{info.row.original.CurrentStatus === "Approved"?new Date(info.row.original.Modified).toLocaleDateString():""}</span>
+            header: 'Completion Date',
+            cell: (info) => <span>{info.row.original.CurrentStatus === "Approved" ? new Date(info.row.original.Modified).toLocaleDateString() :info.row.original.CurrentStatus === "Rejected"?new Date(info.row.original.Modified).toLocaleDateString():""}</span>
         }),
         columnHelper.accessor('Created', {
             header: 'View',

@@ -160,15 +160,13 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
   const [loading, setLoading] = React.useState(false);
   const [actionType, setActionType] = React.useState<'approve' | 'reject' | ''>('');
   const [approverOptions, setApproverOptions] = React.useState<any[]>([]);
-
+  const [selectedApprover, setSelectedApprover] = React.useState<number | null>(null);
   //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
-
-  // Load data on mount ---
   React.useEffect(() => {
     const id = getIdFromQueryString();
     if (id) {
@@ -176,8 +174,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       loadPurchaseOrderDetails(id);
       loadAttachments(id);
     }
+    loadDepartments();
   }, []);
-
 
   const removeExistingFile = async (index: number) => {
     const file = attachments[index];
@@ -288,7 +286,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       return;
     }
   }
-
   // Remove one purchase order row while keeping at least one visible.
   const removePurchaseOrderRow = (index: number) => {
     setPoItems((prev) => {
@@ -323,19 +320,9 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       console.error(error);
     }
   };
-  React.useEffect(() => {
-    if (itemId) {
-      loadAttachments(itemId);
-      //getApprover();
-    }
-  }, [itemId]);
-  // Track the selected approver for amounts > 200,000
-  const [selectedApprover, setSelectedApprover] = React.useState<number | null>(null);
-  React.useEffect(() => {
-    const loadDepartments = async () => {
+const loadDepartments = async () => {
       try {
         const res = await service.getAllDepartments();
-
         setDepartmentOptions(
           (res || []).map((item: any) => ({
             key: item.DepartmentName,
@@ -345,15 +332,9 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       } catch (error) {
         console.error(error);
       }
-    };
-    loadDepartments();
-  }, []);
-
+};
   const handleDepartmentChange = async (departmentValue: string) => {
-
     const dept = departmentValue.trim();
-
-    // reset
     setApproverOptions([]);
     setSelectedApprover(null);
     if (!dept) return;
@@ -451,20 +432,15 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       console.error("Approver fetch error:", error);
     }
   };
-
   const handleApproverSelect = (id: number) => {
     console.log("Selected Approver ID:", id);
-
     setSelectedApprover(id);
-
     const selected = approverOptions.find(a => a.key === id);
-
     setForm(prev => ({
       ...prev,
       ApprovalPath: prev.DepartmentHead + ' > ' + (selected?.text || '')
     }));
   };
-
   const handleCancel = () => {
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);
@@ -554,9 +530,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
   const handleSaveOrUpdate = async () => {
     try {
       setLoading(true);
-
       const currentuser = await service.getUser();
-
       // 🔹 Validations
       if (!form.ProjectTitle) return alert("Enter Project Title ");
       if (!form.Vendor1) return alert("Enter Vendor1 ");
@@ -564,8 +538,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       if (!form.Selectedvendor) return alert("Please Select Vendor");
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
-      if (!form.Advancepayment) return alert("Please Select Advance Payment");         
-
+      if (!form.Advancepayment) return alert("Please Select Advance Payment"); 
       const dataApprover = await service.getDepartmentApprovers(form.Department);
       const approver = dataApprover[0];
       const user = await service.getUserById(approver?.Approval1?.Id);
@@ -591,18 +564,11 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           SelectedQuote: form.SelectedQuote?.toString() || "",
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
-          ApprovalPath: form.ApprovalPath || "",
-          AssignedTo: approver?.Approval1?.Title || "",
-          AssignedToEmailId: approver?.Approval1?.Id || null,
-          //Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-          Approval1Id: (dataApprover[0].Approval1?.Id || 0),
-          Approval2Id: (dataApprover[0].Approval2?.Id || 0),
-          Approval3Id: (dataApprover[0].Approval3?.Id || 0),
+          ApprovalPath: form.ApprovalPath || "",          
           CurrentStatus: "Draft"
         };
 
       else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
-
         if (!selectedApprover) {
           alert("Please select approver ❌");
           return;
@@ -620,18 +586,10 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Quote2: form.Quote2?.toString() || "",
           Quote3: form.Quote3?.toString() || "",
           SelectedQuote: form.SelectedQuote?.toString() || "",
-          Selectedvendor: form.Selectedvendor || "",
-          //SelectedQuote: Number(form.SelectedQuote) || 0,
+          Selectedvendor: form.Selectedvendor || "",          
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
-          ApprovalPath: form.ApprovalPath || "",
-          //AssignedTo: approver?.Approval1?.Title || "",
-          AssignedTo: approver?.Approval1?.Title || "",
-          AssignedToEmailId: approver?.Approval1?.Id || null,
-          //AssignedToEmailId: approver?.Approval1?.Id || null,
-          Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-          Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
-          //Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
+          ApprovalPath: form.ApprovalPath || "",       
           CurrentStatus: "Draft"
         };
       }
@@ -652,12 +610,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Selectedvendor: form.Selectedvendor || "",
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
-          ApprovalPath: form.ApprovalPath || "",
-          AssignedTo: approver?.Approval1?.Title || "",
-          AssignedToEmailId: approver?.Approval1?.Id || null,
-          Approval1Id: dataApprover[0].Approval1.Id || null,
-          Approval2Id: dataApprover[0].Approval2.Id || null,
-          Approval3Id: dataApprover[0].Approval3.Id || null,
+          ApprovalPath: form.ApprovalPath || "",         
           CurrentStatus: "Draft"
         };
       }
@@ -735,8 +688,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     
     try {
       setLoading(true);
-
-      // 🔹 Validations
       if (!form.ProjectTitle) return alert("Enter Project Title ");
       if (!form.Vendor1) return alert("Enter Vendor1 ");
       if (!form.Quote1) return alert("Enter Quote1");
@@ -749,11 +700,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       const currentuser = await service.getUser();
       const approver = dataApprover[0];
       const user = await service.getUserById(approver?.Approval1?.Id);
-
-
-      // 🔹 MAIN PAYLOAD (NO PODetails)
       let payload = {};
-
       if (Number(form.TotalProjectAmount) <= 200000)
         payload = {
           ProjectTitle: form.ProjectTitle || "",
@@ -768,21 +715,18 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Quote2: form.Quote2?.toString() || "",
           Quote3: form.Quote3?.toString() || "",
           SelectedQuote: form.SelectedQuote?.toString() || "",
-          Selectedvendor: form.Selectedvendor || "",
-          //SelectedQuote: Number(form.SelectedQuote) || 0,
+          Selectedvendor: form.Selectedvendor || "",          
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
           AssignedTo: approver?.Approval1?.Title,
-          AssignedToEmailId: approver?.Approval1?.Id || 0,
-          //AssignedTo: User.Title,
+          AssignedToEmailId: approver?.Approval1?.Id || 0,         
           Approval1Id: Number(dataApprover[0]?.Approval1?.Id || null),          
           CurrentStatus: "Pending"
         };
 
       else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
         {
-
           if (!selectedApprover) {
             alert("Please select approver ❌");
             return;
@@ -826,8 +770,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           Quote2: form.Quote2?.toString() || "",
           Quote3: form.Quote3?.toString() || "",
           SelectedQuote: form.SelectedQuote?.toString() || "",
-          Selectedvendor: form.Selectedvendor || "",
-          //SelectedQuote: Number(form.SelectedQuote) || 0,
+          Selectedvendor: form.Selectedvendor || "",          
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
@@ -1248,6 +1191,4 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     </section>
   );
 };
-
-
 export default QuotationApprovalForm;
