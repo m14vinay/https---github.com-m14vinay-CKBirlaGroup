@@ -977,11 +977,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
               <label>Applicable Taxes</label>
               <input name="ApplicableTaxes" value={form.ApplicableTaxes} type='number' onChange={handleChange} />
-
-              {/* 
-          <label>Vendor 1 <span className={styles.required}>*</span></label>
-          <input name="Vendor1" value={form.Vendor1} onChange={handleChange}  /> */}
-
               <div className={styles.twoColumnRow}>
                 <div className={styles.fieldBlock}>
                   <label>Vendor 1 <span className={styles.required}>*</span></label>
