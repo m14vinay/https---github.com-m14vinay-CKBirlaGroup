@@ -183,13 +183,13 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
                     statusClass = `${styles.statusBox}`;
                   }
                   else if (item.UserAction === "Rejected") {
-                    statusClass = `${styles.statusBox} ${styles.rejected}`;
+                    statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
                   }
                   else if (item.UserAction === "Upcoming") {
                     statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
                   }
                   else if (item.UserAction === "Pending") {
-                    statusClass = `${styles.statusBox} ${styles.pending}`;
+                    statusClass = `${styles.statusBox} ${styles.pendingBox}`;
                   }
                   return (
                     <div className={statusClass} key={index}>
