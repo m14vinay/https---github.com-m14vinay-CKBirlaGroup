@@ -1016,10 +1016,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
               <label>Selected Quote <span className={styles.required}>*</span></label>
               <input name="SelectedQuote" value={form.SelectedQuote} onChange={handlecheckamount} type='number' />
 
-
-              {/* Department and approval section */}
               <label>Department <span className={styles.required}>*</span></label>
-
               <select
                 value={form.Department}
                 onChange={(e) => {
@@ -1041,7 +1038,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
                   </option>
                 ))}
               </select>
-
               <ChoiceGroup
                 label="Advance Payment"
                 options={poOptions}
