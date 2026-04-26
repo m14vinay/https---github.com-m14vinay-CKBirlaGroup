@@ -28,6 +28,7 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
       SelectedQuote:'',
       Department:'',
       Advancepayment:'',
+       AdvancepaymentStatus:'',
       ApprovalPath: '',
       files: [] as File[],
       CurrentStatus:'',
@@ -119,7 +120,11 @@ const loadAttachments = async (id:number) => {
       } 
          if (result.CurrentStatus==='Draft') {
       setItemId(result.Id);
-
+const selected = poOptions.find(
+    opt =>
+      opt.text.trim().toLowerCase() ===
+      result.Advancepayment?.trim().toLowerCase()
+  );
        setForm(prev => ({
         ...prev,
         ProjectTitle: result.ProjectTitle || '',
@@ -140,7 +145,7 @@ const loadAttachments = async (id:number) => {
       ApprovalPath: result.ApprovalPath || '',
       CurrentStatus: result.CurrentStatus || '',
       RequestNo: result.RequestNo || '',
-     
+     AdvancepaymentStatus: selected?.key || "" 
       
       }));       
     } else {
@@ -245,8 +250,8 @@ const handlecheckamount = async (e: React.ChangeEvent<HTMLInputElement>) => {
 }, [form.Department, form.Advancepayment]);
 
  const poOptions: IChoiceGroupOption[] = [
-    { key: '1', text: 'Yes' },
-    { key: '2', text: 'No' }
+    { key: 'Yes', text: 'Yes' },
+    { key: 'No', text: 'No' }
   ];
 
   const loadApprovers = async () => {
@@ -332,6 +337,13 @@ const handleSaveHistory = async (id: number, Title: string, UserName: string, Us
   // 🔹 Validations
   try {
     setLoading(true);
+    if(!form.ProjectTitle) return alert("Enter Project Title ");
+    if(!form.Vendor1) return alert("Enter Vendor1 ");
+    if(!form.Quote1) return alert("Enter Quote1");
+    if(!form.Selectedvendor) return alert("Please Select Vendor");
+    if(!form.SelectedQuote) return alert("Please Selected Quote");
+    if(!form.Department) return alert("Please Select Department Name");
+    if(!form.AdvancepaymentStatus) return alert("Please Select Advance Payemnt");
 const User=await service.getUserById(Number(form.Approval1Id));
   if(User?.Id)
   {
@@ -411,7 +423,7 @@ const handleUpdate = async () => {
     if(!form.Selectedvendor) return alert("Please Select Vendor");
     if(!form.SelectedQuote) return alert("Please Selected Quote");
     if(!form.Department) return alert("Please Select Department Name");
-    if(!form.Advancepayment) return alert("Please Select Advance Payemnt");
+    if(!form.AdvancepaymentStatus) return alert("Please Select Advance Payemnt");
      if (!form.files || form.files.length === 0) return alert("Please Attach files");
       const currentuser = await service.getUser();
      const User=await service.getUserById(Number(form.ApprovalID.split('_')[0]));
@@ -617,11 +629,12 @@ setForm(prev => ({
           <ChoiceGroup
             label="Advance Payment"
             options={poOptions}
-            selectedKey={poOptions.find(opt => opt.text === form.Advancepayment)?.key} // selectedKey ko key set karo based on text match
+            selectedKey={form.AdvancepaymentStatus} // selectedKey ko key set karo based on text match
             onChange={(_, option) => {
               setForm(prev => ({
                 ...prev,
-                Advancepayment: option?.text || ""  // text store karo
+                Advancepayment: option?.text || "" , // text store karo
+                 AdvancepaymentStatus: option?.key || ""
               }));
             }}
           />

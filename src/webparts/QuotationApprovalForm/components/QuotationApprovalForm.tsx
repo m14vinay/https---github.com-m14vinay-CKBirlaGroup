@@ -62,7 +62,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
     DepartmentHead: string;
     RequestNo: string;
-
+AdvancepaymentStatus: string;
     description: string;
 
     quantity: number | '';
@@ -130,7 +130,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     quantity: '',
     rate: '',
     amount: '',
-
+AdvancepaymentStatus: '',
     Comments: ''
   });
 
@@ -201,6 +201,11 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       }
       if (result.CurrentStatus === 'Draft') {
         setItemId(result.Id);
+        const selected = poOptions.find(
+    opt =>
+      opt.text.trim().toLowerCase() ===
+      result.Advancepayment?.trim().toLowerCase()
+  );
         setForm(prev => ({
           ...prev,
           ProjectTitle: result.ProjectTitle || '',
@@ -228,6 +233,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           ApprovalPath: result.ApprovalPath || '',
           CurrentStatus: result.CurrentStatus || '',
           RequestNo: result.RequestNo || '',
+           AdvancepaymentStatus: selected?.key || "" 
         }));
         if (result.Department) {
           // handleDepartmentChange(result.Department);
@@ -538,7 +544,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       if (!form.Selectedvendor) return alert("Please Select Vendor");
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
-      if (!form.Advancepayment) return alert("Please Select Advance Payment");
+      if (!form.AdvancepaymentStatus) return alert("Please Select Advance Payment");
       if (!form.ApprovalPath) return alert("Please select Approval.");
       let payload = {};
       if (Number(form.TotalProjectAmount) <= 200000)
@@ -678,7 +684,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       if (!form.Selectedvendor) return alert("Please Select Vendor");
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
-      if (!form.Advancepayment) return alert("Please Select Advance Payment");
+      if (!form.AdvancepaymentStatus) return alert("Please Select Advance Payment");
       if (!form.ApprovalPath) return alert("Please select Approval.");
       if ((!form.files || form.files.length === 0) && (!attachments || attachments.length === 0)) return alert("Attach files");
       const dataApprover = await service.getDepartmentApprovers(form.Department);
