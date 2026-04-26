@@ -352,7 +352,7 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
                             : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : ""
                       }
                     >
-                      <span className={styles.poHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
+                      <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
                       <span><b>{isInitiated ? "Initiator" : "Approver Name:"} </b>{item.UserName}</span>
                       {item.UserAction && (
                         <span>

@@ -668,6 +668,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       setLoading(false);
     }
   };
+
   const handleUpdate = async () => {
     try {
       setLoading(true);
@@ -710,6 +711,11 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
       else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
         {
+          const Users = form.ApprovalPath.split(">");
+          const User1 = Users[0].trim();
+          const User2 = Users[1].trim();
+          const UserAprrover1=service.getUserIdByName(User1.trim());
+          const UserAprrover2=service.getUserIdByName(User2.trim());
           payload = {
             ProjectTitle: form.ProjectTitle || "",
             ProjectReffNo: form.ProjectReffNo || "",
@@ -729,8 +735,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             ApprovalPath: form.ApprovalPath || "",
             AssignedTo: approver?.Approval1?.Title || "",
             AssignedToEmailId: approver?.Approval1?.Id || null,
-            Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-            Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
+            Approval1Id: Number(UserAprrover1),
+            Approval2Id: Number(UserAprrover2),
             CurrentStatus: "Pending"
           };
         }
@@ -784,10 +790,10 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
           }
-        }      
+        }
         await service.updateItem(res.Id, {
           RequestNo: `PRJ-${res.Id}`
-        });       
+        });
         if (Number(form.TotalProjectAmount) <= 200000) {
           await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
           await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
@@ -806,7 +812,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
         alert("Request Submitted Successfully");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
-      } else {        
+      } else {
         await service.updateItem(itemId, payload);
         await service.deletePurchaseOrderDetailsByQuotationId(itemId);
         for (let i = 0; i < poItems.length; i++) {
