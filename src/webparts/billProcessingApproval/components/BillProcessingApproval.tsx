@@ -680,6 +680,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                   const isInitiated = item.UserAction === "Request Initiator";
                   const isUpcoming = item.UserAction === "Upcoming";
                   const isPending = item.UserAction === "Pending";
+                  const isHold = item.UserAction === "Hold";
                   return (
                     <li
                       key={index}
@@ -688,7 +689,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                           ? styles.tickIcon
                           : isRejected
                             ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : ""
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : isHold ? styles.upcomingIcon : ""
                       }
                     >
                       <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
@@ -702,7 +703,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : ""
+                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : isHold ? styles.upcomingstatus : ""
                             }
                           >
                             {item.UserAction}

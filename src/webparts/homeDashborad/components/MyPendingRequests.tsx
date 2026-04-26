@@ -122,10 +122,10 @@ export default function MyPendingRequests() {
         console.log("context user : ", context);
         let resturl = {};
         if (listName === "QuotationApproval") {
-            resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=(AssignedTo eq '" + user.Title + "' or AssignedTo2 eq '" + user.Title + "') and CurrentStatus eq 'Pending'";
+            resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=(AssignedTo eq '" + user.Title + "' or AssignedTo2 eq '" + user.Title + "') and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')";
         }
         else {
-            resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AssignedTo eq '" + user.Title + "' and CurrentStatus eq 'Pending'";
+            resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AssignedTo eq '" + user.Title + "' and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')";
         }
         context.spHttpClient.get(
             `${resturl}`,

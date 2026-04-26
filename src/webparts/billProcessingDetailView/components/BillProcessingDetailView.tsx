@@ -228,7 +228,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                   else if (item.UserAction === "Rejected") {
                     statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
                   }
-                  else if (item.UserAction === "Upcoming") {
+                  else if (item.UserAction === "Upcoming" || item.UserAction === "Hold") {
                     statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
                   }
                   else if (item.UserAction === "Pending") {
@@ -318,6 +318,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                   const isInitiated = item.UserAction === "Request Initiator";
                   const isUpcoming = item.UserAction === "Upcoming";
                   const isPending = item.UserAction === "Pending";
+                  const isHold = item.UserAction === "Hold";
                   return (
                     <li
                       key={index}
@@ -326,7 +327,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                           ? styles.tickIcon
                           : isRejected
                             ? styles.crossIcon
-                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : ""
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : isHold ? styles.upcomingIcon : ""
                       }
                     >
                       <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
@@ -340,7 +341,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                                 ? styles.apprStatus
                                 : isRejected
                                   ? styles.rejStatus
-                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : ""
+                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : isHold ? styles.upcomingstatus : ""
                             }
                           >
                             {item.UserAction}

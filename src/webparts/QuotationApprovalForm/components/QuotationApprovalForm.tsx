@@ -229,15 +229,14 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           CurrentStatus: result.CurrentStatus || '',
           RequestNo: result.RequestNo || '',
         }));
-
         if (result.Department) {
-          handleDepartmentChange(result.Department);
+         // handleDepartmentChange(result.Department);
         }
       } else {
         alert("No Data Found");
       }
     } catch (error) {
-      console.error("Error Occurred,Please Contact To System Administrator.:", error);
+      console.error(error);
     }
     finally {
       setLoading(false);
@@ -682,9 +681,7 @@ const loadDepartments = async () => {
     }
   };
 
-  //*****************Submit****************
-  const handleUpdate = async () => {
-    
+  const handleUpdate = async () => {    
     try {
       setLoading(true);
       if (!form.ProjectTitle) return alert("Enter Project Title ");
@@ -697,8 +694,7 @@ const loadDepartments = async () => {
       if ((!form.files || form.files.length === 0) && (!attachments || attachments.length === 0)) return alert("Attach files");
       const dataApprover = await service.getDepartmentApprovers(form.Department);
       const currentuser = await service.getUser();
-      const approver = dataApprover[0];
-      const user = await service.getUserById(approver?.Approval1?.Id);
+      const approver = dataApprover[0];      
       let payload = {};
       if (Number(form.TotalProjectAmount) <= 200000)
         payload = {
@@ -994,8 +990,6 @@ const loadDepartments = async () => {
 
               <label>Approval Path<span className={styles.required}>*</span></label>
               <input value={form.ApprovalPath || ""} readOnly style={{ backgroundColor: "lightgray" }} />
-
-
               {Number(form.TotalProjectAmount || 0) > 200000 && approverOptions.length > 0 && (
                 <>
                   <label>Select Approver <span className={styles.required}>*</span></label>
@@ -1003,8 +997,7 @@ const loadDepartments = async () => {
                     value={selectedApprover ?? ''}
                     onChange={(e) => handleApproverSelect(Number(e.target.value))}
                   >
-                    <option value="">Select Approver</option>   {/* * ADD THIS */}
-
+                    <option value="">Select Approver</option>
                     {approverOptions.map((opt, i) => (
                       <option key={i} value={opt.key}>
                         {opt.text}
