@@ -784,14 +784,10 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
           }
-        }
-        alert("Request Submitted Successfully");
+        }      
         await service.updateItem(res.Id, {
           RequestNo: `PRJ-${res.Id}`
-        });
-        setTimeout(() => {
-          window.location.href = "https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/Dashboard.aspx";
-        }, 800);
+        });       
         if (Number(form.TotalProjectAmount) <= 200000) {
           await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
           await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
@@ -807,6 +803,9 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval2?.Title, 'Upcoming', 'Management1', new Date(), 2);
           await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval3?.Title, 'Upcoming', 'Management2', new Date(), 3);
         }
+        alert("Request Submitted Successfully");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       } else {        
         await service.updateItem(itemId, payload);
         await service.deletePurchaseOrderDetailsByQuotationId(itemId);
