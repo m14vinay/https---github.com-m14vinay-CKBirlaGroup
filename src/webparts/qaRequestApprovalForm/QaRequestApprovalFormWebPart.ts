@@ -9,9 +9,9 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
 import * as strings from 'QaRequestApprovalFormWebPartStrings';
-import {QaRequestApprovalForm} from './components/QaRequestApprovalForm';
 import'./components/QaRequestApprovalForm.module.scss';
 import { IQaRequestApprovalFormProps } from './components/IQaRequestApprovalFormProps';
+import QaRequestApprovalForm from './components/QaRequestApprovalForm';
 
 export interface IQaRequestApprovalFormWebPartProps {
   description: string;

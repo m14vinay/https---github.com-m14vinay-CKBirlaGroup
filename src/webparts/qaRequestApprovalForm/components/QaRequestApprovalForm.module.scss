@@ -1,5 +1,9 @@
+/* ================= IMPORTS ================= */
+
 @import '~@fluentui/react/dist/sass/References.scss';
 @import "~bootstrap/scss/bootstrap";
+
+/* ================= LAYOUT ================= */
 
 .container {
   padding: 15px;
@@ -10,26 +14,24 @@
   gap: 20px;
   align-items: flex-start;
 }
-textarea:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-}
 
-.leftPanel,
-.rightTimeline {
+.leftPanel {
+  flex: 2;
   background: #fff;
   padding: 15px;
   border-radius: 6px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.leftPanel {
-  flex: 2;
-}
-
 .rightTimeline {
   flex: 1;
+  background: #fff;
+  padding: 15px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
+
+/* ================= HEADINGS ================= */
 
 .heading {
   font-size: 18px;
@@ -44,6 +46,8 @@ textarea:disabled {
   border-bottom: 1px solid #ddd;
   padding-bottom: 6px;
 }
+
+/* ================= FORM ================= */
 
 .formRow {
   margin-bottom: 12px;
@@ -79,14 +83,14 @@ textarea {
 .twoCol span {
   font-size: 12px;
   color: #555;
-  white-space: nowrap;
 }
+
+/* ================= BUTTONS ================= */
 
 .buttonContainer {
   margin-top: 15px;
   display: flex;
   gap: 10px;
-  flex-wrap: wrap;
 }
 .header {
   margin-bottom: 15px;
@@ -118,10 +122,24 @@ button:hover {
   color: #fff;
 }
 
+.backBtn {
+  background: #6c757d;
+  color: #fff;
+}
+
+/* ================= REQUIRED / ERROR ================= */
+
 .required {
   color: red;
   margin-left: 2px;
 }
+
+.error {
+  color: red;
+  font-size: 12px;
+}
+
+/* ================= PO TABLE ================= */
 
 .poSection {
   margin-top: 15px;
@@ -140,40 +158,19 @@ button:hover {
 }
 
 .poRowHeader {
-  font-weight: 700;
+  font-weight: bold;
   border-bottom: 1px solid #ddd;
   padding-bottom: 5px;
 }
 
-.emptyState {
-  color: #666;
-  font-size: 13px;
-  padding: 8px 0;
-}
-
-.statusMessage {
-  margin-top: 12px;
-  font-size: 13px;
-  color: #333;
-}
-
-// .timelineMarker.pending {
-//   background-color: #e38111;
-// }
-
-// .timelineMarker.approved {
-//   background-color: #28a745;
-// }
-
-// .timelineMarker.rejected {
-//   background-color: #dc3545;
-// }
+/* ================= TIMELINE ================= */
 
 .timelineBody {
   position: relative;
   padding-left: 45px;
 }
 
+/* Vertical dotted line */
 .timelineBody::before {
   content: "";
   position: absolute;
@@ -183,11 +180,13 @@ button:hover {
   border-left: 2px dotted #28a745;
 }
 
+/* Timeline item */
 .timelineItem {
   position: relative;
   margin-bottom: 25px;
 }
 
+/* Marker circle */
 .timelineMarker {
   position: absolute;
   left: -30px;
@@ -200,96 +199,84 @@ button:hover {
   justify-content: center;
 }
 
+/* ✅ Approved (GREEN PERFECT CENTER ICON) */
 .timelineItem.approved .timelineMarker {
   background-color: #28a745;
 }
 
 .timelineItem.approved .timelineMarker::after {
-  content: "\2714";
+  content: "✔";
   color: #fff;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: bold;
   line-height: 1;
 }
 
+/* ❌ Rejected */
 .timelineItem.rejected .timelineMarker {
   background-color: #dc3545;
 }
 
 .timelineItem.rejected .timelineMarker::after {
-  content: "\2716";
+  content: "✖";
   color: #fff;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: bold;
   line-height: 1;
 }
 
+/* ⏳ Pending */
 .timelineItem.pending .timelineMarker {
   background-color:  #ff9800;
 }
 
 .timelineItem.pending .timelineMarker::after {
-  content: "\2714";
+ content: "✔";
   color: #fff;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: bold;
   line-height: 1;
 }
 
+
+/* Content */
 .timelineContent {
   padding-left: 5px;
 }
 
+/* Step title */
 .timelineStepTitle {
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 4px;
 }
 
+/* Text */
 .timelineText {
   font-size: 12px;
   color: #444;
   margin-bottom: 3px;
 }
-
 .timelineText b {
   color: #333;
   font-weight: 600;
 }
 
+/* ================= STATUS TEXT ================= */
+
 .statusTextApproved {
   color: #00a651;
-  font-weight: 700;
-}
-
-.approvalBar {
-  position: relative;
-  height: 50px;
-  display: flex;
-  align-items: center;
-}
-
-.approvalBar::after {
-  content: "";
-  position: absolute;
-  right: -20px;
-  top: 0;
-  border-top: 25px solid transparent;
-  border-bottom: 25px solid transparent;
-  border-left: 20px solid #198754; // green
-}
-.approvalBar {
-  overflow: hidden;   // optional
+  font-weight: bold;
 }
 
 .statusTextRejected {
   color: #e53935;
-  font-weight: 700;
+  font-weight: bold;
 }
 
 .statusTextPending {
   color: #ff9800;
-  font-weight: 700;
+  font-weight: bold;
 }
 
 

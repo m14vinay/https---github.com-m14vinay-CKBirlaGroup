@@ -354,9 +354,7 @@ if (form.ActionDate1 == '') {
     }
     if (NextUserAction != '') {
       const payload = {
-        UserAction: NextUserAction,
-        ActionDate: new Date().toISOString(),
-        UserComment: comment
+        UserAction: NextUserAction        
       };
       await service.UpdateHistoryItem(id, payload, 'QANEIBT', NextSequence);
     }
@@ -385,10 +383,8 @@ if (form.ActionDate1 == '') {
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
         };
-        CurrentSequence = 1;
-        NextSequence=0;
         CurrentUserAction='Rejected';
-        NextuserAction='';
+        CurrentSequence=1;
       }
        else
 if (form.ActionDate1 == '') {
@@ -400,10 +396,8 @@ if (form.ActionDate1 == '') {
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
         };
-        CurrentSequence = 1;
-        NextSequence = 2;
-         CurrentUserAction='Rejected';
-        NextuserAction='Rejected';
+      CurrentUserAction='Rejected';
+        CurrentSequence=1;
       }
       
       // 🔥 CASE 3: Second Approver
@@ -418,10 +412,8 @@ if (form.ActionDate1 == '') {
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
         };
-        CurrentSequence = 2;
-        CurrentUserAction = 'Rejected';
-        NextSequence = 0;
-        NextuserAction = '';
+       CurrentUserAction='Rejected';
+        CurrentSequence=2;
       }
          else {
           const UserApproval3 = await service.getUserById(form.Approver3EmailId);
@@ -432,10 +424,8 @@ if (form.ActionDate1 == '') {
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
         };
-        CurrentSequence = 2;
-        CurrentUserAction = 'Rejected';
-        NextSequence = 3;
-        NextuserAction = 'Rejected';
+        CurrentUserAction='Rejected';
+        CurrentSequence=2;
       }
     }
       else if (form.ActionDate3 == '') {
@@ -447,10 +437,8 @@ if (form.ActionDate1 == '') {
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
         };
-        CurrentSequence = 3;
-        CurrentUserAction = 'Rejected';
-        NextSequence = 0;
-        NextuserAction = '';
+        CurrentUserAction='Rejected';
+        CurrentSequence=3;
       }
       if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);

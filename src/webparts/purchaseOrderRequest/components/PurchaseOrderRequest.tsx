@@ -447,18 +447,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const handleSaveOrUpdate = async () => {
      try {
     setLoading(true);
-    // 🔹 Validations
-    // if (!form.projectCode) return alert("Enter Project Code");
-    // if (!form.POAmount) return alert("Enter POAmount");
-    // if (!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
-    // if (!form.POAmount) return alert("Please Choose POCategory");
-    // if (
-    //   (!form.files || form.files.length === 0) &&
-    //   (!attachments || attachments.length === 0)
-    // ) {
-    //   return alert("Please Attach files");
-    // }
-
+    
     // 🔹 Payload (common)
     const payload = {
       ProjectCode: form.projectCode,
@@ -486,13 +475,14 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
             await service.uploadFile(res.Id, form.files[i]);
 
           }
-        }
-        alert("Request Saved Successfully.");
+        }        
         const counterResult = await CounterfyPOCategory();
         await service.updateItem(res.Id, {
-          RequestNo: counterResult.requestNo
-          //RequestNo : `CKBCSL/${getFinancialYear()}/${getShortName(form.PoMaster)}/${form.Department}/${res.Id}`
+          RequestNo: counterResult.requestNo        
         });
+        alert("Request Saved Successfully.");
+          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       } else {
         // 🔹 UPDATE
         await service.updateItem(itemId, payload);
@@ -503,6 +493,8 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
           }
         }
         alert("Request Updated Successfully ");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       }
     
     } catch (error) {

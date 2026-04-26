@@ -281,9 +281,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
     }
     if (NextUserAction != '') {
       const payload = {
-        UserAction: NextUserAction,
-        ActionDate: new Date().toISOString(),
-        UserComment: comment
+        UserAction: NextUserAction       
       };
       await service.UpdateHistoryItem(id, payload, 'PO', NextSequence);
     }
@@ -309,6 +307,8 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
         };       
+        CurrentUserAction='Rejected';
+        CurrentSequence=1;
       }
        
       else if (form.ActionDate1 === '') {
@@ -320,7 +320,9 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
           ActionDate1: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
-        };        
+        };   
+        CurrentUserAction='Rejected';
+        CurrentSequence=1;     
       }
         
       else if (form.ActionDate2 === '') {
@@ -328,10 +330,12 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
          payload = {
           ApproverComment2: form.ApprovalComment,
           CurrentStatus: 'Rejected',
-          ActionDate5: new Date().toLocaleDateString('en-GB'),
+          ActionDate2: new Date().toLocaleDateString('en-GB'),
           AssignedTo: 'Rejected',
           AssignedToEmailId: 0
         };        
+        CurrentUserAction='Rejected';
+        CurrentSequence=2;
       }
         if (payload != '') {
         const updatedData = await service.updateItem(itemId, payload);

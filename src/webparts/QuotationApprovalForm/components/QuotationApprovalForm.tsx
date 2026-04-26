@@ -10,129 +10,129 @@ import { IQuotationRequestNeiBtProps } from '../../quotationRequestNeiBt/compone
 const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
   // State
-type IForm = {
-  ID: number;
-  ProjectTitle: string;
-  ProjectReffNo: string;
-  ProjectDescription: string;
+  type IForm = {
+    ID: number;
+    ProjectTitle: string;
+    ProjectReffNo: string;
+    ProjectDescription: string;
 
-  TotalProjectAmount: number | '';
-  ApplicableTaxes: number | '';
+    TotalProjectAmount: number | '';
+    ApplicableTaxes: number | '';
 
-  Vendor1: string;
-  Vendor2: string;
-  Vendor3: string;
+    Vendor1: string;
+    Vendor2: string;
+    Vendor3: string;
 
-  Quote1: number | '';
-  Quote2: number | '';
-  Quote3: number | '';
+    Quote1: number | '';
+    Quote2: number | '';
+    Quote3: number | '';
 
-  Selectedvendor: string;
-  SelectedQuote: number | '';
+    Selectedvendor: string;
+    SelectedQuote: number | '';
 
-  Department: string;
-  Advancepayment: string;
-  ApprovalPath: string;
+    Department: string;
+    Advancepayment: string;
+    ApprovalPath: string;
 
-  files: File[];
+    files: File[];
 
-  CurrentStatus: string;
-  ApprovalID: string;
+    CurrentStatus: string;
+    ApprovalID: string;
 
-  approver1: string;
-  approver2: string;
-  approver3: string;
-  approver4: string;
-  approver5: string;
+    approver1: string;
+    approver2: string;
+    approver3: string;
+    approver4: string;
+    approver5: string;
 
-  Approval1Id: number | null;
-  Approval2Id: number | null;
-  Approval3Id: number | null;
+    Approval1Id: number | null;
+    Approval2Id: number | null;
+    Approval3Id: number | null;
 
-  Approval1: string;
-  ApprovalPathID: string;
-  Approval2: string;
-  Approval3: string;
+    Approval1: string;
+    ApprovalPathID: string;
+    Approval2: string;
+    Approval3: string;
 
-  AssignedTo: string | number;
+    AssignedTo: string | number;
 
-  ActionDate1: string;
-  ActionDate2: string;
-  ActionDate3: string;
+    ActionDate1: string;
+    ActionDate2: string;
+    ActionDate3: string;
 
-  DepartmentHead: string;
-  RequestNo: string;
+    DepartmentHead: string;
+    RequestNo: string;
 
-  description: string;
-AdvancepaymentStatus: string;
-  quantity: number | '';
-  rate: number | '';
-  amount: number | '';
+    description: string;
 
-  Comments: string;
-};
+    quantity: number | '';
+    rate: number | '';
+    amount: number | '';
 
-const [form, setForm] = React.useState<IForm>({
-  ID: 0,
-  ProjectTitle: '',
-  ProjectReffNo: '',
-  ProjectDescription: '',
+    Comments: string;
+  };
 
-  TotalProjectAmount: '',
-  ApplicableTaxes: '',
+  const [form, setForm] = React.useState<IForm>({
+    ID: 0,
+    ProjectTitle: '',
+    ProjectReffNo: '',
+    ProjectDescription: '',
 
-  Vendor1: '',
-  Vendor2: '',
-  Vendor3: '',
+    TotalProjectAmount: '',
+    ApplicableTaxes: '',
 
-  Quote1: '',
-  Quote2: '',
-  Quote3: '',
+    Vendor1: '',
+    Vendor2: '',
+    Vendor3: '',
 
-  Selectedvendor: '',
-  SelectedQuote: '',
+    Quote1: '',
+    Quote2: '',
+    Quote3: '',
 
-  Department: '',
-  Advancepayment: '',
-  ApprovalPath: '',
+    Selectedvendor: '',
+    SelectedQuote: '',
 
-  files: [],
+    Department: '',
+    Advancepayment: '',
+    ApprovalPath: '',
 
-  CurrentStatus: '',
-  ApprovalID: '',
+    files: [],
 
-  approver1: '',
-  approver2: '',
-  approver3: '',
-  approver4: '',
-  approver5: '',
+    CurrentStatus: '',
+    ApprovalID: '',
 
-  Approval1Id: null,
-  Approval2Id: null,
-  Approval3Id: null,
+    approver1: '',
+    approver2: '',
+    approver3: '',
+    approver4: '',
+    approver5: '',
 
-  Approval1: '',
-  ApprovalPathID: '',
-  Approval2: '',
-  Approval3: '',
+    Approval1Id: null,
+    Approval2Id: null,
+    Approval3Id: null,
 
-  AssignedTo: '',
+    Approval1: '',
+    ApprovalPathID: '',
+    Approval2: '',
+    Approval3: '',
 
-  ActionDate1: '',
-  ActionDate2: '',
-  ActionDate3: '',
+    AssignedTo: '',
 
-  DepartmentHead: '',
-  RequestNo: '',
+    ActionDate1: '',
+    ActionDate2: '',
+    ActionDate3: '',
 
-  description: '',
-AdvancepaymentStatus:'',
-  quantity: '',
-  rate: '',
-  amount: '',
+    DepartmentHead: '',
+    RequestNo: '',
 
-  Comments: ''
-});
+    description: '',
+
+    quantity: '',
+    rate: '',
+    amount: '',
+
+    Comments: ''
+  });
 
   type TPurchaseOrderRow = {
     description: string;
@@ -160,22 +160,22 @@ AdvancepaymentStatus:'',
   const [loading, setLoading] = React.useState(false);
   const [actionType, setActionType] = React.useState<'approve' | 'reject' | ''>('');
   const [approverOptions, setApproverOptions] = React.useState<any[]>([]);
-
+  const [selectedApprover, setSelectedApprover] = React.useState<number | null>(null);
   //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('RequestId');
     return id ? parseInt(id, 10) : null;
   };
-
-  // Load data on mount ---
   React.useEffect(() => {
     const id = getIdFromQueryString();
     if (id) {
       handleFetchById(id);
+      loadPurchaseOrderDetails(id);
+      loadAttachments(id);
     }
+    loadDepartments();
   }, []);
-
 
   const removeExistingFile = async (index: number) => {
     const file = attachments[index];
@@ -196,17 +196,11 @@ AdvancepaymentStatus:'',
       const result = await service.getItemByRequestNo(id);
       const currentUser = await service.getUser();
       console.log("Result:", result);
-       if(result.AuthorId!== currentUser.Id)
-      {
-         alert("You Are Not Authorized ❌ ");
-      } 
-         if (result.CurrentStatus==='Draft') {
-      setItemId(result.Id);
-       const selected = poOptions.find(
-    opt =>
-      opt.text.trim().toLowerCase() ===
-      result.Advancepayment?.trim().toLowerCase()
-  );
+      if (result.AuthorId !== currentUser.Id) {
+        alert("You Are Not Authorized ❌ ");
+      }
+      if (result.CurrentStatus === 'Draft') {
+        setItemId(result.Id);
         setForm(prev => ({
           ...prev,
           ProjectTitle: result.ProjectTitle || '',
@@ -234,19 +228,15 @@ AdvancepaymentStatus:'',
           ApprovalPath: result.ApprovalPath || '',
           CurrentStatus: result.CurrentStatus || '',
           RequestNo: result.RequestNo || '',
-          AdvancepaymentStatus: selected?.key || "" 
-
-
         }));
-
-        if(result.Department){
-          handleDepartmentChange(result.Department);
+        if (result.Department) {
+          // handleDepartmentChange(result.Department);
         }
       } else {
         alert("No Data Found");
       }
     } catch (error) {
-      console.error("Error Occurred,Please Contact To System Administrator.:", error);
+      console.error(error);
     }
     finally {
       setLoading(false);
@@ -277,25 +267,24 @@ AdvancepaymentStatus:'',
   };
 
   const handlecheckamount = async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setForm({
-        ...form,
-        [name]: value
-      });
-      const selectedQuote = Number(value || 0);
-const totalAmount = Number(form.TotalProjectAmount || 0);
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: value
+    });
+    const selectedQuote = Number(value || 0);
+    const totalAmount = Number(form.TotalProjectAmount || 0);
 
-if (selectedQuote > totalAmount) {
-  setForm(prev => ({
-    ...prev,
-    SelectedQuote: 0
-  }));
+    if (selectedQuote > totalAmount) {
+      setForm(prev => ({
+        ...prev,
+        SelectedQuote: 0
+      }));
 
-  alert("Selected Quote cannot be greater than Total Project Amount.");
-  return;
-}
+      alert("Selected Quote cannot be greater than Total Project Amount.");
+      return;
+    }
   }
-      
   // Remove one purchase order row while keeping at least one visible.
   const removePurchaseOrderRow = (index: number) => {
     setPoItems((prev) => {
@@ -330,39 +319,28 @@ if (selectedQuote > totalAmount) {
       console.error(error);
     }
   };
-  React.useEffect(() => {
-    if (itemId) {
-      loadAttachments(itemId);
-      //getApprover();
+  const loadDepartments = async () => {
+    try {
+      const res = await service.getAllDepartments();
+      setDepartmentOptions(
+        (res || []).map((item: any) => ({
+          key: item.DepartmentName,
+          text: item.DepartmentName
+        }))
+      );
+    } catch (error) {
+      console.error(error);
     }
-  }, [itemId]);
-  // Track the selected approver for amounts > 200,000
-  const [selectedApprover, setSelectedApprover] = React.useState<number | null>(null);
-  React.useEffect(() => {
-    const loadDepartments = async () => {
-      try {
-        const res = await service.getAllDepartments();
-
-        setDepartmentOptions(
-          (res || []).map((item: any) => ({
-            key: item.DepartmentName,
-            text: item.DepartmentName
-          }))
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    loadDepartments();
-  }, []);
-
+  };
   const handleDepartmentChange = async (departmentValue: string) => {
-
     const dept = departmentValue.trim();
-
-    // reset
     setApproverOptions([]);
     setSelectedApprover(null);
+    setForm(prev => ({
+      ...prev,
+      Department: dept,
+      ApprovalPath: ''
+    }));
     if (!dept) return;
     try {
       const data = await service.getDepartmentApprovers(dept);
@@ -386,7 +364,6 @@ if (selectedQuote > totalAmount) {
           Department: dept,
           DepartmentHead: approvers[0]?.name || '',
           ApprovalPath: approvers.map(a => a.name).join(" > "),
-          //Approval1Id: approvers[0]?.id?.toString() || null
           Approval1Id: approvers[0]?.id || 0
         }));
         setSelectedApprover(approvers[0]?.id || null);
@@ -451,27 +428,22 @@ if (selectedQuote > totalAmount) {
         }, 0);
 
         // optional
-        setSelectedApprover( approvers[0]?.name|| null );
-       
+        setSelectedApprover(approvers[0]?.name || null);
+
       }
     } catch (error) {
       console.error("Approver fetch error:", error);
     }
   };
-
   const handleApproverSelect = (id: number) => {
     console.log("Selected Approver ID:", id);
-
     setSelectedApprover(id);
-
     const selected = approverOptions.find(a => a.key === id);
-
     setForm(prev => ({
       ...prev,
       ApprovalPath: prev.DepartmentHead + ' > ' + (selected?.text || '')
     }));
   };
-
   const handleCancel = () => {
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);
@@ -521,14 +493,14 @@ if (selectedQuote > totalAmount) {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-     const { name, value } = e.target;
-   
- setForm({
-  ...form,
-  [name]:value
-  
-  });
-    };
+    const { name, value } = e.target;
+
+    setForm({
+      ...form,
+      [name]: value
+
+    });
+  };
 
   const handleSaveHistory = async (id: number, Title: string, UserName: string, UserAction: string, Designation: string, ActionDate: Date, Sequence: number) => {
     let payload: {};
@@ -557,35 +529,18 @@ if (selectedQuote > totalAmount) {
     await service.createHistoryItem(payload);
   };
 
-  //***************Save***************
   const handleSaveOrUpdate = async () => {
     try {
       setLoading(true);
-
-      const currentuser = await service.getUser();
-
-      // 🔹 Validations
       if (!form.ProjectTitle) return alert("Enter Project Title ");
       if (!form.Vendor1) return alert("Enter Vendor1 ");
       if (!form.Quote1) return alert("Enter Quote1");
       if (!form.Selectedvendor) return alert("Please Select Vendor");
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
-      if (!form.AdvancepaymentStatus) return alert("Please Select Advance Payment");
-      if (!form.files || form.files.length === 0) return alert("Attach files");
-
-      const dataApprover = await service.getDepartmentApprovers(form.Department);
-
-      const approver = dataApprover[0];
-      const user = await service.getUserById(approver?.Approval1?.Id);
-      if (!approver?.Approval1?.Id) {
-        alert("Approval1 not configured ❌");
-        return;
-      }
-
-      // 🔹 MAIN PAYLOAD (NO PODetails)
+      if (!form.Advancepayment) return alert("Please Select Advance Payment");
+      if (!form.ApprovalPath) return alert("Please select Approval.");
       let payload = {};
-
       if (Number(form.TotalProjectAmount) <= 200000)
         payload = {
           ProjectTitle: form.ProjectTitle || "",
@@ -604,21 +559,10 @@ if (selectedQuote > totalAmount) {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedTo: approver?.Approval1?.Title || "",
-          AssignedToEmailId: approver?.Approval1?.Id || null,
-          //Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-          Approval1Id: (dataApprover[0].Approval1?.Id || 0),
-          Approval2Id: (dataApprover[0].Approval2?.Id || 0),
-          Approval3Id: (dataApprover[0].Approval3?.Id || 0),
           CurrentStatus: "Draft"
         };
 
       else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
-        
-        if (!selectedApprover) {
-  alert("Please select approver ❌");
-  return;
-}
         payload = {
           ProjectTitle: form.ProjectTitle || "",
           ProjectReffNo: form.ProjectReffNo || "",
@@ -633,17 +577,9 @@ if (selectedQuote > totalAmount) {
           Quote3: form.Quote3?.toString() || "",
           SelectedQuote: form.SelectedQuote?.toString() || "",
           Selectedvendor: form.Selectedvendor || "",
-          //SelectedQuote: Number(form.SelectedQuote) || 0,
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          //AssignedTo: approver?.Approval1?.Title || "",
-          AssignedTo: approver?.Approval1?.Title || "",
-          AssignedToEmailId: approver?.Approval1?.Id || null,
-          //AssignedToEmailId: approver?.Approval1?.Id || null,
-          Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-          Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
-          //Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
           CurrentStatus: "Draft"
         };
       }
@@ -665,26 +601,19 @@ if (selectedQuote > totalAmount) {
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
-          AssignedTo: approver?.Approval1?.Title || "",
-          AssignedToEmailId: approver?.Approval1?.Id || null,
-          Approval1Id: dataApprover[0].Approval1.Id || null,
-          Approval2Id: dataApprover[0].Approval2.Id || null,
-          Approval3Id: dataApprover[0].Approval3.Id || null,
           CurrentStatus: "Draft"
         };
       }
-
       if (!itemId) {
-        // ✅ CREATE
+        if (!form.files || form.files.length === 0)
+          return alert("Attach files");
         const res = await service.createItem(payload);
         setItemId(res.Id);
         // SAVE PO DETAILS
         await service.deletePurchaseOrderDetailsByQuotationId(res.Id);
-
         for (let i = 0; i < poItems.length; i++) {
           const row = poItems[i];
           if (!row.description) continue;
-
           await service.createPurchaseOrderDetail({
             Title: row.description,
             Description: row.description,
@@ -694,7 +623,6 @@ if (selectedQuote > totalAmount) {
             QuotationIdId: res.Id
           });
         }
-
         // 🔹 Attachments
         if (form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
@@ -704,11 +632,13 @@ if (selectedQuote > totalAmount) {
         await service.updateItem(res.Id, {
           RequestNo: `PRJ-${res.Id}`
         });
-        alert("Request Saved Successfully ✅");      
-         window.location.href = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        alert("Request Saved Successfully ✅");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       }
       else {
-        // ✅ UPDATE
+        if (!attachments || attachments.length === 0)
+          return alert("Attach files");
         await service.updateItem(itemId, payload);
         await service.deletePurchaseOrderDetailsByQuotationId(itemId);
         for (let i = 0; i < poItems.length; i++) {
@@ -728,6 +658,8 @@ if (selectedQuote > totalAmount) {
           await service.uploadFile(itemId, form.files[i]);
         }
         alert("Request Updated Successfully ✅");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       }
     } catch (error: any) {
       console.error(error);
@@ -737,30 +669,22 @@ if (selectedQuote > totalAmount) {
     }
   };
 
-  //*****************Submit****************
   const handleUpdate = async () => {
-
     try {
       setLoading(true);
-
-      // 🔹 Validations
       if (!form.ProjectTitle) return alert("Enter Project Title ");
       if (!form.Vendor1) return alert("Enter Vendor1 ");
       if (!form.Quote1) return alert("Enter Quote1");
       if (!form.Selectedvendor) return alert("Please Select Vendor");
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
-      if (!form.AdvancepaymentStatus) return alert("Please Select Advance Payment");
+      if (!form.Advancepayment) return alert("Please Select Advance Payment");
+      if (!form.ApprovalPath) return alert("Please select Approval.");
       if ((!form.files || form.files.length === 0) && (!attachments || attachments.length === 0)) return alert("Attach files");
       const dataApprover = await service.getDepartmentApprovers(form.Department);
       const currentuser = await service.getUser();
       const approver = dataApprover[0];
-      const user = await service.getUserById(approver?.Approval1?.Id);
-
-
-      // 🔹 MAIN PAYLOAD (NO PODetails)
       let payload = {};
-
       if (Number(form.TotalProjectAmount) <= 200000)
         payload = {
           ProjectTitle: form.ProjectTitle || "",
@@ -776,26 +700,22 @@ if (selectedQuote > totalAmount) {
           Quote3: form.Quote3?.toString() || "",
           SelectedQuote: form.SelectedQuote?.toString() || "",
           Selectedvendor: form.Selectedvendor || "",
-          //SelectedQuote: Number(form.SelectedQuote) || 0,
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
           AssignedTo: approver?.Approval1?.Title,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
-          //AssignedTo: User.Title,
           Approval1Id: Number(dataApprover[0]?.Approval1?.Id || null),
-          Approval2Id: Number(dataApprover[0]?.Approval2?.Id || null),
-          Approval3Id: Number(dataApprover[0]?.Approval3?.Id || null),          
           CurrentStatus: "Pending"
         };
 
       else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
         {
-
-if (!selectedApprover) {
-  alert("Please select approver ❌");
-  return;
-}
+          const Users = form.ApprovalPath.split(">");
+          const User1 = Users[0].trim();
+          const User2 = Users[1].trim();
+          const UserAprrover1=await service.getUserIdByName(User1.trim());
+          const UserAprrover2=await service.getUserIdByName(User2.trim());
           payload = {
             ProjectTitle: form.ProjectTitle || "",
             ProjectReffNo: form.ProjectReffNo || "",
@@ -815,9 +735,8 @@ if (!selectedApprover) {
             ApprovalPath: form.ApprovalPath || "",
             AssignedTo: approver?.Approval1?.Title || "",
             AssignedToEmailId: approver?.Approval1?.Id || null,
-            Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-            Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
-            Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
+            Approval1Id: Number(UserAprrover1),
+            Approval2Id: Number(UserAprrover2),
             CurrentStatus: "Pending"
           };
         }
@@ -837,7 +756,6 @@ if (!selectedApprover) {
           Quote3: form.Quote3?.toString() || "",
           SelectedQuote: form.SelectedQuote?.toString() || "",
           Selectedvendor: form.Selectedvendor || "",
-          //SelectedQuote: Number(form.SelectedQuote) || 0,
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
@@ -845,7 +763,7 @@ if (!selectedApprover) {
           AssignedToEmailId: approver?.Approval1?.Id || null,
           Approval1Id: Number(dataApprover[0].Approval1.Id || null),
           Approval2Id: Number(dataApprover[0].Approval2.Id || null),
-          Approval3Id: Number(dataApprover[0].Approval3.Id || null),        
+          Approval3Id: Number(dataApprover[0].Approval3.Id || null),
           CurrentStatus: "Pending"
         };
       }
@@ -873,31 +791,35 @@ if (!selectedApprover) {
             await service.uploadFile(res.Id, form.files[i]);
           }
         }
-        alert("Request Submitted Successfully");
-        setTimeout(() => {
-          window.location.href = "https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/Dashboard.aspx";
-        }, 800);
         await service.updateItem(res.Id, {
           RequestNo: `PRJ-${res.Id}`
         });
-        if (Number(form.TotalProjectAmount) <= 200000)
-        {
-            await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-            await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
+        if (Number(form.TotalProjectAmount) <= 200000) {
+          await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
         }
         else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
-        await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-        await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
-        await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval2?.Id.Title, 'Upcoming', 'Management1', new Date(), 2);
+          const Users = form.ApprovalPath.split(">");
+          const User1 = Users[0].trim();
+          const User2 = Users[1].trim();
+          const UserAprrover1=await service.getUserIdByName(User1.trim());
+          const UserAprrover2=await service.getUserIdByName(User2.trim());
+          const UserApprover1Name=await service.getUserById(Number(UserAprrover1));
+          const UserApprover2Name=await service.getUserById(Number(UserAprrover2));
+          await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(res.Id, 'QA', UserApprover1Name?.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(res.Id, 'QA', UserApprover2Name?.Title, 'Upcoming', 'Management1', new Date(), 2);
         }
-        else{          
-        await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-        await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
-        await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval2?.Title, 'Upcoming', 'Management1', new Date(), 2);
-         await handleSaveHistory(res.Id, 'QA',dataApprover[0]?.Approval3?.Title, 'Upcoming', 'Management2', new Date(), 3);
+        else {
+          await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval2?.Title, 'Upcoming', 'Management1', new Date(), 2);
+          await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval3?.Title, 'Upcoming', 'Management2', new Date(), 3);
         }
+        alert("Request Submitted Successfully");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       } else {
-        // ✅ UPDATE
         await service.updateItem(itemId, payload);
         await service.deletePurchaseOrderDetailsByQuotationId(itemId);
         for (let i = 0; i < poItems.length; i++) {
@@ -916,31 +838,32 @@ if (!selectedApprover) {
         for (let i = 0; i < form.files.length; i++) {
           await service.uploadFile(itemId, form.files[i]);
         }
-        alert("Request Submitted Successfully");
-
-        setTimeout(() => {
-          window.location.href = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-        }, 500);
-        if (Number(form.TotalProjectAmount) <= 200000)
-        {
-            await handleSaveHistory(itemId, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-            await handleSaveHistory(itemId, 'QA',user.Title, 'Pending', 'Department Head', new Date(), 1);
+        if (Number(form.TotalProjectAmount) <= 200000) {
+          await handleSaveHistory(itemId, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(itemId, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
         }
         else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
-        await handleSaveHistory(itemId, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-        await handleSaveHistory(itemId, 'QA',user.Title, 'Pending', 'Department Head', new Date(), 1);
-        await handleSaveHistory(itemId, 'QA',user.Title, 'Upcoming', 'Management1', new Date(), 2);
+          const Users = form.ApprovalPath.split(">");
+          const User1 = Users[0].trim();
+          const User2 = Users[1].trim();
+          const UserAprrover1=await service.getUserIdByName(User1.trim());
+          const UserAprrover2=await service.getUserIdByName(User2.trim());
+          const UserApprover1Name=await service.getUserById(Number(UserAprrover1));
+          const UserApprover2Name=await service.getUserById(Number(UserAprrover2));
+          await handleSaveHistory(itemId, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(itemId, 'QA', UserApprover1Name?.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(itemId, 'QA', UserApprover2Name?.Title, 'Upcoming', 'Management1', new Date(), 2);
         }
-        else{
-        await handleSaveHistory(itemId, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-        await handleSaveHistory(itemId, 'QA',user.Title, 'Pending', 'Department Head', new Date(), 1);
-        await handleSaveHistory(itemId, 'QA',user.Title, 'Upcoming', 'Management1', new Date(), 2);
-        await handleSaveHistory(itemId, 'QA',user.Title, 'Upcoming', 'Management2', new Date(), 3);
+        else {
+          await handleSaveHistory(itemId, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+          await handleSaveHistory(itemId, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(itemId, 'QA', dataApprover[0]?.Approval2?.Title, 'Upcoming', 'Management1', new Date(), 2);
+          await handleSaveHistory(itemId, 'QA', dataApprover[0]?.Approval3?.Title, 'Upcoming', 'Management2', new Date(), 3);
         }
+        alert("Request Submitted Successfully");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       }
-      
-      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-      window.location.assign(url); 
     } catch (error: any) {
       console.error(error);
       alert(error?.message || "Error occurred");
@@ -991,54 +914,46 @@ if (!selectedApprover) {
 
               <label>Applicable Taxes</label>
               <input name="ApplicableTaxes" value={form.ApplicableTaxes} type='number' onChange={handleChange} />
-
-              {/* 
-          <label>Vendor 1 <span className={styles.required}>*</span></label>
-          <input name="Vendor1" value={form.Vendor1} onChange={handleChange}  /> */}
-
-               <div className={styles.twoColumnRow}>
-              <div className={styles.fieldBlock}>
-                <label>Vendor 1 <span className={styles.required}>*</span></label>
-                <input name="Vendor1" value={form.Vendor1} onChange={handleChange} />
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor 1 <span className={styles.required}>*</span></label>
+                  <input name="Vendor1" value={form.Vendor1} onChange={handleChange} />
+                </div>
+                <div className={styles.fieldBlock}>
+                  <label>Quote 1 <span className={styles.required}>*</span></label>
+                  <input name="Quote1" value={form.Quote1} type='number' onChange={handleChange} />
+                </div>
               </div>
-              <div className={styles.fieldBlock}>
-                <label>Quote 1 <span className={styles.required}>*</span></label>
-                <input  name="Quote1" value={form.Quote1} type='number' onChange={handleChange}  />
-              </div>
-            </div>
 
-            <div className={styles.twoColumnRow}>
-              <div className={styles.fieldBlock}>
-                <label>Vendor 2</label>
-                <input name="Vendor2" value={form.Vendor2} onChange={handleChange} />
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor 2</label>
+                  <input name="Vendor2" value={form.Vendor2} onChange={handleChange} />
+                </div>
+                <div className={styles.fieldBlock}>
+                  <label>Quote 2</label>
+                  <input name="Quote2" value={form.Quote2} type='number' onChange={handleChange} />
+                </div>
               </div>
-              <div className={styles.fieldBlock}>
-                <label>Quote 2</label>
-                <input   name="Quote2" value={form.Quote2} type='number' onChange={handleChange} />
+
+              <div className={styles.twoColumnRow}>
+                <div className={styles.fieldBlock}>
+                  <label>Vendor 3</label>
+                  <input name="Vendor3" value={form.Vendor3} onChange={handleChange} />
+                </div>
+                <div className={styles.fieldBlock}>
+                  <label>Quote 3</label>
+                  <input name="Quote3" value={form.Quote3} type='number' onChange={handleChange} />
+                </div>
               </div>
-            </div>
 
-            <div className={styles.twoColumnRow}>
-              <div className={styles.fieldBlock}>
-                <label>Vendor 3</label>
-                <input name="Vendor3" value={form.Vendor3} onChange={handleChange} />
-              </div>
-              <div className={styles.fieldBlock}>
-                <label>Quote 3</label>
-                <input name="Quote3" value={form.Quote3} type='number'  onChange={handleChange} />
-              </div>
-            </div>
+              <label>Select Vendor <span className={styles.required}>*</span></label>
+              <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
 
-             <label>Select Vendor <span className={styles.required}>*</span></label>
-        <input name="Selectedvendor" value={form.Selectedvendor} onChange={handleChange} />
+              <label>Selected Quote <span className={styles.required}>*</span></label>
+              <input name="SelectedQuote" value={form.SelectedQuote} onChange={handlecheckamount} type='number' />
 
-          <label>Selected Quote <span className={styles.required}>*</span></label>
-          <input name="SelectedQuote" value={form.SelectedQuote} onChange={handlecheckamount} type='number' />
-          
-
-              {/* Department and approval section */}
               <label>Department <span className={styles.required}>*</span></label>
-
               <select
                 value={form.Department}
                 onChange={(e) => {
@@ -1060,7 +975,6 @@ if (!selectedApprover) {
                   </option>
                 ))}
               </select>
-
               <ChoiceGroup
                 label="Advance Payment"
                 options={poOptions}
@@ -1075,9 +989,7 @@ if (!selectedApprover) {
               />
 
               <label>Approval Path<span className={styles.required}>*</span></label>
-              <input value={form.ApprovalPath || ""} readOnly   style={{backgroundColor:"lightgray"}} />
-
-
+              <input value={form.ApprovalPath || ""} readOnly style={{ backgroundColor: "lightgray" }} />
               {Number(form.TotalProjectAmount || 0) > 200000 && approverOptions.length > 0 && (
                 <>
                   <label>Select Approver <span className={styles.required}>*</span></label>
@@ -1085,8 +997,7 @@ if (!selectedApprover) {
                     value={selectedApprover ?? ''}
                     onChange={(e) => handleApproverSelect(Number(e.target.value))}
                   >
-                    <option value="">Select Approver</option>   {/* * ADD THIS */}
-
+                    <option value="">Select Approver</option>
                     {approverOptions.map((opt, i) => (
                       <option key={i} value={opt.key}>
                         {opt.text}
@@ -1197,17 +1108,15 @@ if (!selectedApprover) {
                 </div>
               </div>
               {/* Buttons */}
-              <div className={styles.buttonRow}>
-                <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
-                <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
+              <div className={styles['btn-group']}>
+                <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>&nbsp;
+                <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>&nbsp;
                 <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
               </div>
             </div>
           </div>
-
           <div className={styles['col-md-3']}>
             <div className={styles.leftPanelHeader}>
-
             </div>
             <div className={styles.rightPanel}>
               {/* Templates */}
@@ -1274,6 +1183,4 @@ if (!selectedApprover) {
     </section>
   );
 };
-
-
 export default QuotationApprovalForm;

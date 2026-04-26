@@ -569,6 +569,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               });
 
               alert("Request Saved Successfully ✅");
+              const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
             }
           }
 
@@ -628,6 +630,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
               });
             }
             alert("Request Updated Successfully ✅");
+            const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
           }
         }
 
