@@ -714,8 +714,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           const Users = form.ApprovalPath.split(">");
           const User1 = Users[0].trim();
           const User2 = Users[1].trim();
-          const UserAprrover1=service.getUserIdByName(User1.trim());
-          const UserAprrover2=service.getUserIdByName(User2.trim());
+          const UserAprrover1=await service.getUserIdByName(User1.trim());
+          const UserAprrover2=await service.getUserIdByName(User2.trim());
           payload = {
             ProjectTitle: form.ProjectTitle || "",
             ProjectReffNo: form.ProjectReffNo || "",

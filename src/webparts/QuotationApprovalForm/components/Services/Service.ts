@@ -317,21 +317,29 @@ Approval4/Title,Approval4/Id
     return await res.json();
   }
   public async getUserIdByName(name: string): Promise<number | null> {
-    try {
-      const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/siteusers?$filter=Title eq '${name}'&$select=Id,Title`;
+  try {
+    const safeName = name.replace(/'/g, "''").trim();
 
-      const res = await this.context.spHttpClient.get(
-        url,
-        SPHttpClient.configurations.v1
-      );
-      const data = await res.json();
-      if (data.value.length > 0) {
-        return data.value[0].Id; // ✅ User ID
-      }
-      return null;
-    } catch (error) {
-      console.error(error);
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/siteusers?$filter=substringof('${safeName}', Title)&$select=Id,Title,Email`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+
+    if (data.value.length === 0) {
+      console.log("No user found");
       return null;
     }
+    const exactUser = data.value.find(
+      (u: any) => u.Title.toLowerCase().trim() === safeName.toLowerCase()
+    );
+    return exactUser ? exactUser.Id : data.value[0].Id;
+  } catch (error) {
+    console.error(error);
+    return null;
   }
+}
 }
