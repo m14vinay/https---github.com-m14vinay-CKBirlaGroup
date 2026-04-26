@@ -230,7 +230,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           RequestNo: result.RequestNo || '',
         }));
         if (result.Department) {
-         // handleDepartmentChange(result.Department);
+          // handleDepartmentChange(result.Department);
         }
       } else {
         alert("No Data Found");
@@ -319,23 +319,28 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       console.error(error);
     }
   };
-const loadDepartments = async () => {
-      try {
-        const res = await service.getAllDepartments();
-        setDepartmentOptions(
-          (res || []).map((item: any) => ({
-            key: item.DepartmentName,
-            text: item.DepartmentName
-          }))
-        );
-      } catch (error) {
-        console.error(error);
-      }
-};
+  const loadDepartments = async () => {
+    try {
+      const res = await service.getAllDepartments();
+      setDepartmentOptions(
+        (res || []).map((item: any) => ({
+          key: item.DepartmentName,
+          text: item.DepartmentName
+        }))
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const handleDepartmentChange = async (departmentValue: string) => {
     const dept = departmentValue.trim();
     setApproverOptions([]);
     setSelectedApprover(null);
+     setForm(prev => ({
+          ...prev,
+          Department: dept,          
+          ApprovalPath:''          
+        }));
     if (!dept) return;
     try {
       const data = await service.getDepartmentApprovers(dept);
@@ -358,7 +363,7 @@ const loadDepartments = async () => {
           ...prev,
           Department: dept,
           DepartmentHead: approvers[0]?.name || '',
-          ApprovalPath: approvers.map(a => a.name).join(" > "),          
+          ApprovalPath: approvers.map(a => a.name).join(" > "),
           Approval1Id: approvers[0]?.id || 0
         }));
         setSelectedApprover(approvers[0]?.id || null);
@@ -524,26 +529,17 @@ const loadDepartments = async () => {
     await service.createHistoryItem(payload);
   };
 
-  //***************Save***************
   const handleSaveOrUpdate = async () => {
     try {
-      setLoading(true);
-      const currentuser = await service.getUser();
-      // 🔹 Validations
+      setLoading(true);           
       if (!form.ProjectTitle) return alert("Enter Project Title ");
       if (!form.Vendor1) return alert("Enter Vendor1 ");
       if (!form.Quote1) return alert("Enter Quote1");
       if (!form.Selectedvendor) return alert("Please Select Vendor");
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
-      if (!form.Advancepayment) return alert("Please Select Advance Payment"); 
-      const dataApprover = await service.getDepartmentApprovers(form.Department);
-      const approver = dataApprover[0];
-      const user = await service.getUserById(approver?.Approval1?.Id);
-      if (!approver?.Approval1?.Id) {
-        alert("Approval1 not configured ❌");
-        return;
-      }
+      if (!form.Advancepayment) return alert("Please Select Advance Payment");
+      if(!form.ApprovalPath) return alert("Please select Approval.");      
       let payload = {};
       if (Number(form.TotalProjectAmount) <= 200000)
         payload = {
@@ -562,15 +558,11 @@ const loadDepartments = async () => {
           SelectedQuote: form.SelectedQuote?.toString() || "",
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
-          ApprovalPath: form.ApprovalPath || "",          
+          ApprovalPath: form.ApprovalPath || "",
           CurrentStatus: "Draft"
         };
 
       else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
-        if (!selectedApprover) {
-          alert("Please select approver ❌");
-          return;
-        }
         payload = {
           ProjectTitle: form.ProjectTitle || "",
           ProjectReffNo: form.ProjectReffNo || "",
@@ -584,10 +576,10 @@ const loadDepartments = async () => {
           Quote2: form.Quote2?.toString() || "",
           Quote3: form.Quote3?.toString() || "",
           SelectedQuote: form.SelectedQuote?.toString() || "",
-          Selectedvendor: form.Selectedvendor || "",          
+          Selectedvendor: form.Selectedvendor || "",
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
-          ApprovalPath: form.ApprovalPath || "",       
+          ApprovalPath: form.ApprovalPath || "",
           CurrentStatus: "Draft"
         };
       }
@@ -608,23 +600,20 @@ const loadDepartments = async () => {
           Selectedvendor: form.Selectedvendor || "",
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
-          ApprovalPath: form.ApprovalPath || "",         
+          ApprovalPath: form.ApprovalPath || "",
           CurrentStatus: "Draft"
         };
       }
-
       if (!itemId) {
-          if (!form.files || form.files.length === 0) 
-            return alert("Attach files"); 
+        if (!form.files || form.files.length === 0)
+          return alert("Attach files");
         const res = await service.createItem(payload);
         setItemId(res.Id);
         // SAVE PO DETAILS
         await service.deletePurchaseOrderDetailsByQuotationId(res.Id);
-
         for (let i = 0; i < poItems.length; i++) {
           const row = poItems[i];
           if (!row.description) continue;
-
           await service.createPurchaseOrderDetail({
             Title: row.description,
             Description: row.description,
@@ -634,7 +623,6 @@ const loadDepartments = async () => {
             QuotationIdId: res.Id
           });
         }
-
         // 🔹 Attachments
         if (form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
@@ -646,11 +634,11 @@ const loadDepartments = async () => {
         });
         alert("Request Saved Successfully ✅");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-      window.location.assign(url);
+        window.location.assign(url);
       }
       else {
-          if (!attachments || attachments.length === 0) 
-            return alert("Attach files"); 
+        if (!attachments || attachments.length === 0)
+          return alert("Attach files");
         await service.updateItem(itemId, payload);
         await service.deletePurchaseOrderDetailsByQuotationId(itemId);
         for (let i = 0; i < poItems.length; i++) {
@@ -671,7 +659,7 @@ const loadDepartments = async () => {
         }
         alert("Request Updated Successfully ✅");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-      window.location.assign(url);
+        window.location.assign(url);
       }
     } catch (error: any) {
       console.error(error);
@@ -680,8 +668,7 @@ const loadDepartments = async () => {
       setLoading(false);
     }
   };
-
-  const handleUpdate = async () => {    
+  const handleUpdate = async () => {
     try {
       setLoading(true);
       if (!form.ProjectTitle) return alert("Enter Project Title ");
@@ -691,10 +678,11 @@ const loadDepartments = async () => {
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
       if (!form.Advancepayment) return alert("Please Select Advance Payment");
+      if(!form.ApprovalPath) return alert("Please select Approval.");      
       if ((!form.files || form.files.length === 0) && (!attachments || attachments.length === 0)) return alert("Attach files");
       const dataApprover = await service.getDepartmentApprovers(form.Department);
       const currentuser = await service.getUser();
-      const approver = dataApprover[0];      
+      const approver = dataApprover[0];
       let payload = {};
       if (Number(form.TotalProjectAmount) <= 200000)
         payload = {
@@ -710,22 +698,18 @@ const loadDepartments = async () => {
           Quote2: form.Quote2?.toString() || "",
           Quote3: form.Quote3?.toString() || "",
           SelectedQuote: form.SelectedQuote?.toString() || "",
-          Selectedvendor: form.Selectedvendor || "",          
+          Selectedvendor: form.Selectedvendor || "",
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
           AssignedTo: approver?.Approval1?.Title,
-          AssignedToEmailId: approver?.Approval1?.Id || 0,         
-          Approval1Id: Number(dataApprover[0]?.Approval1?.Id || null),          
+          AssignedToEmailId: approver?.Approval1?.Id || 0,
+          Approval1Id: Number(dataApprover[0]?.Approval1?.Id || null),
           CurrentStatus: "Pending"
         };
 
       else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
         {
-          if (!selectedApprover) {
-            alert("Please select approver ❌");
-            return;
-          }
           payload = {
             ProjectTitle: form.ProjectTitle || "",
             ProjectReffNo: form.ProjectReffNo || "",
@@ -746,7 +730,7 @@ const loadDepartments = async () => {
             AssignedTo: approver?.Approval1?.Title || "",
             AssignedToEmailId: approver?.Approval1?.Id || null,
             Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-            Approval2Id: Number(dataApprover[0].Approval2.Id || 0),           
+            Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
             CurrentStatus: "Pending"
           };
         }
@@ -765,7 +749,7 @@ const loadDepartments = async () => {
           Quote2: form.Quote2?.toString() || "",
           Quote3: form.Quote3?.toString() || "",
           SelectedQuote: form.SelectedQuote?.toString() || "",
-          Selectedvendor: form.Selectedvendor || "",          
+          Selectedvendor: form.Selectedvendor || "",
           Department: form.Department || "",
           Advancepayment: form.Advancepayment || "",
           ApprovalPath: form.ApprovalPath || "",
@@ -801,7 +785,7 @@ const loadDepartments = async () => {
             await service.uploadFile(res.Id, form.files[i]);
           }
         }
-        alert("Request Submitted Successfully");        
+        alert("Request Submitted Successfully");
         await service.updateItem(res.Id, {
           RequestNo: `PRJ-${res.Id}`
         });
