@@ -230,8 +230,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           ApprovalPath: result.ApprovalPath || '',
           CurrentStatus: result.CurrentStatus || '',
           RequestNo: result.RequestNo || '',
-
-
         }));
 
         if (result.Department) {
@@ -778,9 +776,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           AssignedTo: approver?.Approval1?.Title,
           AssignedToEmailId: approver?.Approval1?.Id || 0,
           //AssignedTo: User.Title,
-          Approval1Id: Number(dataApprover[0]?.Approval1?.Id || null),
-          Approval2Id: Number(dataApprover[0]?.Approval2?.Id || null),
-          Approval3Id: Number(dataApprover[0]?.Approval3?.Id || null),
+          Approval1Id: Number(dataApprover[0]?.Approval1?.Id || null),          
           CurrentStatus: "Pending"
         };
 
@@ -811,8 +807,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             AssignedTo: approver?.Approval1?.Title || "",
             AssignedToEmailId: approver?.Approval1?.Id || null,
             Approval1Id: Number(dataApprover[0].Approval1.Id || 0),
-            Approval2Id: Number(dataApprover[0].Approval2.Id || 0),
-            Approval3Id: Number(dataApprover[0].Approval3.Id || 0),
+            Approval2Id: Number(dataApprover[0].Approval2.Id || 0),           
             CurrentStatus: "Pending"
           };
         }
@@ -1187,17 +1182,15 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
                 </div>
               </div>
               {/* Buttons */}
-              <div className={styles.btn}>
-                <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
-                <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
+              <div className={styles['btn-group']}>
+                <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>&nbsp;
+                <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>&nbsp;
                 <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
               </div>
             </div>
           </div>
-
           <div className={styles['col-md-3']}>
             <div className={styles.leftPanelHeader}>
-
             </div>
             <div className={styles.rightPanel}>
               {/* Templates */}
