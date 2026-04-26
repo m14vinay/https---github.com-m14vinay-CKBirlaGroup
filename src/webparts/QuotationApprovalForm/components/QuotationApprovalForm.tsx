@@ -359,8 +359,7 @@ const loadDepartments = async () => {
           ...prev,
           Department: dept,
           DepartmentHead: approvers[0]?.name || '',
-          ApprovalPath: approvers.map(a => a.name).join(" > "),
-          //Approval1Id: approvers[0]?.id?.toString() || null
+          ApprovalPath: approvers.map(a => a.name).join(" > "),          
           Approval1Id: approvers[0]?.id || 0
         }));
         setSelectedApprover(approvers[0]?.id || null);
