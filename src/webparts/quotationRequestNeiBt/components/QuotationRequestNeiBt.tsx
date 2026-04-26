@@ -232,15 +232,10 @@ const handlecheckamount = async (e: React.ChangeEvent<HTMLInputElement>) => {
   );
 
   setDepartmentOptions(uniqueDepartments);
-  
-      //setDepartmentOptions(options);
     };
   // 🔹 Load data
     React.useEffect(() => {
       loadDepartments();
-      //loadVendor();
-      //getApprover();
-      
     }, []);
   
   React.useEffect(() => {
@@ -337,14 +332,6 @@ const handleSaveHistory = async (id: number, Title: string, UserName: string, Us
   // 🔹 Validations
   try {
     setLoading(true);
-  //  if(!form.ProjectTitle) return alert("Enter Project Title ");
-  //   if(!form.Vendor1) return alert("Enter Vendor1 ");
-  //   if(!form.Quote1) return alert("Enter Quote1");
-  //   if(!form.Selectedvendor) return alert("Please Select Vendor");
-  //   if(!form.SelectedQuote) return alert("Please Selected Quote");
-  //   if(!form.Department) return alert("Please Select Department Name");
-  //   if(!form.Advancepayment) return alert("Please Select Advance Payemnt");
-  //    if (!form.files || form.files.length === 0) return alert("Please Attach files");
 const User=await service.getUserById(Number(form.Approval1Id));
   if(User?.Id)
   {
@@ -368,11 +355,6 @@ const User=await service.getUserById(Number(form.Approval1Id));
       Department: form.Department,
       Advancepayment:form.Advancepayment,
       ApprovalPath: form.ApprovalPath,
-  //     AssignedTo: AssignedID,  // ✅ must be numeric ID
-  // Approval1Id: Number(form.Approval1Id),
-  // Approval2Id: Number(form.Approval2Id ),
-  // Approval3Id: Number(form.Approval3Id ),
-  // AssignedToEmailId:Number(form.Approval1Id),
   CurrentStatus:'Draft'
    
   };
@@ -387,11 +369,13 @@ const User=await service.getUserById(Number(form.Approval1Id));
       for (let i = 0; i < form.files.length; i++) {
         await service.uploadFile(res.Id , form.files[i]);
         }
-      }
-      alert("Request saved successfully.✅");
+      }      
        await service.updateItem(res.Id, {
        RequestNo: `NEI-${res.Id}`
   });
+  alert("Request saved successfully.✅");
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
 
     } else {
       // 🔹 UPDATE
@@ -403,6 +387,8 @@ const User=await service.getUserById(Number(form.Approval1Id));
         }
       }
       alert("Request Updated Successfully ✅");
+      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
     }
   } catch (error) {
     console.error(error);

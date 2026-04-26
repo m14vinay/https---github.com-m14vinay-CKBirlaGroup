@@ -382,12 +382,13 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
           }
-        }
-        alert("Request Saved Successfully.");
+        }        
         await service.updateItem(res.Id, {
           RequestNo: `VMR-${res.Id}`
         });
-
+        alert("Request Saved Successfully.");
+const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       } else {
         // 🔹 UPDATE
         await service.updateItem(itemId, payload);
@@ -398,6 +399,8 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
           }
         }
         alert("Request Updated Successfully.");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       }
     } catch (error) {
       console.error(error);
@@ -456,11 +459,11 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
           }
-        }
-        alert("Request Submitted Successfully.");
+        }        
         await service.updateItem(res.Id, {
           RequestNo: `VMR-${res.Id}`
         });
+        alert("Request Submitted Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
       }

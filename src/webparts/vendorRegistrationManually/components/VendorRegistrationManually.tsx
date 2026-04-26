@@ -376,7 +376,9 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
           await service.updateItem(res.Id, {
             VendorCode: `CKBCSL/${res.Id}`
           });
-          alert("Reqyest Saved Successfully.");
+          alert("Request Saved Successfully.");
+          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);          
         }
         else {
           alert("Data Not Saved.");
@@ -390,6 +392,8 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
           }
         }
         alert("Request Updated Successfully");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       }
     } catch (error) {
       console.error(error);

@@ -365,7 +365,9 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           await service.updateItem(res.Id, {
             RequestNo: `FBP-${res.Id}`
           });
-          alert("Request Saved Successfully.");
+           alert("Request Saved Successfully.");
+             const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
         }
       } else {
         // 🔹 UPDATE
@@ -376,6 +378,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           }
         }
         alert("Request Updated Successfully ");
+          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       }
     } catch (error) {
       console.error(error);
