@@ -174,6 +174,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     if (id) {
       handleFetchById(id);
       loadPurchaseOrderDetails(id);
+      loadAttachments(id);
     }
   }, []);
 
@@ -565,21 +566,16 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       if (!form.Selectedvendor) return alert("Please Select Vendor");
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
-      if (!form.Advancepayment) return alert("Please Select Advance Payment");
-      if (!form.files || form.files.length === 0) return alert("Attach files");
+      if (!form.Advancepayment) return alert("Please Select Advance Payment");         
 
       const dataApprover = await service.getDepartmentApprovers(form.Department);
-
       const approver = dataApprover[0];
       const user = await service.getUserById(approver?.Approval1?.Id);
       if (!approver?.Approval1?.Id) {
         alert("Approval1 not configured ❌");
         return;
       }
-
-      // 🔹 MAIN PAYLOAD (NO PODetails)
       let payload = {};
-
       if (Number(form.TotalProjectAmount) <= 200000)
         payload = {
           ProjectTitle: form.ProjectTitle || "",
@@ -669,7 +665,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       }
 
       if (!itemId) {
-        // ✅ CREATE
+          if (!form.files || form.files.length === 0) 
+            return alert("Attach files"); 
         const res = await service.createItem(payload);
         setItemId(res.Id);
         // SAVE PO DETAILS
@@ -703,7 +700,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       window.location.assign(url);
       }
       else {
-        // ✅ UPDATE
+          if (!attachments || attachments.length === 0) 
+            return alert("Attach files"); 
         await service.updateItem(itemId, payload);
         await service.deletePurchaseOrderDetailsByQuotationId(itemId);
         for (let i = 0; i < poItems.length; i++) {
@@ -736,7 +734,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
   //*****************Submit****************
   const handleUpdate = async () => {
-
+    
     try {
       setLoading(true);
 
