@@ -698,6 +698,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           RequestNo: `PRJ-${res.Id}`
         });
         alert("Request Saved Successfully ✅");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+      window.location.assign(url);
       }
       else {
         // ✅ UPDATE
@@ -720,6 +722,8 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           await service.uploadFile(itemId, form.files[i]);
         }
         alert("Request Updated Successfully ✅");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+      window.location.assign(url);
       }
     } catch (error: any) {
       console.error(error);
@@ -865,13 +869,13 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
             await service.uploadFile(res.Id, form.files[i]);
           }
         }
-        alert("Request Submitted Successfully");
-        setTimeout(() => {
-          window.location.href = "https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/Dashboard.aspx";
-        }, 800);
+        alert("Request Submitted Successfully");        
         await service.updateItem(res.Id, {
           RequestNo: `PRJ-${res.Id}`
         });
+        setTimeout(() => {
+          window.location.href = "https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/Dashboard.aspx";
+        }, 800);
         if (Number(form.TotalProjectAmount) <= 200000) {
           await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
           await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
@@ -908,7 +912,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           await service.uploadFile(itemId, form.files[i]);
         }
         alert("Request Submitted Successfully");
-
         setTimeout(() => {
           window.location.href = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         }, 500);
@@ -928,7 +931,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           await handleSaveHistory(itemId, 'QA', dataApprover[0]?.Approval3?.Title, 'Upcoming', 'Management2', new Date(), 3);
         }
       }
-
       const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
       window.location.assign(url);
     } catch (error: any) {
