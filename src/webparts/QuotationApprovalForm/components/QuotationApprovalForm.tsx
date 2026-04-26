@@ -64,7 +64,7 @@ type IForm = {
   RequestNo: string;
 
   description: string;
-
+AdvancepaymentStatus: string;
   quantity: number | '';
   rate: number | '';
   amount: number | '';
@@ -126,7 +126,7 @@ const [form, setForm] = React.useState<IForm>({
   RequestNo: '',
 
   description: '',
-
+AdvancepaymentStatus:'',
   quantity: '',
   rate: '',
   amount: '',
@@ -202,6 +202,11 @@ const [form, setForm] = React.useState<IForm>({
       } 
          if (result.CurrentStatus==='Draft') {
       setItemId(result.Id);
+       const selected = poOptions.find(
+    opt =>
+      opt.text.trim().toLowerCase() ===
+      result.Advancepayment?.trim().toLowerCase()
+  );
         setForm(prev => ({
           ...prev,
           ProjectTitle: result.ProjectTitle || '',
@@ -229,6 +234,7 @@ const [form, setForm] = React.useState<IForm>({
           ApprovalPath: result.ApprovalPath || '',
           CurrentStatus: result.CurrentStatus || '',
           RequestNo: result.RequestNo || '',
+          AdvancepaymentStatus: selected?.key || "" 
 
 
         }));
@@ -565,7 +571,7 @@ if (selectedQuote > totalAmount) {
       if (!form.Selectedvendor) return alert("Please Select Vendor");
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
-      if (!form.Advancepayment) return alert("Please Select Advance Payment");
+      if (!form.AdvancepaymentStatus) return alert("Please Select Advance Payment");
       if (!form.files || form.files.length === 0) return alert("Attach files");
 
       const dataApprover = await service.getDepartmentApprovers(form.Department);
@@ -699,6 +705,7 @@ if (selectedQuote > totalAmount) {
           RequestNo: `PRJ-${res.Id}`
         });
         alert("Request Saved Successfully ✅");      
+         window.location.href = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
       }
       else {
         // ✅ UPDATE
@@ -743,7 +750,7 @@ if (selectedQuote > totalAmount) {
       if (!form.Selectedvendor) return alert("Please Select Vendor");
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
-      if (!form.Advancepayment) return alert("Please Select Advance Payment");
+      if (!form.AdvancepaymentStatus) return alert("Please Select Advance Payment");
       if ((!form.files || form.files.length === 0) && (!attachments || attachments.length === 0)) return alert("Attach files");
       const dataApprover = await service.getDepartmentApprovers(form.Department);
       const currentuser = await service.getUser();
@@ -965,7 +972,7 @@ if (!selectedApprover) {
           <div className={styles["col-md-9"]}>
             <div className={styles.leftPanel}>
               <div className={styles.leftPanelHeader}>
-                <h4>Quotation Request Approval form</h4>
+                <h4>Quotation Approval </h4>
               </div>
 
               <label>Project Title <span className={styles.required}>*</span></label>
@@ -1057,11 +1064,12 @@ if (!selectedApprover) {
               <ChoiceGroup
                 label="Advance Payment"
                 options={poOptions}
-                selectedKey={poOptions.find(opt => opt.text === form.Advancepayment)?.text} // selectedKey ko key set karo based on text match
+                selectedKey={form.AdvancepaymentStatus} // selectedKey ko key set karo based on text match
                 onChange={(_, option) => {
                   setForm(prev => ({
                     ...prev,
-                    Advancepayment: option?.text || ""  // text store karo
+                    Advancepayment: option?.text || "",  // text store karo
+                    AdvancepaymentStatus: option?.key || ""
                   }));
                 }}
               />
@@ -1189,7 +1197,7 @@ if (!selectedApprover) {
                 </div>
               </div>
               {/* Buttons */}
-              <div className={styles.btn}>
+              <div className={styles.buttonRow}>
                 <button className={styles.submitBtn} onClick={handleUpdate}>Submit</button>
                 <button className={styles.saveBtn} onClick={handleSaveOrUpdate}>Save</button>
                 <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>

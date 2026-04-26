@@ -451,7 +451,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElemen
           <div className={styles['col-md-3']}>
             <div className={styles.rightPanel}>
               <div className={styles.rightPanelHeader}>
-                <h4>Timeline of the Request - {form.RequestNo}</h4>
+                <h4>Timeline of the Request-{form.RequestNo}</h4>
               </div>
               <ul>
                   {History.map((item, index) => {

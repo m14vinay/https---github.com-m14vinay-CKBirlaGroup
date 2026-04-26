@@ -23,6 +23,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     ApplicableTaxes: '',
     AssignedTo: '',
     PoMaster: '',
+     PoMasterKey: '',
     ApprovalPath: '',
     POCategory: '',
     Comments: '',
@@ -95,9 +96,12 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       if (result.CurrentStatus === 'Draft') {
         setItemId(result.Id);
 
-        const selectedOption = poOptions.find(
-          opt => opt.text === result.PoMaster
-        );
+        const selected = poOptions.find(
+    opt =>
+      opt.text.trim().toLowerCase() ===
+      result.PoMaster?.trim().toLowerCase()
+  );
+
         setForm(prev => ({
           ...prev,
 
@@ -112,7 +116,8 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
           POAmount: result.POAmount || 0,
           ApplicableTaxes: result.ApplicableTaxes || 0,
           Comments: result.ProjectDescription || '',
-          POCategory: selectedOption?.text || ''
+          POCategory: result.PoMaster || '',
+           PoMasterKey: selected?.key || "" 
         }));
         const data = await service.GetApprover(result.Department);
         if (data?.Id > 0) {
@@ -316,8 +321,8 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
 
   // 🔹 PO Category Options
   const poOptions: IChoiceGroupOption[] = [
-    { key: '1', text: 'Issue To Vendor' },
-    { key: '2', text: 'Internal Compliance' }
+    { key: 'Issue To Vendor', text: 'Issue To Vendor' },
+    { key: 'Internal Compliance', text: 'Internal Compliance' }
   ];
   const getShortName = (value: string) => {
     switch (value) {
@@ -516,7 +521,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       if (!form.projectCode) return alert("Enter Project Code ");
       if (!form.POAmount) return alert("Enter POAmount");
       if (!form.ApplicableTaxes) return alert("Enter Applicable Taxes");
-      if (!form.PoMaster) return alert("Please Choose POCategory");
+      if (!form.PoMasterKey) return alert("Please Choose POCategory");
       if (
         (!form.files || form.files.length === 0) &&
         (!attachments || attachments.length === 0)
@@ -669,7 +674,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
           <div className={styles['col-md-9']}>
             <div className={styles.leftPanel}>
               <div className={styles.leftPanelHeader}>
-                <h4>PO Approval Form</h4>
+                <h4>PO Approval Forms</h4>
               </div>
               {/* <button style={{ backgroundColor: 'purple', color: 'white', fontSize: 'bold', width: '100%' }} onClick={handleDownload}>Download Purchase Order</button> */}
               <div></div>
@@ -703,12 +708,13 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
               <ChoiceGroup
                 label="PO Category"
                 options={poOptions}
-                selectedKey={poOptions.find(opt => opt.text === form.PoMaster)?.key}
+                selectedKey={form.PoMasterKey}
                 //selectedKey={form.PoMaster}
                 onChange={(_, option) => {
                   setForm(prev => ({
                     ...prev,
-                    PoMaster: option?.text || "" // text store karo
+                    PoMaster: option?.text || "", // text store karo
+                     PoMasterKey: option?.key || "" 
                   }));
                 }}
               />
