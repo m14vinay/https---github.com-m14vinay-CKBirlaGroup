@@ -799,9 +799,16 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
         }
         else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
+          const Users = form.ApprovalPath.split(">");
+          const User1 = Users[0].trim();
+          const User2 = Users[1].trim();
+          const UserAprrover1=await service.getUserIdByName(User1.trim());
+          const UserAprrover2=await service.getUserIdByName(User2.trim());
+          const UserApprover1Name=await service.getUserById(Number(UserAprrover1));
+          const UserApprover2Name=await service.getUserById(Number(UserAprrover2));
           await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
-          await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval2?.Title, 'Upcoming', 'Management1', new Date(), 2);
+          await handleSaveHistory(res.Id, 'QA', UserApprover1Name?.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(res.Id, 'QA', UserApprover2Name?.Title, 'Upcoming', 'Management1', new Date(), 2);
         }
         else {
           await handleSaveHistory(res.Id, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
@@ -836,9 +843,16 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           await handleSaveHistory(itemId, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
         }
         else if (Number(form.TotalProjectAmount) > 200000 && form.Department === "Branding") {
+          const Users = form.ApprovalPath.split(">");
+          const User1 = Users[0].trim();
+          const User2 = Users[1].trim();
+          const UserAprrover1=await service.getUserIdByName(User1.trim());
+          const UserAprrover2=await service.getUserIdByName(User2.trim());
+          const UserApprover1Name=await service.getUserById(Number(UserAprrover1));
+          const UserApprover2Name=await service.getUserById(Number(UserAprrover2));
           await handleSaveHistory(itemId, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-          await handleSaveHistory(itemId, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
-          await handleSaveHistory(itemId, 'QA', dataApprover[0]?.Approval2?.Title, 'Upcoming', 'Management1', new Date(), 2);
+          await handleSaveHistory(itemId, 'QA', UserApprover1Name?.Title, 'Pending', 'Department Head', new Date(), 1);
+          await handleSaveHistory(itemId, 'QA', UserApprover2Name?.Title, 'Upcoming', 'Management1', new Date(), 2);
         }
         else {
           await handleSaveHistory(itemId, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
