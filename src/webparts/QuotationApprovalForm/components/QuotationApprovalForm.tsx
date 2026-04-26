@@ -336,11 +336,11 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
     const dept = departmentValue.trim();
     setApproverOptions([]);
     setSelectedApprover(null);
-     setForm(prev => ({
-          ...prev,
-          Department: dept,          
-          ApprovalPath:''          
-        }));
+    setForm(prev => ({
+      ...prev,
+      Department: dept,
+      ApprovalPath: ''
+    }));
     if (!dept) return;
     try {
       const data = await service.getDepartmentApprovers(dept);
@@ -531,7 +531,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
 
   const handleSaveOrUpdate = async () => {
     try {
-      setLoading(true);           
+      setLoading(true);
       if (!form.ProjectTitle) return alert("Enter Project Title ");
       if (!form.Vendor1) return alert("Enter Vendor1 ");
       if (!form.Quote1) return alert("Enter Quote1");
@@ -539,7 +539,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
       if (!form.Advancepayment) return alert("Please Select Advance Payment");
-      if(!form.ApprovalPath) return alert("Please select Approval.");      
+      if (!form.ApprovalPath) return alert("Please select Approval.");
       let payload = {};
       if (Number(form.TotalProjectAmount) <= 200000)
         payload = {
@@ -678,7 +678,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
       if (!form.SelectedQuote) return alert("Please Selected Quote");
       if (!form.Department) return alert("Please Select Department Name");
       if (!form.Advancepayment) return alert("Please Select Advance Payment");
-      if(!form.ApprovalPath) return alert("Please select Approval.");      
+      if (!form.ApprovalPath) return alert("Please select Approval.");
       if ((!form.files || form.files.length === 0) && (!attachments || attachments.length === 0)) return alert("Attach files");
       const dataApprover = await service.getDepartmentApprovers(form.Department);
       const currentuser = await service.getUser();
@@ -807,8 +807,7 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval2?.Title, 'Upcoming', 'Management1', new Date(), 2);
           await handleSaveHistory(res.Id, 'QA', dataApprover[0]?.Approval3?.Title, 'Upcoming', 'Management2', new Date(), 3);
         }
-      } else {
-        // ✅ UPDATE
+      } else {        
         await service.updateItem(itemId, payload);
         await service.deletePurchaseOrderDetailsByQuotationId(itemId);
         for (let i = 0; i < poItems.length; i++) {
@@ -827,10 +826,6 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
         for (let i = 0; i < form.files.length; i++) {
           await service.uploadFile(itemId, form.files[i]);
         }
-        alert("Request Submitted Successfully");
-        setTimeout(() => {
-          window.location.href = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-        }, 500);
         if (Number(form.TotalProjectAmount) <= 200000) {
           await handleSaveHistory(itemId, 'QA', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
           await handleSaveHistory(itemId, 'QA', dataApprover[0]?.Approval1?.Title, 'Pending', 'Department Head', new Date(), 1);
@@ -846,9 +841,10 @@ const QuotationApprovalForm = (props: IQuotationApprovalFormProps) => {
           await handleSaveHistory(itemId, 'QA', dataApprover[0]?.Approval2?.Title, 'Upcoming', 'Management1', new Date(), 2);
           await handleSaveHistory(itemId, 'QA', dataApprover[0]?.Approval3?.Title, 'Upcoming', 'Management2', new Date(), 3);
         }
+        alert("Request Submitted Successfully");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       }
-      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-      window.location.assign(url);
     } catch (error: any) {
       console.error(error);
       alert(error?.message || "Error occurred");
