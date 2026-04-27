@@ -96,8 +96,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               VendorName: result.VendorName || '',
               projectTitle: result.ProjectTitle || '',
               DepartmentName: result.Department || '',
-              ProjectCode: result.ProjectCode || '',
-              vendorName: result.VendorName || '',
+              ProjectCode: result.ProjectCode || '',              
               TotalAmount: result.TotalAmount || '',
               Comments: result.ProjectDescription || '',
               vendorcode: result.Vendorcode || '',
@@ -154,8 +153,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         setForm(prev => ({
           ...prev,
           ProjectCode: form.ProjectCode,
-          vendorcode: result[0].vendorcode,
-          VendorName: result[0].VendorName,
+          vendorcode: result[0].VendorName.split("-")[0] || '',
+          VendorName: result[0].VendorName.split("-")[1] || '',
           projectTitle: result[0].ProjectTitle,
           DepartmentName: result[0].Department
         }));
