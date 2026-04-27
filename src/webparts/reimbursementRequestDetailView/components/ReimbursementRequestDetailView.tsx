@@ -247,18 +247,18 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                   </div>
                 ))}
               </div>
-              <div className={styles.form}>
+              <div className={styles.form} style={{width:"100%"}}>
                 <div className={styles['form-group']}>
                   <label>Approval Path</label>
-                  <input type='text' className="form-control" name="ApprovalPath" value={form.ApprovalPath} readOnly style={{ backgroundColor: "lightgray" }} />
+                  <input type='text' className="form-control" name="ApprovalPath" value={form.ApprovalPath} readOnly style={{ backgroundColor: "lightgray",width: "100%" }} />
                 </div>
                 <div className={styles['form-group']}>
                   <label>Total Amount</label>
-                  <input type='number' className="form-control" name="TotalAmount" value={form.TotalAmount} readOnly style={{ backgroundColor: "lightgray" }} />
+                  <input type='number' className="form-control" name="TotalAmount" value={form.TotalAmount} readOnly style={{ backgroundColor: "lightgray",width: "100%" }} />
                 </div>
                 <div className={styles['form-group']}>
                   <label>Remarks</label>
-                  <input type='text' className="form-control" name="Remarks" value={form.Remarks} style={{ backgroundColor: "lightgray" }} readOnly />
+                  <input type='text' className="form-control" name="Remarks" value={form.Remarks} style={{ backgroundColor: "lightgray",width: "100%" }} readOnly />
                 </div>
                 {/* Buttons */}
                 <div className={styles['btn-group']}>

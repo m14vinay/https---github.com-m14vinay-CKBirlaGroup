@@ -266,7 +266,11 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
       [name]: value
     });
   };
-
+  const toSafeString = (value: any): string => {
+    return value !== null && value !== undefined && value !== ""
+      ? value.toString()
+      : "";
+  };
   // Date Change
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -298,7 +302,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
   // Button click save
   const handleSaveManual = async () => {
     const gst = form.GST?.toString().trim();
-   
+
     //  GST validation
     if (!form.Pan) {
       alert("Pan No is Required ❗");
@@ -312,44 +316,44 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
     }
     const dateOnly = new Date(form.CommencementDate);
     const payload = {
-      Title: form.Title,
-      YearofEstablishment: form.YearofEstablishment,
-      CommencementDate: dateOnly,
-      GST: gst,
-      Pan: form.Pan,
-      Tin: form.Tin,
-      CentralSalesTaxNo: form.CentralSalesTaxNo,
-      ServiceTaxRegNo: form.ServiceTaxRegNo,
-      NatureofService: form.NatureofService,
-      MSMERegistrationNo: form.MSMERegistrationNo,
-      ESICNo: form.ESICNo,
-      ExciseRegisterNo: form.ExciseRegisterNo,
-      WorkContractTaxNo: form.WorkContractTaxNo,
-      FullAddress: form.FullAddress,
-      TelephoneNo: form.TelephoneNo,
-      FaxNo: form.FaxNo,
-      EmailId: form.EmailId,
-      ContactPerson: form.ContactPerson,
-      RegFullAddress: form.RegFullAddress,
-      RegTelephoneNo: form.RegTelephoneNo,
-      RegFaxNo: form.RegFaxNo,
-      RegEmailId: form.RegEmailId,
-      RegContactPerson: form.RegContactPerson,
-      Manufacturer: form.Manufacturer,
-      AuthorizedAgent: form.AuthorizedAgent,
-      Trader: form.Trader,
-      ConsultingCompany: form.ConsultingCompany,
-      Other: form.Other,
-      ConstitutionofOrganization: form.ConstitutionofOrganization,
-      Name: form.Name,
-      Address: form.Address,
-      ContactNo: form.ContactNo,
-      Details: form.Details,
-      BankName: form.BankName,
-      BankAddress: form.BankAddress,
-      NameinBankAccount: form.NameinBankAccount,
-      BankAccountNo: form.BankAccountNo,
-      BankIFSCMICRCode: form.BankIFSCMICRCode,
+      Title: toSafeString(form.Title),
+      YearofEstablishment: form.YearofEstablishment || 0,
+      CommencementDate: dateOnly ? dateOnly.toString() : "",
+      GST: toSafeString(gst),
+      Pan: toSafeString(form.Pan),
+      Tin: toSafeString(form.Tin),
+      CentralSalesTaxNo: toSafeString(form.CentralSalesTaxNo),
+      ServiceTaxRegNo: toSafeString(form.ServiceTaxRegNo),
+      NatureofService: toSafeString(form.NatureofService),
+      MSMERegistrationNo: toSafeString(form.MSMERegistrationNo),
+      ESICNo: toSafeString(form.ESICNo),
+      ExciseRegisterNo: toSafeString(form.ExciseRegisterNo),
+      WorkContractTaxNo: toSafeString(form.WorkContractTaxNo),
+      FullAddress: toSafeString(form.FullAddress),
+      TelephoneNo: toSafeString(form.TelephoneNo),
+      FaxNo: toSafeString(form.FaxNo),
+      EmailId: toSafeString(form.EmailId),
+      ContactPerson: toSafeString(form.ContactPerson),
+      RegFullAddress: toSafeString(form.RegFullAddress),
+      RegTelephoneNo: toSafeString(form.RegTelephoneNo),
+      RegFaxNo: toSafeString(form.RegFaxNo),
+      RegEmailId: toSafeString(form.RegEmailId),
+      RegContactPerson: toSafeString(form.RegContactPerson),
+      Manufacturer: toSafeString(form.Manufacturer),
+      AuthorizedAgent: toSafeString(form.AuthorizedAgent),
+      Trader: toSafeString(form.Trader),
+      ConsultingCompany: toSafeString(form.ConsultingCompany),
+      Other: toSafeString(form.Other),
+      ConstitutionofOrganization: toSafeString(form.ConstitutionofOrganization),
+      Name: toSafeString(form.Name),
+      Address: toSafeString(form.Address),
+      ContactNo: toSafeString(form.ContactNo),
+      Details: toSafeString(form.Details),
+      BankName: toSafeString(form.BankName),
+      BankAddress: toSafeString(form.BankAddress),
+      NameinBankAccount: toSafeString(form.NameinBankAccount),
+      BankAccountNo: toSafeString(form.BankAccountNo),
+      BankIFSCMICRCode: toSafeString(form.BankIFSCMICRCode),
       CurrentStatus: 'Draft'
     };
     try {
@@ -378,7 +382,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
           });
           alert("Request Saved Successfully.");
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-        window.location.assign(url);          
+          window.location.assign(url);
         }
         else {
           alert("Data Not Saved.");
@@ -421,7 +425,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
           return;
         }
       }
-      
+
       const gst = form.GST?.toString().trim();
       const IsValid = service.validateGST(gst);
       if (!IsValid) {
@@ -436,44 +440,44 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
       }
       const dateOnly = new Date(form.CommencementDate);
       const payload = {
-        Title: form.Title,
-        YearofEstablishment: form.YearofEstablishment,
-        CommencementDate: dateOnly,
-        GST: gst,
-        Pan: form.Pan,
-        Tin: form.Tin,
-        CentralSalesTaxNo: form.CentralSalesTaxNo,
-        ServiceTaxRegNo: form.ServiceTaxRegNo,
-        NatureofService: form.NatureofService,
-        MSMERegistrationNo: form.MSMERegistrationNo,
-        ESICNo: form.ESICNo,
-        ExciseRegisterNo: form.ExciseRegisterNo,
-        WorkContractTaxNo: form.WorkContractTaxNo,
-        FullAddress: form.FullAddress,
-        TelephoneNo: form.TelephoneNo,
-        FaxNo: form.FaxNo,
-        EmailId: form.EmailId,
-        ContactPerson: form.ContactPerson,
-        RegFullAddress: form.RegFullAddress,
-        RegTelephoneNo: form.RegTelephoneNo,
-        RegFaxNo: form.RegFaxNo,
-        RegEmailId: form.RegEmailId,
-        RegContactPerson: form.RegContactPerson,
-        Manufacturer: form.Manufacturer,
-        AuthorizedAgent: form.AuthorizedAgent,
-        Trader: form.Trader,
-        ConsultingCompany: form.ConsultingCompany,
-        Other: form.Other,
-        ConstitutionofOrganization: form.ConstitutionofOrganization,
-        Name: form.Name,
-        Address: form.Address,
-        ContactNo: form.ContactNo,
-        Details: form.Details,
-        BankName: form.BankName,
-        BankAddress: form.BankAddress,
-        NameinBankAccount: form.NameinBankAccount,
-        BankAccountNo: form.BankAccountNo,
-        BankIFSCMICRCode: form.BankIFSCMICRCode,
+        Title: toSafeString(form.Title),
+        YearofEstablishment: form.YearofEstablishment|| 0,
+        CommencementDate: dateOnly ? dateOnly.toString() : "",
+        GST: toSafeString(gst),
+        Pan: toSafeString(form.Pan),
+        Tin: toSafeString(form.Tin),
+        CentralSalesTaxNo: toSafeString(form.CentralSalesTaxNo),
+        ServiceTaxRegNo: toSafeString(form.ServiceTaxRegNo),
+        NatureofService: toSafeString(form.NatureofService),
+        MSMERegistrationNo: toSafeString(form.MSMERegistrationNo),
+        ESICNo: toSafeString(form.ESICNo),
+        ExciseRegisterNo: toSafeString(form.ExciseRegisterNo),
+        WorkContractTaxNo: toSafeString(form.WorkContractTaxNo),
+        FullAddress: toSafeString(form.FullAddress),
+        TelephoneNo: toSafeString(form.TelephoneNo),
+        FaxNo: toSafeString(form.FaxNo),
+        EmailId: toSafeString(form.EmailId),
+        ContactPerson: toSafeString(form.ContactPerson),
+        RegFullAddress: toSafeString(form.RegFullAddress),
+        RegTelephoneNo: toSafeString(form.RegTelephoneNo),
+        RegFaxNo: toSafeString(form.RegFaxNo),
+        RegEmailId: toSafeString(form.RegEmailId),
+        RegContactPerson: toSafeString(form.RegContactPerson),
+        Manufacturer: toSafeString(form.Manufacturer),
+        AuthorizedAgent: toSafeString(form.AuthorizedAgent),
+        Trader: toSafeString(form.Trader),
+        ConsultingCompany: toSafeString(form.ConsultingCompany),
+        Other: toSafeString(form.Other),
+        ConstitutionofOrganization: toSafeString(form.ConstitutionofOrganization),
+        Name: toSafeString(form.Name),
+        Address: toSafeString(form.Address),
+        ContactNo: toSafeString(form.ContactNo),
+        Details: toSafeString(form.Details),
+        BankName: toSafeString(form.BankName),
+        BankAddress: toSafeString(form.BankAddress),
+        NameinBankAccount: toSafeString(form.NameinBankAccount),
+        BankAccountNo: toSafeString(form.BankAccountNo),
+        BankIFSCMICRCode: toSafeString(form.BankIFSCMICRCode),
         CurrentStatus: 'Completed'
       };
       if (itemId) {

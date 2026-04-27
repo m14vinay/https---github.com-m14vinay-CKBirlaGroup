@@ -61,10 +61,18 @@ export default class Service {
       }
     );
   }
+  public getUniqueFileName = (file: File): string => {
+    const timestamp = new Date().getTime();
+    const ext = file.name.substring(file.name.lastIndexOf('.'));
+    const name = file.name.replace(ext, '');
+
+    return `${name}_${timestamp}${ext}`;
+  };
   // Upload Files
 
   public async uploadFile(itemId: number, file: File): Promise<void> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${file.name}')`;
+    const uniqueFileName = this.getUniqueFileName(file);
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${itemId})/AttachmentFiles/add(FileName='${uniqueFileName}')`;
 
     const buffer = await file.arrayBuffer();
 
@@ -147,6 +155,9 @@ export default class Service {
     return data.value.length > 0;
   };
 
+  public toSafeString = (value: any): string => {
+    return value ? value.toString() : "";
+  };
   public saveToSharePoint = async (items: any[]) => {
     const results: any[] = [];
 
@@ -189,44 +200,44 @@ export default class Service {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            Title: item.Title,
-            YearofEstablishment: item.YearofEstablishment,
-            GST: gst,
+            Title: this.toSafeString(item.Title),
+            YearofEstablishment: this.toSafeString(item.YearofEstablishment),
+            GST: this.toSafeString(gst),
             CommencementDate: new Date(utc_value * 1000),
-            Pan: item.Pan,
-            Tin: item.Tin,
-            CentralSalesTaxNo: item.CentralSalesTaxNo,
-            ServiceTaxRegNo: item.ServiceTaxRegNo,
-            NatureofService: item.NatureofService,
-            MSMERegistrationNo: item.MSMERegistrationNo,
-            ESICNo: item.ESICNo,
-            ExciseRegisterNo: item.ExciseRegisterNo,
-            WorkContractTaxNo: item.WorkContractTaxNo,
-            FullAddress: item.FullAddress,
-            TelephoneNo: item.TelephoneNo,
-            FaxNo: item.FaxNo,
-            EmailId: item.EmailId,
-            ContactPerson: item.ContactPerson,
-            RegFullAddress: item.RegFullAddress,
-            RegTelephoneNo: item.RegTelephoneNo,
-            RegFaxNo: item.RegFaxNo,
-            RegEmailId: item.RegEmailId,
-            RegContactPerson: item.RegContactPerson,
-            Manufacturer: item.Manufacturer,
-            AuthorizedAgent: item.AuthorizedAgent,
-            Trader: item.Trader,
-            ConsultingCompany: item.ConsultingCompany,
-            Other: item.Other,
-            ConstitutionofOrganization: item.ConstitutionofOrganization,
-            Name: item.Name,
-            Address: item.Address,
-            ContactNo: item.ContactNo,
-            Details: item.Details,
-            BankName: item.BankName,
-            BankAddress: item.BankAddress,
-            NameinBankAccount: item.NameinBankAccount,
-            BankAccountNo: item.BankAccountNo,
-            BankIFSCMICRCode: item.BankIFSCMICRCode,
+            Pan: this.toSafeString(item.Pan),
+            Tin: this.toSafeString(item.Tin),
+            CentralSalesTaxNo: this.toSafeString(item.CentralSalesTaxNo),
+            ServiceTaxRegNo: this.toSafeString(item.ServiceTaxRegNo),
+            NatureofService: this.toSafeString(item.NatureofService),
+            MSMERegistrationNo: this.toSafeString(item.MSMERegistrationNo),
+            ESICNo: this.toSafeString(item.ESICNo),
+            ExciseRegisterNo: this.toSafeString(item.ExciseRegisterNo),
+            WorkContractTaxNo: this.toSafeString(item.WorkContractTaxNo),
+            FullAddress: this.toSafeString(item.FullAddress),
+            TelephoneNo: this.toSafeString(item.TelephoneNo),
+            FaxNo: this.toSafeString(item.FaxNo),
+            EmailId: this.toSafeString(item.EmailId),
+            ContactPerson: this.toSafeString(item.ContactPerson),
+            RegFullAddress: this.toSafeString(item.RegFullAddress),
+            RegTelephoneNo: this.toSafeString(item.RegTelephoneNo),
+            RegFaxNo: this.toSafeString(item.RegFaxNo),
+            RegEmailId: this.toSafeString(item.RegEmailId),
+            RegContactPerson: this.toSafeString(item.RegContactPerson),
+            Manufacturer: this.toSafeString(item.Manufacturer),
+            AuthorizedAgent: this.toSafeString(item.AuthorizedAgent),
+            Trader: this.toSafeString(item.Trader),
+            ConsultingCompany: this.toSafeString(item.ConsultingCompany),
+            Other: this.toSafeString(item.Other),
+            ConstitutionofOrganization: this.toSafeString(item.ConstitutionofOrganization),
+            Name: this.toSafeString(item.Name),
+            Address: this.toSafeString(item.Address),
+            ContactNo: this.toSafeString(item.ContactNo),
+            Details: this.toSafeString(item.Details),
+            BankName: this.toSafeString(item.BankName),
+            BankAddress: this.toSafeString(item.BankAddress),
+            NameinBankAccount: this.toSafeString(item.NameinBankAccount),
+            BankAccountNo: this.toSafeString(item.BankAccountNo),
+            BankIFSCMICRCode: this.toSafeString(item.BankIFSCMICRCode),
             CurrentStatus: 'Completed'
           })
         }
