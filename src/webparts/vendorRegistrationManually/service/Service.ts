@@ -201,7 +201,7 @@ export default class Service {
           },
           body: JSON.stringify({
             Title: this.toSafeString(item.Title),
-            YearofEstablishment: this.toSafeString(item.YearofEstablishment),
+            YearofEstablishment: item.YearofEstablishment||0,
             GST: this.toSafeString(gst),
             CommencementDate: new Date(utc_value * 1000),
             Pan: this.toSafeString(item.Pan),
