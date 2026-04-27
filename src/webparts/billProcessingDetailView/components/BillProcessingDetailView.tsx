@@ -133,7 +133,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
         setForm(
           prev => ({
             ...prev,
-            Email: vendor.EmailId || ''
+            Email: vendor.RegEmailId || ''
           }));
       }
     }
