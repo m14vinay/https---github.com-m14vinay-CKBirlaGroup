@@ -46,7 +46,7 @@ Approver/Id,Approver/Title&$expand=Approver`;
   //Get Vendor Data
   public async getVendor(): Promise<any[]> {
 
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.VendorList}')/items`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.VendorList}')/items?$orderby=Created desc`;
 
     const res = await this.context.spHttpClient.get(
       url,
