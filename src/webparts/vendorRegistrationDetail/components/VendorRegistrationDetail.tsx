@@ -139,8 +139,17 @@ const VendorRegistrationDetail: React.FC<IVendorRegistrationDetailProps> = (prop
     }
   };
   const handleCancel = async () => {
+    const params = new URLSearchParams(window.location.search);
+    const PageName = params.get('PageName');
+    if(PageName === 'VendorMappingForm')
+    {
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorMappingForm.aspx`;
+    window.location.assign(url);
+    }
+    else{
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationSearch.aspx`;
     window.location.assign(url);
+    }
   };
   return (
     <section>
