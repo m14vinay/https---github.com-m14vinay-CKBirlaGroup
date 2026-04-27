@@ -51,7 +51,10 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
     }
   }, []);
 
-
+ const handleCancel = () => {
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    window.location.assign(url);
+  };
   const loadAttachments = async (id: number) => {
     try {
       const files = await service.getAttachments(id);
@@ -168,32 +171,32 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
                       ? styles.Rejected
                       : styles.Pending}>{form.CurrentStatus}</span></h4>
               </div>
-               <div className={styles.leftPanelStatusHeader}>
-                             {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
-                               let statusClass = styles.statusBox;
-                               if (item.UserAction === "Approved") {
-                                 statusClass = `${styles.statusBox}`;
-                               }
-                               else if (item.UserAction === "Rejected") {
-                                 statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
-                               }
-                               else if (item.UserAction === "Upcoming") {
-                                 statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
-                               }
-                               else if (item.UserAction === "Pending") {
-                                 statusClass = `${styles.statusBox} ${styles.pendingBox}`;
-                               }
-                               return (
-                                 <div className={statusClass} key={index}>
-                                   <div className={styles.content}>
-                                     <h5>{item.UserName}</h5>
-                                     <h6>{item.Designation}</h6>
-                                     <h4>{item.UserAction}</h4>
-                                   </div>
-                                 </div>
-                               );
-                             })}
-                           </div>
+              <div className={styles.leftPanelStatusHeader}>
+                {History.filter(item => item.UserAction !== "Request Initiator").map((item, index) => {
+                  let statusClass = styles.statusBox;
+                  if (item.UserAction === "Approved") {
+                    statusClass = `${styles.statusBox}`;
+                  }
+                  else if (item.UserAction === "Rejected") {
+                    statusClass = `${styles.statusBox} ${styles.rejectedBox}`;
+                  }
+                  else if (item.UserAction === "Upcoming") {
+                    statusClass = `${styles.statusBox} ${styles.upcomingBox}`;
+                  }
+                  else if (item.UserAction === "Pending") {
+                    statusClass = `${styles.statusBox} ${styles.pendingBox}`;
+                  }
+                  return (
+                    <div className={statusClass} key={index}>
+                      <div className={styles.content}>
+                        <h5>{item.UserName}</h5>
+                        <h6>{item.Designation}</h6>
+                        <h4>{item.UserAction}</h4>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
               <div className={styles.formGroup}>
                 <label>Project Code<span className={styles.required}>*</span></label>
                 <input name="projectCode" value={form.projectCode} readOnly style={{ backgroundColor: "lightgray" }} />
@@ -232,6 +235,11 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
                   </div>
                 </div>
               </div>
+              <div>
+                <div className={styles.buttonGroup} >
+                  <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
+                </div>
+              </div>
             </div>
           </div>
           <div className={styles['col-md-3']}>
@@ -240,56 +248,56 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
                 <h4>Timeline of the Request - {form.RequestNo}</h4>
               </div>
               <ul>
-                 {History.map((item, index) => {
-                                  const isApproved = item.UserAction === "Approved";
-                                  const isRejected = item.UserAction === "Rejected";
-                                  const isInitiated = item.UserAction === "Request Initiator";
-                                  const isUpcoming = item.UserAction === "Upcoming";
-                                  const isPending = item.UserAction === "Pending";
-                                  return (
-                                    <li
-                                      key={index}
-                                      className={
-                                        isApproved
-                                          ? styles.tickIcon
-                                          : isRejected
-                                            ? styles.crossIcon
-                                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : ""
-                                      }
-                                    >
-                                      <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
-                                      <span><b>{isInitiated ? "Initiator" : "Approver Name:"} </b>{item.UserName}</span>
-                                      {item.UserAction && (
-                                        <span>
-                                          <b>Action Taken:{" "}</b>
-                                          <span
-                                            className={
-                                              isApproved
-                                                ? styles.apprStatus
-                                                : isRejected
-                                                  ? styles.rejStatus
-                                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : ""
-                                            }
-                                          >
-                                            {item.UserAction}
-                                          </span>
-                                        </span>
-                                      )}
-                                      {item.ActionDate && (<span><b>Action Date: </b>
-                                        {new Date(item.ActionDate).toLocaleString('en-GB', {
-                                          day: 'numeric',
-                                          month: 'short',
-                                          year: 'numeric',
-                                          hour: 'numeric',
-                                          minute: '2-digit',
-                                          hour12: true
-                                        }).replace(',', ' AT')}
-                                      </span>
-                                      )}
-                                      {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
-                                    </li>
-                                  );
-                                })}
+                {History.map((item, index) => {
+                  const isApproved = item.UserAction === "Approved";
+                  const isRejected = item.UserAction === "Rejected";
+                  const isInitiated = item.UserAction === "Request Initiator";
+                  const isUpcoming = item.UserAction === "Upcoming";
+                  const isPending = item.UserAction === "Pending";
+                  return (
+                    <li
+                      key={index}
+                      className={
+                        isApproved
+                          ? styles.tickIcon
+                          : isRejected
+                            ? styles.crossIcon
+                            : isInitiated ? styles.tickIcon : isUpcoming ? styles.upcomingIcon : isPending ? styles.pendingIcon : ""
+                      }
+                    >
+                      <span className={styles.spanHeader} style={{ fontSize: "bold" }}>{item.Designation}</span>
+                      <span><b>{isInitiated ? "Initiator" : "Approver Name:"} </b>{item.UserName}</span>
+                      {item.UserAction && (
+                        <span>
+                          <b>Action Taken:{" "}</b>
+                          <span
+                            className={
+                              isApproved
+                                ? styles.apprStatus
+                                : isRejected
+                                  ? styles.rejStatus
+                                  : isUpcoming ? styles.upcomingstatus : isPending ? styles.pendingstatus : ""
+                            }
+                          >
+                            {item.UserAction}
+                          </span>
+                        </span>
+                      )}
+                      {item.ActionDate && (<span><b>Action Date: </b>
+                        {new Date(item.ActionDate).toLocaleString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        }).replace(',', ' AT')}
+                      </span>
+                      )}
+                      {item.UserComment && <span><b>Comments:</b> {item.UserComment}</span>}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>

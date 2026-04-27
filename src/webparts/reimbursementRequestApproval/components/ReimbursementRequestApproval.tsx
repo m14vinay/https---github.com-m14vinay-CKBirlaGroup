@@ -592,7 +592,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                 </div>
                 <div className={styles['form-group']}>
                   <label>Comments</label>
-                  <input type='text' className="form-control" name="Comments" value={form.Comments} onChange={handleChange} />
+                  <input type='text' className="form-control" name="Comments" value={form.Comments} onChange={handleChange} style={{width:"100%"}} />
                 </div>
                 {/* Buttons */}
                 <div className={styles['btn-group']}>

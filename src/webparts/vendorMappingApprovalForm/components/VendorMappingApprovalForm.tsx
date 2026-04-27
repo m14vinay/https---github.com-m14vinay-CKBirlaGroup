@@ -59,7 +59,10 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
       handleFetchById(id);
     }
   }, []);
-
+ const handleCancel = () => {
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    window.location.assign(url);
+  };
 
   const loadAttachments = async (id: number) => {
     try {
@@ -330,7 +333,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
                 <div className={styles.buttonGroup} >
                   <button className={styles.ApproveBtn} onClick={handleApprove} disabled={isDisabled}>Approve</button>
                   <button className={styles.RejectBtn} onClick={handleReject} disabled={isDisabled} >Reject</button>
-                  <button className={styles.cancelBtn}>Cancel</button>
+                  <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
                 </div>
               </div>
 

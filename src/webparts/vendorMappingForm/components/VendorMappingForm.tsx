@@ -15,7 +15,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     projectCode: '',
     projectTitle: '',
     projectDescription: '',
-    vendorId:0,
+    vendorId: 0,
     vendorName: '',
     vendorDescription: '',
     files: [] as File[],
@@ -133,7 +133,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
       const options = data.map((item: any) => ({
         key: item.ID,
         text: 'CKBCSL/' + item.ID + '-' + item.Title,
-  
+
       }));
       setVendorOptions(options);
     } catch (error) {
@@ -224,8 +224,8 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
-const handleprojectNoExist = async () => {
-  const checkdata = await service.getRequestDetails(form.projectCode);
+  const handleprojectNoExist = async () => {
+    const checkdata = await service.getRequestDetails(form.projectCode);
     if (checkdata != null) {
       setForm(prev => ({
         ...prev,
@@ -249,17 +249,17 @@ const handleprojectNoExist = async () => {
       return;
     }
     try {
-        const check = await service.getItemByProjectCode(value);
-    // // 🔒 Safety check
-   if (check && check.value && check.value.length > 0 && check.value[0].CurrentStatus === 'Approved') {
-      alert("This Project Code is Already Approved.");
+      const check = await service.getItemByProjectCode(value);
+      // // 🔒 Safety check
+      if (check && check.value && check.value.length > 0 && check.value[0].CurrentStatus === 'Approved') {
+        alert("This Project Code is Already Approved.");
         setForm(prev => ({
-            ...prev,
-           projectCode:''
-            }));
-      return;
-    }
-       
+          ...prev,
+          projectCode: ''
+        }));
+        return;
+      }
+
       // 🔹 Service call to fetch request details
       const result = await service.getRequestDetails(value);
       if (result.length > 0) {
@@ -274,20 +274,20 @@ const handleprojectNoExist = async () => {
           alert("This Request is Not Approved.✅");
           setForm(prev => ({
             ...prev,
-           projectCode:''
+            projectCode: ''
           }));
         }
 
       }
-      else{
-         alert("Enter correct project code");
-          setForm(prev => ({
-            ...prev,
-            projectCode:'',
-            projectTitle: '',
-            projectDescription: '',
-            Department: ''
-          }));
+      else {
+        alert("Enter correct project code");
+        setForm(prev => ({
+          ...prev,
+          projectCode: '',
+          projectTitle: '',
+          projectDescription: '',
+          Department: ''
+        }));
       }
     }
     catch (error) {
@@ -300,13 +300,13 @@ const handleprojectNoExist = async () => {
   const handleChangeProjectCode = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
 
-  setForm(prev => ({
-    ...prev,
-    projectCode: value
-  }));
-};
+    setForm(prev => ({
+      ...prev,
+      projectCode: value
+    }));
+  };
 
- const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     setForm({
@@ -315,14 +315,14 @@ const handleprojectNoExist = async () => {
     });
   };
 
-const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
 
-  setForm(prev => ({
-    ...prev,
-    projectCode: value
-  }));
-};
+    setForm(prev => ({
+      ...prev,
+      projectCode: value
+    }));
+  };
 
   const handleSaveHistory = async (id: number, Title: string, UserName: string, UserAction: string, Designation: string, ActionDate: Date, Sequence: number) => {
     let payload: {};
@@ -342,7 +342,7 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
         Title: Title,
         FID: id,
         UserName: UserName,
-        UserAction:UserAction,
+        UserAction: UserAction,
         Designation: Designation,
         Sequence: Sequence
       };
@@ -383,12 +383,12 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
           }
-        }        
+        }
         await service.updateItem(res.Id, {
           RequestNo: `VMR-${res.Id}`
         });
         alert("Request Saved Successfully.");
-const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
       } else {
         // 🔹 UPDATE
@@ -414,9 +414,9 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
 
   // SUBMIT DATA
   const handleUpdate = async () => {
-      try {
-    setLoading(true);
-  
+    try {
+      setLoading(true);
+
       if (!form.projectCode) return alert("Enter Project Code");
       if (!form.vendorName) return alert("Please Select Vendor");
 
@@ -454,14 +454,14 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
       else {
         const res = await service.createItem(payload);
         setItemId(res.Id);
-      await handleSaveHistory(res.Id, 'VMR', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-       await handleSaveHistory(res.Id, 'VMR', useremail?.Title, 'Pending', 'Approver', new Date(), 1);
+        await handleSaveHistory(res.Id, 'VMR', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+        await handleSaveHistory(res.Id, 'VMR', useremail?.Title, 'Pending', 'Approver', new Date(), 1);
         // store ID for future update
         if (res.Id > 0 && form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
           }
-        }        
+        }
         await service.updateItem(res.Id, {
           RequestNo: `VMR-${res.Id}`
         });
@@ -512,20 +512,6 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
               <div className={styles.leftPanelHeader}>
                 <h4>Vendor Mapping</h4>
               </div>
-
-              <label>Project Code <span className={styles.required}>*</span></label>
-              <input name="projectCode" value={form.projectCode} onChange={handleChangeProjectCode} onBlur={handleRequestNoChange} type='uppercase' />
-              {requestNoError && <span className={styles.error}>{requestNoError}</span>}
-
-              <label>Project Title</label>
-              <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
-
-              <label>Project Description</label>
-              <input name="projectDescription" value={form.projectDescription} readOnly style={{ backgroundColor: "lightgray" }} />
-
-
-              <input name="Department" value={form.Department} readOnly style={{ backgroundColor: "lightgray" }} type="hidden" />
-
               <label>Select Vendor <span className={styles.required}>*</span></label>
               <Dropdown
                 placeholder="Select Vendor"
@@ -549,6 +535,20 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
                   Click Here
                 </a>
               </p>
+              <label>Project Code <span className={styles.required}>*</span></label>
+              <input name="projectCode" value={form.projectCode} onChange={handleChangeProjectCode} onBlur={handleRequestNoChange} type='uppercase' />
+              {requestNoError && <span className={styles.error}>{requestNoError}</span>}
+
+              <label>Project Title</label>
+              <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
+
+              <label>Project Description</label>
+              <input name="projectDescription" value={form.projectDescription} readOnly style={{ backgroundColor: "lightgray" }} />
+
+
+              <input name="Department" value={form.Department} readOnly style={{ backgroundColor: "lightgray" }} type="hidden" />
+
+
               <label>Additional Information & Remarks</label>
               <input name="vendorDescription" value={form.vendorDescription} onChange={handleChange} />
 

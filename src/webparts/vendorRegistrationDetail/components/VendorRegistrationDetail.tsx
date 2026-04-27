@@ -491,7 +491,7 @@ const VendorRegistrationDetail: React.FC<IVendorRegistrationDetailProps> = (prop
                           <div className={styles["accordion-body"]}>
                             {attachments.map((file, index) => (
                               <div key={index}>
-                                <a href={file.ServerRelativeUrl} target="_blank">
+                                <a href={file.ServerRelativeUrl} rel="noopener noreferrer">
                                   {file.FileName}
                                 </a>
                               </div>
