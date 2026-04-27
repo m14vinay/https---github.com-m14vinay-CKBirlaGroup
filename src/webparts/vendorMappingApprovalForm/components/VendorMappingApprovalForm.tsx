@@ -113,7 +113,6 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
 
             files: null
           }));
-
           const value = result.VendorName || '';
           const Id = value.split("/")[1].split("-")[0];
           setVendorId(Id);
@@ -234,20 +233,6 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
       setLoading(false);
     }
   };
-
-  //     await service.updateItemdata(itemId, "Rejected", approverComment, "Rejected");
-  //     await handleUpdateApproveHistory(itemId, 'Rejected', 1, approverComment);
-  //     alert("❌ Rejected Successfully");
-  //     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-  //     window.location.assign(url);
-  //     //setApproverComment('');
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  //   finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   // --- RENDER ---
   return (
