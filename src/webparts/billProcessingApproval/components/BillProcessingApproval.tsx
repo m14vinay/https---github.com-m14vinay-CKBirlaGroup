@@ -609,7 +609,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
               <label>PO Request No</label>
               <input name="PORequestNo" value={form.PORequestNo} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Vendor Name</label>
-              <input name="VendorName" value={form.vendorcode + "-" + form.VendorName} type='text' readOnly style={{ backgroundColor: "lightgray" }}>
+              <input name="VendorName" value={form.VendorName} type='text' readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
               <label>Project Title</label>
               <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
