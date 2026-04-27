@@ -539,6 +539,7 @@ AdvancepaymentStatus: '',
     try {
       setLoading(true);
       if (!form.ProjectTitle) return alert("Enter Project Title ");
+       if(!form.ProjectDescription) return alert("Enter ProjectDescription");
       if (!form.Vendor1) return alert("Enter Vendor1 ");
       if (!form.Quote1) return alert("Enter Quote1");
       if (!form.Selectedvendor) return alert("Please Select Vendor");
@@ -679,6 +680,7 @@ AdvancepaymentStatus: '',
     try {
       setLoading(true);
       if (!form.ProjectTitle) return alert("Enter Project Title ");
+       if(!form.ProjectDescription) return alert("Enter ProjectDescription");
       if (!form.Vendor1) return alert("Enter Vendor1 ");
       if (!form.Quote1) return alert("Enter Quote1");
       if (!form.Selectedvendor) return alert("Please Select Vendor");
@@ -911,7 +913,7 @@ AdvancepaymentStatus: '',
               <input name="ProjectReffNo" value={form.ProjectReffNo} onChange={handleChange} />
 
 
-              <label>Project Description & Advance Payment Details</label>
+              <label>Project Description & Advance Payment Details <span className={styles.required}>*</span></label>
               <input name="ProjectDescription" value={form.ProjectDescription} onChange={handleChange} />
 
 

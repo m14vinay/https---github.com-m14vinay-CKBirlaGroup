@@ -41,6 +41,7 @@ import { ChoiceGroup, IChoiceGroupOption, Dropdown, IDropdownOption } from '@flu
     Approval1Id: null as number | null, 
   Approval2Id: null as number | null, 
   Approval3Id: null as number | null,  
+  ApprovalKey:  null as number | null,
     Approval1:'',
     Approval2:'',
     Approval3:'',
@@ -120,11 +121,15 @@ const loadAttachments = async (id:number) => {
       } 
          if (result.CurrentStatus==='Draft') {
       setItemId(result.Id);
+      
 const selected = poOptions.find(
     opt =>
       opt.text.trim().toLowerCase() ===
       result.Advancepayment?.trim().toLowerCase()
   );
+  const select = ApproverOptions.find(
+  opt => opt.text === result.ApprovalPath
+);
        setForm(prev => ({
         ...prev,
         ProjectTitle: result.ProjectTitle || '',
@@ -145,7 +150,8 @@ const selected = poOptions.find(
       ApprovalPath: result.ApprovalPath || '',
       CurrentStatus: result.CurrentStatus || '',
       RequestNo: result.RequestNo || '',
-     AdvancepaymentStatus: selected?.key || "" 
+     AdvancepaymentStatus: selected?.key || "" ,
+     ApprovalID: ""
       
       }));       
     } else {
@@ -159,6 +165,24 @@ const selected = poOptions.find(
     setLoading(false);
   }
 };
+
+React.useEffect(() => {
+  if (!ApproverOptions.length) return;
+  if (!form.ApprovalPath) return;
+
+  const select = ApproverOptions.find(
+    opt =>
+      opt.text?.trim().toLowerCase() ===
+      form.ApprovalPath?.trim().toLowerCase()
+  );
+
+  if (select) {
+    setForm(prev => ({
+      ...prev,
+      ApprovalID: select.key
+    }));
+  }
+}, [ApproverOptions, form.ApprovalPath]);
 const handlecheckamount = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm({
@@ -338,12 +362,15 @@ const handleSaveHistory = async (id: number, Title: string, UserName: string, Us
   try {
     setLoading(true);
     if(!form.ProjectTitle) return alert("Enter Project Title ");
+     if(!form.ProjectDescription) return alert("Enter ProjectDescription");
     if(!form.Vendor1) return alert("Enter Vendor1 ");
     if(!form.Quote1) return alert("Enter Quote1");
     if(!form.Selectedvendor) return alert("Please Select Vendor");
     if(!form.SelectedQuote) return alert("Please Selected Quote");
     if(!form.Department) return alert("Please Select Department Name");
     if(!form.AdvancepaymentStatus) return alert("Please Select Advance Payemnt");
+   
+
 const User=await service.getUserById(Number(form.Approval1Id));
   if(User?.Id)
   {
@@ -418,13 +445,19 @@ const handleUpdate = async () => {
   try {
    setLoading(true);
    if(!form.ProjectTitle) return alert("Enter Project Title ");
+    if(!form.ProjectDescription) return alert("Enter ProjectDescription");
     if(!form.Vendor1) return alert("Enter Vendor1 ");
     if(!form.Quote1) return alert("Enter Quote1");
     if(!form.Selectedvendor) return alert("Please Select Vendor");
     if(!form.SelectedQuote) return alert("Please Selected Quote");
     if(!form.Department) return alert("Please Select Department Name");
     if(!form.AdvancepaymentStatus) return alert("Please Select Advance Payemnt");
-     if (!form.files || form.files.length === 0) return alert("Please Attach files");
+     if (
+        (!form.files || form.files.length === 0) &&
+        (!attachments || attachments.length === 0)
+      ) {
+        return alert("Please Attach files");
+      }
       const currentuser = await service.getUser();
      const User=await service.getUserById(Number(form.ApprovalID.split('_')[0]));
       if(User?.Id)
@@ -527,7 +560,8 @@ const handleApprovalPathChange = (option?: IDropdownOption) => {
 setForm(prev => ({
   ...prev,
   ApprovalPath: option?.text||"",
-  ApprovalID:(option?.key).toString()||""
+  ApprovalID:(option?.key).toString()||"",
+  ApprovalKey: option.key as number 
 }));
 };
     return (
@@ -565,7 +599,7 @@ setForm(prev => ({
           <input name="ProjectReffNo" value={form.ProjectReffNo} onChange={handleChange}  />
         
 
-          <label>Project Description & Advance Payment Details</label>
+          <label>Project Description & Advance Payment Details <span className={styles.required}>*</span></label>
           {/* <input name="ProjectDescription" value={form.ProjectDescription} onChange={handleChange} /> */}
           <textarea name="ProjectDescription" value={form.ProjectDescription} onChange={handleChange}/>
 

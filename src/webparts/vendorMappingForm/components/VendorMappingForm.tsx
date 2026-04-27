@@ -357,7 +357,8 @@ const handleChangedescription = (e: React.ChangeEvent<HTMLInputElement>) => {
     // 🔹 Validations
     try {
       setLoading(true);
-      
+      if (!form.projectCode) return alert("Enter Project Code");
+      if (!form.vendorName) return alert("Please Select Vendor");
       // 🔹 Payload (common)
       const payload = {
 
@@ -413,8 +414,9 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
 
   // SUBMIT DATA
   const handleUpdate = async () => {
+      try {
     setLoading(true);
-    try {
+  
       if (!form.projectCode) return alert("Enter Project Code");
       if (!form.vendorName) return alert("Please Select Vendor");
 
