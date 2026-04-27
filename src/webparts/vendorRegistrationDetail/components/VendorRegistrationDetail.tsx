@@ -146,6 +146,12 @@ const VendorRegistrationDetail: React.FC<IVendorRegistrationDetailProps> = (prop
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorMappingForm.aspx`;
     window.location.assign(url);
     }
+    else if(PageName?.includes('VendorMappingApprovalForm_'))
+    {
+    const RequestPageID = PageName.split('_')[1];
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorMappingApprovalForm.aspx?RequestId=${RequestPageID}`;
+    window.location.assign(url);
+    }
     else{
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationSearch.aspx`;
     window.location.assign(url);

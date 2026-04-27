@@ -509,7 +509,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
         setForm(
           prev => ({
             ...prev,
-            Email: vendor.EmailId || ''
+            Email: vendor.RegEmailId || ''
           }));
       }
     }

@@ -154,7 +154,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           ...prev,
           ProjectCode: form.ProjectCode,
           vendorcode: result[0].VendorName.split("-")[0] || '',
-          VendorName: result[0].VendorName.split("-")[1] || '',
+          VendorName: result[0].VendorName || '',
           projectTitle: result[0].ProjectTitle,
           DepartmentName: result[0].Department
         }));
@@ -523,10 +523,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                 onChange={(e, option) => handleDocumentChange(option)}
               />
               <label>Vendor Name</label>
-              <input name="VendorName" value={form.vendorcode + "-" + form.VendorName} type='text' readOnly>
+              <input name="VendorName" value={form.VendorName} type='text' readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
               <label>Project Title</label>
-              <input name="projectTitle" value={form.projectTitle} readOnly />
+              <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Additional Information & Remarks</label>
               <input name="Comments" value={form.Comments} onChange={handleChange}  >
               </input>
