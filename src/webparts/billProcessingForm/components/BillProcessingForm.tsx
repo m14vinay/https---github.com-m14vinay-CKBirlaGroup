@@ -535,7 +535,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                 value={form.ProjectCode}
                 onChange={handleRequestNoChange}
               />
-              <label>PO Request No</label>
+              <label>PO Request No<span className={styles.required}>*</span></label>
               <Dropdown
                 placeholder="Select Request No"
                 options={POOptions}
