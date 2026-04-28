@@ -190,11 +190,11 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
           isOpen={isOpen}
           onDismiss={() => setisOpen(false)}
           isBlocking={true}>
-          <div className={styles.searchBox} style={{ marginBottom: "0px" }}>
+          <div className={styles.searchBox} style={{ marginBottom: "0px",width:"500px" }}>
             <h3>Send Email To Vendor</h3>
-            <div className={styles.formGroup} style={{ display: "inline-flex", padding: "10px 10px 10px 10px" }}>
+            <div className={styles.formGroup} style={{ display: "inline-flex", padding: "10px 10px 10px 10px",width:"100%" }}>
               <label style={{ width: '30%' }}>Vendor Email<span style={{ color: "red" }}>*</span></label>
-              <input className="form-control" name='Email' type='email' placeholder='xxx@mail.com' value={form.Email} style={{ width: '70%' }}
+              <input className="form-control" name='Email' type='email' placeholder='xxx@mail.com' value={form.Email} style={{ width: '100%' }}
                 onChange={handleChange}
               />
             </div>
