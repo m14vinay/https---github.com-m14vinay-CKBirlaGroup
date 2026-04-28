@@ -68,7 +68,10 @@
 .pendingBox::after {
   border-left-color:#F6BE00;
 }
-
+#ModalFocusTrapZone2
+{
+  width: 40%;
+}
 .pendingBox::before {
   border-bottom: 46px solid transparent;
   border-left: 46px solid white;
