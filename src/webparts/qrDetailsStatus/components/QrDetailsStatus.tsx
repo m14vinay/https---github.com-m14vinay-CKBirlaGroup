@@ -87,7 +87,10 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
     }
   }, [itemId]);
 
-
+  const handleCancel = () => {
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    window.location.assign(url);
+  };
   const handleFetchById = async (id: number) => {
     try {
       setLoading(true);
@@ -326,6 +329,11 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
                     <div>No purchase order details found.</div>
                   )}
                 </div>
+              </div>
+            </div>
+            <div>
+              <div className={styles.buttonGroup} >
+                <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
               </div>
             </div>
           </div>
