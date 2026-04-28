@@ -400,6 +400,26 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         setLoading(false);
         return alert("Please Attach files");
       }
+      if (form.ProjectCode == '') {
+        alert("Please enter Project Code.");
+        return;
+      }
+      if (form.PORequestNo == '') {
+        alert("Please select PO Request.");
+        return;
+      }
+      if (form.BillNo == '') {
+        alert("Please enter Bill No.");
+        return;
+      }
+      if (form.BillDate == null) {
+        alert("Please enter Bill Date.");
+        return;
+      }
+      if (form.BillAmount == 0) {
+        alert("Please enter Bill Amount.");
+        return;
+      }
       const data = await service.GetApprover(form.DepartmentName);
       const User = await service.getUserById(data.Departmenthead.Id);
       const dataFinanceApprover = await service.GetApproverFromFinance(form.DepartmentName);
@@ -534,10 +554,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               <input name="OccupiedAmount" value={form.OccupiedAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Remaining Amount</label>
               <input name="RemainingAmount" value={form.RemainingAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
-              <label>Bill No</label>
+              <label>Bill No<span className={styles.required}>*</span></label>
               <input name="BillNo" value={form.BillNo} type='text' onChange={handleChange} onBlur={handleCheckbillNoExist}>
               </input>
-              <label>Bill Date</label>
+              <label>Bill Date<span className={styles.required}>*</span></label>
               <input name="BillDate" type="date" value={
                 form.BillDate
                   ? new Date(form.BillDate).toISOString().split('T')[0]
@@ -545,7 +565,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               } onChange={handleBillDateChange}>
               </input>
 
-              <label>Bill Amount</label>
+              <label>Bill Amount<span className={styles.required}>*</span></label>
               <input name="BillAmount" value={form.BillAmount} type='number' onChange={handleChange} onBlur={handleAmountCalculateChange} />
 
               <label>Calculated Taxes</label>
