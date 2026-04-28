@@ -53,7 +53,8 @@ if (parm_Pan) {
 const filterQuery = filters.length > 0
   ? `$filter=${filters.join(" or ")}`
   : "";
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?${filterQuery}`;
+  const orderBy = `$orderby=Created desc`;
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?${filterQuery}${filterQuery ? "&" : ""}${orderBy}`;
   const res = await this.context.spHttpClient.get(
     url,
     SPHttpClient.configurations.v1
