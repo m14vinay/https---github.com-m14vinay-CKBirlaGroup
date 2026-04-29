@@ -287,7 +287,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
 
               <p>If you want to verfiy the document.
                 <a
-                  href={`https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/VendorRegistrationDetails.aspx?RequestId=${vendorId}&PageName=VendorMappingApprovalForm_${new URLSearchParams(window.location.search).get('RequestId')}`}
+                  href={`${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationDetails.aspx?RequestId=${vendorId}&PageName=VendorMappingApprovalForm_${new URLSearchParams(window.location.search).get('RequestId')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

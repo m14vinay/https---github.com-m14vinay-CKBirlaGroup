@@ -542,10 +542,8 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
 
               <p>If You Want To Add New Vendor.
                 <a
-                  href="https://ckbcsl.sharepoint.com/:u:/r/sites/DigiflowUAT/SitePages/VendorRegistrationSearch.aspx"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                  href={`${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationSearch.aspx`}
+                  rel="noopener noreferrer">
                   Click Here
                 </a>
               </p>
@@ -554,7 +552,7 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
 
               <p>If you want to verfiy the document.
                 <a
-                  href={`https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/VendorRegistrationDetails.aspx?RequestId=${form.vendorId}&PageName=VendorMappingForm`}
+                  href={`${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationDetails.aspx?RequestId=${form.vendorId}&PageName=VendorMappingForm`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -641,16 +639,16 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
                 <ol>
                   <p>
                     <a
-                      href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/CKBCSL_VENDOR_LIST_11.06.18.xlsx"
+                      href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/CKBCSL_VENDOR_LIST_11.06.18.xlsx`}
                       target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                     rel="noopener noreferrer"   >
+                 
                       CKBCSL_VENDOR_LIST_11.06.18.xlsx
                     </a>
                   </p>
                   <p>
                     <a
-                      href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/Vendor_Registration_Form_v1.0.xlsx"
+                      href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/Vendor_Registration_Form_v1.0.xlsx`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

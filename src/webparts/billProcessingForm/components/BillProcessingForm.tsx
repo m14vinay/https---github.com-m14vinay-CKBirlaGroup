@@ -648,7 +648,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                 <ol>
                   <p>
                     <a
-                      href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/Cheque_Payment_Form_v1.0.xlsx"
+                      href={`${props.context.pageContext.web.absoluteUrl}SampleDocuments/Cheque_Payment_Form_v1.0.xlsx`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
