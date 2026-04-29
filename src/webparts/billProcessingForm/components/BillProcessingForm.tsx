@@ -153,7 +153,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         setForm(prev => ({
           ...prev,
           ProjectCode: form.ProjectCode,
-          vendorcode: result[0].VendorName.split("-")[0] || '',
+          vendorcode:result[0].VendorName.includes("-") ? result[0].VendorName.split("-")[0] : '',
           VendorName: result[0].VendorName || '',
           projectTitle: result[0].ProjectTitle,
           DepartmentName: result[0].Department
