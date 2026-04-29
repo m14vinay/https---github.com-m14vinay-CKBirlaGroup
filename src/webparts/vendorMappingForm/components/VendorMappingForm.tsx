@@ -554,7 +554,7 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
 
               <p>If you want to verfiy the document.
                 <a
-                  href={`https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SitePages/VendorRegistrationDetails.aspx?RequestId=${form.vendorId}&PageName=VendorMappingForm`}
+                  href={`${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationDetails.aspx?RequestId=${form.vendorId}&PageName=VendorMappingForm`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -641,7 +641,7 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
                 <ol>
                   <p>
                     <a
-                      href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/CKBCSL_VENDOR_LIST_11.06.18.xlsx"
+                      href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/CKBCSL_VENDOR_LIST_11.06.18.xlsx`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -650,7 +650,7 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
                   </p>
                   <p>
                     <a
-                      href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/Vendor_Registration_Form_v1.0.xlsx"
+                      href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/Vendor_Registration_Form_v1.0.xlsx`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

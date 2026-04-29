@@ -1098,7 +1098,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
                       <div className={styles.formGroup}>
                         <label style={{ width: '50%' }}>Vendor Registration Template</label>
 
-                        <a href="https://ckbcsl.sharepoint.com/:x:/r/sites/DigiflowUAT/Shared%20Documents/Vendor.xlsx" download><img src="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/Shared%20Documents/download.png"
+                        <a href={`${props.context.pageContext.web.absoluteUrl}/Shared%20Documents/Vendor.xlsx`} download><img src={`${props.context.pageContext.web.absoluteUrl}/Shared%20Documents/download.png`} alt="Download Template"
                           style={{ height: "30px" }} /></a>
                       </div>
                     </div>

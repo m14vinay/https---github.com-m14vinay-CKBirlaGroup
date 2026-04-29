@@ -758,7 +758,7 @@ setForm(prev => ({
             <ol>
              <p>
      <a 
-        href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/Quotation_Approval_Form_v1.0.xlsx"
+        href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/Quotation_Approval_Form_v1.0.xlsx`}
       target="_blank"
       rel="noopener noreferrer"
       >
@@ -767,7 +767,7 @@ setForm(prev => ({
     </p>
     <p>
      <a 
-        href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/SOP_Procurement_of_Goods_Services-CKBCSL-V1.1_wef_15.09.2016.pdf"
+        href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/SOP_Procurement_of_Goods_Services-CKBCSL-V1.1_wef_15.09.2016.pdf`}
       target="_blank"
       rel="noopener noreferrer"
       >
@@ -776,7 +776,7 @@ setForm(prev => ({
     </p>
     <p>
      <a 
-        href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/WSR5June.docx"
+        href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/WSR5June.docx`}
       target="_blank"
       rel="noopener noreferrer"
       >
@@ -785,7 +785,7 @@ setForm(prev => ({
     </p>
      <p>
      <a 
-        href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/SharePointtestpage.docx"
+        href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/SharePointtestpage.docx`}
       target="_blank"
       rel="noopener noreferrer"
       >
