@@ -1153,7 +1153,7 @@ AdvancepaymentStatus: '',
                   </p>
                   <p>
                     <a
-                      href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/WSR5June.docx"
+                      href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/WSR5June.docx`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -1162,7 +1162,7 @@ AdvancepaymentStatus: '',
                   </p>
                   <p>
                     <a
-                      href="https://ckbcsl.sharepoint.com/sites/DigiflowUAT/SampleDocuments/SharePointtestpage.docx"
+                      href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/SharePointtestpage.docx`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

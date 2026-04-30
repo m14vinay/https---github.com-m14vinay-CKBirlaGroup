@@ -1,4 +1,5 @@
 import { SPHttpClient } from '@microsoft/sp-http';
+import { sp } from "@pnp/sp/presets/all";
 export default class Service {
 
   private context: any;
@@ -8,24 +9,27 @@ export default class Service {
     this.context = context;
   }
   // Fetch the Record
-  public async getItemByTitle(
+ public async getItemByTitle(
   FromDate: string,
   ToDate: string
 ): Promise<any[]> {
   let filters: string[] = [];
-  if (FromDate) {
-    // start of day
-    const start = new Date(FromDate);
-    start.setHours(0, 0, 0, 0);
+  if (FromDate && ToDate) {
 
-    // end of day
-    const end = new Date(ToDate);
-    end.setHours(23, 59, 59, 999);
+      // ✅ Convert dd-MM-yyyy → ISO safely
+      const parseDate = (dateStr: string) => {
+        const [day, month, year] = dateStr.split("-");
+        return new Date(`${year}-${month}-${day}`);
+      };
 
-    filters.push(
-      `Created ge datetime'${start.toISOString()}' and Created lt datetime'${end.toISOString()}'`
-    );
-  }
+      const start = parseDate(FromDate);
+      start.setHours(0, 0, 0, 0);
+
+      const end = parseDate(ToDate);
+      end.setHours(23, 59, 59, 999);
+
+      filters.push(`Created ge datetime'${start.toISOString()}' and Created le datetime'${end.toISOString()}'`);
+    }
 
   // Combine filters
   const filterQuery = filters.length > 0 ? `$filter=${filters.join(" or ")}` : "";

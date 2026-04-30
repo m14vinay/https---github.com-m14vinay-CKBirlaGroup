@@ -96,7 +96,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               VendorName: result.VendorName || '',
               projectTitle: result.ProjectTitle || '',
               DepartmentName: result.Department || '',
-              ProjectCode: result.ProjectCode || '',              
+              ProjectCode: result.ProjectCode || '',
               TotalAmount: result.TotalAmount || '',
               Comments: result.ProjectDescription || '',
               vendorcode: result.Vendorcode || '',
@@ -153,7 +153,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         setForm(prev => ({
           ...prev,
           ProjectCode: form.ProjectCode,
-          vendorcode: result[0].VendorName.split("-")[0] || '',
+          vendorcode: result[0].VendorName.includes("-") ? result[0].VendorName.split("-")[0] : '',
           VendorName: result[0].VendorName || '',
           projectTitle: result[0].ProjectTitle,
           DepartmentName: result[0].Department
@@ -282,7 +282,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       setForm(prev => ({
         ...prev,
         BillAmount: 0,
-        TotalAmount:form.CalculatedTaxes
+        TotalAmount: form.CalculatedTaxes
       }));
       alert("Bill Amount must be less than Remaining Amount.");
       return;
@@ -330,29 +330,49 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     await service.createHistoryItem(payload);
   };
   // Save
-  const handleSaveOrUpdate = async () => {
-    setLoading(true);
-    const payload = {
-      Vendorcode: form.vendorcode,
-      VendorName: form.VendorName,
-      ProjectTitle: form.projectTitle,
-      ProjectCode: form.ProjectCode,
-      PORequestNo: form.PORequestNo,
-      BillNo: form.BillNo,
-      BillDate: form.BillDate,
-      BillAmount: form.BillAmount,
-      CalculatedTaxes: form.CalculatedTaxes.toString(),
-      TotalAmount: form.TotalAmount.toString(),
-      Department: form.DepartmentName,
-      CurrentStatus: 'Draft',
-      BillDescription: form.Comments,
-      PODescription: form.Comments,
-      ProjectDescription: form.Comments,
-      AttachedSignedPO: isChecked ? "True" : "False",
-      OccupiedAmount: form.OccupiedAmount,
-      RemainingAmount: form.RemainingAmount
-    };
+  const handleSaveOrUpdate = async () => {    
     try {
+       setLoading(true);
+      if (form.ProjectCode == '') {
+        alert("Please enter Project Code.");
+        return;
+      }
+      if (form.PORequestNo == '') {
+        alert("Please select PO Request.");
+        return;
+      }
+      if (form.BillNo == '') {
+        alert("Please enter Bill No.");
+        return;
+      }
+      if (form.BillDate == null) {
+        alert("Please enter Bill Date.");
+        return;
+      }
+      if (form.BillAmount == 0) {
+        alert("Please enter Bill Amount.");
+        return;
+      }
+      const payload = {
+        Vendorcode: form.vendorcode,
+        VendorName: form.VendorName,
+        ProjectTitle: form.projectTitle,
+        ProjectCode: form.ProjectCode,
+        PORequestNo: form.PORequestNo,
+        BillNo: form.BillNo,
+        BillDate: form.BillDate,
+        BillAmount: form.BillAmount,
+        CalculatedTaxes: form.CalculatedTaxes.toString(),
+        TotalAmount: form.TotalAmount.toString(),
+        Department: form.DepartmentName,
+        CurrentStatus: 'Draft',
+        BillDescription: form.Comments,
+        PODescription: form.Comments,
+        ProjectDescription: form.Comments,
+        AttachedSignedPO: isChecked ? "True" : "False",
+        OccupiedAmount: form.OccupiedAmount,
+        RemainingAmount: form.RemainingAmount
+      };
       if (!itemId) {
         // 🔹 CREATE
         const res = await service.createItem(payload);
@@ -360,13 +380,13 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         if (res.Id > 0 && form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
-          }         
+          }
           await service.updateItem(res.Id, {
             RequestNo: `FBP-${res.Id}`
           });
-           alert("Request Saved Successfully.");
-             const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-        window.location.assign(url);
+          alert("Request Saved Successfully.");
+          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+          window.location.assign(url);
         }
       } else {
         // 🔹 UPDATE
@@ -377,7 +397,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           }
         }
         alert("Request Updated Successfully ");
-          const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
       }
     } catch (error) {
@@ -648,11 +668,11 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                 <ol>
                   <p>
                     <a
-                      href={`${props.context.pageContext.web.absoluteUrl}SampleDocuments/Cheque_Payment_Form_v1.0.xlsx`}
+                      href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/Cheque_Payment_Form_v1.0.xlsx`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                     Cheque_Payment_Form_v1.0.xlsx
+                      Cheque_Payment_Form_v1.0.xlsx
                     </a>
                   </p>
                 </ol>

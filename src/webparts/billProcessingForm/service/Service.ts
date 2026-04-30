@@ -1,4 +1,5 @@
 import { SPHttpClient } from '@microsoft/sp-http';
+import { sp } from "@pnp/sp/presets/all";
 export default class Service {
 
   private context: any;
@@ -79,18 +80,45 @@ export default class Service {
   }
   // PO Request NO;
   public async getTotalAmountFromBillProcessingByPO(PORequestNo: string): Promise<number> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items?$filter=PORequestNo eq '${PORequestNo}' and CurrentStatus ne 'Rejected'`;
-    const res = await this.context.spHttpClient.get(
-      url,
-      SPHttpClient.configurations.v1
-    );
-    const data = await res.json();
-    const total = data.value.reduce((sum: number, item: any) => {
-      const amount = parseFloat(item.BillAmount);
-      return sum + (isNaN(amount) ? 0 : amount);
+  try {
+
+    const camlQuery = `
+      <View>
+        <Query>
+          <Where>
+            <Eq>
+              <FieldRef Name='PORequestNo' />
+              <Value Type='Text'>${PORequestNo}</Value>
+            </Eq>
+          </Where>
+        </Query>
+        <ViewFields>
+          <FieldRef Name='BillAmount' />
+          <FieldRef Name='CurrentStatus' />
+        </ViewFields>
+        <RowLimit>200</RowLimit>
+      </View>`;
+
+    const items = await sp.web.lists
+      .getByTitle(this.BillProcessing)
+      .getItemsByCAMLQuery({ ViewXml: camlQuery });
+
+    // Filter + sum in code (fast + safe)
+    const total = items.reduce((sum: number, item: any) => {
+      if (item.CurrentStatus !== "Rejected") {
+        const amount = parseFloat(item.BillAmount);
+        return sum + (isNaN(amount) ? 0 : amount);
+      }
+      return sum;
     }, 0);
+
     return total;
+
+  } catch (error) {
+    console.error("Error:", error);
+    return 0;
   }
+}
   // Get Data using PO Request No
   public async getDocumentDetailsID(RequestNo: string): Promise<any[]> {
 
