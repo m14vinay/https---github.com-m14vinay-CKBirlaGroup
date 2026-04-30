@@ -542,7 +542,7 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
 
               <p>If You Want To Add New Vendor.
                 <a
-                  href="https://ckbcsl.sharepoint.com/:u:/r/sites/DigiflowUAT/SitePages/VendorRegistrationSearch.aspx"
+                  href={`${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationSearch.aspx`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

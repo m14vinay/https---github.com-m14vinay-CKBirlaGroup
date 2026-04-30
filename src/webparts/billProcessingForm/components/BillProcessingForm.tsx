@@ -332,6 +332,26 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   // Save
   const handleSaveOrUpdate = async () => {
     setLoading(true);
+     if (form.ProjectCode == '') {
+        alert("Please enter Project Code.");
+        return;
+      }
+      if (form.PORequestNo == '') {
+        alert("Please select PO Request.");
+        return;
+      }
+      if (form.BillNo == '') {
+        alert("Please enter Bill No.");
+        return;
+      }
+      if (form.BillDate == null) {
+        alert("Please enter Bill Date.");
+        return;
+      }
+      if (form.BillAmount == 0) {
+        alert("Please enter Bill Amount.");
+        return;
+      }
     const payload = {
       Vendorcode: form.vendorcode,
       VendorName: form.VendorName,
