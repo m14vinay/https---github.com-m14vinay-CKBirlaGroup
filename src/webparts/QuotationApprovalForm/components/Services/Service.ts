@@ -80,7 +80,6 @@ export default class Service {
           })
         }
       );
-
       await this.throwIfNotOk(response as unknown as Response, 'Delete purchase order detail failed');
     }
   }
@@ -99,14 +98,15 @@ export default class Service {
     );
 
     await this.throwIfNotOk(response as unknown as Response, 'Create purchase order detail failed');
-    return response.json();
+    const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
   }
 
   // Update the main quotation item.
   public async updateItem(id: number, data: any): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
-    await this.context.spHttpClient.post(
+    const response = await this.context.spHttpClient.post(
       url,
       SPHttpClient.configurations.v1,
       {
@@ -119,6 +119,8 @@ export default class Service {
         body: JSON.stringify(data)
       }
     );
+    const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
   }
   // Load one quotation item by list ID.
   public async getItemByRequestNo(ID: number): Promise<any> {
@@ -243,14 +245,15 @@ Departmenthead/Id,Departmenthead/Title
       url,
       SPHttpClient.configurations.v1,
       {
-        headers: this.getJsonHeaders({
-          'Content-Type': 'application/json;odata=nometadata'
-        }),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(data)
       }
     );
-    await this.throwIfNotOk(response as unknown as Response, 'Create history failed');
-    return response.json();
+   const updateText = await response.text();
+  return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
   }
 
   // Load approvers for the given department from DepartmentMaster list.
