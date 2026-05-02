@@ -68,11 +68,10 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
     columnHelper.display({
       id: 'view',
       header: 'View',
-      cell: info => (
-        <button onClick={() => handleView(info.row.original.ID)}>
-          View
-        </button>
-      )
+       cell: (info) => <span style={{ cursor: "pointer" }}>
+                      {info.row.original.CurrentStatus === "Draft" ? <Icon iconName="Edit" onClick={() => handleEdit(info.row.original.ID)}></Icon> :
+                          <Icon iconName="RedEye" onClick={() => handleView(info.row.original.ID)}></Icon>}
+                  </span>
     })
   ]
   const table = useReactTable({
@@ -108,6 +107,10 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
   };
   const handleView = (documentId: string) => {
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationDetails.aspx?RequestId=${documentId}`;
+    window.location.assign(url);
+  };
+  const handleEdit = (documentId: string) => {
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistration.aspx?RequestId=${documentId}`;
     window.location.assign(url);
   };
   const handlesearch = async () => {
