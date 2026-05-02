@@ -114,7 +114,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
             files: null
           }));
           const value = result.VendorName || '';
-          const Id = value.split("/")[1].split("-")[0];
+          const Id = value.includes("/") ? value.split("/")[1].split("-")[0] : value;
           setVendorId(Id);
           if (!result.Actiondate1) {
             setIsDisabled(false);  // enable

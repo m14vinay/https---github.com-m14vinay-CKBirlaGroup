@@ -776,7 +776,7 @@ setForm(prev => ({
     </p>
     <p>
      <a 
-        href={`{${props.context.pageContext.web.absoluteUrl}/SampleDocuments/WSR5June.docx`}
+        href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/WSR5June.docx`}
       target="_blank"
       rel="noopener noreferrer"
       >
@@ -785,7 +785,7 @@ setForm(prev => ({
     </p>
      <p>
      <a 
-        href={`{${props.context.pageContext.web.absoluteUrl}/SampleDocuments/SharePointtestpage.docx`}
+        href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/SharePointtestpage.docx`}
       target="_blank"
       rel="noopener noreferrer"
       >

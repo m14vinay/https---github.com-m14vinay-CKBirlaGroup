@@ -47,7 +47,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   const [User, setUser] = React.useState<any>(null);
   const service = new SharePointService(props.context);
   const handleCancel = () => {
-    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Home.aspx`;
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
     window.location.assign(url);
   };
   const handleBillDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {

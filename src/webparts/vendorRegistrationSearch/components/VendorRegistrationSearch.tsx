@@ -52,8 +52,8 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
     columnHelper.accessor('GST', {
       header: 'GST'
     }),
-    columnHelper.accessor('Pan', {
-      header: 'PAN'
+    columnHelper.accessor('Tin', {
+      header: 'Tin'
     }),
     columnHelper.accessor('Created', {
       header: 'Submitted Date',

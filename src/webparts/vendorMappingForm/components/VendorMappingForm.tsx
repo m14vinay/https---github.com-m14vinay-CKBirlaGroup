@@ -543,7 +543,9 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
               <p>If You Want To Add New Vendor.
                 <a
                   href={`${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistrationSearch.aspx`}
-                  rel="noopener noreferrer">
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Click Here
                 </a>
               </p>
