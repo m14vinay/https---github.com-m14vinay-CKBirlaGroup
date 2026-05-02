@@ -585,7 +585,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
         }
       if (itemId) {
         await service.updateItem(itemId, payload);
-        if (form.PoMaster === 'Internal Compliance') {
+        if (form.PoMasterKey === 'Internal Compliance') {
           await handleSaveHistory(itemId, 'PO', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
           await handleSaveHistory(itemId, 'PO', dataApprover?.FinanceController?.Title, 'Pending', 'Finance Controller', new Date(), 1);
         }
