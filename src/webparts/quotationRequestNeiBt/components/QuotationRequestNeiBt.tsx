@@ -413,8 +413,8 @@ const User=await service.getUserById(Number(form.Approval1Id));
        RequestNo: `NEI-${res.Id}`
   });
   alert("Request saved successfully.✅");
-  // const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-  //       window.location.assign(url);
+  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
 
     } else {
       // 🔹 UPDATE
@@ -426,8 +426,8 @@ const User=await service.getUserById(Number(form.Approval1Id));
         }
       }
       alert("Request Updated Successfully ✅");
-      // const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-      //   window.location.assign(url);
+      const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
     }
   } catch (error) {
     console.error(error);
@@ -510,8 +510,8 @@ const handleUpdate = async () => {
       }
     }
     alert("Request Submitted Successfully.✅");    
-    // const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-    // window.location.assign(url);  
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    window.location.assign(url);  
     }
     else{
      const res= await service.createItem(payload);
@@ -537,8 +537,8 @@ const handleUpdate = async () => {
       await service.updateItem(res.Id, {
        RequestNo: `NEI-${res.Id}`
   });
-    // const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-    // window.location.assign(url);  
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    window.location.assign(url);  
      }
     }    
     }
