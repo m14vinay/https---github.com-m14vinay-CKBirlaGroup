@@ -25,6 +25,11 @@ export default function MyPendingRequests() {
 
     let data1: any[] = [];
     let counter = 0;
+    const stripHtml = (html: string) => {
+        const temp = document.createElement("div");
+        temp.innerHTML = html;
+        return temp.textContent || temp.innerText || "";
+    };
 
     const openForm = (row: any) => {
         console.log(row);
@@ -68,7 +73,7 @@ export default function MyPendingRequests() {
             header: () => 'Description',
             cell: info => (
                 <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                    {info.getValue()}
+                    {stripHtml(info.getValue())}
                 </div>)
         }),
         columnHelper.accessor('Department', {
@@ -84,7 +89,7 @@ export default function MyPendingRequests() {
         }),
         columnHelper.accessor('Created', {
             header: 'Completion Date',
-            cell: (info) => <span>{info.row.original.CurrentStatus === "Approved" ? new Date(info.row.original.Modified).toLocaleDateString() :info.row.original.CurrentStatus === "Rejected"?new Date(info.row.original.Modified).toLocaleDateString():""}</span>
+            cell: (info) => <span>{info.row.original.CurrentStatus === "Approved" ? new Date(info.row.original.Modified).toLocaleDateString() : info.row.original.CurrentStatus === "Rejected" ? new Date(info.row.original.Modified).toLocaleDateString() : ""}</span>
         }),
         columnHelper.accessor('Created', {
             header: 'View',
