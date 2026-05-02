@@ -538,7 +538,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       
       let payload = {};
       const UserDepartment = await service.getUserById(Number(Departmenthead));
-      if (form.PoMaster === 'Internal Compliance') {
+      if (form.PoMasterKey === 'Internal Compliance') {
         payload = {
 
           Title: "Testing",
@@ -551,7 +551,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
           Department: form.Department,
           POAmount: form.POAmount,
           ApplicableTaxes: form.ApplicableTaxes,
-          PoMaster: form.PoMaster,
+          PoMaster: form.PoMasterKey,
           ProjectDescription: form.Comments,
           CurrentStatus: 'Pending',
           AssignedTo: dataApprover?.FinanceController?.Title,
@@ -574,7 +574,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
           Department: form.Department,
           POAmount: form.POAmount,
           ApplicableTaxes: form.ApplicableTaxes,
-          PoMaster: form.PoMaster,
+          PoMaster: form.PoMasterKey,
           ProjectDescription: form.Comments,
           CurrentStatus: 'Pending',
           ApprovalPath: approvalPathIC.map(a => a.name).join(" > "),
@@ -606,7 +606,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
       else {
         const res = await service.createItem(payload);
         setItemId(res.Id);
-         if (form.PoMaster === 'Internal Compliance') {
+         if (form.PoMasterKey === 'Internal Compliance') {
           await handleSaveHistory(res.Id, 'PO', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
           await handleSaveHistory(res.Id, 'PO', dataApprover?.FinanceController?.Title, 'Pending', 'Finance Controller', new Date(), 1);
         }
