@@ -380,11 +380,11 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         if (res.Id > 0 && form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
-          }
-          await service.updateItem(res.Id, {
-            RequestNo: `FBP-${res.Id}`
-          });         
+          }                 
         }
+        await service.updateItem(res.Id, {
+            RequestNo: `FBP-${res.Id}`
+          });  
          alert("Request Saved Successfully.");
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
@@ -480,8 +480,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         if (res.Id > 0 && form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
-          }
-          alert("Request Submitted Successfully.");
+          }          
+        }        
           await service.updateItem(res.Id, {
             RequestNo: `FBP-${res.Id}`
           });
@@ -490,9 +490,9 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, 'Upcoming', 'Billing and Approver', new Date(), 2);
           await handleSaveHistory(res.Id, 'FBP', dataFinanceApprover.FinanceController?.Title, 'Upcoming', 'Finance Controller', new Date(), 3);
           await handleSaveHistory(res.Id, 'FBP', databillingApprover.Billing2ndApprover?.Title, 'Upcoming', 'Billing and Approver', new Date(), 4);
+          alert("Request Submitted Successfully.");
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
-        }
       } else {
         // 🔹 UPDATE
         await service.updateItem(itemId, payload);
