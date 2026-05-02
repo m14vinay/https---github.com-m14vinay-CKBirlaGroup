@@ -62,7 +62,7 @@ export default class Service {
   public async updateItem(ID: number, data: any): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${ID})`;
 
-    await this.context.spHttpClient.post(
+    const response = await this.context.spHttpClient.post(
       url,
       SPHttpClient.configurations.v1,
       {
@@ -75,14 +75,15 @@ export default class Service {
         body: JSON.stringify(data)
       }
     );
-
+const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
   }
 
   // Update the Record (Submit)
   public async updateItemdata(id: number, status: string, comments: string, AssignedStatus: string): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
-    await this.context.spHttpClient.post(
+    const response = await this.context.spHttpClient.post(
       url,
       SPHttpClient.configurations.v1,
       {
@@ -100,6 +101,8 @@ export default class Service {
         })
       }
     );
+    const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
   }
 
   // Fetch the Record
