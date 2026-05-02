@@ -11,15 +11,6 @@ export default class Service {
     this.context = context;
   }
 
-  private async throwIfNotOk(response: Response, fallbackMessage: string): Promise<void> {
-    if (response.ok) {
-      return;
-    }
-
-    const errorText = await response.text();
-    throw new Error(errorText || fallbackMessage);
-  }
-
   private getJsonHeaders(extraHeaders?: { [key: string]: string }): { [key: string]: string } {
     return {
       'Accept': 'application/json;odata.metadata=minimal',
@@ -80,7 +71,8 @@ export default class Service {
           })
         }
       );
-      await this.throwIfNotOk(response as unknown as Response, 'Delete purchase order detail failed');
+    const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
     }
   }
 
@@ -96,8 +88,6 @@ export default class Service {
         body: JSON.stringify(data)
       }
     );
-
-    await this.throwIfNotOk(response as unknown as Response, 'Create purchase order detail failed');
     const updateText = await response.text();
     return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
   }
