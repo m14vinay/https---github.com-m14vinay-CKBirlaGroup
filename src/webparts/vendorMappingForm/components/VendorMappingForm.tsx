@@ -643,8 +643,8 @@ const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.as
                     <a
                       href={`${props.context.pageContext.web.absoluteUrl}/SampleDocuments/CKBCSL_VENDOR_LIST_11.06.18.xlsx`}
                       target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                     rel="noopener noreferrer"   >
+                 
                       CKBCSL_VENDOR_LIST_11.06.18.xlsx
                     </a>
                   </p>
