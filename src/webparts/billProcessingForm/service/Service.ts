@@ -43,7 +43,7 @@ export default class Service {
   public async updateItem(id: number, data: any): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items(${id})`;
 
-    await this.context.spHttpClient.post(
+    const response=await this.context.spHttpClient.post(
       url,
       SPHttpClient.configurations.v1,
       {
@@ -56,6 +56,8 @@ export default class Service {
         body: JSON.stringify(data)
       }
     );
+    const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
   }
   public async getItemByRequestNo(ID: Number): Promise<any> {
 

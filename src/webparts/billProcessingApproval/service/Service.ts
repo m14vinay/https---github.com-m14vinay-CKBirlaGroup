@@ -90,7 +90,8 @@ export default class Service {
         body: JSON.stringify(data)
       }
     );
-    return response.json();
+    const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
   }
   // Update History
    public async UpdateHistoryItem(

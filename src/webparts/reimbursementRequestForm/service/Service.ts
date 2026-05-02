@@ -146,7 +146,7 @@ DepartmentHead/Id,DepartmentHead/Title
   public async updateItem(id: number, data: any): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
 
-    await this.context.spHttpClient.post(
+    const response = await this.context.spHttpClient.post(
       url,
       SPHttpClient.configurations.v1,
       {
@@ -159,12 +159,13 @@ DepartmentHead/Id,DepartmentHead/Title
         body: JSON.stringify(data)
       }
     );
-    return data;
+    const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
   }
   public async updateExpenseItem(id: number, data: any): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items(${id})`;
 
-    await this.context.spHttpClient.post(
+   const response = await this.context.spHttpClient.post(
       url,
       SPHttpClient.configurations.v1,
       {
@@ -177,7 +178,9 @@ DepartmentHead/Id,DepartmentHead/Title
         body: JSON.stringify(data)
       }
     );
-    return data;
+    const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
+    
   }
   // Get Current User
   public async getUser(): Promise<any> {

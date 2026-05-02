@@ -83,7 +83,8 @@ export default class Service {
         body: JSON.stringify(data)
       }
     );
-    return response.json();
+    const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
   }
   // Create History
   public async createHistoryItem(data: any): Promise<any> {
