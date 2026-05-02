@@ -309,16 +309,16 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
       return;
     }
     const IsValid = service.validateGST(gst);
-    if (!IsValid) {
+    if (gst !== '' && !IsValid) {
       console.log(`Please enter valid GST No.: ${gst}`);
       alert("Please enter valid GST No.");
       return;
     }
-    const dateOnly = new Date(form.CommencementDate);
+   
     const payload = {
       Title: toSafeString(form.Title),
       YearofEstablishment: form.YearofEstablishment || 0,
-      CommencementDate: dateOnly ? dateOnly.toString() : "",
+     CommencementDate: form.CommencementDate? new Date(form.CommencementDate).toISOString() : null,
       GST: toSafeString(gst),
       Pan: toSafeString(form.Pan),
       Tin: toSafeString(form.Tin),
@@ -428,7 +428,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
 
       const gst = form.GST?.toString().trim();
       const IsValid = service.validateGST(gst);
-      if (!IsValid) {
+      if (gst !== '' && !IsValid) {
         console.log(`Please enter valid GST No.: ${gst}`);
         alert("Please enter valid GST No.");
         return;
@@ -438,11 +438,12 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
         alert("Pan No Required ❗");
         return;
       }
-      const dateOnly = new Date(form.CommencementDate);
+    
+    
       const payload = {
         Title: toSafeString(form.Title),
         YearofEstablishment: form.YearofEstablishment|| 0,
-        CommencementDate: dateOnly ? dateOnly.toString() : "",
+        CommencementDate: form.CommencementDate? new Date(form.CommencementDate).toISOString() : null,
         GST: toSafeString(gst),
         Pan: toSafeString(form.Pan),
         Tin: toSafeString(form.Tin),
