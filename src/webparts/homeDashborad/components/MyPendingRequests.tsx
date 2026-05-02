@@ -94,7 +94,7 @@ export default function MyPendingRequests() {
     const [globalFilter, setGlobalFilter] = useState("");
     const [sorting, setSorting] = useState<any>([]);
     const webUrl = context.pageContext.web.absoluteUrl;
-    const lists = ["QuotationApproval","PoApproval","ITApproval","ReimburseExpenseMaster","BillProcessing","VendorMapping","QuotationApprovalNEIBTAdmin"];
+    const lists = ["PoApproval","ITApproval","ReimburseExpenseMaster","BillProcessing","VendorMapping","QuotationApprovalNEIBTAdmin"];
 
     const getUser = () => {
         console.log("context user : ", context);
@@ -135,6 +135,19 @@ export default function MyPendingRequests() {
         })
     }
 
+    const getQuotationData = async () => {
+        console.log("context user : ", context);
+        let resturl = webUrl + "/_api/web/lists/getbytitle('QuotationApproval')/items?$top=5000&$select=*&$filter=AssignedTo eq '" + user.Title + "' or AssignedTo eq '" + user.Title + "'";
+        let data = await context.spHttpClient.get(
+            `${resturl}`,
+            SPHttpClient.configurations.v1
+        ).then(res => res.json());
+        console.log("Quotation",data);
+        if (data.value.length > 0) {
+            data1 = data1.concat(...data.value);
+        }
+    }
+
     const sortData = () => {
         setLoading(false);
         _setData(data1.sort((a,b) => {
@@ -145,11 +158,16 @@ export default function MyPendingRequests() {
         }))
     }
 
+    const getAllData = async () => {
+        await getQuotationData();
+        lists.forEach(l => {
+            getData(l);
+        })
+    }
+
     useEffect(() => {
         if(user){
-            lists.forEach(l => {
-                getData(l);
-            })
+            getAllData()
         }
     },[user]);
 
