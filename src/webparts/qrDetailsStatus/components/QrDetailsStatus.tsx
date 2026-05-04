@@ -100,15 +100,8 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
       const user = await service.getUser();
       const historydata = await service.GetHistoryItem(id, "QA");
       setHistory(historydata);
-      //  const purchaseOrderResponse= await service.createPurchaseOrderDetail(id);
-      // setPoItems(purchaseOrderResponse.value || []);
       const currentUser = await service.getUser();
-      if (result.AuthorId !== currentUser.Id) {
-        alert("You Are Not Authorized ❌ ");
-      }
-      console.log("Result:", result);
-
-      if (result) {
+      if (result.Id > 0 || result.Author.Id == currentUser.Id) {
         setItemId(result.Id);
 
         setForm(prev => ({
@@ -136,11 +129,10 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
         }));
         setApproverComment(result.ApproverComment1 || '');
       } else {
-        alert("No Data Found");
+        alert("You are not an authorized user.");
       }
-
     } catch (error) {
-      console.error("Error Occurred,Please Contact To System Administrator.:", error);
+      console.error(error);
     }
     finally {
       setLoading(false);

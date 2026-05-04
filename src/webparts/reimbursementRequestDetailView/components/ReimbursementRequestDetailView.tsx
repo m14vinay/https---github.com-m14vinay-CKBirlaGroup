@@ -58,10 +58,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
   const getRequestDetails = async (requestNo: number) => {
     const data = await service.getItemByRequestNo(requestNo);
     const currentUser = await service.getUser();
-    if (data.AuthorId !== currentUser.Id) {
-      alert("You Are Not Authorized ❌ ");
-    }
-    if (data.Id > 0) {
+    if (data.Id>0 || data.Author.Id == currentUser.Id) {
       setForm({
         ...form,
         RequestNo: data.RequestNo,
@@ -119,6 +116,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
         CurrentStatus: '',
         ApprovalPath: ''
       });
+      alert("You are not an authorized user.");
     }
   };
   return (

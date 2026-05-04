@@ -125,13 +125,8 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
       setHistory(historydata);
       console.log("Result:", result);
        const currentUser = await service.getUser();
-       if(result.AuthorId!== currentUser.Id)
-      {
-         alert("You Are Not Authorized ❌ ");
-      } 
-      if (result) {
+     if (result.Id>0 || result.Author.Id == currentUser.Id) {
         setItemId(result.Id);
-
         setForm(prev => ({
           ...prev,
           POrequestNo: result.POrequestNo || '',
@@ -148,11 +143,10 @@ const PurchaseOrderView: React.FC<IPurchaseOrderViewProps> = (props) => {
           CurrentStatus: result.CurrentStatus,
           files: null
         }));
-
         setApproverComment(result.ApproverComment1 || '');
 
       } else {
-        alert("No data found");
+        alert("You are not an authorized user.");
       }
 
     } catch (error) {

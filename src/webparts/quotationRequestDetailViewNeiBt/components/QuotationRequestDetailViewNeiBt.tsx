@@ -88,15 +88,8 @@ const handleFetchById = async (id: number) => {
      const historydata=await service.GetHistoryItem(id,"QANEIBT");
      setHistory(historydata);
       const currentUser = await service.getUser();
-       if(result.AuthorId!== currentUser.Id)
-      {
-         alert("You Are Not Authorized ❌ ");
-      } 
-      console.log("Result:", result);
-
-      if (result) {
+      if (result.Id>0 || result.Author.Id == currentUser.Id) {
       setItemId(result.Id);
-
       setForm(prev => ({
         ...prev,
         ProjectTitle: result.ProjectTitle || '',
@@ -122,11 +115,10 @@ const handleFetchById = async (id: number) => {
       }));
   setApproverComment(result.ApproverComment1 || '');
     } else {
-      alert("No Data Found");
+      alert("You are not an authorized user.");
     }
-
   } catch (error) {
-    console.error("Error Occurred,Please Contact To System Administrator.:", error);
+    console.error(error);
   }
   finally
   {

@@ -87,21 +87,14 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
     try {
       setLoading(true);
       console.log("Calling API with ID:", id);
-
       const result = await service.getItemByRequestNo(id);
       const user = await service.getUser();
       const historydata = await service.GetHistoryItem(id, "VMR");
       setHistory(historydata);
       console.log("Result:", result);
       const currentUser = await service.getUser();
-      if (result.AuthorId !== currentUser.Id) {
-        alert("You Are Not Authorized ❌ ");
-      }
-
-
-      if (result) {
+     if (result.Id>0 || result.Author.Id == currentUser.Id) {
         setItemId(result.Id);
-
         setForm(prev => ({
           ...prev,
           RequestNo: result.RequestNo || '',
@@ -120,11 +113,10 @@ const VendorMappingForm: React.FC<IVendorMappingDetailsProps> = (props) => {
 
 
       } else {
-        alert("No Data Found");
+        alert("You are not an authorized user.");
       }
-
     } catch (error) {
-      console.error("Error Occurred,Please Contact To System Administrator.:", error);
+      console.error(error);
     }
     finally {
       setLoading(false);

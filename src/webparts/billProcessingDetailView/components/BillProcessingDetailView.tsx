@@ -78,7 +78,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
       const result = await service.getItemByRequestNo(id);
       console.log("Result:", result);
       const currentuser = await service.getUser();
-      if (result.Author.Id == currentuser.Id) {
+      if (result.Id>0 || result.Author.Id == currentuser.Id) {
         loadAttachments(id);
         setItemId(result.Id);
         setForm(prev => ({
