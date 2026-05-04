@@ -16,7 +16,7 @@ export default function RootFunctionalComponent(props: IHomeDashboradProps) {
 
     return(<div>
         <SharePointContext.Provider value={props.context}>
-            <div><label style={{fontSize:"20px"}}>Digital Overview Status</label></div>
+            <div><label style={{fontSize:"20px"}}>Digiflow Overview Status</label></div>
             {/* <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
                 <WorkflowStatusChart context={props.context}/>
             </div>
