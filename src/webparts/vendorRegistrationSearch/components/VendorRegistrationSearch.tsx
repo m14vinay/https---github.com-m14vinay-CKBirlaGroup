@@ -113,10 +113,6 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/VendorRegistration.aspx?RequestId=${documentId}`;
     window.location.assign(url);
   };
-  const handlesearch = async () => {
-    _setData([]);
-    await getDatafromListByTitle(form.Title, form.GST, form.Pan, form.VendorCode, form.Tin);
-  };
   const getDatafromListByTitle = async (parm_Title: string, parm_GST: string, parm_Pan: string, parm_VendorCode: string, parm_Tin: string) => {
     try {
       setLoading(true);
@@ -131,6 +127,10 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
     finally {
       setLoading(false);
     }
+  };
+   const handlesearch = async () => {
+    _setData([]);
+    await getDatafromListByTitle(form.Title, form.GST, form.Pan, form.VendorCode, form.Tin);
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
