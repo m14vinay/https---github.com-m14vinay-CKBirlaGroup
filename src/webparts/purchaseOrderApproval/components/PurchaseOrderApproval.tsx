@@ -175,7 +175,10 @@ const PurchaseOrderApproval: React.FC<IPurchaseOrderApprovalProps> = (props) => 
 
     }
  else {
-      alert("❌ This Action Has Already Taken.Please Wait For Queue");
+      //alert("❌ This Action Has Already Taken.Please Wait For Queue");
+       alert("❌ Unauthorized Access! You are not the current approver");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
     }
     } catch (error) {
       console.error("Error Occurred,Please Contact To System Administrator.:", error);

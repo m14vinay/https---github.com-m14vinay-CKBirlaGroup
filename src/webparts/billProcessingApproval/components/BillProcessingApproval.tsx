@@ -224,7 +224,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
         }
       }
       else {
-        alert("Please Wait for you queue.");
+         alert("❌ Unauthorized Access! You are not the current approver");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
       }
