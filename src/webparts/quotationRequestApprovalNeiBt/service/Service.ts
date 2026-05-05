@@ -60,28 +60,6 @@ private FinanceController="FinanceController";
     return response.json();
   }
 
-  // // Update the Record (Submit)
-  //  public async updateItemdata(id: number,status:string, comments: string): Promise<void> {
-  //   const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
-
-  //   await this.context.spHttpClient.post(
-  //     url,
-  //     SPHttpClient.configurations.v1,
-  //     {
-  //       headers: {
-  //         "Accept": "application/json;",
-  //         "Content-Type": "application/json;",
-  //         "IF-MATCH": "*",
-  //         "X-HTTP-Method": "MERGE"
-  //       },
-  //       body: JSON.stringify({
-  //       CurrentStatus: status,
-  //        ApproverComment1: comments
-  //    })
-  //     }
-  //   );
-  // }
-
  //Update the Record (Submit)
   public async updateItemdata(id: number,status:string, comments: string,Assigned:string,AssignedToEmail:number): Promise<void> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items(${id})`;
@@ -328,16 +306,31 @@ private async getListItemType(): Promise<string> {
   const data = await res.json();
   return data.ListItemEntityTypeFullName;
 }
-public async UpdateHistoryItem(id: number, data: any, Title: string, Sequence: number): Promise<any[]> {
+ public async UpdateHistoryItem(
+    id: number,
+    data: any,
+    Title: string,
+    Sequence: number
+  ): Promise<any> {
+
     const getUrl = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${id} and Title eq '${Title}' and Sequence eq ${Sequence}`;
 
     const getResponse = await this.context.spHttpClient.get(
       getUrl,
       SPHttpClient.configurations.v1
     );
-    const result = await getResponse.json();
+
+    const getText = await getResponse.text();
+    const result = getText ? JSON.parse(getText) : null;
+
+    if (!result || !result.value || result.value.length === 0) {
+      throw new Error("Item not found");
+    }
+
     const itemId = result.value[0].Id;
+
     const updateUrl = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items(${itemId})`;
+
     const updateResponse = await this.context.spHttpClient.post(
       updateUrl,
       SPHttpClient.configurations.v1,
@@ -351,7 +344,10 @@ public async UpdateHistoryItem(id: number, data: any, Title: string, Sequence: n
         body: JSON.stringify(data)
       }
     );
-    return updateResponse.json();
+
+    // ✅ FIX HERE
+    const updateText = await updateResponse.text();
+    return updateText ? JSON.parse(updateText) : { success: true };
   }
   
   };

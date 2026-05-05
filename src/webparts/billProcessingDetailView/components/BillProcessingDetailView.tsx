@@ -148,7 +148,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
     }
     setLoading(true);
     const payload = {
-      Title: form.VendorName,
+      Title: form.VendorName.includes("-") ? form.VendorName.split("-")[1] : form.VendorName,
       VendorEmail: form.Email,
       Comment: form.ApproverComment5,
       Subject: 'Invoice is released to your account.',

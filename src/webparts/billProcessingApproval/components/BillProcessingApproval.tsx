@@ -523,7 +523,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     }
     setLoading(true);
     const payload = {
-      Title: form.VendorName.split('-')[1],
+      Title: form.VendorName,
       VendorEmail: form.Email,
       Comment: form.ApprovalComment,
       Subject: 'Invoice is released to your account.',

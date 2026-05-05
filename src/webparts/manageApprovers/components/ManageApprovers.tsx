@@ -92,7 +92,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setLoading(true);
     try {
       const payload = {
-        ApproverId: selectedUserId==null?form.ApproverId:selectedUserId,
+        ApproverId: selectedUserId == null ? form.ApproverId : selectedUserId,
         ID: form.ID
       };
       await service.updateItem(form.ID, payload, 'VendorMappingApproval');
@@ -150,8 +150,8 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setLoading(true);
     try {
       const payload = {
-        FinanceControllerId: selectedUserId==null?form.ApproverId:selectedUserId,
-        Billing2ndApproverId:selectedApprover1Id==null?form.Approver1Id:selectedApprover1Id,
+        FinanceControllerId: selectedUserId == null ? form.ApproverId : selectedUserId,
+        Billing2ndApproverId: selectedApprover1Id == null ? form.Approver1Id : selectedApprover1Id,
         ID: form.ID
       };
       await service.updateItem(form.ID, payload, 'FinanceController');
@@ -181,10 +181,10 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     try {
       const payload = {
         ID: form.ID,
-        DepartmentheadId: selectedUserId==null?form.ApproverId:selectedUserId,
-        Approval1Id: selectedApprover1Id==null?form.Approver1Id:selectedApprover1Id,
-        Approval2Id: selectedApprover2Id==null?form.Approver2Id:selectedApprover2Id,
-        Approval3Id: selectedApprover3Id==null?form.Approver3Id:selectedApprover3Id
+        DepartmentheadId: selectedUserId == null ? form.ApproverId : selectedUserId,
+        Approval1Id: selectedApprover1Id == null ? form.Approver1Id : selectedApprover1Id,
+        Approval2Id: selectedApprover2Id == null ? form.Approver2Id : selectedApprover2Id,
+        Approval3Id: selectedApprover3Id == null ? form.Approver3Id : selectedApprover3Id
       };
       await service.updateItem(form.ID, payload, 'DepartmentMaster');
       alert("Updated Successfully.");
@@ -213,10 +213,10 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     try {
       const payload = {
         ID: form.ID,
-        DepartmentheadId: selectedUserId==null?form.ApproverId:selectedUserId,
-        Approval1Id: selectedApprover1Id==null?form.Approver1Id:selectedApprover1Id,
-        Approval2Id: selectedApprover2Id==null?form.Approver2Id:selectedApprover2Id,
-        Approval3Id: selectedApprover3Id==null?form.Approver3Id:selectedApprover3Id
+        DepartmentheadId: selectedUserId == null ? form.ApproverId : selectedUserId,
+        Approval1Id: selectedApprover1Id == null ? form.Approver1Id : selectedApprover1Id,
+        Approval2Id: selectedApprover2Id == null ? form.Approver2Id : selectedApprover2Id,
+        Approval3Id: selectedApprover3Id == null ? form.Approver3Id : selectedApprover3Id
       };
       await service.updateItem(form.ID, payload, 'DepartmentMasterNEI');
       alert("Updated Successfully.");
@@ -244,7 +244,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setLoading(true);
     try {
       const payload = {
-        DepartmentHeadId: selectedUserId==null?form.ApproverId:selectedUserId,
+        DepartmentHeadId: selectedUserId == null ? form.ApproverId : selectedUserId,
         ID: form.ID
       };
       await service.updateItem(form.ID, payload, 'ReimburseDepartmentMaster');
@@ -273,7 +273,7 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
     setLoading(true);
     try {
       const payload = {
-        ApproverNameId: selectedUserId==null?form.ApproverId:selectedUserId,
+        ApproverNameId: selectedUserId == null ? form.ApproverId : selectedUserId,
         ID: form.ID
       };
       await service.updateItem(form.ID, payload, 'ReimbursementApproverMaster');
@@ -1119,265 +1119,265 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
               </select>
             </div>
           </div>
-          <div className='row' id='vendor' style={{ paddingTop: "2%", display: isActiveVM ? "block" : "none", alignSelf: "center" }}>
-            <div className={styles['form-control']}>
-              <PeoplePicker
-                context={peoplePickerContext}
-                titleText="Approver"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}
-                principalTypes={[PrincipalType.User]}
-                resolveDelay={1000}
-                defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserVendorChange}
-              />
-            </div>
-            {/* Buttons */}
-            <div className={styles['btn-group']}>
-              <button name='vendorbtnsubmit' className={styles.btnSubmit} onClick={handleVendorSubmit}>Update</button>&nbsp;
-              <button name='vendorbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
-            </div>
-          </div>
-          <div className='row' id='Quotation' style={{ paddingTop: "2%", display: isActiveQA ? "block" : "none", alignSelf: "center" }}>
-            <div className={styles['form-control']}>
-              <PeoplePicker                
-                context={peoplePickerContext}
-                titleText="Department Head"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}      
-                resolveDelay={1000}          
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserQuotationDepartmentHeadChange}
-              />             
-            </div>
-            <div className={styles['form-control']}>
-              <PeoplePicker                
-                context={peoplePickerContext}
-                titleText="Approver 1"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}
-                resolveDelay={1000}
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.Approver1EMail]}
-                onChange={onUserQuotationApprover1Change}
-              />
-            </div>
-            <div className={styles['form-control']}>
-              <PeoplePicker                
-                context={peoplePickerContext}
-                titleText="Approver 2"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}
-                resolveDelay={1000}
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.Approver2EMail]}
-                onChange={onUserQuotationApprover2Change}
-              />
-            </div>
-            <div className={styles['form-control']}>
-              <PeoplePicker               
-                context={peoplePickerContext}
-                titleText="Approver 3"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}
-                resolveDelay={1000}
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.Approver3EMail]}
-                onChange={onUserQuotationApprover3Change}
-              />
-            </div>
-            {/* Buttons */}
-            <div className={styles['btn-group']}>
-              <button name='QAbtnsubmit' className={styles.btnSubmit} onClick={handleQASubmit}>Update</button>&nbsp;
-              <button name='QAbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
-            </div>
-          </div>
-          <div className='row' id='QuotationNEI' style={{ paddingTop: "2%", display: isActiveNEI ? "block" : "none", alignSelf: "center" }}>
+        </div>
+        <div className='row' id='vendor' style={{ paddingTop: "2%", display: isActiveVM ? "block" : "none", alignSelf: "center" }}>
           <div className={styles['form-control']}>
-              <PeoplePicker                
-                context={peoplePickerContext}
-                titleText="Department Head"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}      
-                resolveDelay={1000}          
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserQuotationNEIDepartmentHeadChange}
-              />             
-            </div>
-            <div className={styles['form-control']}>
-              <PeoplePicker                
-                context={peoplePickerContext}
-                titleText="Approver 1"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}
-                resolveDelay={1000}
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.Approver1EMail]}
-                onChange={onUserQuotationNEIApprover1Change}
-              />
-            </div>
-            <div className={styles['form-control']}>
-              <PeoplePicker                
-                context={peoplePickerContext}
-                titleText="Approver 2"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}
-                resolveDelay={1000}
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.Approver2EMail]}
-                onChange={onUserQuotationNEIApprover2Change}
-              />
-            </div>
-            <div className={styles['form-control']}>
-              <PeoplePicker               
-                context={peoplePickerContext}
-                titleText="Approver 3"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}
-                resolveDelay={1000}
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.Approver3EMail]}
-                onChange={onUserQuotationNEIApprover3Change}
-              />
-            </div>
-            {/* Buttons */}
-            <div className={styles['btn-group']}>
-              <button name='NEIbtnsubmit' className={styles.btnSubmit} onClick={handleQANEISubmit}>Update</button>&nbsp;
-              <button name='NEIbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
-            </div>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Approver"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              principalTypes={[PrincipalType.User]}
+              resolveDelay={1000}
+              defaultSelectedUsers={[form.ApproverEMail]}
+              onChange={onUserVendorChange}
+            />
           </div>
-          <div className='row' id='ReimbursementD' style={{ paddingTop: "2%", display: isActiveREIMD ? "block" : "none", alignSelf: "center" }}>
-            <div className={styles['form-control']}>              
-              <PeoplePicker
-                key={[form.ApproverEMail].join(",")}
-                context={peoplePickerContext}
-                titleText="Department Head"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                 searchTextLimit={2}      
-                resolveDelay={1000}          
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserREIMDChange}
-              />
-            </div>
-            {/* Buttons */}
-            <div className={styles['btn-group']}>
-              <button name='Reimbtnsubmit' className={styles.btnSubmit} onClick={handleREIMDSubmit}>Update</button>&nbsp;
-              <button name='ReimbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
-            </div>
+          {/* Buttons */}
+          <div className={styles['btn-group']}>
+            <button name='vendorbtnsubmit' className={styles.btnSubmit} onClick={handleVendorSubmit}>Update</button>&nbsp;
+            <button name='vendorbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
           </div>
-          <div className='row' id='ReimbursementF' style={{ paddingTop: "2%", display: isActiveREIMF ? "block" : "none", alignSelf: "center" }}>
-            <div className={styles['form-control']}>              
-              <PeoplePicker                
-                context={peoplePickerContext}
-                titleText="Approver"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}      
-                resolveDelay={1000}          
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserREIMFChange}
-              />
-            </div>
-            {/* Buttons */}
-            <div className={styles['btn-group']}>
-              <button name='Reimbtnsubmit' className={styles.btnSubmit} onClick={handleREIMFSubmit}>Update</button>&nbsp;
-              <button name='ReimbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
-            </div>
+        </div>
+        <div className='row' id='Quotation' style={{ paddingTop: "2%", display: isActiveQA ? "block" : "none", alignSelf: "center" }}>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Department Head"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.ApproverEMail]}
+              onChange={onUserQuotationDepartmentHeadChange}
+            />
           </div>
-          <div className='row' id='BillProcessing' style={{ paddingTop: "2%", display: isActiveBP ? "block" : "none", alignSelf: "center" }}>
-            <div className={styles['form-control']}>
-              <PeoplePicker                
-                context={peoplePickerContext}
-                titleText="Finance Controller"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}      
-                resolveDelay={1000}          
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserBPFinanceChange}
-              />             
-            </div>
-            <div className={styles['form-control']}>
-              <PeoplePicker                
-                context={peoplePickerContext}
-                titleText="Billing2 & Approver"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}
-                resolveDelay={1000}
-                principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
-                defaultSelectedUsers={[form.Approver1EMail]}
-                onChange={onUserBPBillingChange}
-              />
-            </div>
-            {/* Buttons */}
-            <div className={styles['btn-group']}>
-              <button name='BPbtnsubmit' className={styles.btnSubmit} onClick={handleBPSubmit}>Update</button>&nbsp;
-              <button name='BPbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
-            </div>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Approver 1"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.Approver1EMail]}
+              onChange={onUserQuotationApprover1Change}
+            />
           </div>
-          <div className='row' id='PurchaseOrder' style={{ paddingTop: "2%", display: isActivePO ? "block" : "none", alignSelf: "center" }}>
-            <div className={styles['form-control']}>              
-              <PeoplePicker                
-                context={peoplePickerContext}
-                titleText="Select Approver"
-                personSelectionLimit={1}
-                showtooltip={true}
-                required={true}
-                disabled={false}
-                searchTextLimit={2}
-                principalTypes={[PrincipalType.User]}
-                resolveDelay={1000}
-                defaultSelectedUsers={[form.ApproverEMail]}
-                onChange={onUserPOChange}
-              />
-            </div>
-            {/* Buttons */}
-            <div className={styles['btn-group']}>
-              <button name='PObtnsubmit' className={styles.btnSubmit} onClick={handlePOSubmit}>Update</button>&nbsp;
-              <button name='PObtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
-            </div>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Approver 2"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.Approver2EMail]}
+              onChange={onUserQuotationApprover2Change}
+            />
+          </div>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Approver 3"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.Approver3EMail]}
+              onChange={onUserQuotationApprover3Change}
+            />
+          </div>
+          {/* Buttons */}
+          <div className={styles['btn-group']}>
+            <button name='QAbtnsubmit' className={styles.btnSubmit} onClick={handleQASubmit}>Update</button>&nbsp;
+            <button name='QAbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        <div className='row' id='QuotationNEI' style={{ paddingTop: "2%", display: isActiveNEI ? "block" : "none", alignSelf: "center" }}>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Department Head"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.ApproverEMail]}
+              onChange={onUserQuotationNEIDepartmentHeadChange}
+            />
+          </div>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Approver 1"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.Approver1EMail]}
+              onChange={onUserQuotationNEIApprover1Change}
+            />
+          </div>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Approver 2"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.Approver2EMail]}
+              onChange={onUserQuotationNEIApprover2Change}
+            />
+          </div>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Approver 3"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.Approver3EMail]}
+              onChange={onUserQuotationNEIApprover3Change}
+            />
+          </div>
+          {/* Buttons */}
+          <div className={styles['btn-group']}>
+            <button name='NEIbtnsubmit' className={styles.btnSubmit} onClick={handleQANEISubmit}>Update</button>&nbsp;
+            <button name='NEIbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        <div className='row' id='ReimbursementD' style={{ paddingTop: "2%", display: isActiveREIMD ? "block" : "none", alignSelf: "center" }}>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              key={[form.ApproverEMail].join(",")}
+              context={peoplePickerContext}
+              titleText="Department Head"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.ApproverEMail]}
+              onChange={onUserREIMDChange}
+            />
+          </div>
+          {/* Buttons */}
+          <div className={styles['btn-group']}>
+            <button name='Reimbtnsubmit' className={styles.btnSubmit} onClick={handleREIMDSubmit}>Update</button>&nbsp;
+            <button name='ReimbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        <div className='row' id='ReimbursementF' style={{ paddingTop: "2%", display: isActiveREIMF ? "block" : "none", alignSelf: "center" }}>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Approver"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.ApproverEMail]}
+              onChange={onUserREIMFChange}
+            />
+          </div>
+          {/* Buttons */}
+          <div className={styles['btn-group']}>
+            <button name='Reimbtnsubmit' className={styles.btnSubmit} onClick={handleREIMFSubmit}>Update</button>&nbsp;
+            <button name='ReimbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        <div className='row' id='BillProcessing' style={{ paddingTop: "2%", display: isActiveBP ? "block" : "none", alignSelf: "center" }}>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Finance Controller"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.ApproverEMail]}
+              onChange={onUserBPFinanceChange}
+            />
+          </div>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Billing2 & Approver"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              resolveDelay={1000}
+              principalTypes={[PrincipalType.User, PrincipalType.SharePointGroup, PrincipalType.SecurityGroup]}
+              defaultSelectedUsers={[form.Approver1EMail]}
+              onChange={onUserBPBillingChange}
+            />
+          </div>
+          {/* Buttons */}
+          <div className={styles['btn-group']}>
+            <button name='BPbtnsubmit' className={styles.btnSubmit} onClick={handleBPSubmit}>Update</button>&nbsp;
+            <button name='BPbtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+        <div className='row' id='PurchaseOrder' style={{ paddingTop: "2%", display: isActivePO ? "block" : "none", alignSelf: "center" }}>
+          <div className={styles['form-control']}>
+            <PeoplePicker
+              context={peoplePickerContext}
+              titleText="Select Approver"
+              personSelectionLimit={1}
+              showtooltip={true}
+              required={true}
+              disabled={false}
+              searchTextLimit={2}
+              principalTypes={[PrincipalType.User]}
+              resolveDelay={1000}
+              defaultSelectedUsers={[form.ApproverEMail]}
+              onChange={onUserPOChange}
+            />
+          </div>
+          {/* Buttons */}
+          <div className={styles['btn-group']}>
+            <button name='PObtnsubmit' className={styles.btnSubmit} onClick={handlePOSubmit}>Update</button>&nbsp;
+            <button name='PObtnCancel' className={styles.btnCancel} onClick={handleCancel}>Cancel</button>
           </div>
         </div>
       </div>
