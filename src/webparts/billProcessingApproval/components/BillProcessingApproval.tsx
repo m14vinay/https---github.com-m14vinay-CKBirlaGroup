@@ -546,6 +546,11 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       setLoading(false);
     }
   }
+  const stripHtml = (html: string) => {
+        const temp = document.createElement("div");
+        temp.innerHTML = html;
+        return temp.textContent || temp.innerText || "";
+    };
   // 🔹 UI
   return (
     <section>
@@ -614,16 +619,13 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
               <label>Project Title</label>
               <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Additional Information & Remarks</label>
-              <input name="Comments" value={form.Comments} readOnly style={{ backgroundColor: "lightgray" }}>
+              <input name="Comments" value={stripHtml(form.Comments)} readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
               <label>Bill No</label>
               <input name="BillNo" value={form.BillNo} readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
               <label>Bill Date</label>
-              <input name="BillDate" type="text" value={
-                form.BillDate
-                  ? new Date(form.BillDate).toISOString().split('T')[0]
-                  : ''} readOnly style={{ backgroundColor: "lightgray" }}>
+              <input name="BillDate" type="text" value={form.BillDate ? form.BillDate.toString() : ''} readOnly style={{ backgroundColor: "lightgray" }}>
               </input>
               <label>Occupied Amount</label>
               <input name="OccupiedAmount" value={form.OccupiedAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
