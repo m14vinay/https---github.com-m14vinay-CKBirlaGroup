@@ -494,7 +494,6 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
         setShowPaidButton(false);
         setShowHoldButton(false);
         alert("Request Approved Successfully.");
-        return;
       }
     } catch (error) {
       console.error(error);
