@@ -458,11 +458,23 @@ const ManageApprovers: React.FC<IManageApproversProps> = (props) => {
   };
   // Load data
   React.useEffect(() => {
-    getUser();
-    _setData(data);
-    setColumns(columns);
-    handleQuotation();
-    console.log("Web URL:", props.context?.pageContext?.web?.absoluteUrl);
+    const checkUser = async () => {
+      const value: boolean = await service.getUserExists();
+      if (value === true) {
+        checkUser();
+        getUser();
+        _setData(data);
+        setColumns(columns);
+        handleQuotation();
+        console.log("Web URL:", props.context?.pageContext?.web?.absoluteUrl);
+      }
+      else {
+        alert("You don't have access to view this page.");
+         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+    window.location.assign(url);
+      }
+    };
+
   }, []);
   // Load the User Details
   const getUser = async () => {

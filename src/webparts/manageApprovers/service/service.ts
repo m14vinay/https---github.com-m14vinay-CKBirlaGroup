@@ -1,4 +1,4 @@
-import { SPHttpClient } from '@microsoft/sp-http';
+import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 export default class Service {
   private context: any;
   constructor(context: any) {
@@ -86,4 +86,31 @@ export default class Service {
     const userData = await userResponse.json();
     return userData.Id;
   }
+  public async getUserExists(): Promise<boolean> {
+      var isMember = false;
+      try {
+        const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser?$expand=groups`;
+        const response: SPHttpClientResponse = await this.context.spHttpClient.get(
+          url,
+          SPHttpClient.configurations.v1,
+          {
+            headers: {
+              'Accept': 'application/json;odata=nometadata'
+            }
+          }
+        );
+        const data = await response.json();
+        isMember = data.Groups.some((g: any) => g.Title === "User Change Access");
+        if (isMember) {
+          isMember = true;
+        }
+        else {
+          isMember = false;
+        }
+      } catch (error) {
+        console.error("Error fetching groups:", error);
+        return false;
+      }
+      return isMember;
+    }
 }
