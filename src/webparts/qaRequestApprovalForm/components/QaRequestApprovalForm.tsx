@@ -326,7 +326,7 @@ const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (props) => 
           alert("Request Approved Successfully.");
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
-          return;
+          //return;
         }
 
       } catch (error) {
@@ -447,7 +447,7 @@ const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (props) => 
           alert("Request Rejected Successfully.");
           const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
           window.location.assign(url);
-          return;
+          //return;
         }
 
 

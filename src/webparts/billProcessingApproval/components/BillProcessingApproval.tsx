@@ -297,7 +297,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
         alert("Request Approved Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
-        return;
+        //return;
       }
     } catch (error) {
       console.error(error);
@@ -423,7 +423,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
         alert("Request Hold Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
-        return;
+        //return;
       }
     } catch (error) {
       console.error(error);
@@ -458,7 +458,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
         alert("Request Resumed Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
-        return;
+        //return;
       }
     } catch (error) {
       console.error(error);
