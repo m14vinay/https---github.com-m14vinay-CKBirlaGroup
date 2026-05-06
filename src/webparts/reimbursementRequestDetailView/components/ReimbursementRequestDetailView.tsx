@@ -231,7 +231,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
                               >
                                 <a
-                                  href={file.ServerRelativeUrl}
+                                  href={`${props.context.pageContext.web.absoluteUrl}${file.ServerRelativeUrl}`}
                                   rel="noopener noreferrer"
                                   target="_blank"
                                 >

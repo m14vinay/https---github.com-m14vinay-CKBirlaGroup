@@ -704,7 +704,7 @@ setForm(prev => ({
 
         {/* 📄 File Link */}
         <a
-          href={file.ServerRelativeUrl}
+          href={`${props.context.pageContext.web.absoluteUrl}${file.ServerRelativeUrl}`}
           target="_blank"
           rel="noopener noreferrer"
         >

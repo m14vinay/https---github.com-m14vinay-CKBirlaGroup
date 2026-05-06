@@ -565,7 +565,7 @@ const QaRequestApprovalForm: React.FC<IQaRequestApprovalFormProps> = (props) => 
                     {attachments.map((file: any, index: number) => (
                       <a
                         key={index}
-                        href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
+                        href={`${props.context.pageContext.web.absoluteUrl}${file.ServerRelativeUrl}`} target="_blank" rel="noopener noreferrer">
                         {file.FileName}
                       </a>
                     ))}
