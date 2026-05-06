@@ -563,7 +563,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
                               >
                                 <a
-                                  href={`${window.location.origin}${file.ServerRelativeUrl}`}
+                                  href={file.LinkageUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >

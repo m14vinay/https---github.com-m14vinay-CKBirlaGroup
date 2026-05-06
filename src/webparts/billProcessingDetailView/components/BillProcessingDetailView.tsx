@@ -294,7 +294,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                       key={index}
                       style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <a
-                        href={`${window.location.origin}${file.ServerRelativeUrl}`} target='_blank'
+                        href={file.LinkUrl} target='_blank'
                         rel="noopener noreferrer">
                         {file.FileName}
                       </a>

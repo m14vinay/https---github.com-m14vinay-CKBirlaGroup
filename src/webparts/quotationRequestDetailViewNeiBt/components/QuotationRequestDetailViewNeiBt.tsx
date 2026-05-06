@@ -277,7 +277,7 @@ const handleFetchById = async (id: number) => {
       {attachments.map((file: any, index: number) => (
         <a
           key={index}
-            href={`${window.location.origin}${file.ServerRelativeUrl}`} target="_blank" rel="noopener noreferrer">
+            href={file.LinkageUrl} target="_blank" rel="noopener noreferrer">
           {file.FileName}
         </a>
        ))}
