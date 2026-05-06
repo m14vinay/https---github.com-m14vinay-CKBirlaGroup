@@ -1038,7 +1038,7 @@ AdvancepaymentStatus: '',
 
                       {/* 📄 File Link */}
                       <a
-                        href={`${props.context.pageContext.web.absoluteUrl}${file.ServerRelativeUrl}`}
+                        href={`${window.location.origin}${file.ServerRelativeUrl}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >

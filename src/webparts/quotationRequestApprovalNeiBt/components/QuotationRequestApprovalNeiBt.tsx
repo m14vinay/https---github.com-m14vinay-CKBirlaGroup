@@ -572,7 +572,7 @@ if (form.ActionDate1 == '') {
                   {attachments.map((file: any, index: number) => (
                     <a
                       key={index}
-                      href={`${props.context.pageContext.web.absoluteUrl}${file.ServerRelativeUrl}`} target="_blank" rel="noopener noreferrer">
+                      href={`${window.location.origin}${file.ServerRelativeUrl}`} target="_blank" rel="noopener noreferrer">
                       {file.FileName}
                     </a>
                   ))}
