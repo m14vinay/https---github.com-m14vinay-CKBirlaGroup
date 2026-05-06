@@ -1038,7 +1038,7 @@ AdvancepaymentStatus: '',
 
                       {/* 📄 File Link */}
                       <a
-                        href={file.LinkageUrl}
+                        href={file.LinkingUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
