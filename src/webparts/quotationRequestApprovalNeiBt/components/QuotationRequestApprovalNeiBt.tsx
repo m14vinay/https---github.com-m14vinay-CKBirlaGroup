@@ -333,7 +333,7 @@ if (form.ActionDate1 == '') {
         alert("Request Approved Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
-        return;
+        //return;
         }
       
     } catch (error) {
@@ -448,7 +448,7 @@ if (form.ActionDate1 == '') {
         alert("Request Rejected Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
-        return;
+        //return;
       }
     
     } catch (error) {

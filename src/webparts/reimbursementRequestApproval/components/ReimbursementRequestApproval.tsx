@@ -312,7 +312,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
         setComment('');
-        return;
+
       }
     } catch (error) {
       console.error(error);
@@ -468,7 +468,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
         setComment('');
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
-        return;
+        //return;
       }
     } catch (error) {
       console.error(error);

@@ -175,7 +175,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
         alert("Request Approved Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
-        return;
+
       }
     } catch (error) {
       console.error(error);
@@ -226,7 +226,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
         alert("Request Rejected Successfully.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
-        return;
+       
       }
     } catch (error) {
       console.error(error);
