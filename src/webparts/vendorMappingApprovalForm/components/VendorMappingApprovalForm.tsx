@@ -127,7 +127,9 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
         }
 
       } else {
-        alert("❌ This action has already taken.Please wait for queue");
+        alert("❌ Unauthorized Access! You are not the current approver");
+        const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+        window.location.assign(url);
       }
     } catch (error) {
       console.error("Error Occurred,Please Contact To System Administrator.:", error);
