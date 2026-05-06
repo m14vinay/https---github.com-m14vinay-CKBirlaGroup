@@ -14,18 +14,18 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './HideTopBar.css';
 
 interface IDigiflowMenuState {
-  items:any[];
-  showDropdown:string;
+  items: any[];
+  showDropdown: string;
 }
 
 export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, IDigiflowMenuState> {
 
-  constructor(props:IDigiflowMenuProps){
+  constructor(props: IDigiflowMenuProps) {
     super(props);
 
     this.state = {
-      items:[],
-      showDropdown:""
+      items: [],
+      showDropdown: ""
     }
 
     this.getMenuItems = this.getMenuItems.bind(this);
@@ -36,19 +36,29 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
   private getMenuItems() {
     let webUrl = this.props.context.pageContext.web.absoluteUrl;
 
-    this.props.context.spHttpClient.get(webUrl + `/_api/web/lists/getbytitle('MenuMaster')/items?$oorderby=Order0`,SPHttpClient.configurations.v1)
-    .then(r => r.json())
-    .then(d => {
-      console.log("Menu",d);
-      this.setState({
-        items:d.value
-      });
-    })
+    this.props.context.spHttpClient.get(webUrl + `/_api/web/lists/getbytitle('MenuMaster')/items?$oorderby=Order0`, SPHttpClient.configurations.v1)
+      .then(r => r.json())
+      .then(d => {
+        console.log("Menu", d);
+        this.setState({
+          items: d.value
+        });
+      })
   }
-
-  private setMenuDropdown(value:string){
+  private async getUserExists(): Promise<boolean> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser/groups`;
+    const response = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await response.json();
+    const exists = data.value.some((g: any) => g.Title === "User Change Access");
+    console.log(exists);
+    return exists;
+  }
+  private setMenuDropdown(value: string) {
     this.setState({
-      showDropdown:value
+      showDropdown: value
     })
   }
 
@@ -59,28 +69,36 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
 
     return (
       <Nav className="me-auto">
-        {base.map(b => {
+        {base.map(async b => {
           let childItems = this.state.items.filter(item => item.ParentId == b.Id);
-          if(childItems.length > 0){
-            return <NavDropdown 
-            onMouseEnter={() => this.setMenuDropdown(b.Title)}
-            onMouseLeave={() => this.setMenuDropdown("")}
-            show={this.state.showDropdown === b.Title}
-            title={
-                  <span><span><img className={styles.iconImg} src={b.Icon}></img></span><span className={styles.menuHaeding}>{b.Title}</span></span>
-                } id="basic-nav-dropdown">
-                  {childItems.map((c,i) => {
-                    return <><NavDropdown.Item href={c.Link}>{c.Title}</NavDropdown.Item>
-                    {i < childItems.length -1 && <NavDropdown.Divider />}
-                  </>
-                  })}
-                </NavDropdown>
+          if (childItems.length > 0) {
+            return <NavDropdown
+              onMouseEnter={() => this.setMenuDropdown(b.Title)}
+              onMouseLeave={() => this.setMenuDropdown("")}
+              show={this.state.showDropdown === b.Title}
+              title={
+                <span><span><img className={styles.iconImg} src={b.Icon}></img></span><span className={styles.menuHaeding}>{b.Title}</span></span>
+              } id="basic-nav-dropdown">
+              {childItems.map((c, i) => {
+                return <><NavDropdown.Item href={c.Link}>{c.Title}</NavDropdown.Item>
+                  {i < childItems.length - 1 && <NavDropdown.Divider />}
+                </>
+              })}
+            </NavDropdown>
           }
           else {
-            return <Nav.Link href={b.Link}>
+            if (await this.getUserExists() && b.Title === "Manage Approvers") {
+              return <Nav.Link href={b.Link}>
                 <span><img className={styles.iconImg} src={b.Icon}></img></span>
                 <span className={styles.menuHaeding}>{b.Title}</span>
-                </Nav.Link>
+              </Nav.Link>
+            }
+            else if(b.Title !== "Manage Approvers") {             
+                return <Nav.Link href={b.Link}>
+                  <span><img className={styles.iconImg} src={b.Icon}></img></span>
+                  <span className={styles.menuHaeding}>{b.Title}</span>
+                </Nav.Link>              
+            }
           }
         })}
       </Nav>
@@ -96,10 +114,10 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
     return (
       <div>
         <Navbar expand="lg" bg='light' className="bg-body-tertiary">
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-              {this.menuBar()}
-            </Navbar.Collapse>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            {this.menuBar()}
+          </Navbar.Collapse>
         </Navbar>
       </div>
     );
