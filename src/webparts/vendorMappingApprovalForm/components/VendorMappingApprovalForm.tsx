@@ -305,7 +305,7 @@ const VendorMappingForm: React.FC<IVendorMappingApprovalFormProps> = (props) => 
                   {attachments.map((file: any, index: number) => (
                     <a
                       key={index}
-                      href={file.LinkingUrl} target="_blank" rel="noopener noreferrer">
+                      href={file.ServerRelativeUrl} target="_blank" rel="noopener noreferrer">
                       {file.FileName}
                     </a>
                   ))}

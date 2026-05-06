@@ -696,7 +696,7 @@ const QuotationRequestNeiBt: React.FC<IQuotationRequestNeiBtProps> = (props) => 
 
                       {/* 📄 File Link */}
                       <a
-                        href={file.LinkingUrl}
+                        href={file.ServerRelativeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
