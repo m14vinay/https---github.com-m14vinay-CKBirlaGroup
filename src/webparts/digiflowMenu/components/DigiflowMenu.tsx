@@ -1,12 +1,12 @@
 import * as React from 'react';
 import styles from './DigiflowMenu.module.scss';
 import type { IDigiflowMenuProps } from './IDigiflowMenuProps';
-import { escape } from '@microsoft/sp-lodash-subset';
+import { escape, set } from '@microsoft/sp-lodash-subset';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
-import { SPHttpClient, SPHttpClientConfiguration } from '@microsoft/sp-http'
+import { SPHttpClient, SPHttpClientConfiguration, SPHttpClientResponse } from '@microsoft/sp-http'
 const HomeIcon = require('../assets/Home.png');
 const FormIcon = require('../assets/Form.png');
 const ReportIcon = require('../assets/Report.png');
@@ -16,6 +16,7 @@ import './HideTopBar.css';
 interface IDigiflowMenuState {
   items: any[];
   showDropdown: string;
+  flag: boolean;
 }
 
 export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, IDigiflowMenuState> {
@@ -25,9 +26,9 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
 
     this.state = {
       items: [],
-      showDropdown: ""
+      showDropdown: "",
+      flag: false
     }
-
     this.getMenuItems = this.getMenuItems.bind(this);
     this.setMenuDropdown = this.setMenuDropdown.bind(this);
     this.getMenuItems();
@@ -44,17 +45,40 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
           items: d.value
         });
       })
+    const checkUser = async () => {
+      const value: boolean = await this.getUserExists();
+      this.setState({
+        flag: value
+      });
+    };
+    checkUser();
   }
   private async getUserExists(): Promise<boolean> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/currentuser/groups`;
-    const response = await this.context.spHttpClient.get(
-      url,
-      SPHttpClient.configurations.v1
-    );
-    const data = await response.json();
-    const exists = data.value.some((g: any) => g.Title === "User Change Access");
-    console.log(exists);
-    return exists;
+    var isMember = false;
+    try {
+      const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/currentuser?$expand=groups`;
+      const response: SPHttpClientResponse = await this.props.context.spHttpClient.get(
+        url,
+        SPHttpClient.configurations.v1,
+        {
+          headers: {
+            'Accept': 'application/json;odata=nometadata'
+          }
+        }
+      );
+      const data = await response.json();
+      isMember = data.Groups.some((g: any) => g.Title === "User Change Access");
+      if (isMember) {
+        isMember = true;
+      }
+      else {
+        isMember = false;
+      }
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+      return false;
+    }
+    return isMember;
   }
   private setMenuDropdown(value: string) {
     this.setState({
@@ -69,7 +93,7 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
 
     return (
       <Nav className="me-auto">
-        {base.map(async b => {
+        {base.map(b => {
           let childItems = this.state.items.filter(item => item.ParentId == b.Id);
           if (childItems.length > 0) {
             return <NavDropdown
@@ -87,17 +111,17 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
             </NavDropdown>
           }
           else {
-            if (await this.getUserExists() && b.Title === "Manage Approvers") {
+            if (this.state.flag && b.Title === "Manage Approvers") {
               return <Nav.Link href={b.Link}>
                 <span><img className={styles.iconImg} src={b.Icon}></img></span>
                 <span className={styles.menuHaeding}>{b.Title}</span>
               </Nav.Link>
             }
-            else if(b.Title !== "Manage Approvers") {             
-                return <Nav.Link href={b.Link}>
-                  <span><img className={styles.iconImg} src={b.Icon}></img></span>
-                  <span className={styles.menuHaeding}>{b.Title}</span>
-                </Nav.Link>              
+            else if (b.Title !== "Manage Approvers") {
+              return <Nav.Link href={b.Link}>
+                <span><img className={styles.iconImg} src={b.Icon}></img></span>
+                <span className={styles.menuHaeding}>{b.Title}</span>
+              </Nav.Link>
             }
           }
         })}
