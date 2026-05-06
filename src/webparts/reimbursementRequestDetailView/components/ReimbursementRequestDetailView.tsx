@@ -233,6 +233,7 @@ const ReimbursementRequestDetailView: React.FC<IReimbursementRequestDetailViewPr
                                 <a
                                   href={file.ServerRelativeUrl}
                                   rel="noopener noreferrer"
+                                  target="_blank"
                                 >
                                   {file.FileName}
                                 </a>

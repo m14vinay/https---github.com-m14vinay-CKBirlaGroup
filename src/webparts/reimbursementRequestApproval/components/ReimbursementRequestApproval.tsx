@@ -564,6 +564,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
                               >
                                 <a
                                   href={file.ServerRelativeUrl}
+                                  target="_blank"
                                   rel="noopener noreferrer"
                                 >
                                   {file.FileName}

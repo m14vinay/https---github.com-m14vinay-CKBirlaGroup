@@ -1039,7 +1039,7 @@ AdvancepaymentStatus: '',
                       {/* 📄 File Link */}
                       <a
                         href={file.ServerRelativeUrl}
-
+                        target="_blank"
                         rel="noopener noreferrer"
                       >
                         {file.FileName}
