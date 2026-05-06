@@ -80,7 +80,7 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
     getCoreRowModel: getCoreRowModel(),
     state: {
       globalFilter,
-      sorting,
+      sorting
     },
     onGlobalFilterChange: setGlobalFilter,
     onSortingChange: setSorting,
@@ -122,7 +122,7 @@ const VendorRegistrationSearch: React.FC<IVendorRegistrationSearchProps> = (prop
       }
     } catch (error) {
       console.error(error);
-      alert("Error Occurred,Please Contact To System Administrator.");
+      alert(error);
     }
     finally {
       setLoading(false);
