@@ -132,7 +132,8 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
       const data = await service.getVendor();
       const options = data.map((item: any) => ({
         key: item.ID,
-        text: 'CKBCSL/' + item.ID + '-' + item.Title,
+       // text: 'CKBCSL/' + item.ID + '-' + item.Title,
+       text: item.VendorCode + '-' + item.Title,
   
       }));
       setVendorOptions(options);
