@@ -124,7 +124,7 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
       const result = await service.getItemByID(id);
       const currentUser = await service.getUser();
       console.log("Result:", result);
-      if (result.AuthorId !== currentUser.Id) {
+      if (result.Author.Id !== currentUser.Id) {
         alert("You Are Not Authorized ❌ ");
       }
       console.log("Result:", result);

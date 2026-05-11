@@ -31,7 +31,7 @@ export default class Service {
       SPHttpClient.configurations.v1
     );
     const data = await res.json();
-    return data.value.length > 0 ? 1 : 0;
+  return data;
   }
 
   public async getUser(): Promise<any> {
