@@ -588,7 +588,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                 ClaimAmount: Expenseform.expenses[i].ClaimAmount,
                 SupportedAttachment: 'Y',
                 DocumentName: Expenseform.expenses[i].DocumentName,
-                ReimursementLookupId: itemId
+                ReimursementLookupId: Number(itemId)
               };
               if (Number(Expenseform.expenses[i].Id) > 0) {
                 await service.updateExpenseItem(Number(Expenseform.expenses[i].Id), Expensepayload);
