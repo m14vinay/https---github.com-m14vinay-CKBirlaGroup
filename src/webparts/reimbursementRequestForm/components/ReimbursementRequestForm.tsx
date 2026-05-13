@@ -37,7 +37,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   const [DocumentOption, setDocumentOption] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(0);
   const [BillAmount, setBillAmount] = React.useState<number | null>(0);
-  const MAX_TOTAL_SIZE_MB = 25;
+  const MAX_TOTAL_SIZE_MB = 51;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
   const [Expenseform, setExpenseForm] = React.useState<{
     expenses: { Id: Number, Description: string; BillAmount: number; BillDate: Date, BillNo: string, DocumentName: string, ClaimAmount: number, ExpanseType: string, files: [] }[];

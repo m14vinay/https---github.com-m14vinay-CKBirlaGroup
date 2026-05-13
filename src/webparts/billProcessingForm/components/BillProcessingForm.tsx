@@ -37,7 +37,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   const [TotalAmount, setTotalAmount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
   const [isChecked, setIsChecked] = React.useState(false);
-  const MAX_TOTAL_SIZE_MB = 25;
+  const MAX_TOTAL_SIZE_MB = 51;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
 
   const handleCheckbillNoExist = async () => {

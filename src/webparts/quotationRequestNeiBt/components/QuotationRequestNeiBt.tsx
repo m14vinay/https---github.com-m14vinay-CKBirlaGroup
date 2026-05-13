@@ -59,7 +59,7 @@ const QuotationRequestNeiBt: React.FC<IQuotationRequestNeiBtProps> = (props) => 
   const service = new SharePointService(props.context);
   const [ApproverOptions, setApproverOptions] = React.useState<any[]>([]);
   const [attachments, setAttachments] = React.useState<any[]>([]);
-  const MAX_TOTAL_SIZE_MB = 25;
+  const MAX_TOTAL_SIZE_MB = 51;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
   const [departmentOptions, setDepartmentOptions] = React.useState<IDropdownOption[]>([]);
   const [loading, setLoading] = React.useState(false);

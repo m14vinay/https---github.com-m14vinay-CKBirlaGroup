@@ -44,7 +44,7 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
   const [attachments, setAttachments] = React.useState<any[]>([]);
   const [occupiedAmount, setoccupiedAmount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
-  const MAX_TOTAL_SIZE_MB = 25;
+  const MAX_TOTAL_SIZE_MB = 51;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
 
 

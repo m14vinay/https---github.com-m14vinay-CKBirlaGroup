@@ -41,7 +41,7 @@ const VendorMappingForm: React.FC<IVendorMappingFormProps> = (props) => {
   const [AssignedToEmail, setAssignedToEmail] = React.useState();
   const [requestNoError, setRequestNoError] = React.useState('');
   const [isSubmitted, setIsSubmitted] = React.useState('');
-  const MAX_TOTAL_SIZE_MB = 25;
+  const MAX_TOTAL_SIZE_MB = 51;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
   const [attachments, setAttachments] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
