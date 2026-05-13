@@ -73,7 +73,7 @@ export default class Service {
 
   }
   public async getCheckBillNoExist(BillNo: string): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items?$filter=BillNo eq '${BillNo}'`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items?$filter=BillNo eq '${BillNo}' and CurrentStatus ne 'Rejected'`;
     const res = await this.context.spHttpClient.get(      url,
       SPHttpClient.configurations.v1
     );
