@@ -167,10 +167,10 @@ const PurchaseOrderRequest: React.FC<IPurchaseOrderRequestProps> = (props) => {
     // 🔹 Check each file
     for (let file of filesArray) {
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
-      if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
-        alert(`File Type Not Allowed: ${file.name}. Only PDF, XLSX, DOCX are Allowed.`);
-        return; // stop execution
-      }
+     // if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
+       // alert(`File Type Not Allowed: ${file.name}. Only PDF, XLSX, DOCX are Allowed.`);
+        //return; // stop execution
+     // }
     }
 
     // 🔹 Total size check

@@ -196,10 +196,10 @@ const VendorRegistrationManually: React.FC<IVendorRegistrationManuallyProps> = (
     // 🔹 Check each file
     for (let file of filesArray) {
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
-      if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
-        alert(`File type not allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
-        return; // stop execution
-      }
+     // if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
+       // alert(`File type not allowed: ${file.name}. Only PDF, XLSX, DOCX are allowed.`);
+        //return; // stop execution
+      //}
     }
     // 🔹 Total size check
     const totalSizeMB = filesArray.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024);
