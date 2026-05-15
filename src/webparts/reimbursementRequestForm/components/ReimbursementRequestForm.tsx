@@ -66,15 +66,28 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     });
   };
   const handleCheckbillNoExist = async () => {
-    const checkdata = await service.getCheckBillNoExist(form.BillNo);
-    const checkexpensebill=Expenseform.expenses.some(item => item.BillNo === form.BillNo);
-    if (checkdata != null || checkexpensebill) {
+    // Allow only letters, numbers, hyphen (-) and underscore (_)
+    const cleanBillNo = form.BillNo.replace(/[^a-zA-Z0-9]/g, '');
+    // Check invalid characters
+    if (cleanBillNo !== form.BillNo) {
       setForm(prev => ({
         ...prev,
         BillNo: ''
-      }))
-      alert("Bill No is duplicate , Please enter another bill no");
+      }));
+      alert("Only letters, numbers, hyphen (-) and underscore (_) are allowed");
       return;
+    }
+    else {
+      const checkdata = await service.getCheckBillNoExist(form.BillNo);
+      const checkexpensebill = Expenseform.expenses.some(item => item.BillNo === form.BillNo);
+      if (checkdata != null || checkexpensebill) {
+        setForm(prev => ({
+          ...prev,
+          BillNo: ''
+        }))
+        alert("Bill No is duplicate , Please enter another bill no");
+        return;
+      }
     }
   }
   //Get ID from query string ---
@@ -151,8 +164,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     for (let file of filesArray) {
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
       //if (!fileExtension || allowedExtensions.indexOf(fileExtension) === -1) {
-        //alert(`File Type Not Allowed: ${file.name}. Only PDF, XLSX, DOCX are Allowed.`);
-        //return; // stop execution
+      //alert(`File Type Not Allowed: ${file.name}. Only PDF, XLSX, DOCX are Allowed.`);
+      //return; // stop execution
       //}
     }
 
@@ -249,8 +262,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     });
   };
   const handleExpenseSubmit = () => {
-    if (form.files.length==0) { alert("Please upload file.");return; }
-    if (!form.BillNo) { alert("Please enter bill no.");return; }
+    if (form.files.length == 0) { alert("Please upload file."); return; }
+    if (!form.BillNo) { alert("Please enter bill no."); return; }
     if (!form.BillDate) { alert("Please enter bill date."); return; }
     if (!form.BillAmount) { alert("Please enter bill amount."); return; }
     if (!form.ClaimAmount) { alert("Please enter claim amount."); return; }
@@ -299,11 +312,11 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     await service.createHistoryItem(payload);
   };
   const handleSubmit = async () => {
-     if (!form.DepartmentName) {
+    if (!form.DepartmentName) {
       alert("Please select a Department");
       return false;
     }
-    if (!form.TotalAmount || form.TotalAmount==0) {
+    if (!form.TotalAmount || form.TotalAmount == 0) {
       alert("Please add expenses.");
       return false;
     }
@@ -398,31 +411,31 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
                     for (let k = 0; k < Expenseform.expenses[i].files.length; k++) {
                       await service.uploadFile(resExpense.Id, Expenseform.expenses[i].files[k]);
                     }
-                  }                  
+                  }
                 }
               }
               if (form.DepartmentName == 'DH Branding' || form.DepartmentName == 'DH OGS' || form.DepartmentName == 'DH HR') {
-                    await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Pending', 'Finance Approver', new Date(), 1);
-                  }
-                  else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
-                    await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverCFO.ApproverName?.Title, 'Upcoming', 'CFO Approver', new Date(), 3);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
-                  }
-                  else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
-                    await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
-                    await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverCompliance.ApproverName?.Title, 'Upcoming', 'Compliance Head', new Date(), 3);
-                    await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
-                  }
-                  alert("Request Submitted Successfully ✅");
-                  console.log("Successfully Transaction Saved:-" + res.Id);
-                  const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-                  window.location.assign(url);
+                await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+                await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Pending', 'Finance Approver', new Date(), 1);
+              }
+              else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount > 100000) {
+                await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+                await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
+                await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
+                await handleSaveHistory(res.Id, 'REM', dataApproverCFO.ApproverName?.Title, 'Upcoming', 'CFO Approver', new Date(), 3);
+                await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
+              }
+              else if ((form.DepartmentName !== 'DH Branding' && form.DepartmentName !== 'DH OGS' && form.DepartmentName !== 'DH HR') && form.TotalAmount < 100000) {
+                await handleSaveHistory(res.Id, 'REM', currentuser?.Title, 'Request Initiator', 'Request Initiator', new Date(), 0);
+                await handleSaveHistory(res.Id, 'REM', dataApprover.DepartmentHead?.Title, 'Pending', 'Department Head', new Date(), 1);
+                await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 2);
+                await handleSaveHistory(res.Id, 'REM', dataApproverCompliance.ApproverName?.Title, 'Upcoming', 'Compliance Head', new Date(), 3);
+                await handleSaveHistory(res.Id, 'REM', dataApproverFI.ApproverName?.Title, 'Upcoming', 'Finance Approver', new Date(), 4);
+              }
+              alert("Request Submitted Successfully ✅");
+              console.log("Successfully Transaction Saved:-" + res.Id);
+              const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
+              window.location.assign(url);
             }
           }
         } else {
@@ -495,7 +508,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       alert("Please select a Department");
       return false;
     }
-    if (!form.TotalAmount || form.TotalAmount==0) {
+    if (!form.TotalAmount || form.TotalAmount == 0) {
       alert("Please add expenses.");
       return false;
     }
@@ -570,7 +583,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
 
               alert("Request Saved Successfully ✅");
               const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-        window.location.assign(url);
+              window.location.assign(url);
             }
           }
 
@@ -631,7 +644,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
             }
             alert("Request Updated Successfully ✅");
             const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
-        window.location.assign(url);
+            window.location.assign(url);
           }
         }
 
