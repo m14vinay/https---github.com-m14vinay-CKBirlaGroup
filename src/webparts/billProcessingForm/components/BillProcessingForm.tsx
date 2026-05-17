@@ -49,7 +49,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         ...prev,
         BillNo: ''
       }));
-      alert("Only letters, numbers, hyphen (-) and underscore (_) are allowed");
+      alert("Only letters, numbers are allowed");
       return;
     }
     else {
