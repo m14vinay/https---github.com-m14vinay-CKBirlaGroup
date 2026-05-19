@@ -160,7 +160,7 @@ const ReimbursementRequestApproval: React.FC<IReimbursementRequestApprovalProps>
         }
       }
       else {
-        alert("❌ Unauthorized Access! You are not the current approver");
+        alert("You have already approved the request or this request is not pending at your end.");
         const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Dashboard.aspx`;
         window.location.assign(url);
       }
