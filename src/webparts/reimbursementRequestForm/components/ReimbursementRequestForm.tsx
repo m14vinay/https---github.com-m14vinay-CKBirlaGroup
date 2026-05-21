@@ -67,7 +67,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
   };
   const handleCheckbillNoExist = async () => {
     // Allow only letters, numbers, hyphen (-) and underscore (_)
-    const cleanBillNo = form.BillNo.replace(/[^a-zA-Z0-9]/g, '');
+    const cleanBillNo = form.BillNo;
     // Check invalid characters
     if (cleanBillNo !== form.BillNo) {
       setForm(prev => ({
