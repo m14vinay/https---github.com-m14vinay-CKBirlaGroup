@@ -41,18 +41,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
 
   const handleCheckbillNoExist = async () => {
-    // Allow only letters, numbers, hyphen (-) and underscore (_)
-    const cleanBillNo = form.BillNo;
-    // Check invalid characters
-    if (cleanBillNo !== form.BillNo) {
-      setForm(prev => ({
-        ...prev,
-        BillNo: ''
-      }));
-      alert("Only letters, numbers are allowed");
-      return;
-    }
-    else {
       const checkdata = await service.getCheckBillNoExist(form.BillNo);
       if (checkdata != null) {
         setForm(prev => ({
@@ -62,7 +50,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         alert("Bill No is duplicate , Please enter another bill no");
         return;
       }
-    }
   }
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {

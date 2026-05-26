@@ -66,18 +66,6 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
     });
   };
   const handleCheckbillNoExist = async () => {
-    // Allow only letters, numbers, hyphen (-) and underscore (_)
-    const cleanBillNo = form.BillNo;
-    // Check invalid characters
-    if (cleanBillNo !== form.BillNo) {
-      setForm(prev => ({
-        ...prev,
-        BillNo: ''
-      }));
-      alert("Only letters, numbers are allowed");
-      return;
-    }
-    else {
       const checkdata = await service.getCheckBillNoExist(form.BillNo);
       const checkexpensebill = Expenseform.expenses.some(item => item.BillNo === form.BillNo);
       if (checkdata != null || checkexpensebill) {
@@ -88,7 +76,6 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         alert("Bill No is duplicate , Please enter another bill no");
         return;
       }
-    }
   }
   //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
