@@ -69,6 +69,8 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
       const checkdata = await service.getCheckBillNoExist(form.BillNo);
       const checkexpensebill = Expenseform.expenses.some(item => item.BillNo === form.BillNo);
       if (checkdata != null || checkexpensebill) {
+        const checkmasterdata= await service.getItemByRequestNoNotRejected(checkdata.value[0].ReimursementLookupId);
+        if(checkmasterdata != null){
         setForm(prev => ({
           ...prev,
           BillNo: ''
@@ -76,6 +78,7 @@ const ReimbursementRequestForm: React.FC<IReimbursementRequestFormProps> = (prop
         alert("Bill No is duplicate , Please enter another bill no");
         return;
       }
+    }
   }
   //Get ID from query string ---
   const getIdFromQueryString = (): number | null => {

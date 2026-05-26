@@ -205,6 +205,18 @@ DepartmentHead/Id,DepartmentHead/Title
     const data = await res.json();
     return data.value.length > 0 ? data.value[0] : null;
   }
+  public async getItemByRequestNoNotRejected(ID: number): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?$filter=ID eq ${ID} and CurrentStatus ne 'Rejected'`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0] : null;
+  }
   public async getItemByExpenseData(ID: number): Promise<any> {
 
    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$select=*,AttachmentFiles&$expand=AttachmentFiles
@@ -219,7 +231,9 @@ DepartmentHead/Id,DepartmentHead/Title
     return data.value.length > 0 ? data : null;
   }
   public async getCheckBillNoExist(BillNo: string): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items?$filter=BillNo eq '${BillNo}'`;
+    const url = `${this.context.pageContext.web.absoluteUrl}` +
+    `/_api/web/lists/getbytitle('${this.ReimburseExpenseTransaction}')/items` +
+    `?$filter=BillNo eq '${BillNo}'`;
     const res = await this.context.spHttpClient.get(      url,
       SPHttpClient.configurations.v1
     );
