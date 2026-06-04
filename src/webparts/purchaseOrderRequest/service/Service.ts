@@ -8,8 +8,8 @@ export default class Service {
   private VendorList="";
   private FinanceController="FinanceController";
   private HistoryList="History";
-   private Approver="VendorMappingApproval";
-    private VendorMapping="VendorMapping";
+  private Approver="VendorMappingApproval";
+  private VendorMapping="VendorMapping";
   constructor(context: any) {
     this.context = context;
   }
