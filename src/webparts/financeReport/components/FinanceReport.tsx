@@ -27,65 +27,143 @@ const FinanceReport: React.FC<IFinanceReportProps> = (props) => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<any>([]);
 
-  const columnHelper = createColumnHelper<any>()
-  const columns = [
-    columnHelper.accessor('ID', {
-      header: () => 'Req No.'
+   const stripHtml = (html: string) => {
+          const temp = document.createElement("div");
+          temp.innerHTML = html;
+          return temp.textContent || temp.innerText || "";
+      };
+    const columnHelper = createColumnHelper<any>()
+    const columns = [
+      columnHelper.accessor('ID', {
+        header: () => 'Request No.'
+      }),
+      columnHelper.accessor('ProjectCode', {
+        header: 'Project Code'
+      }),
+      columnHelper.accessor('PORequestNo', {
+        header: 'PO Request No.'
+      }),
+      columnHelper.accessor('Department', {
+        header: 'Department'
+      }),
+      columnHelper.accessor('Vendorcode', {
+        header: 'Vendor Code'
+      }),
+      columnHelper.accessor('Modified', {
+        header: 'Modified Date',
+        cell: (info) => <span>{new Date(info.row.original.Modified).toLocaleDateString()}</span>
+      }),
+      columnHelper.accessor('ProjectTitle', {
+        header: () => 'Project Title'
+      }),
+      columnHelper.accessor(row => row.Author?.Title,
+    {
+      id: 'Author',
+      header: 'Created By'
+    }), 
+      columnHelper.accessor('Created', {
+        header: 'Submitted Date',
+         cell: (info) => <span>{new Date(info.row.original.Created).toLocaleDateString()}</span>
+      }),
+      columnHelper.accessor('VendorName', {
+        header: 'Vendor Name'
+      }),
+      columnHelper.accessor('CurrentStatus', {
+        header: 'Status'
+      }), 
+      columnHelper.accessor('BillDescription', {
+        header: 'Bill Description',
+        cell: info => (
+                  <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                      {stripHtml(info.getValue())}
+                  </div>
+              )
+      }),
+      columnHelper.accessor('PODescription', {
+        header: 'PO Description',
+        cell: info => (
+                  <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                      {stripHtml(info.getValue())}
+                  </div>
+              )
+      }),
+      columnHelper.accessor('AssignedTo', {
+        header: 'Assigned To'
+      }),    
+      columnHelper.accessor('ApproverComment1', {
+        header: 'Approver Comment 1'
+      }),  
+      columnHelper.accessor('ApproverComment2', {
+        header: 'Approver Comment 2'
+      }),  
+      columnHelper.accessor('ApproverComment3', {
+        header: 'Approver Comment 3'
+      }),  
+      columnHelper.accessor('ApproverComment4', {
+        header: 'Approver Comment 4'
+      }),  
+      columnHelper.accessor('ActionDate1', {
+        header: 'Action Date 1'
+      }),  
+      columnHelper.accessor('ActionDate2', {
+        header: 'Action Date 2'
+      }),  
+      columnHelper.accessor('ActionDate3', {
+        header: 'Action Date 3'
+      }),  
+      columnHelper.accessor('ActionDate4', {
+        header: 'Action Date 4'
+      }),  
+      columnHelper.accessor(row => row.DepartmentHead?.Title,
+    {
+      id: 'DepartmentHead',
+      header: 'Department Head'
+    }), 
+      columnHelper.accessor(row => row.Approver2?.Title,
+    {
+      id: 'Approver2',
+      header: 'Approver 2'
     }),
-    columnHelper.accessor('ProjectTitle', {
-      header: () => 'Project Title'
+      columnHelper.accessor(row => row.Approver3?.Title,
+    {
+      id: 'Approver3',
+      header: 'Approver 3'
+    }), 
+      columnHelper.accessor(row => row.Approver5?.Title,
+    {
+      id: 'Approver5',
+      header: 'Approver 5'
+    }), 
+      columnHelper.accessor('BillNo', {
+        header: 'Bill No'
+      }),
+      columnHelper.accessor('BillDate', {
+        header: 'Bill Date'
+      }),
+      columnHelper.accessor('BillAmount', {
+        header: 'Bill Amount'
+      }),
+    columnHelper.accessor(row => row.Editor?.Title,
+    {
+      id: 'ModifiedBy',
+      header: 'Modified By'
     }),
-    columnHelper.accessor('ProjectReffNo', {
-      header: () => 'Project Ref No.'
-    }),
-    columnHelper.accessor('Department', {
-      header: 'Department'
-    }),
-    columnHelper.accessor('Description', {
-      header: 'Description'
-    }),
-    columnHelper.accessor('CurrentStatus', {
-      header: 'Status'
-    }),
-    columnHelper.accessor('Created', {
-      header: 'Submitted Date',
-      cell: info =>
-        new Date(info.getValue()).toISOString()
-    }),
-    columnHelper.accessor('', {
-      header: 'Approved Date'
-    }),
-    columnHelper.accessor('ProjectCode', {
-      header: 'Project Code'
-    }),
-    columnHelper.accessor('', {
-      header: 'Approval Path'
-    }),
-    columnHelper.accessor('AssignedTo', {
-      header: 'Approved Pending On'
-    }),
-    columnHelper.accessor('', {
-      header: 'Approval Pending Date'
-    }),
-    columnHelper.accessor('VendorRequestNo', {
-      header: 'Vendor Req No.'
-    }),
-    columnHelper.accessor('VendorCode', {
-      header: 'Vendor Code'
-    }),
-    columnHelper.accessor('VendorName', {
-      header: 'Vendor Name'
-    }),
-    columnHelper.accessor('PORequestNo', {
-      header: 'PO Request No.'
-    }),
-    columnHelper.accessor('', {
-      header: 'Requestor Name'
-    }),
-    columnHelper.accessor('BillAmount', {
-      header: 'Bill Amount'
-    })
-  ]
+      columnHelper.accessor('CalculatedTaxes', {
+        header: 'Calculated Taxes'
+      }),
+      columnHelper.accessor('TotalAmount', {
+        header: 'Total Amount'
+      }), 
+      columnHelper.accessor('ApprovalPath', {
+        header: 'Approval Path'
+      }), 
+      columnHelper.accessor('RemainingAmount', {
+        header: 'Remaining Amount'
+      }), 
+      columnHelper.accessor('OccupiedAmount', {
+        header: 'Occupied Amount'
+      })  
+    ]
   const table = useReactTable({
     data,
     columns,
