@@ -77,24 +77,116 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
       columnHelper.accessor('RequestNo', {
         header: "Request No"
       }),
-      columnHelper.accessor('ProjectReffNo', {
-        header: "Description"
-      }),
       columnHelper.accessor('ProjectTitle', {
         header: "Project Title"
       }),
       columnHelper.accessor('ProjectDescription', {
-        header: "Project Description"
-      }),
+         header: 'Project Description',
+         cell: info => (
+                   <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                       {stripHtml(info.getValue())}
+                   </div>
+               )
+       }),
       columnHelper.accessor('Department', {
         header: "Department"
       }),
-      columnHelper.accessor('Status', {
-        header: "Status"
+      columnHelper.accessor('CurrentStatus', {
+        header: "Current Status"
       }),
       columnHelper.accessor('ApprovalPath', {
         header: "Approval Path"
-      })
+      }),
+       columnHelper.accessor('ApproverComment1', {
+        header: "Approver Comment 1"
+      }),
+       columnHelper.accessor('ApproverComment2', {
+        header: "Approver Comment 2"
+      }),
+       columnHelper.accessor('ApproverComment3', {
+        header: "Approver Comment 3"
+      }),
+      columnHelper.accessor(row => row.Approval1?.Title,
+     {
+       id: 'Approval1',
+       header: 'Approver 1'
+     }),
+     columnHelper.accessor(row => row.Approval2?.Title,
+     {
+       id: 'Approval2',
+       header: 'Approver 2'
+     }),
+     columnHelper.accessor(row => row.Approval3?.Title,
+     {
+       id: 'Approval3',
+       header: 'Approver 3'
+     }),
+     columnHelper.accessor('Modified', {
+         header: 'Modified Date',
+         cell: (info) => <span>{new Date(info.row.original.Modified).toLocaleDateString()}</span>
+       }),
+       columnHelper.accessor('Advancepayment', {
+        header: "Advance Payment"
+      }),
+       columnHelper.accessor('ActionDate1', {
+        header: "Action Date 1"
+      }),
+      columnHelper.accessor('ActionDate2', {
+        header: "Action Date 2"
+      }),
+      columnHelper.accessor('ActionDate3', {
+        header: "Action Date 3"
+      }),
+      columnHelper.accessor('ApprovalPath', {
+        header: "Approval Path"
+      }),
+      columnHelper.accessor('Vendor1', {
+        header: "Vendor 1"
+      }),
+      columnHelper.accessor('Vendor2', {
+        header: "Vendor 2"
+      }),
+      columnHelper.accessor('Vendor3', {
+        header: "Vendor 3"
+      }),
+      columnHelper.accessor('Quote1', {
+        header: "Quote 1"
+      }),
+      columnHelper.accessor('Quote2', {
+        header: "Quote 2"
+      }),
+      columnHelper.accessor('Quote3', {
+        header: "Quote 3"
+      }),
+      columnHelper.accessor('Selectedvendor', {
+        header: "Selected Vendor"
+      }),
+      columnHelper.accessor('Created', {
+         header: 'Created Date',
+         cell: (info) => <span>{new Date(info.row.original.Created).toLocaleDateString()}</span>
+       }),
+       columnHelper.accessor('SelectedQuote', {
+        header: "Selected Quote"
+      }),
+      columnHelper.accessor(row => row.Author?.Title,
+     {
+       id: 'Author',
+       header: 'Created By'
+     }),
+     columnHelper.accessor(row => row.Editor?.Title,
+     {
+       id: 'Editor',
+       header: 'Modified By'
+     }),
+     columnHelper.accessor('TotalProjectAmount', {
+        header: "Total Project Amount"
+      }),
+      columnHelper.accessor('ApplicableTaxes', {
+        header: "Applicable Taxes"
+      }),
+      columnHelper.accessor('AssignedTo', {
+        header: "Assigned To"
+      }),
     ]
     setColumns(setDynamicColumns);
     await getDatafromListByTitle('QuotationApproval');
