@@ -32,7 +32,11 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
   const [Label, setLabel] = useState("");
   const columnHelper = createColumnHelper<any>();
   const [columns, setColumns] = React.useState<any[]>([]);
-
+  const stripHtml = (html: string) => {
+           const temp = document.createElement("div");
+           temp.innerHTML = html;
+           return temp.textContent || temp.innerText || "";
+       };
   const table = useReactTable({
     data,
     columns,
@@ -108,20 +112,26 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
       columnHelper.accessor('ProjectCode', {
         header: "Project Code"
       }),
-      columnHelper.accessor('ProjectReffNo', {
-        header: "Description"
+      columnHelper.accessor('RequestNo', {
+        header: "Request No"
       }),
       columnHelper.accessor('ProjectTitle', {
         header: "Project Title"
       }),
+      columnHelper.accessor('Created', {
+         header: 'Created Date',
+         cell: (info) => <span>{new Date(info.row.original.Created).toLocaleDateString()}</span>
+       }),
       columnHelper.accessor('ProjectDescription', {
-        header: "Project Description"
-      }),
+         header: 'Project Description',
+         cell: info => (
+                   <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                       {stripHtml(info.getValue())}
+                   </div>
+               )
+       }),
       columnHelper.accessor('Department', {
         header: "Department"
-      }),
-      columnHelper.accessor('Vendorcode', {
-        header: "Vendor Code"
       }),
       columnHelper.accessor('VendorName', {
         header: "Vendor Name"
@@ -129,9 +139,43 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
       columnHelper.accessor('CurrentStatus', {
         header: "Status"
       }),
-      columnHelper.accessor('RequestNo', {
-        header: "Request No"
-      })
+      columnHelper.accessor('VendorDescription', {
+        header: "Vendor Description",
+        cell: info => (
+                   <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                       {stripHtml(info.getValue())}
+                   </div>
+               )
+      }),
+      columnHelper.accessor('AssignedTo', {
+        header: "Assigned To"
+      }),
+      columnHelper.accessor('ApproverComment', {
+        header: "Approver Comment"
+      }),
+      columnHelper.accessor('ApproverComment1', {
+        header: "Approver Comment 1"
+      }),
+      columnHelper.accessor('ApproverComment2', {
+        header: "Approver Comment 2"
+      }),
+      columnHelper.accessor('Actiondate1', {
+        header: "Action Date 1"
+      }),
+      columnHelper.accessor('Modified', {
+         header: 'Modified Date',
+         cell: (info) => <span>{new Date(info.row.original.Modified).toLocaleDateString()}</span>
+       }),
+       columnHelper.accessor(row => row.Author?.Title,
+     {
+       id: 'Author',
+       header: 'Created By'
+     }),
+     columnHelper.accessor(row => row.Editor?.Title,
+     {
+       id: 'Editor',
+       header: 'Modified By'
+     })
     ]
     setColumns(setDynamicColumns);
     await getDatafromListByTitle('VendorMapping');
@@ -146,24 +190,96 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
     setIsActivePO(true);
     setIsActiveVM(false);
     const setDynamicColumns = [
+      columnHelper.accessor('RequestNo', {
+        header: "Request No"
+      }),
       columnHelper.accessor('ProjectCode', {
         header: "Project Code"
-      }),
-      columnHelper.accessor('ProjectDescription', {
-        header: "Description"
       }),
       columnHelper.accessor('Department', {
         header: "Department"
       }),
+      columnHelper.accessor('ProjectTitle', {
+        header: "Project Title"
+      }),
+      columnHelper.accessor('Created', {
+         header: 'Created Date',
+         cell: (info) => <span>{new Date(info.row.original.Created).toLocaleDateString()}</span>
+       }),
       columnHelper.accessor('VendorName', {
         header: "Vendor Name"
       }),
       columnHelper.accessor('CurrentStatus', {
         header: "Status"
       }),
-      columnHelper.accessor('RequestNo', {
-        header: "Request No"
-      })
+      columnHelper.accessor('PODescription', {
+         header: 'PO Description',
+         cell: info => (
+                   <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                       {stripHtml(info.getValue())}
+                   </div>
+               )
+       }),
+       columnHelper.accessor('ProjectDescription', {
+         header: 'Project Description',
+         cell: info => (
+                   <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                       {stripHtml(info.getValue())}
+                   </div>
+               )
+       }),
+      columnHelper.accessor('AssignedTo', {
+         header: 'Assigned To'
+       }),    
+       columnHelper.accessor('ApproverComment1', {
+        header: "Approver Comment 1"
+      }),
+      columnHelper.accessor('ApproverComment2', {
+        header: "Approver Comment 2"
+      }),
+      columnHelper.accessor('ActionDate1', {
+        header: "Action Date 1"
+      }),
+      columnHelper.accessor('ActionDate2', {
+        header: "Action Date 2"
+      }),
+      columnHelper.accessor(row => row.DepartmentHead?.Title,
+     {
+       id: 'DepartmentHead',
+       header: 'Department Head'
+     }), 
+     columnHelper.accessor(row => row.Approver2?.Title,
+     {
+       id: 'Approver2',
+       header: 'Approver 2'
+     }), 
+     columnHelper.accessor('POCategory', {
+        header: "PO Category"
+      }),
+      columnHelper.accessor('Modified', {
+         header: 'Modified Date',
+         cell: (info) => <span>{new Date(info.row.original.Modified).toLocaleDateString()}</span>
+       }),
+      columnHelper.accessor(row => row.Author?.Title,
+     {
+       id: 'Author',
+       header: 'Created By'
+     }),
+      columnHelper.accessor('PoMaster', {
+        header: "PO Master"
+      }),
+      columnHelper.accessor('ApprovalPath', {
+        header: "Approval Path"
+      }),
+      columnHelper.accessor('POAmount', {
+        header: "PO Issued Amount"
+      }),
+      columnHelper.accessor('ApplicableTaxes', {
+        header: "Applicable Taxes"
+      }),
+      columnHelper.accessor('TotalPRJAmount', {
+        header: "Total Project Amount"
+      }),
     ]
     setColumns(setDynamicColumns);
     await getDatafromListByTitle('PoApproval');
@@ -178,35 +294,136 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
     setIsActivePO(false);
     setIsActiveVM(false);
     const setDynamicColumns = [
-      columnHelper.accessor('ProjectCode', {
-        header: "Project Code"
-      }),
-      columnHelper.accessor('ProjectDescription', {
-        header: "Description",
-        cell: info => (
-          <div
-            dangerouslySetInnerHTML={{
-              __html: info.getValue()
-            }}
-          />
-        )
-      }),
-      columnHelper.accessor('ProjectTitle', {
-        header: "Project Title"
-      }),
-      columnHelper.accessor('Vendorcode', {
-        header: "Vendor Code"
-      }),
-      columnHelper.accessor('VendorName', {
-        header: "Vendor Name"
-      }),
-      columnHelper.accessor('CurrentStatus', {
-        header: "Status"
-      }),
-      columnHelper.accessor('RequestNo', {
-        header: "Request No"
-      })
-    ]
+       columnHelper.accessor('ID', {
+         header: () => 'Request No.'
+       }),
+       columnHelper.accessor('ProjectCode', {
+         header: 'Project Code'
+       }),
+       columnHelper.accessor('PORequestNo', {
+         header: 'PO Request No.'
+       }),
+       columnHelper.accessor('Department', {
+         header: 'Department'
+       }),
+       columnHelper.accessor('Vendorcode', {
+         header: 'Vendor Code'
+       }),
+       columnHelper.accessor('Modified', {
+         header: 'Modified Date',
+         cell: (info) => <span>{new Date(info.row.original.Modified).toLocaleDateString()}</span>
+       }),
+       columnHelper.accessor('ProjectTitle', {
+         header: () => 'Project Title'
+       }),
+       columnHelper.accessor(row => row.Author?.Title,
+     {
+       id: 'Author',
+       header: 'Created By'
+     }), 
+       columnHelper.accessor('Created', {
+         header: 'Submitted Date',
+          cell: (info) => <span>{new Date(info.row.original.Created).toLocaleDateString()}</span>
+       }),
+       columnHelper.accessor('VendorName', {
+         header: 'Vendor Name'
+       }),
+       columnHelper.accessor('CurrentStatus', {
+         header: 'Status'
+       }), 
+       columnHelper.accessor('BillDescription', {
+         header: 'Bill Description',
+         cell: info => (
+                   <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                       {stripHtml(info.getValue())}
+                   </div>
+               )
+       }),
+       columnHelper.accessor('PODescription', {
+         header: 'PO Description',
+         cell: info => (
+                   <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                       {stripHtml(info.getValue())}
+                   </div>
+               )
+       }),
+       columnHelper.accessor('AssignedTo', {
+         header: 'Assigned To'
+       }),    
+       columnHelper.accessor('ApproverComment1', {
+         header: 'Approver Comment 1'
+       }),  
+       columnHelper.accessor('ApproverComment2', {
+         header: 'Approver Comment 2'
+       }),  
+       columnHelper.accessor('ApproverComment3', {
+         header: 'Approver Comment 3'
+       }),  
+       columnHelper.accessor('ApproverComment4', {
+         header: 'Approver Comment 4'
+       }),  
+       columnHelper.accessor('ActionDate1', {
+         header: 'Action Date 1'
+       }),  
+       columnHelper.accessor('ActionDate2', {
+         header: 'Action Date 2'
+       }),  
+       columnHelper.accessor('ActionDate3', {
+         header: 'Action Date 3'
+       }),  
+       columnHelper.accessor('ActionDate4', {
+         header: 'Action Date 4'
+       }),  
+       columnHelper.accessor(row => row.DepartmentHead?.Title,
+     {
+       id: 'DepartmentHead',
+       header: 'Department Head'
+     }), 
+       columnHelper.accessor(row => row.Approver2?.Title,
+     {
+       id: 'Approver2',
+       header: 'Approver 2'
+     }),
+       columnHelper.accessor(row => row.Approver3?.Title,
+     {
+       id: 'Approver3',
+       header: 'Approver 3'
+     }), 
+       columnHelper.accessor(row => row.Approver5?.Title,
+     {
+       id: 'Approver5',
+       header: 'Approver 5'
+     }), 
+       columnHelper.accessor('BillNo', {
+         header: 'Bill No'
+       }),
+       columnHelper.accessor('BillDate', {
+         header: 'Bill Date'
+       }),
+       columnHelper.accessor('BillAmount', {
+         header: 'Bill Amount'
+       }),
+     columnHelper.accessor(row => row.Editor?.Title,
+     {
+       id: 'ModifiedBy',
+       header: 'Modified By'
+     }),
+       columnHelper.accessor('CalculatedTaxes', {
+         header: 'Calculated Taxes'
+       }),
+       columnHelper.accessor('TotalAmount', {
+         header: 'Total Amount'
+       }), 
+       columnHelper.accessor('ApprovalPath', {
+         header: 'Approval Path'
+       }), 
+       columnHelper.accessor('RemainingAmount', {
+         header: 'Remaining Amount'
+       }), 
+       columnHelper.accessor('OccupiedAmount', {
+         header: 'Occupied Amount'
+       })  
+     ]
     setColumns(setDynamicColumns);
     await getDatafromListByTitle('BillProcessing');
     setLoading(false);
@@ -355,52 +572,51 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
           </div>
         </div>
         <div className="p-2">
-          <div>
-            <span style={{ display: "inline-block" }}>{Label}</span>
+          <div style={{ marginBottom: "10px", padding: "5px", textAlign: 'right' }}>
             <input
               value={globalFilter ?? ""}
               onChange={(e) => setGlobalFilter(e.target.value)}
               placeholder="Search..."
-              style={{ marginBottom: "10px", padding: "5px", float: "right" }}
             />
           </div>
           <div className={styles['table-responsive']}>
-          <Table striped bordered hover>
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      onClick={header.column.getToggleSortingHandler()}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                      {{
-                        asc: <Icon iconName='ChevronUpMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
-                        desc: <Icon iconName='ChevronDownMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
-                      }[header.column.getIsSorted() as string] ?? null}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+            <Table striped bordered hover>
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        onClick={header.column.getToggleSortingHandler()}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                        {{
+                          asc: <Icon iconName='ChevronUpMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
+                          desc: <Icon iconName='ChevronDownMed' style={{ verticalAlign: "middle", marginLeft: "5px" }} />,
+                        }[header.column.getIsSorted() as string] ?? null}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           </div>
+
           {/* 📄 Pagination */}
           <div className="flex items-center gap-2">
             <span>
@@ -467,8 +683,6 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
               </select>
             </div>
           </div>
-
-
         </div>
       </div>
     </section>

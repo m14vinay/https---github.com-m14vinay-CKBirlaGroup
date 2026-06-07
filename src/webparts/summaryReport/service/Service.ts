@@ -8,7 +8,48 @@ export default class Service {
 
   // Fetch the Record
   public async getItemByTitle(listname:string): Promise<any[]> {
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listname}')/items`;
+  let url:string = "";
+ if(listname === "BillProcessing"){
+     url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listname}')/items
+?$select=*,
+Author/Title,
+Editor/Title,
+Approver2/Title,
+Approver3/Title,
+Approver5/Title,
+DepartmentHead/Title
+&$expand=Author,Editor,Approver2,Approver3,Approver5,DepartmentHead`;
+  }
+  if(listname === "PoApproval"){
+    url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listname}')/items
+?$select=*,
+Author/Title,
+Editor/Title,
+Approver2/Title,
+DepartmentHead/Title
+&$expand=Author,Editor,Approver2,DepartmentHead`;
+  }
+  if(listname === "VendorMapping")
+  {
+    url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listname}')/items
+?$select=*,
+Author/Title,
+Editor/Title
+&$expand=Author,Editor`;
+  }
+  if(listname === "QuotationApproval")
+  {
+url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listname}')/items
+?$select=*,
+Approval1/Title,
+Approval2/Title,
+Approval3/Title,
+Approval4/Title,
+Approval5/Title,
+Author/Title,
+Editor/Title
+&$expand=Author,Editor,Approval1,Approval2,Approval3,Approval4,Approval5`;
+  }
   const res = await this.context.spHttpClient.get(
     url,
     SPHttpClient.configurations.v1
