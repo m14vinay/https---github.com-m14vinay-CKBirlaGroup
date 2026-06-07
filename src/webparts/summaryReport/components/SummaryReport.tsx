@@ -364,6 +364,7 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
               style={{ marginBottom: "10px", padding: "5px", float: "right" }}
             />
           </div>
+          <div className={styles['table-responsive']}>
           <Table striped bordered hover>
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -399,7 +400,7 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
               ))}
             </tbody>
           </Table>
-
+          </div>
           {/* 📄 Pagination */}
           <div className="flex items-center gap-2">
             <span>
