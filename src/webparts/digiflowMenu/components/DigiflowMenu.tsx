@@ -103,36 +103,99 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
     return (
       <Nav className="me-auto">
         {base.map(b => {
-          let childItems = this.state.items.filter(item => item.ParentId == b.Id);
-          if (childItems.length > 0) {
-            return <NavDropdown
-              onMouseEnter={() => this.setMenuDropdown(b.Title)}
-              onMouseLeave={() => this.setMenuDropdown("")}
-              show={this.state.showDropdown === b.Title}
-              title={
-                <span><span><img className={styles.iconImg} src={b.Icon}></img></span><span className={styles.menuHaeding}>{b.Title}</span></span>
-              } id="basic-nav-dropdown">
-              {childItems.map((c, i) => {
-                return <><NavDropdown.Item href={c.Link}>{c.Title}</NavDropdown.Item>
-                  {i < childItems.length - 1 && <NavDropdown.Divider />}
-                </>
-              })}
-            </NavDropdown>
-          }
-          else {
-            if (this.state.flag && b.Title === "Manage Approvers") {
-              return <Nav.Link href={b.Link}>
-                <span><img className={styles.iconImg} src={b.Icon}></img></span>
-                <span className={styles.menuHaeding}>{b.Title}</span>
-              </Nav.Link>
+          if (this.state.flag && b.Title === "Manage Approvers") {
+            let childItems = this.state.items.filter(item => item.ParentId == b.Id);
+            if (childItems.length > 0) {
+              return <NavDropdown
+                onMouseEnter={() => this.setMenuDropdown(b.Title)}
+                onMouseLeave={() => this.setMenuDropdown("")}
+                show={this.state.showDropdown === b.Title}
+                title={
+                  <span><span><img className={styles.iconImg} src={b.Icon}></img></span><span className={styles.menuHaeding}>{b.Title}</span></span>
+                } id="basic-nav-dropdown">
+                {childItems.map((c, i) => {
+                  return <><NavDropdown.Item href={c.Link}>{c.Title}</NavDropdown.Item>
+                    {i < childItems.length - 1 && <NavDropdown.Divider />}
+                  </>
+                })}
+              </NavDropdown>
             }
-            else if (this.state.NEIBTFlag && (b.Title === "NEIBT Admin Report" || b.Title === "Approval NEIBT" )) {
-              return <Nav.Link href={b.Link}>
-                <span><img className={styles.iconImg} src={b.Icon}></img></span>
-                <span className={styles.menuHaeding}>{b.Title}</span>
-              </Nav.Link>
-            }            
-            else if (b.Title !== "Manage Approvers" && b.Title !== "NEIBT Admin Report" && b.Title !== "Approval NEIBT") {
+            else {
+            return <Nav.Link href={b.Link}>
+              <span><img className={styles.iconImg} src={b.Icon}></img></span>
+              <span className={styles.menuHaeding}>{b.Title}</span>
+            </Nav.Link>
+          }
+        }
+          else if (this.state.NEIBTFlag && b.Title === "NEIBT Admin Report") {
+
+            let childItems = this.state.items.filter(item => item.ParentId == b.Id);
+            if (childItems.length > 0) {
+              return <NavDropdown
+                onMouseEnter={() => this.setMenuDropdown(b.Title)}
+                onMouseLeave={() => this.setMenuDropdown("")}
+                show={this.state.showDropdown === b.Title}
+                title={
+                  <span><span><img className={styles.iconImg} src={b.Icon}></img></span><span className={styles.menuHaeding}>{b.Title}</span></span>
+                } id="basic-nav-dropdown">
+                {childItems.map((c, i) => {
+                  return <><NavDropdown.Item href={c.Link}>{c.Title}</NavDropdown.Item>
+                    {i < childItems.length - 1 && <NavDropdown.Divider />}
+                  </>
+                })}
+              </NavDropdown>
+            }
+            else
+            {
+            return <Nav.Link href={b.Link}>
+              <span><img className={styles.iconImg} src={b.Icon}></img></span>
+              <span className={styles.menuHaeding}>{b.Title}</span>
+            </Nav.Link>
+            }
+          }
+          else if (this.state.NEIBTFlag && b.Title === "Approval NEIBT") {
+            let childItems = this.state.items.filter(item => item.ParentId == b.Id);
+            if (childItems.length > 0) {
+              return <NavDropdown
+                onMouseEnter={() => this.setMenuDropdown(b.Title)}
+                onMouseLeave={() => this.setMenuDropdown("")}
+                show={this.state.showDropdown === b.Title}
+                title={
+                  <span><span><img className={styles.iconImg} src={b.Icon}></img></span><span className={styles.menuHaeding}>{b.Title}</span></span>
+                } id="basic-nav-dropdown">
+                {childItems.map((c, i) => {
+                  return <><NavDropdown.Item href={c.Link}>{c.Title}</NavDropdown.Item>
+                    {i < childItems.length - 1 && <NavDropdown.Divider />}
+                  </>
+                })}
+              </NavDropdown>
+            }
+            else
+            {
+            return <Nav.Link href={b.Link}>
+              <span><img className={styles.iconImg} src={b.Icon}></img></span>
+              <span className={styles.menuHaeding}>{b.Title}</span>
+            </Nav.Link>
+            }
+          }
+          else if(b.Title !== "Manage Approvers" && b.Title !== "NEIBT Admin Report" && b.Title !== "Approval NEIBT") {
+            let childItems = this.state.items.filter(item => item.ParentId == b.Id);
+            if (childItems.length > 0) {
+              return <NavDropdown
+                onMouseEnter={() => this.setMenuDropdown(b.Title)}
+                onMouseLeave={() => this.setMenuDropdown("")}
+                show={this.state.showDropdown === b.Title}
+                title={
+                  <span><span><img className={styles.iconImg} src={b.Icon}></img></span><span className={styles.menuHaeding}>{b.Title}</span></span>
+                } id="basic-nav-dropdown">
+                {childItems.map((c, i) => {
+                  return <><NavDropdown.Item href={c.Link}>{c.Title}</NavDropdown.Item>
+                    {i < childItems.length - 1 && <NavDropdown.Divider />}
+                  </>
+                })}
+              </NavDropdown>
+            }
+            else {
               return <Nav.Link href={b.Link}>
                 <span><img className={styles.iconImg} src={b.Icon}></img></span>
                 <span className={styles.menuHaeding}>{b.Title}</span>
