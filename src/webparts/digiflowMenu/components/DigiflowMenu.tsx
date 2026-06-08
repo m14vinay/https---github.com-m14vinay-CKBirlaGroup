@@ -17,6 +17,7 @@ interface IDigiflowMenuState {
   items: any[];
   showDropdown: string;
   flag: boolean;
+  NEIBTFlag: boolean;
 }
 
 export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, IDigiflowMenuState> {
@@ -27,7 +28,8 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
     this.state = {
       items: [],
       showDropdown: "",
-      flag: false
+      flag: false,
+      NEIBTFlag: false
     }
     this.getMenuItems = this.getMenuItems.bind(this);
     this.setMenuDropdown = this.setMenuDropdown.bind(this);
@@ -46,14 +48,21 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
         });
       })
     const checkUser = async () => {
-      const value: boolean = await this.getUserExists();
+      const value: boolean = await this.getUserExists("User Change Access");
       this.setState({
         flag: value
       });
     };
+    const checkUserNEIBT = async () => {
+      const value: boolean = await this.getUserExists("NEIBT Admins");
+      this.setState({
+        NEIBTFlag: value
+      });
+    };
     checkUser();
+    checkUserNEIBT();
   }
-  private async getUserExists(): Promise<boolean> {
+  private async getUserExists(GroupTitle: string): Promise<boolean> {
     var isMember = false;
     try {
       const url = `${this.props.context.pageContext.web.absoluteUrl}/_api/web/currentuser?$expand=groups`;
@@ -67,7 +76,7 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
         }
       );
       const data = await response.json();
-      isMember = data.Groups.some((g: any) => g.Title === "User Change Access");
+      isMember = data.Groups.some((g: any) => g.Title === GroupTitle);
       if (isMember) {
         isMember = true;
       }
@@ -117,7 +126,13 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
                 <span className={styles.menuHaeding}>{b.Title}</span>
               </Nav.Link>
             }
-            else if (b.Title !== "Manage Approvers") {
+            else if (this.state.NEIBTFlag && (b.Title === "NEIBT Admin Report" || b.Title === "Approval NEIBT" )) {
+              return <Nav.Link href={b.Link}>
+                <span><img className={styles.iconImg} src={b.Icon}></img></span>
+                <span className={styles.menuHaeding}>{b.Title}</span>
+              </Nav.Link>
+            }            
+            else if (b.Title !== "Manage Approvers" && b.Title !== "NEIBT Admin Report" && b.Title !== "Approval NEIBT") {
               return <Nav.Link href={b.Link}>
                 <span><img className={styles.iconImg} src={b.Icon}></img></span>
                 <span className={styles.menuHaeding}>{b.Title}</span>
