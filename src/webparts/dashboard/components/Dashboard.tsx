@@ -3,21 +3,14 @@ import styles from './Dashboard.module.scss';
 import type { IDashboardProps } from './IDashboardProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 
-export default class Dashboard extends React.Component<IDashboardProps> {
-  public render(): React.ReactElement<IDashboardProps> {
-    const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      hasTeamsContext,
-      userDisplayName
-    } = this.props;
- const cards = [
-    { title: 'Quotation', count: 30, className: styles.card1 },
-    { title: 'Vendor Mapping', count: 30, className: styles.card2 },
-    { title: 'PO Approval', count: 30, className: styles.card3 },
-    { title: 'Bill Processing', count: 30, className: styles.card4 }
-  ];
+const Dashboard: React.FC<IDashboardProps> = (props) => {
+
+    const cards = [
+      { title: 'Quotation', count: 30, className: styles.card1 },
+      { title: 'Vendor Mapping', count: 30, className: styles.card2 },
+      { title: 'PO Approval', count: 30, className: styles.card3 },
+      { title: 'Bill Processing', count: 30, className: styles.card4 }
+    ];     
     return (
       <section>
         <div className={styles.container}>
@@ -30,23 +23,26 @@ export default class Dashboard extends React.Component<IDashboardProps> {
               <select className={styles.dropdown}>
                 <option>Select Company</option>
               </select>
-
-              <div className={styles.userInfo}>
-                <div className={styles.avatar}></div>
-                <span>M.Ponnamalai</span>
-              </div>
             </div>
           </div>
 
           {/* Navigation */}
           <div className={styles.navbar}>
-            <a href="#">Dashboard</a>
-            <a href="#">Forms</a>
-            <a href="#">Approval NEIBT</a>
-            <a href="#">AP Reports</a>
-            <a href="#">NEIBT Admin Reports</a>
-            <a href="#">Reimbursement</a>
-            <a href="#">Expense Reports</a>
+            {menuItems.map((item, index) => (
+              <div key={index} className={styles.menuItem}>
+                <a href={item.url}>{item.title}</a>
+
+                {item.children?.length > 0 && (
+                  <div className={styles.dropdown}>
+                    {item.children.map((child, childIndex) => (
+                      <a key={childIndex} href={child.url}>
+                        {child.title}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
 
           <h2>Dashboard</h2>
@@ -67,9 +63,9 @@ export default class Dashboard extends React.Component<IDashboardProps> {
               <div className={styles.panelHeader}>My Requests</div>
               <div className={styles.requestCard}>
                 <div>
-                  <p>Request : PRJ-1100</p>
-                  <p>Project Title : Project Title</p>
-                  <p>Total Amount : ₹100000</p>
+                  <div>Request : PRJ-1100</div>
+                  <div>Project Title : Project Title</div>
+                  <div>Total Amount : ₹100000</div>
                 </div>
                 <span className={styles.pending}>Pending</span>
               </div>
@@ -80,7 +76,6 @@ export default class Dashboard extends React.Component<IDashboardProps> {
               <select className={styles.flowDropdown}>
                 <option>Quotation Approval</option>
               </select>
-
               <div className={styles.chartArea}>
                 Chart Area
               </div>
@@ -88,21 +83,18 @@ export default class Dashboard extends React.Component<IDashboardProps> {
 
             <div className={styles.panel}>
               <div className={styles.panelHeader}>Requests For Approval</div>
-
               <div className={styles.requestCard}>
                 <div>
-                  <p>Request : PRJ-1100</p>
-                  <p>Project Title : Project Title</p>
-                  <p>Total Amount : ₹100000</p>
+                  <div>Request : PRJ-1100</div>
+                  <div>Project Title : Project Title</div>
+                  <div>Total Amount : ₹100000</div>
                 </div>
-
                 <span className={styles.pending}>Pending</span>
               </div>
             </div>
-
           </div>
         </div>
       </section>
     );
-  }
-}
+  };
+export default Dashboard;
