@@ -297,6 +297,14 @@
           "manifest": "./src/webparts/financeReportExpense/FinanceReportExpenseWebPart.manifest.json"
         }
       ]
+    },
+    "dashboard-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/dashboard/DashboardWebPart.js",
+          "manifest": "./src/webparts/dashboard/DashboardWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -338,6 +346,7 @@
     "RequestHistoryReportNeibtWebPartStrings": "lib/webparts/requestHistoryReportNeibt/loc/{locale}.js",
     "SummaryReportExpenseWebPartStrings": "lib/webparts/summaryReportExpense/loc/{locale}.js",
     "FinanceReportExpenseWebPartStrings": "lib/webparts/financeReportExpense/loc/{locale}.js",
-    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
+    "DashboardWebPartStrings": "lib/webparts/dashboard/loc/{locale}.js"
   }
 }

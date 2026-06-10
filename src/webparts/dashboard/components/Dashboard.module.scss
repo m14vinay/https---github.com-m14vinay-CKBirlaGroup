@@ -1,0 +1,175 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+.container {
+  padding: 20px;
+  background: #f3f3f3;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.logo {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ea6674;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.dropdown {
+  min-width: 220px;
+  height: 40px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #444;
+  border-radius: 50%;
+}
+
+.navbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  background: #ea6674;
+  padding: 15px;
+  margin-bottom: 30px;
+
+  a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+  }
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin: 25px 0;
+}
+
+.summaryCard {
+  min-height: 140px;
+  border-radius: 8px;
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h3 {
+    margin: 0;
+  }
+
+  span {
+    font-size: 50px;
+    font-weight: bold;
+  }
+}
+
+.card1 { background: #ea6674; }
+.card2 { background: #6f8eb9; }
+.card3 { background: #b8b8b8; }
+.card4 { background: #80868b; }
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.panel {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,.1);
+}
+
+.panelHeader {
+  padding: 20px;
+  font-size: 24px;
+  border-bottom: 1px solid #ddd;
+}
+
+.requestCard {
+  margin: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.pending {
+  background: #5f86bd;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+}
+
+.flowDropdown {
+  width: calc(100% - 40px);
+  margin: 20px;
+  height: 40px;
+}
+
+.chartArea {
+  margin: 20px;
+  height: 300px;
+  border: 2px dashed #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 1024px) {
+
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .headerRight {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .requestCard {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .navbar {
+    flex-direction: column;
+  }
+}
