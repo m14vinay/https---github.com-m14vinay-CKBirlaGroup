@@ -75,7 +75,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
     setIsActiveBP(false);
     setIsActivePO(false);
     setIsActiveVM(false);
-    const setDynamicColumns = [
+    const setDynamicColumnsQ = [
       columnHelper.accessor('RequestNo', {
         header: "Request No"
       }),
@@ -190,7 +190,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
         header: "Assigned To"
       }),
     ]
-    setColumns(setDynamicColumns);
+    setColumns(setDynamicColumnsQ);
     await getDatafromListByTitle('QuotationApproval');
     setLoading(false);
   };
@@ -204,7 +204,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
     setIsActiveBP(false);
     setIsActivePO(false);
     setIsActiveVM(true);
-    const setDynamicColumns = [
+    const setDynamicColumnsVM = [
       columnHelper.accessor('ProjectCode', {
         header: "Project Code"
       }),
@@ -273,7 +273,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
        header: 'Modified By'
      })
     ]
-    setColumns(setDynamicColumns);
+    setColumns(setDynamicColumnsVM);
     await getDatafromListByTitle('VendorMapping');
     setLoading(false);
   };
@@ -287,7 +287,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
     setIsActiveBP(false);
     setIsActivePO(true);
     setIsActiveVM(false);
-    const setDynamicColumns = [
+    const setDynamicColumnsPO = [
       columnHelper.accessor('RequestNo', {
         header: "Request No"
       }),
@@ -379,7 +379,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
         header: "Total Project Amount"
       }),
     ]
-    setColumns(setDynamicColumns);
+    setColumns(setDynamicColumnsPO);
     await getDatafromListByTitle('PoApproval');
     setLoading(false);
   };
@@ -393,7 +393,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
     setIsActiveBP(true);
     setIsActivePO(false);
     setIsActiveVM(false);
-    const setDynamicColumns = [
+    const setDynamicColumnsBill = [
        columnHelper.accessor('ID', {
          header: () => 'Request No.'
        }),
@@ -524,7 +524,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
          header: 'Occupied Amount'
        })  
      ]
-    setColumns(setDynamicColumns);
+    setColumns(setDynamicColumnsBill);
     await getDatafromListByTitle('BillProcessing');
     setLoading(false);
   };
@@ -612,7 +612,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
       setLoading(true);
       const data = await service.getItemByTitle(listname);
       if (data) {
-        _setData((d) => [...d.concat(data)]);
+        _setData(data); // Replace existing data
       }
     } catch (error) {
       console.error(error);

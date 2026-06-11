@@ -612,7 +612,7 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
       setLoading(true);
       const data = await service.getItemByTitle(listname);
       if (data) {
-        _setData((d) => [...d.concat(data)]);
+        _setData(data); // Replace existing data
       }
     } catch (error) {
       console.error(error);
