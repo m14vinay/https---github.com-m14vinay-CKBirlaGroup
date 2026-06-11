@@ -610,6 +610,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
   const getDatafromListByTitle = async (listname: string) => {
     try {
       setLoading(true);
+       _setData([]); // Clear old data
       const data = await service.getItemByTitle(listname);
       if (data) {
         _setData(data); // Replace existing data
