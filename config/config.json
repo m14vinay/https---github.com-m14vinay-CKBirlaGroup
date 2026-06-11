@@ -305,6 +305,14 @@
           "manifest": "./src/webparts/dashboard/DashboardWebPart.manifest.json"
         }
       ]
+    },
+    "rejected-report-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/rejectedReport/RejectedReportWebPart.js",
+          "manifest": "./src/webparts/rejectedReport/RejectedReportWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -347,6 +355,7 @@
     "SummaryReportExpenseWebPartStrings": "lib/webparts/summaryReportExpense/loc/{locale}.js",
     "FinanceReportExpenseWebPartStrings": "lib/webparts/financeReportExpense/loc/{locale}.js",
     "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
-    "DashboardWebPartStrings": "lib/webparts/dashboard/loc/{locale}.js"
+    "DashboardWebPartStrings": "lib/webparts/dashboard/loc/{locale}.js",
+    "RejectedReportWebPartStrings": "lib/webparts/rejectedReport/loc/{locale}.js"
   }
 }
