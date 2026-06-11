@@ -66,6 +66,8 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
     }
   };
   const handleQuotation = async () => {
+     _setData(data);
+    setColumns(columns);
     setLoading(true);
     _setData([]);
     setLabel('Quotation Approval');
@@ -193,6 +195,8 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
     setLoading(false);
   };
   const handleVendor = async () => {
+    _setData(data);
+    setColumns(columns);
     setLoading(true);
     _setData([]);
     setLabel('Vendor Mapping');
@@ -274,6 +278,8 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
     setLoading(false);
   };
   const handlePO = async () => {
+     _setData(data);
+    setColumns(columns);
     setLoading(true);
     _setData([]);
     setLabel('PO Approval');
@@ -378,6 +384,8 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
     setLoading(false);
   };
   const handleBill = async () => {
+     _setData(data);
+    setColumns(columns);
     setLoading(true);
     _setData([]);
     setLabel('Bill Processing');

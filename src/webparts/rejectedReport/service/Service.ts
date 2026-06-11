@@ -10,7 +10,7 @@ export default class Service {
   public async getItemByTitle(listname:string): Promise<any[]> {
   let url:string = "";
  if(listname === "BillProcessing"){
-     url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listname}')/items
+     url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('BillProcessing')/items
 ?$select=*,
 Author/Title,
 Editor/Title,
@@ -21,7 +21,7 @@ DepartmentHead/Title
 &$expand=Author,Editor,Approver2,Approver3,Approver5,DepartmentHead&$filter=CurrentStatus eq 'Rejected'`;
   }
   if(listname === "PoApproval"){
-    url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listname}')/items
+    url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('PoApproval')/items
 ?$select=*,
 Author/Title,
 Editor/Title,
@@ -31,7 +31,7 @@ DepartmentHead/Title
   }
   if(listname === "VendorMapping")
   {
-    url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listname}')/items
+    url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('VendorMapping')/items
 ?$select=*,
 Author/Title,
 Editor/Title
@@ -39,7 +39,7 @@ Editor/Title
   }
   if(listname === "QuotationApproval")
   {
-url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listname}')/items
+url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('QuotationApproval')/items
 ?$select=*,
 Approval1/Title,
 Approval2/Title,
