@@ -31,7 +31,7 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
   const [sorting, setSorting] = useState<any>([]);
   const [Label, setLabel] = useState("");
   const columnHelper = createColumnHelper<any>();
-  const [columns, setColumns] = React.useState<any[]>([]);
+  const [columns, setColumns] = useState<any[]>([]);
   const stripHtml = (html: string) => {
            const temp = document.createElement("div");
            temp.innerHTML = html;
@@ -54,8 +54,8 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
   // Load data
   React.useEffect(() => {
     getUser();
-    _setData(data);
-    setColumns(columns);
+      _setData([]);
+      setColumns([]);
     handleQuotation();
   }, []);
   // Load the User Details
@@ -66,10 +66,8 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
     }
   };
   const handleQuotation = async () => {
-     _setData(data);
-    setColumns(columns);
-    setLoading(true);
     _setData([]);
+    setColumns([]); // Clear old columns
     setLabel('Quotation Approval');
     setIsActiveQA(true);
     setIsActiveBP(false);
@@ -139,9 +137,6 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
       columnHelper.accessor('ActionDate3', {
         header: "Action Date 3"
       }),
-      columnHelper.accessor('ApprovalPath', {
-        header: "Approval Path"
-      }),
       columnHelper.accessor('Vendor1', {
         header: "Vendor 1"
       }),
@@ -195,9 +190,8 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
     setLoading(false);
   };
   const handleVendor = async () => {
-    _setData(data);
-    setColumns(columns);
     setLoading(true);
+    setColumns([]); // Clear old columns
     _setData([]);
     setLabel('Vendor Mapping');
     setIsActiveQA(false);
@@ -278,9 +272,8 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
     setLoading(false);
   };
   const handlePO = async () => {
-     _setData(data);
-    setColumns(columns);
     setLoading(true);
+    setColumns([]); // Clear old columns
     _setData([]);
     setLabel('PO Approval');
     setIsActiveQA(false);
@@ -384,9 +377,8 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
     setLoading(false);
   };
   const handleBill = async () => {
-     _setData(data);
-    setColumns(columns);
     setLoading(true);
+    setColumns([]); // Clear old columns  
     _setData([]);
     setLabel('Bill Processing');
     setIsActiveQA(false);
@@ -505,7 +497,7 @@ const SummaryReport: React.FC<ISummaryReportProps> = (props) => {
        }),
      columnHelper.accessor(row => row.Editor?.Title,
      {
-       id: 'ModifiedBy',
+       id: 'Editor',
        header: 'Modified By'
      }),
        columnHelper.accessor('CalculatedTaxes', {

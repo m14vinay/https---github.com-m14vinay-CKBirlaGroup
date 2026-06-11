@@ -31,7 +31,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
   const [sorting, setSorting] = useState<any>([]);
   const [Label, setLabel] = useState("");
   const columnHelper = createColumnHelper<any>();
-  const [columns, setColumns] = React.useState<any[]>([]);
+  const [columns, setColumns] = useState<any[]>([]);
   const stripHtml = (html: string) => {
            const temp = document.createElement("div");
            temp.innerHTML = html;
@@ -54,8 +54,8 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
   // Load data
   React.useEffect(() => {
     getUser();
-    _setData(data);
-    setColumns(columns);
+    _setData([]);
+    setColumns([]);
     handleQuotation();
   }, []);
   // Load the User Details
@@ -66,9 +66,8 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
     }
   };
   const handleQuotation = async () => {
-     _setData(data);
-    setColumns(columns);
     setLoading(true);
+    setColumns([]); // Clear old columns
     _setData([]);
     setLabel('Quotation Approval');
     setIsActiveQA(true);
@@ -95,9 +94,6 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
       }),
       columnHelper.accessor('CurrentStatus', {
         header: "Current Status"
-      }),
-      columnHelper.accessor('ApprovalPath', {
-        header: "Approval Path"
       }),
        columnHelper.accessor('ApproverComment1', {
         header: "Approver Comment 1"
@@ -195,9 +191,8 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
     setLoading(false);
   };
   const handleVendor = async () => {
-     _setData(data);
-    setColumns(columns);
     setLoading(true);
+    setColumns([]); // Clear old columns
     _setData([]);
     setLabel('Vendor Mapping');
     setIsActiveQA(false);
@@ -278,9 +273,8 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
     setLoading(false);
   };
   const handlePO = async () => {
-     _setData(data);
-    setColumns(columns);
     setLoading(true);
+    setColumns([]); // Clear old columns
     _setData([]);
     setLabel('PO Approval');
     setIsActiveQA(false);
@@ -384,9 +378,8 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
     setLoading(false);
   };
   const handleBill = async () => {
-     _setData(data);
-    setColumns(columns);
     setLoading(true);
+    setColumns([]); // Clear old columns
     _setData([]);
     setLabel('Bill Processing');
     setIsActiveQA(false);
@@ -505,7 +498,7 @@ const RejectedReport: React.FC<IRejectedReportProps> = (props) => {
        }),
      columnHelper.accessor(row => row.Editor?.Title,
      {
-       id: 'ModifiedBy',
+       id: 'Editor',
        header: 'Modified By'
      }),
        columnHelper.accessor('CalculatedTaxes', {
