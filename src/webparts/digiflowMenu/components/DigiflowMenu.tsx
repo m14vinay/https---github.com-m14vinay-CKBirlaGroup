@@ -20,7 +20,6 @@ interface IDigiflowMenuState {
   flag: boolean;
   NEIBTFlag: boolean;
 }
-const [companies, setCompanies] = useState<any[]>([]);
 export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, IDigiflowMenuState> {
 
   constructor(props: IDigiflowMenuProps) {
@@ -62,22 +61,6 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
     };
     checkUser();
     checkUserNEIBT();
-    if(this.state.flag && this.state.NEIBTFlag) {
-      setCompanies([
-    { Id: 1, Title: "CKBCL" },
-    { Id: 2, Title: "NEIBT Admin" }
-  ]);
-    }
-    else if(!this.state.flag && this.state.NEIBTFlag) {
-      setCompanies([
-    { Id: 2, Title: "NEIBT Admin" }
-  ]);
-    }
-    else if (this.state.flag && !this.state.NEIBTFlag) {
-      setCompanies([
-    { Id: 1, Title: "CKBCL" }
-  ]);
-    }
   }
   private async getUserExists(GroupTitle: string): Promise<boolean> {
     var isMember = false;
@@ -236,11 +219,6 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
           <div className={styles.headerRight}>
             <select className={styles.dropdown}>
               <option value="">Select Company</option>
-              {companies.map((company) => (
-                <option key={company.Id} value={company.Id}>
-                  {company.Title}
-                </option>
-              ))}
             </select>
           </div>
         </div>
