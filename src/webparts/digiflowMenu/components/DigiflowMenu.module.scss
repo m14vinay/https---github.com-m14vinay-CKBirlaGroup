@@ -1,5 +1,45 @@
 @import '~@fluentui/react/dist/sass/References.scss';
+.container {
+  padding: 5px;
+  background: #f3f3f3;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
+.logo {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ea6674;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.dropdown {
+  min-width: 220px;
+  height: 40px;
+}
+.navbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  background: #ea6674;
+  padding: 5px;
+  margin-bottom: 30px;
+
+  a {
+    text-decoration: none;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
 .digiflowMenu {
   overflow: hidden;
   padding: 1em;

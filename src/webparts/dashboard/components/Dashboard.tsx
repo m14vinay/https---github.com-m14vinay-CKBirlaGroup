@@ -22,27 +22,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
   ];
   return (
     <section>
-      <div className={styles.container}>
-
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.logo}>DIGIFLOW</div>
-
-          <div className={styles.headerRight}>
-            <select className={styles.dropdown}>
-              <option>Select Company</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <div className={styles.navbar}>
-          {menuItems.map((item, index) => (
-            <a key={index} href={item.url}>
-              {item.title}
-            </a>
-          ))}
-        </div>
+      <div className={styles.container}>       
 
         <h2>Dashboard</h2>
 

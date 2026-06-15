@@ -12,6 +12,7 @@ const FormIcon = require('../assets/Form.png');
 const ReportIcon = require('../assets/Report.png');
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './HideTopBar.css';
+import { useState } from 'react';
 
 interface IDigiflowMenuState {
   items: any[];
@@ -19,7 +20,7 @@ interface IDigiflowMenuState {
   flag: boolean;
   NEIBTFlag: boolean;
 }
-
+const [companies, setCompanies] = useState<any[]>([]);
 export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, IDigiflowMenuState> {
 
   constructor(props: IDigiflowMenuProps) {
@@ -61,6 +62,22 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
     };
     checkUser();
     checkUserNEIBT();
+    if(this.state.flag && this.state.NEIBTFlag) {
+      setCompanies([
+    { Id: 1, Title: "CKBCL" },
+    { Id: 2, Title: "NEIBT Admin" }
+  ]);
+    }
+    else if(!this.state.flag && this.state.NEIBTFlag) {
+      setCompanies([
+    { Id: 2, Title: "NEIBT Admin" }
+  ]);
+    }
+    else if (this.state.flag && !this.state.NEIBTFlag) {
+      setCompanies([
+    { Id: 1, Title: "CKBCL" }
+  ]);
+    }
   }
   private async getUserExists(GroupTitle: string): Promise<boolean> {
     var isMember = false;
@@ -78,7 +95,7 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
       const data = await response.json();
       isMember = data.Groups.some((g: any) => g.Title === GroupTitle);
       if (isMember) {
-        isMember = true;
+        isMember = true;        
       }
       else {
         isMember = false;
@@ -121,12 +138,12 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
               </NavDropdown>
             }
             else {
-            return <Nav.Link href={b.Link}>
-              <span><img className={styles.iconImg} src={b.Icon}></img></span>
-              <span className={styles.menuHaeding}>{b.Title}</span>
-            </Nav.Link>
+              return <Nav.Link href={b.Link}>
+                <span><img className={styles.iconImg} src={b.Icon}></img></span>
+                <span className={styles.menuHaeding}>{b.Title}</span>
+              </Nav.Link>
+            }
           }
-        }
           else if (this.state.NEIBTFlag && b.Title === "NEIBT Admin Report") {
 
             let childItems = this.state.items.filter(item => item.ParentId == b.Id);
@@ -145,12 +162,11 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
                 })}
               </NavDropdown>
             }
-            else
-            {
-            return <Nav.Link href={b.Link}>
-              <span><img className={styles.iconImg} src={b.Icon}></img></span>
-              <span className={styles.menuHaeding}>{b.Title}</span>
-            </Nav.Link>
+            else {
+              return <Nav.Link href={b.Link}>
+                <span><img className={styles.iconImg} src={b.Icon}></img></span>
+                <span className={styles.menuHaeding}>{b.Title}</span>
+              </Nav.Link>
             }
           }
           else if (this.state.NEIBTFlag && b.Title === "Approval NEIBT") {
@@ -170,15 +186,14 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
                 })}
               </NavDropdown>
             }
-            else
-            {
-            return <Nav.Link href={b.Link}>
-              <span><img className={styles.iconImg} src={b.Icon}></img></span>
-              <span className={styles.menuHaeding}>{b.Title}</span>
-            </Nav.Link>
+            else {
+              return <Nav.Link href={b.Link}>
+                <span><img className={styles.iconImg} src={b.Icon}></img></span>
+                <span className={styles.menuHaeding}>{b.Title}</span>
+              </Nav.Link>
             }
           }
-          else if(b.Title !== "Manage Approvers" && b.Title !== "NEIBT Admin Report" && b.Title !== "Approval NEIBT") {
+          else if (b.Title !== "Manage Approvers" && b.Title !== "NEIBT Admin Report" && b.Title !== "Approval NEIBT") {
             let childItems = this.state.items.filter(item => item.ParentId == b.Id);
             if (childItems.length > 0) {
               return <NavDropdown
@@ -214,13 +229,29 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
 
     let webUrl = context.pageContext.web.absoluteUrl;
     return (
-      <div>
-        <Navbar expand="lg" bg='light' className="bg-body-tertiary">
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            {this.menuBar()}
-          </Navbar.Collapse>
-        </Navbar>
+      <div className={styles.container}>
+        {/* Header */}
+        <div className={styles.header}>
+          <div className={styles.logo}>DIGIFLOW</div>
+          <div className={styles.headerRight}>
+            <select className={styles.dropdown}>
+              <option value="">Select Company</option>
+              {companies.map((company) => (
+                <option key={company.Id} value={company.Id}>
+                  {company.Title}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className={styles.navbar}>
+          <Navbar expand="lg">
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
+              {this.menuBar()}
+            </Navbar.Collapse>
+          </Navbar>
+        </div>
       </div>
     );
   }
