@@ -53,6 +53,10 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
       hoverOffset: 4
     }]
   };
+  const handleClick = (listname: string) => {
+    const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Default.aspx?list=${listname}`;
+    window.location.assign(url);
+  };
   const getUser = async () => {
     try {
       const resturl = `${context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
@@ -188,10 +192,10 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
     getChartDataSet()
   }, [items]);
   const cards = [
-    { title: 'Quotation', count: quotationCount, className: styles.card1 },
-    { title: 'Vendor Mapping', count: vendorMappingCount, className: styles.card2 },
-    { title: 'PO Approval', count: poApprovalCount, className: styles.card3 },
-    { title: 'Bill Processing', count: billProcessingCount, className: styles.card4 }
+    { title: 'Quotation', count: quotationCount, className: styles.card1,value:'QuotationApproval' },
+    { title: 'Vendor Mapping', count: vendorMappingCount, className: styles.card2,value:'VendorMapping' },
+    { title: 'PO Approval', count: poApprovalCount, className: styles.card3,value:'PoApproval' },
+    { title: 'Bill Processing', count: billProcessingCount, className: styles.card4,value:'BillProcessing' }
   ];
   return (
     <section>
@@ -214,7 +218,8 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
         {/* Summary Cards */}
         <div className={styles.summaryGrid}>
           {cards.map((card, index) => (
-            <div key={index} className={`${styles.summaryCard} ${card.className}`}>
+            <div key={index} className={`${styles.summaryCard} ${card.className}`}
+            onClick={() => handleClick(card.value)}>
               <h3>{card.title}</h3>
               <span>{card.count}</span>
             </div>
@@ -224,7 +229,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
         {/* Panels */}
         <div className={styles.contentGrid}>
           <div className={styles.panel}>
-            <div className={styles.panelHeader}>My Requests</div>
+            <div className={styles.panelHeader} onClick={() => handleClick('All')}>My Requests</div>
             <div>
               {myData.sort(
                 (a, b) =>
@@ -255,7 +260,9 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
           </div>
 
           <div className={styles.panel}>
-            <div className={styles.panelHeader}>Workflow Status</div>
+            <div className={styles.panelHeader} onClick={() => handleClick('All')}>
+              Workflow Status
+            </div>
             <select className={styles.flowDropdown}
               onChange={(e) => getPieData(e.target.value)}>
               <option value="">Select Flow</option>
@@ -283,7 +290,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
           </div>
 
           <div className={styles.panel}>
-            <div className={styles.panelHeader}>Requests For Approval</div>
+            <div className={styles.panelHeader} onClick={() => handleClick('All')}>Requests For Approval</div>
             <div>
               {myPendingData.map((item) => (
                 <div key={item.Id} className={styles.requestCard}>

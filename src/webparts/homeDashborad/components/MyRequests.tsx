@@ -151,7 +151,11 @@ export default function MyRequests() {
             console.log(e);
         })
     }
-
+    const getIdFromQueryString = (): string => {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('list');
+        return id ? id : 'All';
+    };
     useEffect(() => {
         getUser();
     }, []);
@@ -190,10 +194,13 @@ export default function MyRequests() {
     }
 
     useEffect(() => {
+        const id = getIdFromQueryString();
         if (user) {
-            lists.forEach(l => {
-                getData(l);
-            })
+            if (id == "All") {
+                lists.forEach(l => {
+                    getData(l);
+                })
+            } else { getData(id); }
         }
     }, [user]);
 
