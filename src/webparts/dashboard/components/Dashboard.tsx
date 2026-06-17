@@ -2,20 +2,57 @@ import * as React from 'react';
 import styles from './Dashboard.module.scss';
 import type { IDashboardProps } from './IDashboardProps';
 import { escape } from '@microsoft/sp-lodash-subset';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SharePointContext } from '../../homeDashborad/components/SharePointContext';
 import { SPHttpClient } from '@microsoft/sp-http-base';
+import { Pie } from 'react-chartjs-2';
+import { Spinner, SpinnerSize } from '@fluentui/react';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend
+} from 'chart.js';
 
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend
+);
 const Dashboard: React.FC<IDashboardProps> = (props) => {
+  const [loading, setLoading] = React.useState(false);
   const [quotationCount, setQuotationCount] = useState<number>(0);
   const [vendorMappingCount, setVendorMappingCount] = useState<number>(0);
   const [poApprovalCount, setPoApprovalCount] = useState<number>(0);
   const [billProcessingCount, setBillProcessingCount] = useState<number>(0);
   const [myData, setMyData] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
   const [myPendingData, setMyPendingData] = useState<any[]>([]);
+  const [dataset, setDataset] = useState<number[]>([]);
+  const [selectedFlow, setSelectedFlow] = React.useState("");
   const { context } = props;
   const lists = ["QuotationApproval", "PoApproval", "ReimburseExpenseMaster", "BillProcessing", "VendorMapping", "QuotationApprovalNEIBTAdmin"];
+  const data = {
+    labels: [
+      'Admin',
+      'Finance',
+      'IT',
+      'Branding',
+      'Legal'
+    ],
+    datasets: [{
+      data: dataset,
+      backgroundColor: [
+        '#4EC348',
+        '#EF2020',
+        '#E4DE24',
+        '#2C38B8',
+        '#D52B9D'
+      ],
+      hoverOffset: 4
+    }]
+  };
   const getUser = async () => {
     try {
       const resturl = `${context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
@@ -77,53 +114,79 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
       SPHttpClient.configurations.v1
     );
     const data = await response.json();
-     if (data && data.value && data.value.length > 0) {
-        setMyData(prevData => [...prevData, ...data.value]);
-      }
+    if (data && data.value && data.value.length > 0) {
+      setMyData(prevData => [...prevData, ...data.value]);
     }
+  }
   const getmypendingData = async (listName: string, user: any) => {
     console.log("context user : ", context);
     let resturl: string;
-   if (listName === "QuotationApproval") {
-  resturl =
-    `${context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listName}')/items` +
-    `?$select=*` +
-    `&$filter=(AssignedTo eq '${user.Title}' or AssignedTo2 eq '${user.Title}') and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')` +
-    `&$orderby=Created desc` +
-    `&$top=5`;
-} else {
-  resturl =
-    `${context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listName}')/items` +
-    `?$select=*` +
-    `&$filter=AssignedTo eq '${user.Title}' and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')` +
-    `&$orderby=Created desc` +
-    `&$top=5`;
-}
+    if (listName === "QuotationApproval") {
+      resturl =
+        `${context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listName}')/items` +
+        `?$select=*` +
+        `&$filter=(AssignedTo eq '${user.Title}' or AssignedTo2 eq '${user.Title}') and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')` +
+        `&$orderby=Created desc` +
+        `&$top=5`;
+    } else {
+      resturl =
+        `${context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listName}')/items` +
+        `?$select=*` +
+        `&$filter=AssignedTo eq '${user.Title}' and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')` +
+        `&$orderby=Created desc` +
+        `&$top=5`;
+    }
     const response = await context.spHttpClient.get(
       resturl,
       SPHttpClient.configurations.v1
     );
-      const data = await response.json();
-       if (data && data.value && data.value.length > 0) {
-          setMyPendingData(prevData => [...prevData, ...data.value]);
-        }      
+    const data = await response.json();
+    if (data && data.value && data.value.length > 0) {
+      setMyPendingData(prevData => [...prevData, ...data.value]);
+    }
+  }
+  const getPieData = async (listName: string) => {
+    let resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=Department,Id";
+    const response = await context.spHttpClient.get(
+      resturl,
+      SPHttpClient.configurations.v1
+    );
+    const data = await response.json();
+    if (data && data.value && data.value.length > 0) {
+      setItems(data.value);
+    }
   }
   React.useEffect(() => {
+    setLoading(true);
     const loadData = async () => {
       const user = await getUser();
       await getMyItemCount("QuotationApproval", user?.Id);
       await getMyItemCount("VendorMapping", user?.Id);
       await getMyItemCount("PoApproval", user?.Id);
       await getMyItemCount("BillProcessing", user?.Id);
-      lists.forEach(async (l) => {        
+      lists.forEach(async (l) => {
         await getmyData(l, user?.Id);
       })
       lists.forEach(async (l) => {
-        await getmypendingData(l, user);       
+        await getmypendingData(l, user);
       })
+      // await getPieData("QuotationApproval");
     };
     loadData();
+    setLoading(false);
   }, []);
+  const getChartDataSet = () => {
+    const Admin = items.filter(q => q.Department === "Admin");
+    const Finance = items.filter(q => q.Department === "Finance");
+    const IT = items.filter(q => q.Department === "IT");
+    const Branding = items.filter(q => q.Department === "Branding");
+    const Legal = items.filter(q => q.Department === "Legal");
+
+    setDataset([Admin.length, Finance.length, IT.length, Branding.length, Legal.length]);
+  }
+  useEffect(() => {
+    getChartDataSet()
+  }, [items]);
   const cards = [
     { title: 'Quotation', count: quotationCount, className: styles.card1 },
     { title: 'Vendor Mapping', count: vendorMappingCount, className: styles.card2 },
@@ -132,6 +195,21 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
   ];
   return (
     <section>
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.6)',
+          zIndex: 9999
+        }}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+            <Spinner label="Processing..." size={SpinnerSize.large} />
+          </div>
+        </div>
+      )}
       <div className={styles.container}>
         {/* Summary Cards */}
         <div className={styles.summaryGrid}>
@@ -149,47 +227,65 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
             <div className={styles.panelHeader}>My Requests</div>
             <div>
               {myData.sort(
-      (a, b) =>
-        new Date(b.Modified).getTime() -
-        new Date(a.Modified).getTime()
-    )
-    .slice(0, 5).map((item) => (
-                <div key={item.Id} className={styles.requestCard}>
-                  <div>
-                    <div>Request : {item.RequestNo}</div>
-                    <div>Project Title : {item.ProjectTitle}</div>
-                    <div>Total Amount : ₹{item.TotalAmount}</div>
+                (a, b) =>
+                  new Date(b.Modified).getTime() -
+                  new Date(a.Modified).getTime()
+              )
+                .slice(0, 5).map((item) => (
+                  <div key={item.Id} className={styles.requestCard}>
+                    <div>
+                      <div>Request : {item.RequestNo}</div>
+                      <div>Project Title : {item.ProjectTitle}</div>
+                      <div>Total Amount : ₹{item.TotalAmount}</div>
+                    </div>
+                    <span
+                      className={
+                        item.CurrentStatus === "Pending"
+                          ? styles.pending
+                          : item.CurrentStatus === "Approved"
+                            ? styles.approved
+                            : styles.rejected
+                      }
+                    >
+                      {item.CurrentStatus}
+                    </span>
                   </div>
-                  <span
-                    className={
-                      item.CurrentStatus === "Pending"
-                        ? styles.pending
-                        : item.CurrentStatus === "Approved"
-                          ? styles.approved
-                          : styles.rejected
-                    }
-                  >
-                    {item.CurrentStatus}
-                  </span>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
 
           <div className={styles.panel}>
             <div className={styles.panelHeader}>Workflow Status</div>
-            <select className={styles.flowDropdown}>
-              <option>Quotation Approval</option>
+            <select className={styles.flowDropdown}
+              onChange={(e) => getPieData(e.target.value)}>
+              <option value="">Select Flow</option>
+              {lists.map((item, index) => (
+                <option key={index} value={item}>
+                  {item}
+                </option>
+              ))}
             </select>
             <div className={styles.chartArea}>
-              Chart Area
+              {items.length > 0 && <Pie
+                data={data}
+                options={{
+                  plugins: {
+                    legend: {
+                      position: "right",
+                      labels: {
+                        usePointStyle: true,
+                        pointStyle: "circle"
+                      }
+                    }
+                  }
+                }} />}
             </div>
           </div>
 
           <div className={styles.panel}>
             <div className={styles.panelHeader}>Requests For Approval</div>
-            <div>             
-               {myPendingData.map((item) => (
+            <div>
+              {myPendingData.map((item) => (
                 <div key={item.Id} className={styles.requestCard}>
                   <div>
                     <div>Request : {item.RequestNo}</div>
