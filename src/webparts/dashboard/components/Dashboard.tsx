@@ -12,7 +12,11 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
   const [vendorMappingCount, setVendorMappingCount] = useState<number>(0);
   const [poApprovalCount, setPoApprovalCount] = useState<number>(0);
   const [billProcessingCount, setBillProcessingCount] = useState<number>(0);
+  const [user, setUser] = useState<any>(null);
   const { context } = props;
+  let data1: any[] = [];
+  let counter = 0;
+  const lists = ["QuotationApproval", "PoApproval", "ReimburseExpenseMaster", "BillProcessing", "VendorMapping", "QuotationApprovalNEIBTAdmin"];
   const getUser = async () => {
   try {
     const resturl = `${context.pageContext.web.absoluteUrl}/_api/web/currentuser`;
@@ -23,7 +27,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
     );
 
     const data = await response.json();
-
+    setUser(data);
     console.log("Current User:", data);
 
     return data; // IMPORTANT
@@ -65,6 +69,51 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
     }
   console.log(listName, data.value.length);
 };
+const getmyData = (listName: string) => {
+        console.log("context user : ", context);
+        let resturl = `${context.pageContext.web.absoluteUrl}` +
+    `/_api/web/lists/getbytitle('${listName}')/items?$filter=AuthorId eq ${user.Id}`;
+        context.spHttpClient.get(
+            `${resturl}`,
+            SPHttpClient.configurations.v1
+        ).then(res => res.json()).then(data => {
+            console.log(listName, data);
+            if (data.value.length > 0) {               
+                data1 = data1.concat(...data.value);
+            }
+            counter++;
+            if (counter === lists.length) {                
+            }
+        }).catch(e => {
+            console.log(e);
+            counter++;
+        })
+    };
+ const getmypendingData = (listName: string) => {
+        console.log("context user : ", context);
+        let resturl = {};
+        if (listName === "QuotationApproval") {
+            resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=(AssignedTo eq '" + user.Title + "' or AssignedTo2 eq '" + user.Title + "') and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')";
+        }
+        else {
+            resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AssignedTo eq '" + user.Title + "' and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')";
+        }
+        context.spHttpClient.get(
+            `${resturl}`,
+            SPHttpClient.configurations.v1
+        ).then(res => res.json()).then(data => {
+            console.log(listName, data);
+            if (data.value.length > 0) {
+                data1 = data1.concat(...data.value);
+            }
+            counter++;
+            if (counter === lists.length) {                
+            }
+        }).catch(e => {
+            console.log(e);
+            counter++;
+        })
+    }
   React.useEffect(() => {
   const loadData = async () => {
     const user = await getUser();
