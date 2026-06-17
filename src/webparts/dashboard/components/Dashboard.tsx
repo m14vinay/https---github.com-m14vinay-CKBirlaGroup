@@ -12,10 +12,9 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
   const [vendorMappingCount, setVendorMappingCount] = useState<number>(0);
   const [poApprovalCount, setPoApprovalCount] = useState<number>(0);
   const [billProcessingCount, setBillProcessingCount] = useState<number>(0);
+  const [myData, setMyData] = useState<any[]>([]);
+  const [myPendingData, setMyPendingData] = useState<any[]>([]);
   const { context } = props;
-  let datamy: any[] = [];
-  let datamypending: any[] = [];
-  let counter = 0;
   const lists = ["QuotationApproval", "PoApproval", "ReimburseExpenseMaster", "BillProcessing", "VendorMapping", "QuotationApprovalNEIBTAdmin"];
   const getUser = async () => {
     try {
@@ -68,51 +67,46 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
     }
     console.log(listName, data.value.length);
   };
-  const getmyData = (listName: string,
+  const getmyData = async (listName: string,
     userId: number) => {
     console.log("context user : ", context);
     let resturl = `${context.pageContext.web.absoluteUrl}` +
       `/_api/web/lists/getbytitle('${listName}')/items?$filter=AuthorId eq ${userId}&$top=5`;
-    context.spHttpClient.get(
-      `${resturl}`,
+    const response = await context.spHttpClient.get(
+      resturl,
       SPHttpClient.configurations.v1
-    ).then(res => res.json()).then(data => {
-      console.log(listName, data);
-      if (data.value.length > 0) {
-        datamy = datamy.concat(...data.value);
+    );
+    const data = await response.json();
+     if (data && data.value && data.value.length > 0) {
+        setMyData(prevData => [...prevData, ...data.value]);
       }
-      counter++;
-      if (counter === lists.length) {
-      }
-    }).catch(e => {
-      console.log(e);
-      counter++;
-    })
-  };
-  const getmypendingData = (listName: string, user: any) => {
+    }
+  const getmypendingData = async (listName: string, user: any) => {
     console.log("context user : ", context);
-    let resturl = {};
-    if (listName === "QuotationApproval") {
-      resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=(AssignedTo eq '" + user.Title + "' or AssignedTo2 eq '" + user.Title + "') and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')&$top=5";
-    }
-    else {
-      resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AssignedTo eq '" + user.Title + "' and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')&$top=5";
-    }
-    context.spHttpClient.get(
-      `${resturl}`,
+    let resturl: string;
+   if (listName === "QuotationApproval") {
+  resturl =
+    `${context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listName}')/items` +
+    `?$select=*` +
+    `&$filter=(AssignedTo eq '${user.Title}' or AssignedTo2 eq '${user.Title}') and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')` +
+    `&$orderby=Created desc` +
+    `&$top=5`;
+} else {
+  resturl =
+    `${context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listName}')/items` +
+    `?$select=*` +
+    `&$filter=AssignedTo eq '${user.Title}' and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')` +
+    `&$orderby=Created desc` +
+    `&$top=5`;
+}
+    const response = await context.spHttpClient.get(
+      resturl,
       SPHttpClient.configurations.v1
-    ).then(res => res.json()).then(data => {
-      console.log(listName, data);
-      if (data.value.length > 0) {
-        datamypending = datamypending.concat(...data.value);
-      }
-      counter++;
-      if (counter === lists.length) {
-      }
-    }).catch(e => {
-      console.log(e);
-      counter++;
-    })
+    );
+      const data = await response.json();
+       if (data && data.value && data.value.length > 0) {
+          setMyPendingData(prevData => [...prevData, ...data.value]);
+        }      
   }
   React.useEffect(() => {
     const loadData = async () => {
@@ -121,9 +115,11 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
       await getMyItemCount("VendorMapping", user?.Id);
       await getMyItemCount("PoApproval", user?.Id);
       await getMyItemCount("BillProcessing", user?.Id);
-      lists.forEach(l => {
-        getmypendingData(l, user);
-        getmyData(l, user?.Id);
+      lists.forEach(async (l) => {        
+        await getmyData(l, user?.Id);
+      })
+      lists.forEach(async (l) => {
+        await getmypendingData(l, user);       
       })
     };
     loadData();
@@ -137,7 +133,6 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
   return (
     <section>
       <div className={styles.container}>
-        <h2>Dashboard</h2>
         {/* Summary Cards */}
         <div className={styles.summaryGrid}>
           {cards.map((card, index) => (
@@ -153,7 +148,12 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
           <div className={styles.panel}>
             <div className={styles.panelHeader}>My Requests</div>
             <div>
-              {datamy.map((item) => (
+              {myData.sort(
+      (a, b) =>
+        new Date(b.Modified).getTime() -
+        new Date(a.Modified).getTime()
+    )
+    .slice(0, 5).map((item) => (
                 <div key={item.Id} className={styles.requestCard}>
                   <div>
                     <div>Request : {item.RequestNo}</div>
@@ -162,14 +162,14 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
                   </div>
                   <span
                     className={
-                      item.Status === "Pending"
+                      item.CurrentStatus === "Pending"
                         ? styles.pending
-                        : item.Status === "Approved"
+                        : item.CurrentStatus === "Approved"
                           ? styles.approved
                           : styles.rejected
                     }
                   >
-                    {item.Status}
+                    {item.CurrentStatus}
                   </span>
                 </div>
               ))}
@@ -189,20 +189,15 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
           <div className={styles.panel}>
             <div className={styles.panelHeader}>Requests For Approval</div>
             <div>             
-               {datamypending.map((item) => (
+               {myPendingData.map((item) => (
                 <div key={item.Id} className={styles.requestCard}>
                   <div>
                     <div>Request : {item.RequestNo}</div>
                     <div>Project Title : {item.ProjectTitle}</div>
                     <div>Total Amount : ₹{item.TotalAmount}</div>
                   </div>
-                  <span
-                    className={
-                      item.Status === "Pending"
-                        ? styles.pending:styles.pending
-                    }
-                  >
-                    {item.Status}
+                  <span className={styles.pending}>
+                    {item.CurrentStatus}
                   </span>
                 </div>
               ))}
