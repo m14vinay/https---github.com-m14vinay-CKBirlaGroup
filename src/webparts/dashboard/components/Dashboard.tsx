@@ -72,7 +72,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
     userId: number) => {
     console.log("context user : ", context);
     let resturl = `${context.pageContext.web.absoluteUrl}` +
-      `/_api/web/lists/getbytitle('${listName}')/items?$filter=AuthorId eq ${userId}`;
+      `/_api/web/lists/getbytitle('${listName}')/items?$filter=AuthorId eq ${userId}&$top=5`;
     context.spHttpClient.get(
       `${resturl}`,
       SPHttpClient.configurations.v1
@@ -93,10 +93,10 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
     console.log("context user : ", context);
     let resturl = {};
     if (listName === "QuotationApproval") {
-      resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=(AssignedTo eq '" + user.Title + "' or AssignedTo2 eq '" + user.Title + "') and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')";
+      resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=(AssignedTo eq '" + user.Title + "' or AssignedTo2 eq '" + user.Title + "') and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')&$top=5";
     }
     else {
-      resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AssignedTo eq '" + user.Title + "' and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')";
+      resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AssignedTo eq '" + user.Title + "' and (CurrentStatus eq 'Pending' or CurrentStatus eq 'Hold')&$top=5";
     }
     context.spHttpClient.get(
       `${resturl}`,
