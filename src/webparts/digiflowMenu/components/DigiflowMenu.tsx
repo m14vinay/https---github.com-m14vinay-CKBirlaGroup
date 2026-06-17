@@ -78,7 +78,7 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
       const data = await response.json();
       isMember = data.Groups.some((g: any) => g.Title === GroupTitle);
       if (isMember) {
-        isMember = true;        
+        isMember = true;
       }
       else {
         isMember = false;
@@ -218,7 +218,11 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
           <div className={styles.logo}>DIGIFLOW</div>
           <div className={styles.headerRight}>
             <select className={styles.dropdown}>
-              <option value="">Select Company</option>
+              <option value="">Select Company</option>              
+              <option value="CKBCL">CKBCL</option>              
+              {this.state.NEIBTFlag && (
+                <option value="NEIBT">NEIBT</option>
+              )}                        
             </select>
           </div>
         </div>
