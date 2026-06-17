@@ -173,9 +173,9 @@ export default function MyRequests() {
                 data1 = data1.concat(...data.value);
             }
             counter++;
-            if (counter === lists.length) {
+            //if (counter === lists.length) {
                 sortData();
-            }
+            //}
         }).catch(e => {
             console.log(e);
             counter++;
@@ -200,7 +200,11 @@ export default function MyRequests() {
                 lists.forEach(l => {
                     getData(l);
                 })
-            } else { getData(id); }
+            } else { 
+                lists.filter(l => l.toLowerCase() === id.toLowerCase()).forEach(l => {
+                    getData(l);
+                })
+            }
         }
     }, [user]);
 
