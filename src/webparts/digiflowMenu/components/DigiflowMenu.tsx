@@ -212,6 +212,7 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
   ): void {
     const companyId = e.target.value;
     sessionStorage.setItem("SelectedCompany", companyId);
+    window.location.reload();
   }
   public render(): React.ReactElement<IDigiflowMenuProps> {
     const {
