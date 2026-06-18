@@ -13,6 +13,7 @@ const ReportIcon = require('../assets/Report.png');
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './HideTopBar.css';
 import { useState } from 'react';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 
 interface IDigiflowMenuState {
   items: any[];
@@ -97,12 +98,10 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
       showDropdown: value
     })
   }
-
   private menuBar() {
     let base = this.state.items.filter(item => {
       return item.ParentId === null;
     });
-
     return (
       <Nav className="me-auto">
         {base.map(b => {
@@ -205,7 +204,7 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
           }
         })}
       </Nav>
-    )
+    );
   }
 
   private onCompanyChange(
@@ -220,7 +219,7 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
     } = this.props;
 
     let webUrl = context.pageContext.web.absoluteUrl;
-    return (
+    return (      
       <div className={styles.container}>
         {/* Header */}
         <div className={styles.header}>
