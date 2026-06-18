@@ -224,10 +224,10 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
         {/* Panels */}
         <div className={styles.contentGrid}>
           <div className={styles.panel}>
-            <div className={styles.panelHeader} onClick={() => handleClick('All')}>My Requests
+            <div className={styles.panelHeader}>My Requests
               <IconButton
     iconProps={{ iconName: 'BulletedList' }}
-    className={styles.listIcon} style={{ marginLeft: '45%' }}
+    className={styles.listIcon} style={{ marginLeft: '45%' }} onClick={() => handleClick('All')}
   />
             </div>
             <div>
@@ -260,11 +260,11 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
           </div>
 
           <div className={styles.panel}>
-            <div className={styles.panelHeader} onClick={() => handleClick('All')}>
+            <div className={styles.panelHeader}>
               Workflow Status
               <IconButton
     iconProps={{ iconName: 'BulletedList' }}
-    className={styles.listIcon} style={{ marginLeft: '30%' }}
+    className={styles.listIcon} style={{ marginLeft: '30%' }} onClick={() => handleClick('All')}
   />
             </div>
             <select className={styles.flowDropdown}
@@ -294,10 +294,10 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
           </div>
 
           <div className={styles.panel}>
-            <div className={styles.panelHeader} onClick={() => handleClick('All')}>Requests For Approval
+            <div className={styles.panelHeader}>Requests For Approval
               <IconButton
     iconProps={{ iconName: 'BulletedList' }}
-    className={styles.listIcon} style={{ marginLeft: '10%' }}
+    className={styles.listIcon} style={{ marginLeft: '10%' }} onClick={() => handleClick('All')}
   />
             </div>
             <div>
