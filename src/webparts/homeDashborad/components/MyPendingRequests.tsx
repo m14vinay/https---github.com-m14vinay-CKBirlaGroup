@@ -118,7 +118,7 @@ export default function MyPendingRequests() {
             console.log(e);
         })
     }
-   const getIdFromQueryString = (): string => {
+    const getIdFromQueryString = (): string => {
         const params = new URLSearchParams(window.location.search);
         const id = params.get('list');
         return id ? id : 'All';
@@ -146,7 +146,7 @@ export default function MyPendingRequests() {
             }
             counter++;
             //if (counter === lists.length) {
-                sortData();
+            sortData();
             //}
         }).catch(e => {
             console.log(e);
@@ -171,7 +171,7 @@ export default function MyPendingRequests() {
                 lists.forEach(l => {
                     getData(l);
                 })
-            } else { 
+            } else {
                 lists.filter(l => l.toLowerCase() === id.toLowerCase()).forEach(l => {
                     getData(l);
                 })
@@ -186,6 +186,12 @@ export default function MyPendingRequests() {
         state: {
             globalFilter,
             sorting,
+        },
+        initialState: {
+            pagination: {
+                pageIndex: 0,
+                pageSize: 50,
+            },
         },
         onGlobalFilterChange: setGlobalFilter,
         onSortingChange: setSorting,

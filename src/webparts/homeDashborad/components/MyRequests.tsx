@@ -134,7 +134,7 @@ export default function MyRequests() {
                     });
                     break;
                 case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
-                   deleteExpense(row.Id, "QuotationApprovalNEIBTAdmin").then((res) => {
+                    deleteExpense(row.Id, "QuotationApprovalNEIBTAdmin").then((res) => {
                         if (res) {
                             alert("Request deleted successfully");
                             window.location.reload();
@@ -180,10 +180,10 @@ export default function MyRequests() {
             cell: (info) => <span>{info.row.original.CurrentStatus === "Approved" ? new Date(info.row.original.Modified).toLocaleDateString() : info.row.original.CurrentStatus === "Rejected" ? new Date(info.row.original.Modified).toLocaleDateString() : ""}</span>
         }),
         columnHelper.accessor('Created', {
-            header: 'View',
+            header: 'Action',
             cell: (info) => <span style={{ cursor: "pointer" }}>
                 {info.row.original.CurrentStatus === "Draft" ? <Icon iconName="Edit" onClick={() => openEditForm(info.row.original)}></Icon> :
-                   info.row.original.CurrentStatus === "Pending" ? <Icon iconName="Delete" onClick={() => Delete(info.row.original)}></Icon> : <Icon iconName="RedEye" onClick={() => openViewForm(info.row.original)}></Icon>}
+                    info.row.original.CurrentStatus === "Pending" ? <><Icon iconName="Delete" onClick={() => Delete(info.row.original)}></Icon> &nbsp; <Icon iconName="RedEye" onClick={() => openViewForm(info.row.original)}></Icon> </> : <Icon iconName="RedEye" onClick={() => openViewForm(info.row.original)}></Icon>}
             </span>
         })
     ]
@@ -232,32 +232,32 @@ export default function MyRequests() {
             }
             counter++;
             //if (counter === lists.length) {
-                sortData();
+            sortData();
             //}
         }).catch(e => {
             console.log(e);
             counter++;
         })
     };
-const deleteExpense = async (ID: number,listname: string): Promise<boolean> => {
-    try {
-      const url = `${webUrl}/_api/web/lists/getbytitle('${listname}')/items(${ID})`;
-      const res = await context.spHttpClient.post(
-        url,
-        SPHttpClient.configurations.v1,
-        {
-          headers: {
-            "IF-MATCH": "*",              // required
-            "X-HTTP-Method": "DELETE"     // delete method
-          }
+    const deleteExpense = async (ID: number, listname: string): Promise<boolean> => {
+        try {
+            const url = `${webUrl}/_api/web/lists/getbytitle('${listname}')/items(${ID})`;
+            const res = await context.spHttpClient.post(
+                url,
+                SPHttpClient.configurations.v1,
+                {
+                    headers: {
+                        "IF-MATCH": "*",              // required
+                        "X-HTTP-Method": "DELETE"     // delete method
+                    }
+                }
+            );
+            return res.ok; // true if deleted
+        } catch (error) {
+            console.error("Delete failed:", error);
+            return false;
         }
-      );
-      return res.ok; // true if deleted
-    } catch (error) {
-      console.error("Delete failed:", error);
-      return false;
     }
-  }
     const sortData = () => {
         setLoading(false);
         _setData(data1.sort((a, b) => {
@@ -276,7 +276,7 @@ const deleteExpense = async (ID: number,listname: string): Promise<boolean> => {
                 lists.forEach(l => {
                     getData(l);
                 })
-            } else { 
+            } else {
                 lists.filter(l => l.toLowerCase() === id.toLowerCase()).forEach(l => {
                     getData(l);
                 })
@@ -291,6 +291,12 @@ const deleteExpense = async (ID: number,listname: string): Promise<boolean> => {
         state: {
             globalFilter,
             sorting,
+        },
+        initialState: {
+            pagination: {
+                pageIndex: 0,
+                pageSize: 50,
+            },
         },
         onGlobalFilterChange: setGlobalFilter,
         onSortingChange: setSorting,

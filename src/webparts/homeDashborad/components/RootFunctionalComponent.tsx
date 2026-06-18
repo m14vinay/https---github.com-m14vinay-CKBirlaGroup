@@ -16,29 +16,12 @@ export default function RootFunctionalComponent(props: IHomeDashboradProps) {
 
     return(<div>
         <SharePointContext.Provider value={props.context}>
-            <div><label style={{fontSize:"20px"}}>Digiflow Overview Status</label></div>
-            {/* <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
-                <WorkflowStatusChart context={props.context}/>
-            </div>
-            <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
-                <DepartmentWiseChart/>
-            </div>
-            <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
-                <WorkflowPendingAtChart/>
-            </div>
-            <div><label style={{fontSize:"20px"}}>My Workflow Status</label></div>
-            <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
-                <MyWorkflowStatusChart context={props.context}/>
-            </div>
-            <div style={{width:"33%", minWidth:"350px", display:"inline-block"}}>
-                <MyDepartmentWiseChart/>
-            </div> */}
-            {/* <CarousalMenu/> */}
+            <div><label style={{fontSize:"20px"}}>Digiflow Overview Status</label></div>   
             <div>
-                <MyPendingRequests/>
+              {sessionStorage.getItem("DId") === "2" && <MyPendingRequests/>}
             </div>
             <div>
-                <MyRequests/>
+                {sessionStorage.getItem("DId") === "1" && <MyRequests/>}
             </div>
         </SharePointContext.Provider>
     </div>)

@@ -13,7 +13,8 @@ import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
-  Legend
+  Legend,
+  Chart
 } from 'chart.js';
 
 ChartJS.register(
@@ -36,21 +37,22 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
   const lists = ["QuotationApproval", "PoApproval", "ReimburseExpenseMaster", "BillProcessing", "VendorMapping", "QuotationApprovalNEIBTAdmin"];
   const data = {
     labels: [
-      'Approved',
-      'Rejected',
-      'Pending'
+      `Approved (${dataset[0] || 0})`,
+      `Rejected (${dataset[1] || 0})`,
+      `Pending (${dataset[2] || 0})`
     ],
     datasets: [{
       data: dataset,
       backgroundColor: [
-        '#096a04de',
-        '#EF2020',
-        '#E4DE24'
+        '#F06773',
+        '#F59Fa7',
+        '#6B8AB4'
       ],
       hoverOffset: 4
     }]
   };
-  const handleClick = (listname: string) => {
+  const handleClick = (listname: string,Id: number) => {
+    sessionStorage.setItem("DId", Id.toString());
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Default.aspx?list=${listname}`;
     window.location.assign(url);
   };
@@ -215,7 +217,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
         <div className={styles.summaryGrid}>
           {cards.map((card, index) => (
             <div key={index} className={`${styles.summaryCard} ${card.className}`}
-            onClick={() => handleClick(card.value)}>
+            onClick={() => handleClick(card.value,1)}>
               <h3>{card.title}</h3>
               <span>{card.count}</span>
             </div>
@@ -228,7 +230,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
             <div className={styles.panelHeader}>My Requests
               <IconButton
     iconProps={{ iconName: 'BulletedList' }}
-    className={styles.listIcon} style={{ marginLeft: '45%' }} onClick={() => handleClick('All')}
+    className={styles.listIcon} style={{ marginLeft: '45%' }} onClick={() => handleClick('All', 1)}
   />
             </div>
             <div>
@@ -262,11 +264,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
 
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
-              Workflow Status
-              <IconButton
-    iconProps={{ iconName: 'BulletedList' }}
-    className={styles.listIcon} style={{ marginLeft: '30%' }} onClick={() => handleClick('All')}
-  />
+              Workflow Status              
             </div>
             <select className={styles.flowDropdown}
               onChange={(e) => getPieData(e.target.value)}>
@@ -298,7 +296,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
             <div className={styles.panelHeader}>Requests For Approval
               <IconButton
     iconProps={{ iconName: 'BulletedList' }}
-    className={styles.listIcon} style={{ marginLeft: '10%' }} onClick={() => handleClick('All')}
+    className={styles.listIcon} style={{ marginLeft: '10%' }} onClick={() => handleClick('All', 2)}
   />
             </div>
             <div>
