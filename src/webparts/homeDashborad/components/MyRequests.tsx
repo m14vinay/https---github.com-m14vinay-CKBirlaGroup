@@ -218,34 +218,42 @@ export default function MyRequests() {
         getUser();
     }, []);
 
-    const getData = (listName: string) => {
+    const getData = async (listName: string) => {
         console.log("context user : ", context);
-        let resturl="";
-        if (sessionStorage.getItem("CurrentStatus") !== "") 
-        {
-            resturl=`${webUrl}/_api/web/lists/getbytitle('${listName}')/items?$top=5000&$select=*&$filter=AuthorId eq ${user.Id} and CurrentStatus eq '${sessionStorage.getItem("CurrentStatus")}'`
+
+        const currentStatus = sessionStorage.getItem("CurrentStatus");
+
+        let resturl = "";
+
+        if (currentStatus && currentStatus !== "0") {
+            resturl = `${webUrl}/_api/web/lists/getbytitle('${listName}')/items?$top=5000&$select=*&$filter=AuthorId eq ${user.Id} and CurrentStatus eq '${currentStatus}'`;
+        } else {
+            resturl = `${webUrl}/_api/web/lists/getbytitle('${listName}')/items?$top=5000&$select=*&$filter=AuthorId eq ${user.Id}`;
         }
-        else
-        {
-         resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AuthorId eq " + user.Id;
-        }
-         context.spHttpClient.get(
-            `${resturl}`,
-            SPHttpClient.configurations.v1
-        ).then(res => res.json()).then(data => {
-            console.log(listName, data);
-            if (data.value.length > 0) {
-                // _setData((d) => [...d.concat(data.value)]);
-                data1 = data1.concat(...data.value);
+
+        try {
+            let allItems: any[] = [];
+            let nextUrl: string | null = resturl;
+            while (nextUrl) {
+                const response = await context.spHttpClient.get(
+                    nextUrl,
+                    SPHttpClient.configurations.v1
+                );
+                const data = await response.json();
+                if (data.value) {
+                    allItems = [...allItems, ...data.value];
+                }
+                nextUrl = data["@odata.nextLink"] || null;
             }
+            console.log(`Total Records from ${listName}:`, allItems.length);
+            data1 = data1.concat(allItems);
             counter++;
-            //if (counter === lists.length) {
-            sortData();
-            //}
-        }).catch(e => {
+            //sortData();
+        }
+        catch (e) {
             console.log(e);
             counter++;
-        })
+        }
     };
     const deleteExpense = async (ID: number, listname: string): Promise<boolean> => {
         try {
@@ -278,19 +286,27 @@ export default function MyRequests() {
     }
 
     useEffect(() => {
+    const loadData = async () => {
+        data1 = [];
         const id = getIdFromQueryString();
-        if (user) {
-            if (id == "All") {
-                lists.forEach(l => {
-                    getData(l);
-                })
-            } else {
-                lists.filter(l => l.toLowerCase() === id.toLowerCase()).forEach(l => {
-                    getData(l);
-                })
-            }
+
+        if (id === "All") {
+            await Promise.all(lists.map(l => getData(l)));
+        } else {
+            await Promise.all(
+                lists
+                    .filter(l => l.toLowerCase() === id.toLowerCase())
+                    .map(l => getData(l))
+            );
         }
-    }, [user]);
+        console.log("Final data count:", data1.length);
+        sortData();
+    };
+
+    if (user) {
+        loadData();
+    }
+}, [user]);
 
     const table = useReactTable({
         data,

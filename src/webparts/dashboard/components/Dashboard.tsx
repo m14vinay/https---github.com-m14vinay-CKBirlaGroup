@@ -53,7 +53,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
   };
   const handleClick = (listname: string, Id: number) => {
     sessionStorage.setItem("DId", Id.toString());
-    sessionStorage.setItem("CurrentStatus", "");
+    sessionStorage.setItem("CurrentStatus", "0");
     const url = `${props.context.pageContext.web.absoluteUrl}/SitePages/Default.aspx?list=${listname}`;
     window.location.assign(url);
   };
