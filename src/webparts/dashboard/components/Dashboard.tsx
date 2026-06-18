@@ -147,7 +147,8 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
     }
   }
   const getPieData = async (listName: string) => {
-    let resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=CurrentStatus,Id";
+    const user = await getUser();
+    let resturl = `${context.pageContext.web.absoluteUrl}` + `/_api/web/lists/getbytitle('${listName}')/items?$top=5000&$select=CurrentStatus,Id&$filter=AuthorId eq ${user?.Id}`;
     const response = await context.spHttpClient.get(
       resturl,
       SPHttpClient.configurations.v1
