@@ -19,6 +19,7 @@ interface IDigiflowMenuState {
   showDropdown: string;
   flag: boolean;
   NEIBTFlag: boolean;
+  selectedCompany: string;
 }
 export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, IDigiflowMenuState> {
 
@@ -29,8 +30,9 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
       items: [],
       showDropdown: "",
       flag: false,
-      NEIBTFlag: false
-    }
+      NEIBTFlag: false,
+      selectedCompany: sessionStorage.getItem("SelectedCompany") || ""
+    };
     this.getMenuItems = this.getMenuItems.bind(this);
     this.setMenuDropdown = this.setMenuDropdown.bind(this);
     this.getMenuItems();
@@ -62,6 +64,7 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
     checkUser();
     checkUserNEIBT();
   }
+
   private async getUserExists(GroupTitle: string): Promise<boolean> {
     var isMember = false;
     try {
@@ -127,7 +130,7 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
               </Nav.Link>
             }
           }
-          else if (this.state.NEIBTFlag && b.Title === "NEIBT Admin Report") {
+          else if (sessionStorage.getItem("SelectedCompany") === "NEIBT" && b.Title === "NEIBT Admin Report") {
 
             let childItems = this.state.items.filter(item => item.ParentId == b.Id);
             if (childItems.length > 0) {
@@ -152,7 +155,7 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
               </Nav.Link>
             }
           }
-          else if (this.state.NEIBTFlag && b.Title === "Approval NEIBT") {
+          else if (sessionStorage.getItem("SelectedCompany") === "NEIBT" && b.Title === "Approval NEIBT") {
             let childItems = this.state.items.filter(item => item.ParentId == b.Id);
             if (childItems.length > 0) {
               return <NavDropdown
@@ -205,6 +208,12 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
     )
   }
 
+  private onCompanyChange(
+    e: React.ChangeEvent<HTMLSelectElement>
+  ): void {
+    const companyId = e.target.value;
+    sessionStorage.setItem("SelectedCompany", companyId);
+  }
   public render(): React.ReactElement<IDigiflowMenuProps> {
     const {
       context
@@ -217,9 +226,8 @@ export default class DigiflowMenu extends React.Component<IDigiflowMenuProps, ID
         <div className={styles.header}>
           <div className={styles.logo}>DIGIFLOW</div>
           <div className={styles.headerRight}>
-            <select className={styles.dropdown}>
-              <option value="">Select Company</option>              
-              <option value="CKBCL">CKBCL</option>              
+            <select className={styles.dropdown} value={sessionStorage.getItem("SelectedCompany") || ""} onChange={this.onCompanyChange}>            
+              <option value="CKBCSL">CKBCSL</option>              
               {this.state.NEIBTFlag && (
                 <option value="NEIBT">NEIBT</option>
               )}                        
