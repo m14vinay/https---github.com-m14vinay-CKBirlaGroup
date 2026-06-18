@@ -29,7 +29,14 @@ export default class Service {
 
   // Combine filters
   const filterQuery = filters.length > 0 ? `$filter=${filters.join(" or ")}` : "";
-  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items?${filterQuery}`;
+  const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.listname}')/items
+?$select=*,
+Author/Title,
+Editor/Title,
+CFOEmail/Title,
+ComplianceHeadEmail/Title,
+FIApproverEmail/Title
+&$expand=Author,Editor,CFOEmail,ComplianceHeadEmail,FIApproverEmail&${filterQuery}`;
   const res = await this.context.spHttpClient.get(
     url,
     SPHttpClient.configurations.v1

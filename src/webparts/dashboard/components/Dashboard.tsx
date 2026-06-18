@@ -8,6 +8,7 @@ import { SharePointContext } from '../../homeDashborad/components/SharePointCont
 import { SPHttpClient } from '@microsoft/sp-http-base';
 import { Pie } from 'react-chartjs-2';
 import { Spinner, SpinnerSize } from '@fluentui/react';
+import { IconButton } from '@fluentui/react';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -35,20 +36,16 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
   const lists = ["QuotationApproval", "PoApproval", "ReimburseExpenseMaster", "BillProcessing", "VendorMapping", "QuotationApprovalNEIBTAdmin"];
   const data = {
     labels: [
-      'Admin',
-      'Finance',
-      'IT',
-      'Branding',
-      'Legal'
+      'Approved',
+      'Rejected',
+      'Pending'
     ],
     datasets: [{
       data: dataset,
       backgroundColor: [
-        '#4EC348',
+        '#096a04de',
         '#EF2020',
-        '#E4DE24',
-        '#2C38B8',
-        '#D52B9D'
+        '#E4DE24'
       ],
       hoverOffset: 4
     }]
@@ -150,7 +147,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
     }
   }
   const getPieData = async (listName: string) => {
-    let resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=Department,Id";
+    let resturl = `${context.pageContext.web.absoluteUrl}` + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=CurrentStatus,Id";
     const response = await context.spHttpClient.get(
       resturl,
       SPHttpClient.configurations.v1
@@ -180,13 +177,11 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
     setLoading(false);
   }, []);
   const getChartDataSet = () => {
-    const Admin = items.filter(q => q.Department === "Admin");
-    const Finance = items.filter(q => q.Department === "Finance");
-    const IT = items.filter(q => q.Department === "IT");
-    const Branding = items.filter(q => q.Department === "Branding");
-    const Legal = items.filter(q => q.Department === "Legal");
+    const Approved = items.filter(q => q.CurrentStatus === "Approved");
+    const Rejected = items.filter(q => q.CurrentStatus === "Rejected");
+    const IPending = items.filter(q => q.CurrentStatus === "Pending");
 
-    setDataset([Admin.length, Finance.length, IT.length, Branding.length, Legal.length]);
+    setDataset([Approved.length, Rejected.length, IPending.length]);
   }
   useEffect(() => {
     getChartDataSet()
@@ -229,7 +224,12 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
         {/* Panels */}
         <div className={styles.contentGrid}>
           <div className={styles.panel}>
-            <div className={styles.panelHeader} onClick={() => handleClick('All')}>My Requests</div>
+            <div className={styles.panelHeader} onClick={() => handleClick('All')}>My Requests
+              <IconButton
+    iconProps={{ iconName: 'BulletedList' }}
+    className={styles.listIcon} style={{ marginLeft: '45%' }}
+  />
+            </div>
             <div>
               {myData.sort(
                 (a, b) =>
@@ -262,6 +262,10 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
           <div className={styles.panel}>
             <div className={styles.panelHeader} onClick={() => handleClick('All')}>
               Workflow Status
+              <IconButton
+    iconProps={{ iconName: 'BulletedList' }}
+    className={styles.listIcon} style={{ marginLeft: '30%' }}
+  />
             </div>
             <select className={styles.flowDropdown}
               onChange={(e) => getPieData(e.target.value)}>
@@ -290,7 +294,12 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
           </div>
 
           <div className={styles.panel}>
-            <div className={styles.panelHeader} onClick={() => handleClick('All')}>Requests For Approval</div>
+            <div className={styles.panelHeader} onClick={() => handleClick('All')}>Requests For Approval
+              <IconButton
+    iconProps={{ iconName: 'BulletedList' }}
+    className={styles.listIcon} style={{ marginLeft: '10%' }}
+  />
+            </div>
             <div>
               {myPendingData.map((item) => (
                 <div key={item.Id} className={styles.requestCard}>

@@ -26,29 +26,106 @@ const SummaryReportExpense: React.FC<ISummaryReportExpenseProps> = (props) => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<any>([]);
 
-  const columnHelper = createColumnHelper<any>()
-  const columns = [
-    columnHelper.accessor('RequestNo', {
-      header: () => 'Req No.'
-    }),
-    columnHelper.accessor('DepartmentName', {
-      header: 'Department'
-    }),
-  columnHelper.accessor('Author', {
-      header: 'Requestor Name'
-    }),
-    columnHelper.accessor('TotalClaimAmount', {
-      header: 'Claim Amount'
-    }),
-    columnHelper.accessor('CurrentStatus', {
-      header: 'Status'
-    }),
-    columnHelper.accessor('Created', {
-      header: 'Submitted Date',
-      cell: info =>
-        new Date(info.getValue()).toISOString() // dd/mm/yyyy
-    })
-  ]
+  const stripHtml = (html: string) => {
+            const temp = document.createElement("div");
+            temp.innerHTML = html;
+            return temp.textContent || temp.innerText || "";
+        };
+      const columnHelper = createColumnHelper<any>()
+      const columns = [
+        columnHelper.accessor('RequestNo', {
+          header: () => 'Request No.'
+        }),
+        columnHelper.accessor('ProjectTitle', {
+          header: 'Project Title'
+        }),
+        columnHelper.accessor('ProjectDescription', {
+          header: 'Project Description',
+          cell: info => (
+                    <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                        {stripHtml(info.getValue())}
+                    </div>
+                )
+        }),
+        columnHelper.accessor('DepartmentHead', {
+          header: 'Department Head',
+        }),
+        columnHelper.accessor('DepartmentName', {
+          header: 'Department'
+        }),
+        columnHelper.accessor('Modified', {
+          header: 'Modified Date',
+          cell: (info) => <span>{new Date(info.row.original.Modified).toLocaleDateString()}</span>
+        }),
+        columnHelper.accessor('Remarks', {
+          header: () => 'Remarks'
+        }),
+        columnHelper.accessor(row => row.Author?.Title,
+      {
+        id: 'Author',
+        header: 'Created By'
+      }), 
+        columnHelper.accessor('Created', {
+          header: 'Submitted Date',
+           cell: (info) => <span>{new Date(info.row.original.Created).toLocaleDateString()}</span>
+        }),
+        columnHelper.accessor('CurrentStatus', {
+          header: 'Status'
+        }),         
+        columnHelper.accessor('AssignedTo', {
+          header: 'Assigned To'
+        }),    
+        columnHelper.accessor('ApproverComment1', {
+          header: 'Approver Comment 1'
+        }),  
+        columnHelper.accessor('ApproverComment2', {
+          header: 'Approver Comment 2'
+        }),  
+        columnHelper.accessor('ApproverComment3', {
+          header: 'Approver Comment 3'
+        }),  
+        columnHelper.accessor('ApproverComment4', {
+          header: 'Approver Comment 4'
+        }),  
+        columnHelper.accessor('ActionDate1', {
+          header: 'Action Date 1'
+        }),  
+        columnHelper.accessor('ActionDate2', {
+          header: 'Action Date 2'
+        }),  
+        columnHelper.accessor('ActionDate3', {
+          header: 'Action Date 3'
+        }),  
+        columnHelper.accessor('ActionDate4', {
+          header: 'Action Date 4'
+        }),
+        columnHelper.accessor(row => row.FIApproverEmail?.Title,
+      {
+        id: 'FIApproverEmail',
+        header: 'FIApprover'
+      }),
+        columnHelper.accessor(row => row.ComplianceHeadEmail?.Title,
+      {
+        id: 'ComplianceHeadEmail',
+        header: 'ComplianceHead'
+      }), 
+        columnHelper.accessor(row => row.CFOEmail?.Title,
+      {
+        id: 'CFOEmail',
+        header: 'CFO'
+      }),         
+      columnHelper.accessor(row => row.Editor?.Title,
+      {
+        id: 'ModifiedBy',
+        header: 'Modified By'
+      }),
+        columnHelper.accessor('TotalClaimAmount', {
+          header: 'Total Claim Amount'
+        }),
+        columnHelper.accessor('ApprovalPath', {
+          header: 'Approval Path'
+        })         
+      ]
   const table = useReactTable({
     data,
     columns,

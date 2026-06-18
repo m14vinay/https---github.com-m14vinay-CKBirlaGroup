@@ -89,6 +89,64 @@ export default function MyRequests() {
             }
         }
     }
+    const Delete = (row: any) => {
+        console.log(row);
+        if (row["@odata.type"]) {
+            switch (row["@odata.type"]) {
+                case '#SP.Data.QuotationApprovalListItem':
+                    deleteExpense(row.Id, "QuotationApproval").then((res) => {
+                        if (res) {
+                            alert("Request deleted successfully");
+                            window.location.reload();
+                        }
+                    });
+                    break;
+                case '#SP.Data.PoApprovalListItem':
+                    deleteExpense(row.Id, "PoApproval").then((res) => {
+                        if (res) {
+                            alert("Request deleted successfully");
+                            window.location.reload();
+                        }
+                    });
+                    break;
+                case '#SP.Data.VendorMappingListItem':
+                    deleteExpense(row.Id, "VendorMapping").then((res) => {
+                        if (res) {
+                            alert("Request deleted successfully");
+                            window.location.reload();
+                        }
+                    });
+                    break;
+                case '#SP.Data.Remb_x005f_ExpanseMasterListItem':
+                    deleteExpense(row.Id, "ReimburseExpenseMaster").then((res) => {
+                        if (res) {
+                            alert("Request deleted successfully");
+                            window.location.reload();
+                        }
+                    });
+                    break;
+                case '#SP.Data.BillProcessingListItem':
+                    deleteExpense(row.Id, "BillProcessing").then((res) => {
+                        if (res) {
+                            alert("Request deleted successfully");
+                            window.location.reload();
+                        }
+                    });
+                    break;
+                case '#SP.Data.QuotationApprovalNEIBTAdminListItem':
+                   deleteExpense(row.Id, "QuotationApprovalNEIBTAdmin").then((res) => {
+                        if (res) {
+                            alert("Request deleted successfully");
+                            window.location.reload();
+                        }
+                    });
+                    break;
+                default:
+                    alert("Page not found");
+                    break;
+            }
+        }
+    }
 
     const columns = [
         columnHelper.accessor('RequestNo', {
@@ -125,7 +183,7 @@ export default function MyRequests() {
             header: 'View',
             cell: (info) => <span style={{ cursor: "pointer" }}>
                 {info.row.original.CurrentStatus === "Draft" ? <Icon iconName="Edit" onClick={() => openEditForm(info.row.original)}></Icon> :
-                    <Icon iconName="RedEye" onClick={() => openViewForm(info.row.original)}></Icon>}
+                   info.row.original.CurrentStatus === "Pending" ? <Icon iconName="Delete" onClick={() => Delete(info.row.original)}></Icon> : <Icon iconName="RedEye" onClick={() => openViewForm(info.row.original)}></Icon>}
             </span>
         })
     ]
@@ -181,7 +239,25 @@ export default function MyRequests() {
             counter++;
         })
     };
-
+const deleteExpense = async (ID: number,listname: string): Promise<boolean> => {
+    try {
+      const url = `${webUrl}/_api/web/lists/getbytitle('${listname}')/items(${ID})`;
+      const res = await context.spHttpClient.post(
+        url,
+        SPHttpClient.configurations.v1,
+        {
+          headers: {
+            "IF-MATCH": "*",              // required
+            "X-HTTP-Method": "DELETE"     // delete method
+          }
+        }
+      );
+      return res.ok; // true if deleted
+    } catch (error) {
+      console.error("Delete failed:", error);
+      return false;
+    }
+  }
     const sortData = () => {
         setLoading(false);
         _setData(data1.sort((a, b) => {
