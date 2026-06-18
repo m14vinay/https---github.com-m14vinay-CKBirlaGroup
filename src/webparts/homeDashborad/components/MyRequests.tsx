@@ -220,8 +220,16 @@ export default function MyRequests() {
 
     const getData = (listName: string) => {
         console.log("context user : ", context);
-        let resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AuthorId eq " + user.Id;
-        context.spHttpClient.get(
+        let resturl="";
+        if (sessionStorage.getItem("CurrentStatus") !== "") 
+        {
+            resturl=`${webUrl}/_api/web/lists/getbytitle('${listName}')/items?$top=5000&$select=*&$filter=AuthorId eq ${user.Id} and CurrentStatus eq '${sessionStorage.getItem("CurrentStatus")}'`
+        }
+        else
+        {
+         resturl = webUrl + "/_api/web/lists/getbytitle('" + listName + "')/items?$top=5000&$select=*&$filter=AuthorId eq " + user.Id;
+        }
+         context.spHttpClient.get(
             `${resturl}`,
             SPHttpClient.configurations.v1
         ).then(res => res.json()).then(data => {
