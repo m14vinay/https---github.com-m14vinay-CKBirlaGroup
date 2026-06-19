@@ -245,7 +245,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
                     <div>
                       <div>Request : {item.RequestNo}</div>
                       <div>Project Title : {item.ProjectTitle}</div>
-                      <div>Total Amount : ₹{item.TotalAmount}</div>
+                      <div>Total Amount : ₹{Number(item.TotalAmount).toFixed(2)||0||0}</div>
                     </div>
                     <span
                       className={
@@ -311,7 +311,7 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
                   <div>
                     <div>Request : {item.RequestNo}</div>
                     <div>Project Title : {item.ProjectTitle}</div>
-                    <div>Total Amount : ₹{item.TotalAmount}</div>
+                    <div>Total Amount : ₹{Number(item.TotalAmount).toFixed(2)||0}</div>
                   </div>
                   <span className={styles.pending}>
                     {item.CurrentStatus}
