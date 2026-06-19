@@ -183,7 +183,11 @@ export default function MyRequests() {
             header: 'Action',
             cell: (info) => <span style={{ cursor: "pointer" }}>
                 {info.row.original.CurrentStatus === "Draft" ? <Icon iconName="Edit" onClick={() => openEditForm(info.row.original)}></Icon> :
-                    info.row.original.CurrentStatus === "Pending" ? <><Icon iconName="Delete" onClick={() => Delete(info.row.original)}></Icon> &nbsp; <Icon iconName="RedEye" onClick={() => openViewForm(info.row.original)}></Icon> </> : <Icon iconName="RedEye" onClick={() => openViewForm(info.row.original)}></Icon>}
+                    info.row.original.CurrentStatus === "Pending" ? <><Icon iconName="Delete" onClick={() => {
+                        if (window.confirm("Are you sure you want to delete the request?")) {
+                            Delete(info.row.original);
+                        }
+                    }}></Icon> &nbsp; <Icon iconName="RedEye" onClick={() => openViewForm(info.row.original)}></Icon> </> : <Icon iconName="RedEye" onClick={() => openViewForm(info.row.original)}></Icon>}
             </span>
         })
     ]
@@ -286,27 +290,27 @@ export default function MyRequests() {
     }
 
     useEffect(() => {
-    const loadData = async () => {
-        data1 = [];
-        const id = getIdFromQueryString();
+        const loadData = async () => {
+            data1 = [];
+            const id = getIdFromQueryString();
 
-        if (id === "All") {
-            await Promise.all(lists.map(l => getData(l)));
-        } else {
-            await Promise.all(
-                lists
-                    .filter(l => l.toLowerCase() === id.toLowerCase())
-                    .map(l => getData(l))
-            );
+            if (id === "All") {
+                await Promise.all(lists.map(l => getData(l)));
+            } else {
+                await Promise.all(
+                    lists
+                        .filter(l => l.toLowerCase() === id.toLowerCase())
+                        .map(l => getData(l))
+                );
+            }
+            console.log("Final data count:", data1.length);
+            sortData();
+        };
+
+        if (user) {
+            loadData();
         }
-        console.log("Final data count:", data1.length);
-        sortData();
-    };
-
-    if (user) {
-        loadData();
-    }
-}, [user]);
+    }, [user]);
 
     const table = useReactTable({
         data,
