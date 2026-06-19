@@ -117,19 +117,25 @@
 .pending {
   background: #5f86bd;
   color: white;
-  padding: 10%;
+  padding: 10px 17px;
+  line-height: 15px;
+  height: 38px;
   border-radius: 20px;
 }
 .rejected {
   background: #f5a8b0;
   color: white;
-  padding: 10%;
+  padding: 10px 17px;
+  line-height: 15px;
+  height: 38px;
   border-radius: 20px;
 }
 .approved {
   background: #f56b78;
   color: white;
-  padding: 10%;
+  padding: 10px 17px;
+  line-height: 15px;
+  height: 38px;
   border-radius: 20px;
 }
 

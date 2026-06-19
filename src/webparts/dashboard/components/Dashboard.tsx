@@ -34,7 +34,14 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
   const [dataset, setDataset] = useState<number[]>([]);
   const [selectedFlow, setSelectedFlow] = React.useState("");
   const { context } = props;
-  const lists = ["QuotationApproval", "PoApproval", "ReimburseExpenseMaster", "BillProcessing", "VendorMapping", "QuotationApprovalNEIBTAdmin"];
+  const lists = [
+  { key: "QuotationApproval", value: "Quotation Approval" },
+  { key: "PoApproval", value: "PO Approval" },
+  { key: "ReimburseExpenseMaster", value: "Reimburse Expense Master" },
+  { key: "BillProcessing", value: "Bill Processing" },
+  { key: "VendorMapping", value: "Vendor Mapping" },
+  { key: "QuotationApprovalNEIBTAdmin", value: "Quotation Approval NEIBT Admin" }
+];
   const data = {
     labels: [
       `Approved (${dataset[0] || 0})`,
@@ -170,10 +177,10 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
       await getMyItemCount("PoApproval", user?.Id);
       await getMyItemCount("BillProcessing", user?.Id);
       lists.forEach(async (l) => {
-        await getmyData(l, user?.Id);
+        await getmyData(l.key, user?.Id);
       })
       lists.forEach(async (l) => {
-        await getmypendingData(l, user);
+        await getmypendingData(l.key, user);
       })
       // await getPieData("QuotationApproval");
     };
@@ -276,8 +283,8 @@ const Dashboard: React.FC<IDashboardProps> = (props) => {
               onChange={(e) => getPieData(e.target.value)}>
               <option value="">Select Flow</option>
               {lists.map((item, index) => (
-                <option key={index} value={item}>
-                  {item}
+                <option key={index} value={item.key}>
+                  {item.value}
                 </option>
               ))}
             </select>
