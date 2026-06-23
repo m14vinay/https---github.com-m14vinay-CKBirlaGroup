@@ -82,9 +82,18 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     const id = getIdFromQueryString();
     if (id) {
       handleFetchById(id);
-      
+      loadBillProcessingData(id);      
     }
   }, []);
+  const loadBillProcessingData = async (id: number) => {
+    try {
+      const response = await service.getBillProcessingDetailOrderDetails(id);
+      console.log("Bill Processing Details Data:", response);
+      setPoItems(response || []);
+    } catch (error) {
+      console.error("Error fetching PO data:", error);
+    }
+  };
   const loadAttachments = async (id: number) => {
     try {
       const files = await service.getAttachments(id);
@@ -127,10 +136,6 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
             TotalAmount: result.TotalAmount || '',
             Comments: result.ProjectDescription || '',
             vendorcode: result.Vendorcode || '',
-            BillNo: result.BillNo || '',
-            BillDate: result.BillDate,
-            BillAmount: result.BillAmount || 0,
-            CalculatedTaxes: result.CalculatedTaxes || 0,
             PORequestNo: result.PORequestNo || '',
             PORequestNoID: result.PORequestNo || '',
             AttachedSignedPO: result.AttachedSignedPO == "True" ? true : false,

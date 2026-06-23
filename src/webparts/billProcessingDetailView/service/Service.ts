@@ -4,11 +4,22 @@ export default class Service {
   private context: any;
   private HistoryList = "History";
   private BillProcessing = "BillProcessing";
-    private Vendor="AllVendor";
-  private EmailList="EmailToVendor";
+  private Vendor = "AllVendor";
+  private EmailList = "EmailToVendor";
+  private BillProcessingDetail = "BillProcessingDetail";
   constructor(context: any) {
     this.context = context;
   }
+  public async getBillProcessingDetailOrderDetails(BillID: number): Promise<any[]> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessingDetail}')/items?$filter=BillID eq ${BillID}`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data.value || [];
+  }
+  
   public async getItemByRequestNo(ID: Number): Promise<any> {
 
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items(${ID})?$select=*,Author/Id,Author/Title&$expand=Author`;
@@ -16,11 +27,9 @@ export default class Service {
       url,
       SPHttpClient.configurations.v1
     );
-
     const item = await res.json();
-   
-   return item;
-   
+    return item;
+
   }
   // Fetch the Files from List
   public async getAttachments(itemId: number): Promise<any[]> {
@@ -52,7 +61,7 @@ export default class Service {
   }
   // Get the History Record
   public async GetHistoryItem(ID: Number, FormCode: string): Promise<any> {
-    const url =`${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${ID} and Title eq '${encodeURIComponent(FormCode)}'`; 
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.HistoryList}')/items?$filter=FID eq ${ID} and Title eq '${encodeURIComponent(FormCode)}'`;
     console.log("URL:", url)
     const response = await this.context.spHttpClient.get(
       url,
@@ -62,7 +71,7 @@ export default class Service {
     return data.value;
   }
   // GetVendorEmail
-   public async getVendorEmailByVendorCode(VendorCode: string): Promise<any> {
+  public async getVendorEmailByVendorCode(VendorCode: string): Promise<any> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.Vendor}')/items?$filter=VendorCode eq '${VendorCode}'`;
     const res = await this.context.spHttpClient.get(
       url,
@@ -72,7 +81,7 @@ export default class Service {
     return data.value.length > 0 ? data.value[0] : null;
   }
   //Create Send Email
-   public async createEmailList(data: any): Promise<any> {
+  public async createEmailList(data: any): Promise<any> {
     const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.EmailList}')/items`;
     const response = await this.context.spHttpClient.post(
       url,
