@@ -43,6 +43,19 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
     Email: '',
     ApproverComment5: ''
   });
+  type TBillProcessingRow = {
+      BillNo: string;
+      BillDate: Date;
+      BillAmount: string;
+      CalculatedTaxes: string;
+    };
+    const INITIAL_PO_ROW: TBillProcessingRow = {
+      BillNo: '',
+      BillDate: new Date,
+      BillAmount: '',
+      CalculatedTaxes: ''
+    };
+    const [poItems, setPoItems] = React.useState<TBillProcessingRow[]>([INITIAL_PO_ROW]);
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
   const [attachments, setAttachments] = React.useState<any[]>([]);
@@ -620,21 +633,11 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
               <input name="projectTitle" value={form.projectTitle} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Additional Information & Remarks</label>
               <input name="Comments" value={stripHtml(form.Comments)} readOnly style={{ backgroundColor: "lightgray" }}>
-              </input>
-              <label>Bill No</label>
-              <input name="BillNo" value={form.BillNo} readOnly style={{ backgroundColor: "lightgray" }}>
-              </input>
-              <label>Bill Date</label>
-              <input name="BillDate" type="text" value={form.BillDate ? form.BillDate.toString() : ''} readOnly style={{ backgroundColor: "lightgray" }}>
-              </input>
+              </input>              
               <label>Occupied Amount</label>
               <input name="OccupiedAmount" value={form.OccupiedAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Remaining Amount</label>
               <input name="RemainingAmount" value={form.RemainingAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
-              <label>Bill Amount</label>
-              <input name="BillAmount" value={form.BillAmount} readOnly style={{ backgroundColor: "lightgray" }} />
-              <label>Calculated Taxes</label>
-              <input name="CalculatedTaxes" value={form.CalculatedTaxes} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Total Amount</label>
               <input name="TotalAmount" value={form.TotalAmount} readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Approval Path</label>
@@ -655,6 +658,29 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                   ))}
                 </ul>
               )}
+              <div className={styles.poSection}>
+                <h5>Bill Processing Details</h5>
+                <div className={styles.poTable}>
+                  <div className={styles.poRowHeader}>
+                    <div>Bill No</div>
+                    <div>Bill Date</div>
+                    <div>Bill Amount</div>
+                    <div>Calculated Taxes</div>
+                  </div>
+                  {poItems.length > 0 ? (
+                    poItems.map((item, index) => (
+                      <div key={`${index}`} className={styles.poRow}>
+                        <input value={item.BillNo || ''} readOnly style={{ backgroundColor: "lightgray" }} />
+                        <input value={item.BillDate.toISOString().split('T')[0] || ''} readOnly style={{ backgroundColor: "lightgray" }} />
+                        <input value={item.BillAmount || ''} readOnly style={{ backgroundColor: "lightgray" }} />
+                        <input value={item.CalculatedTaxes || ''} readOnly style={{ backgroundColor: "lightgray" }} />
+                      </div>
+                    ))
+                  ) : (
+                    <div>No purchase order details found.</div>
+                  )}
+                </div>
+              </div>
               <div style={{ paddingBottom: "2%" }}>
                 <label>Comments<span className={styles.required}>*</span></label>
                 <input type='text' className="form-control" name="ApprovalComment" value={form.ApprovalComment} onChange={handleChange} />

@@ -302,10 +302,10 @@ const QrDetailsStatus: React.FC<IQrDetailsStatusProps> = (props) => {
 
                 <div className={styles.poTable}>
                   <div className={styles.poRowHeader}>
-                    <div>Description</div>
-                    <div>Qty</div>
-                    <div>Rate</div>
-                    <div>Amount</div>
+                    <div>Bill No</div>
+                    <div>Bill Date</div>
+                    <div>Bill Amount</div>
+                    <div>Calculated Taxes</div>
                   </div>
 
                   {poItems.length > 0 ? (

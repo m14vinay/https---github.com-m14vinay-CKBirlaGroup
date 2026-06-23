@@ -15,10 +15,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     VendorName: '',
     projectTitle: '',
     Comments: '',
-    BillNo: '',
-    BillDate: new Date(),
-    BillAmount: 0,
-    CalculatedTaxes: 0,
     TotalAmount: 0,
     UploadDocument: '',
     files: [],
@@ -29,6 +25,18 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     OccupiedAmount: '',
     RemainingAmount: ''
   });
+  type TBillProcessingRow = {
+    BillNo: string;
+    BillDate: Date;
+    BillAmount: string;
+    CalculatedTaxes: string;
+  };
+  const INITIAL_PO_ROW: TBillProcessingRow = {
+    BillNo: '',
+    BillDate: new Date,
+    BillAmount: '',
+    CalculatedTaxes: ''
+  };
   const [POOptions, setPOOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
   const service = new SharePointService(props.context);
@@ -37,19 +45,20 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   const [TotalAmount, setTotalAmount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
   const [isChecked, setIsChecked] = React.useState(false);
+  const [poItems, setPoItems] = React.useState<TBillProcessingRow[]>([INITIAL_PO_ROW]);
   const MAX_TOTAL_SIZE_MB = 51;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
 
   const handleCheckbillNoExist = async () => {
-      const checkdata = await service.getCheckBillNoExist(form.BillNo);
-      if (checkdata != null) {
-        setForm(prev => ({
-          ...prev,
-          BillNo: ''
-        }))
-        alert("Bill No is duplicate , Please enter another bill no");
-        return;
-      }
+    const checkdata = await service.getCheckBillNoExist("");
+    if (checkdata != null) {
+      setForm(prev => ({
+        ...prev,
+        BillNo: ''
+      }))
+      alert("Bill No is duplicate , Please enter another bill no");
+      return;
+    }
   }
   // --- 1️⃣ Get ID from query string ---
   const getIdFromQueryString = (): number | null => {
@@ -251,8 +260,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   // // 🔹 Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm({
-      ...form,
+    setPoItems({
+      ...poItems,
       [name]: value
     });
   };
@@ -266,23 +275,23 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       alert("Bill date cannot be greater than current date");
       return; // ❌ stop updating state
     }
-    setForm({
-      ...form,
+    setPoItems({
+      ...poItems,
       [name]: value
     });
   };
 
   const handleAmountCalculateChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm({
-      ...form,
+    setPoItems({
+      ...poItems,
       [name]: value
     });
     if (Number(value) > Number(form.RemainingAmount)) {
-      setForm(prev => ({
+      setPoItems(prev => ({
         ...prev,
         BillAmount: 0,
-        TotalAmount: form.CalculatedTaxes
+      // TotalAmount: form.CalculatedTaxes
       }));
       alert("Bill Amount must be less than Remaining Amount.");
       return;
@@ -290,17 +299,17 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     else {
       setForm(prev => ({
         ...prev,
-        TotalAmount: Number(value) + Number(form.CalculatedTaxes)
+       // TotalAmount: Number(value) + Number(form.CalculatedTaxes)
       }));
     }
   };
   // HandleTaxes
   const handleTaxCalculateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm({
-      ...form,
+    setPoItems({
+      ...poItems,
       [name]: value,
-      TotalAmount: Number(form.BillAmount) + Number(value)
+      //TotalAmount: Number(form.BillAmount) + Number(value)
     });
   };
   const handleSaveHistory = async (id: number, Title: string, UserName: string, UserAction: string, Designation: string, ActionDate: Date, Sequence: number) => {
@@ -341,28 +350,13 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         alert("Please select PO Request.");
         return;
       }
-      if (form.BillNo == '') {
-        alert("Please enter Bill No.");
-        return;
-      }
-      if (form.BillDate == null) {
-        alert("Please enter Bill Date.");
-        return;
-      }
-      if (form.BillAmount == 0) {
-        alert("Please enter Bill Amount.");
-        return;
-      }
+      
       const payload = {
         Vendorcode: form.vendorcode,
         VendorName: form.VendorName,
         ProjectTitle: form.projectTitle,
         ProjectCode: form.ProjectCode,
-        PORequestNo: form.PORequestNo,
-        BillNo: form.BillNo,
-        BillDate: form.BillDate,
-        BillAmount: form.BillAmount,
-        CalculatedTaxes: form.CalculatedTaxes.toString(),
+        PORequestNo: form.PORequestNo,       
         TotalAmount: form.TotalAmount.toString(),
         Department: form.DepartmentName,
         CurrentStatus: 'Draft',
@@ -427,19 +421,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       if (form.PORequestNo == '') {
         alert("Please select PO Request.");
         return;
-      }
-      if (form.BillNo == '') {
-        alert("Please enter Bill No.");
-        return;
-      }
-      if (form.BillDate == null) {
-        alert("Please enter Bill Date.");
-        return;
-      }
-      if (form.BillAmount == 0) {
-        alert("Please enter Bill Amount.");
-        return;
-      }
+      }      
       const data = await service.GetApprover(form.DepartmentName);
       const User = await service.getUserById(data.Departmenthead.Id);
       const dataFinanceApprover = await service.GetApproverFromFinance(form.DepartmentName);
@@ -453,14 +435,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         Vendorcode: form.vendorcode,
         VendorName: form.VendorName,
         ProjectTitle: form.projectTitle,
-        BillNo: form.BillNo,
         PORequestNo: form.PORequestNo,
-        BillDate: form.BillDate,
         BillDescription: form.Comments,
         PODescription: form.Comments,
         ProjectDescription: form.Comments,
-        BillAmount: form.BillAmount,
-        CalculatedTaxes: form.CalculatedTaxes.toString(),
         TotalAmount: form.TotalAmount.toString(),
         Department: form.DepartmentName,
         AssignedTo: User?.Title,
@@ -519,7 +497,16 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       setLoading(false);
     }
   };
-
+  const addPurchaseOrderRow = () => {
+    setPoItems((prev) => [...prev, { ...INITIAL_PO_ROW }]);
+  };
+  // Remove one purchase order row while keeping at least one visible.
+  const removePurchaseOrderRow = (index: number) => {
+    setPoItems((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      return updated.length > 0 ? updated : [{ ...INITIAL_PO_ROW }];
+    });
+  };
   return (
     <section>
       {loading && (
@@ -574,23 +561,53 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               <input name="OccupiedAmount" value={form.OccupiedAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
               <label>Remaining Amount</label>
               <input name="RemainingAmount" value={form.RemainingAmount} type='text' readOnly style={{ backgroundColor: "lightgray" }} />
-              <label>Bill No<span className={styles.required}>*</span></label>
-              <input name="BillNo" value={form.BillNo} type='text' onChange={handleChange} onBlur={handleCheckbillNoExist}>
-              </input>
-              <label>Bill Date<span className={styles.required}>*</span></label>
-              <input name="BillDate" type="date" value={
-                form.BillDate
-                  ? new Date(form.BillDate).toISOString().split('T')[0]
-                  : ''
-              } onChange={handleBillDateChange}>
-              </input>
-
-              <label>Bill Amount<span className={styles.required}>*</span></label>
-              <input name="BillAmount" value={form.BillAmount} type='number' onChange={handleChange} onBlur={handleAmountCalculateChange} />
-
-              <label>Calculated Taxes</label>
-              <input name="CalculatedTaxes" value={form.CalculatedTaxes} type='number' onChange={handleTaxCalculateChange} />
-
+              {/* Bill Processing section */}
+              <div className={styles.poSection}>
+                <div className={styles.poSectionHeader}>
+                  <label>Bill Processing Details <span className={styles.required}>*</span> :</label>
+                  <button type="button" className={styles.poAddBtn} onClick={addPurchaseOrderRow} >
+                    Add New
+                  </button>
+                </div>
+                <div className={styles.poTable}>
+                  <div className={styles.poRowHeader}>
+                    <div>Bill No</div>
+                    <div>Bill Date</div>
+                    <div>Bill Amount</div>
+                    <div>Calculated Taxes</div>
+                    <div />
+                  </div>
+                  {poItems.map((item, index) => (
+                    <div key={index} className={styles.poRow}>
+                      <input
+                        className={styles.poDescriptionInput}
+                        value={item.BillNo}
+                        onChange={handleChange} onBlur={handleCheckbillNoExist}
+                        placeholder="Enter Bill No"
+                      />
+                      <input
+                        type="Date"
+                        value={
+                          item.BillDate
+                            ? new Date(item.BillDate).toISOString().split('T')[0]
+                            : ''
+                        } onChange={handleBillDateChange}></input>
+                      <input
+                        type="text"
+                        value={item.BillAmount}
+                        onChange={handleChange} onBlur={handleAmountCalculateChange}
+                      />
+                      <input
+                        type="text"
+                        value={item.CalculatedTaxes} onChange={handleTaxCalculateChange}
+                      />
+                      <button type="button" className={styles.poDeleteBtn} onClick={() => removePurchaseOrderRow(index)}>
+                        x
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
               <label>Total Amount</label>
               <input name="TotalAmount" value={form.TotalAmount} readOnly type='text' />
               <label>Attachments <span className={styles.required}>*</span></label>
