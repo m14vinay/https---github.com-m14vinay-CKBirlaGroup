@@ -33,13 +33,13 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
     ApproverComment5: ''
   });
   type TBillProcessingRow = {
-    BillNo: string;
+    Title: string;
     BillDate: Date;
     BillAmount: string;
     CalculatedTaxes: string;
   };
   const INITIAL_PO_ROW: TBillProcessingRow = {
-    BillNo: '',
+    Title: '',
     BillDate: new Date,
     BillAmount: '',
     CalculatedTaxes: ''
@@ -322,7 +322,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                   {poItems.length > 0 ? (
                     poItems.map((item, index) => (
                       <div key={`${index}`} className={styles.poRow}>
-                        <input value={item.BillNo || ''} readOnly style={{ backgroundColor: "lightgray" }} />
+                        <input value={item.Title || ''} readOnly style={{ backgroundColor: "lightgray" }} />
                         <input value={item.BillDate.toISOString().split('T')[0] || ''} readOnly style={{ backgroundColor: "lightgray" }} />
                         <input value={item.BillAmount || ''} readOnly style={{ backgroundColor: "lightgray" }} />
                         <input value={item.CalculatedTaxes || ''} readOnly style={{ backgroundColor: "lightgray" }} />
