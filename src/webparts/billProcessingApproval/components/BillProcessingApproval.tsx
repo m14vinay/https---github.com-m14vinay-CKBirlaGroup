@@ -87,7 +87,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
       console.log("Bill Processing Details Data:", response);
       setPoItems(response || []);
     } catch (error) {
-      console.error("Error fetching PO data:", error);
+      console.error("Error fetching Bill Processing data:", error);
     }
   };
   const loadAttachments = async (id: number) => {

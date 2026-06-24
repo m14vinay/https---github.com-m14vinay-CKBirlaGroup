@@ -8,6 +8,7 @@ export default class Service {
   private FinanceController = "FinanceController";
   private HistoryList = "History";
   private BillProcessing = "BillProcessing";
+  private BillProcessingDetail = "BillProcessingDetail";
   constructor(context: any) {
     this.context = context;
   }
@@ -72,13 +73,69 @@ export default class Service {
     return item;
 
   }
+  public async getBillProcessingDetailOrderDetails(BillID: number): Promise<any[]> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessingDetail}')/items?$filter=BillID eq ${BillID}`;
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+    const data = await res.json();
+    return data.value || [];
+  }
+  public async deletePurchaseOrderDetailsByQuotationId(BillID: number): Promise<void> {
+    const items = await this.getBillProcessingDetailOrderDetails(BillID);
+    for (const item of items) {
+      const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessingDetail}')/items(${item.Id})`;
+      const response = await this.context.spHttpClient.post(
+        url,
+        SPHttpClient.configurations.v1,
+        {
+          headers: {
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "DELETE"
+        }
+        }
+      );
+    const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
+    }
+  }
+
+  public async createBillProcessingDetail(data: any): Promise<any> {
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessingDetail}')/items`;
+    const response = await this.context.spHttpClient.post(
+      url,
+      SPHttpClient.configurations.v1,
+      {
+         headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      }
+    );
+    const updateText = await response.text();
+    return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
+  }
   public async getCheckBillNoExist(BillNo: string): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items?$filter=BillNo eq '${BillNo}' and CurrentStatus ne 'Rejected'`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessingDetail}')/items?$filter=BillNo eq '${BillNo}'`;
     const res = await this.context.spHttpClient.get(      url,
       SPHttpClient.configurations.v1
     );
     const data = await res.json();
     return data.value.length > 0 ? data : null;
+  }
+   public async getItemByRequestNoNotRejected(ID: number): Promise<any> {
+
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessing}')/items?$filter=ID eq ${ID} and CurrentStatus ne 'Rejected'`;
+
+    const res = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
+
+    const data = await res.json();
+    return data.value.length > 0 ? data.value[0] : null;
   }
   // PO Request NO;
   public async getTotalAmountFromBillProcessingByPO(PORequestNo: string): Promise<number> {
