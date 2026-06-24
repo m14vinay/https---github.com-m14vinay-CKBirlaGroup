@@ -26,13 +26,13 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     RemainingAmount: ''
   });
   type TBillProcessingRow = {
-    BillNo: string;
+    Title: string;
     BillDate: Date;
     BillAmount: string;
     CalculatedTaxes: string;
   };
   const INITIAL_PO_ROW: TBillProcessingRow = {
-    BillNo: '',
+    Title: '',
     BillDate: new Date,
     BillAmount: '',
     CalculatedTaxes: ''
@@ -48,7 +48,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   const [poItems, setPoItems] = React.useState<TBillProcessingRow[]>([INITIAL_PO_ROW]);
   const MAX_TOTAL_SIZE_MB = 51;
   const INVALID_FILENAME_REGEX = /[^a-zA-Z0-9_.\- ]/
- const loadBillProcessingData = async (id: number) => {
+  const loadBillProcessingData = async (id: number) => {
     try {
       const response = await service.getBillProcessingDetailOrderDetails(id);
       console.log("Bill Processing Details Data:", response);
@@ -58,61 +58,23 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     }
   };
   const handleBillProcessingChange = async (index: number, field: keyof TBillProcessingRow, value: string) => {
-    if (field === 'BillDate') {
-      const selectedDate = new Date(value);
-      const today = new Date();
-      // remove time part
-      today.setHours(0, 0, 0, 0);
-      if (selectedDate > today) {
-        alert("Bill date cannot be greater than current date");
-        return; // ❌ stop updating state
-      }
-      setPoItems((prev) => {
-        const updated = [...prev];
-        const row = { ...updated[index], [field]: selectedDate };
-        updated[index] = row;
-        return updated;
-      });
-    }
-    else if (field === 'CalculatedTaxes') {
-      setForm({
-        ...form,
-        TotalAmount: Number(form.TotalAmount) + Number(value)
-      });
-      setPoItems((prev) => {
-        const updated = [...prev];
-        const row = { ...updated[index], [field]: value };
-        updated[index] = row;
-        return updated;
-      });
-    }
-    else if (field === 'BillAmount') {
-      setForm({
-        ...form,
-        TotalAmount: Number(form.TotalAmount) + Number(value)
-      });
-      setPoItems((prev) => {
-        const updated = [...prev];
-        const row = { ...updated[index], [field]: value };
-        updated[index] = row;
-        return updated;
-      });
-    }
-    else {
-      const checkdata = await service.getCheckBillNoExist(value);
-      const checkbill = poItems.some(item => item.BillNo === value);
-      if (checkdata != null || checkbill) {
-        const checkmasterdata = await service.getItemByRequestNoNotRejected(checkdata.value[0].BillIDLookupId);
-        if (checkmasterdata != null) {
-          setForm(prev => ({
-            ...prev,
-            BillNo: ''
-          }))
-          alert("Bill No is duplicate , Please enter another bill no");
+    try {
+      if (field === 'BillDate') {
+        const selectedDate = new Date(value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate > today) {
+          alert("Bill date cannot be greater than current date");
           return;
         }
+        setPoItems((prev) => {
+          const updated = [...prev];
+          const row = { ...updated[index], [field]: selectedDate };
+          updated[index] = row;
+          return updated;
+        });
       }
-      else {
+      else if (field === 'CalculatedTaxes') {
         setPoItems((prev) => {
           const updated = [...prev];
           const row = { ...updated[index], [field]: value };
@@ -120,6 +82,52 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           return updated;
         });
       }
+      else if (field === 'BillAmount') {
+        setPoItems((prev) => {
+          const updated = [...prev];
+          const row = { ...updated[index], [field]: value };
+          updated[index] = row;
+          return updated;
+        });
+      }
+      else {
+        const checkdata = await service.getCheckBillNoExist(value);
+        const checkbill = poItems.some(item => item.Title === value);
+        if (checkdata != null || checkbill) {
+          const checkmasterdata = await service.getItemByRequestNoNotRejected(checkdata.value[0].BillIDLookupId);
+          if (checkmasterdata != null) {
+            setPoItems((prev) => {
+              const updated = [...prev];
+              const row = { ...updated[index], [field]: '' };
+              updated[index] = row;
+              return updated;
+            });
+            alert("Bill No is duplicate , Please enter another bill no");
+            return;
+          }
+        }
+        else {
+          setPoItems((prev) => {
+            const updated = [...prev];
+            const row = { ...updated[index], [field]: value };
+            updated[index] = row;
+            return updated;
+          });
+        }
+      }
+    }
+    catch (error) {
+      console.log(error);
+    }
+    finally {
+      let totalAmount = 0;
+      for (let i = 0; i < poItems.length; i++) {
+        totalAmount += Number(poItems[i].CalculatedTaxes || 0) + Number(poItems[i].BillAmount || 0);
+      }
+      setForm(prev => ({
+        ...prev,
+        TotalAmount: Number(totalAmount)
+      }));
     }
   };
   // --- 1️⃣ Get ID from query string ---
@@ -409,6 +417,18 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         // 🔹 CREATE
         const res = await service.createItem(payload);
         setItemId(res.Id); // store ID for future updates
+        await service.deleteBillProcessingDetailbyID(res.Id);
+        for (let i = 0; i < poItems.length; i++) {
+          const row = poItems[i];
+          if (!row.Title) continue;
+          await service.createBillProcessingDetail({
+            Title: row.Title,
+            BillAmount: Number(row.BillAmount || 0),
+            BillDate: new Date(row.BillDate).toISOString(),
+            CalculatedTaxes: Number(row.CalculatedTaxes) || 0,
+            BillID: res.Id
+          });
+        }
         if (res.Id > 0 && form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
@@ -423,6 +443,18 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       } else {
         // 🔹 UPDATE
         await service.updateItem(itemId, payload);
+        await service.deleteBillProcessingDetailbyID(itemId);
+        for (let i = 0; i < poItems.length; i++) {
+          const row = poItems[i];
+          if (!row.Title) continue;
+          await service.createBillProcessingDetail({
+            Title: row.Title,
+            BillAmount: Number(row.BillAmount || 0),
+            BillDate: new Date(row.BillDate).toISOString(),
+            CalculatedTaxes: Number(row.CalculatedTaxes) || 0,
+            BillID: itemId
+          });
+        }
         if (form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(itemId, form.files[i]);
@@ -493,6 +525,18 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         // 🔹 CREATE
         const res = await service.createItem(payload);
         setItemId(res.Id); // store ID for future updates
+        await service.deleteBillProcessingDetailbyID(res.Id);
+        for (let i = 0; i < poItems.length; i++) {
+          const row = poItems[i];
+          if (!row.Title) continue;
+          await service.createBillProcessingDetail({
+            Title: row.Title,
+            BillAmount: Number(row.BillAmount || 0),
+            BillDate: new Date(row.BillDate).toISOString(),
+            CalculatedTaxes: Number(row.CalculatedTaxes) || 0,
+            BillID: res.Id
+          });
+        }
         if (res.Id > 0 && form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(res.Id, form.files[i]);
@@ -512,6 +556,19 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       } else {
         // 🔹 UPDATE
         await service.updateItem(itemId, payload);
+        await service.deleteBillProcessingDetailbyID(itemId);
+        for (let i = 0; i < poItems.length; i++) {
+          const row = poItems[i];
+          if (!row.Title) continue;
+          await service.createBillProcessingDetail({
+            Title: row.Title,
+            BillAmount: Number(row.BillAmount || 0),
+            BillDate: new Date(row.BillDate).toISOString(),
+            CalculatedTaxes: Number(row.CalculatedTaxes) || 0,
+            BillID: itemId
+          });
+        }
+
         if (form.files.length > 0) {
           for (let i = 0; i < form.files.length; i++) {
             await service.uploadFile(itemId, form.files[i]);
@@ -544,6 +601,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       const updated = prev.filter((_, i) => i !== index);
       return updated.length > 0 ? updated : [{ ...INITIAL_PO_ROW }];
     });
+    setForm(prev => ({
+      ...prev,
+      TotalAmount: Number(form.TotalAmount) - Number(poItems[index].BillAmount || 0) - Number(poItems[index].CalculatedTaxes || 0)
+    }));
   };
   return (
     <section>
@@ -618,9 +679,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                   {poItems.map((item, index) => (
                     <div key={index} className={styles.poRow}>
                       <input
+                        type='text'
                         className={styles.poDescriptionInput}
-                        value={item.BillNo}
-                        onChange={(e) => handleBillProcessingChange(index, 'BillNo', e.target.value)}
+                        value={item.Title}
+                        onChange={(e) => handleBillProcessingChange(index, 'Title', e.target.value)}
                         placeholder="Enter Bill No"
                       />
                       <input

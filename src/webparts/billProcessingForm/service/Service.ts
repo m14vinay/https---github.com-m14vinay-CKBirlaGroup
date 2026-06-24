@@ -82,7 +82,7 @@ export default class Service {
     const data = await res.json();
     return data.value || [];
   }
-  public async deletePurchaseOrderDetailsByQuotationId(BillID: number): Promise<void> {
+  public async deleteBillProcessingDetailbyID(BillID: number): Promise<void> {
     const items = await this.getBillProcessingDetailOrderDetails(BillID);
     for (const item of items) {
       const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessingDetail}')/items(${item.Id})`;
