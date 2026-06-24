@@ -680,7 +680,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                     <div key={index} className={styles.poRow}>
                       <input
                         type='text'
-                        className={styles.poDescriptionInput}
                         value={item.Title}
                         onChange={(e) => handleBillProcessingChange(index, 'Title', e.target.value)}
                         placeholder="Enter Bill No"
@@ -693,12 +692,14 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                             : ''
                         } onChange={(e) => handleBillProcessingChange(index, 'BillDate', e.target.value)}></input>
                       <input
-                        type="text"
+                        type="number"
                         value={item.BillAmount}
+                        placeholder="Enter Bill Amount"
                         onChange={(e) => handleBillProcessingChange(index, 'BillAmount', e.target.value)} onBlur={handleAmountCalculateChange}
                       />
                       <input
-                        type="text"
+                        type="number"
+                        placeholder="Enter Calculated Taxes"
                         value={item.CalculatedTaxes} onChange={(e) => handleBillProcessingChange(index, 'CalculatedTaxes', e.target.value)}
                       />
                       <button type="button" className={styles.poDeleteBtn} onClick={() => removePurchaseOrderRow(index)}>
