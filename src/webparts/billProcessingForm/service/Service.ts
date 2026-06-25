@@ -118,7 +118,7 @@ export default class Service {
     return updateText ? JSON.parse(updateText) : JSON.parse('{"success": true}');
   }
   public async getCheckBillNoExist(BillNo: string): Promise<any> {
-    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessingDetail}')/items?$filter=BillNo eq '${BillNo}'`;
+    const url = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${this.BillProcessingDetail}')/items?$filter=Title eq '${BillNo}'`;
     const res = await this.context.spHttpClient.get(      url,
       SPHttpClient.configurations.v1
     );

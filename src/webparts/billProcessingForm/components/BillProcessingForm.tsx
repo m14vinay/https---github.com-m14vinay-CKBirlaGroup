@@ -34,8 +34,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   const INITIAL_PO_ROW: TBillProcessingRow = {
     Title: '',
     BillDate: new Date,
-    BillAmount: '',
-    CalculatedTaxes: ''
+    BillAmount: '0',
+    CalculatedTaxes: '0'
   };
   const [POOptions, setPOOptions] = React.useState<IDropdownOption[]>([]);
   const [itemId, setItemId] = React.useState<number | null>(null);
@@ -81,14 +81,57 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           updated[index] = row;
           return updated;
         });
+        let totalAmount = 0;
+        for (let i = 0; i <= poItems.length; i++) {         
+          let BillAmount = poItems[i].BillAmount != '' ? poItems[i].BillAmount : 0;
+          totalAmount += Number(BillAmount);
+        }
+        setForm(prev => ({
+          ...prev,
+          TotalAmount: Number(totalAmount)
+        }));
       }
       else if (field === 'BillAmount') {
-        setPoItems((prev) => {
-          const updated = [...prev];
-          const row = { ...updated[index], [field]: value };
-          updated[index] = row;
-          return updated;
-        });
+        if (Number(value) > Number(form.RemainingAmount)) {
+          setPoItems((prev) => {
+            const updated = [...prev];
+            const row = { ...updated[index], [field]: ''};
+            updated[index] = row;
+            return updated;
+          });
+          alert("Bill Amount must be less than Remaining Amount.");
+          return;
+        }
+        else {
+          setPoItems((prev) => {
+            const updated = [...prev];
+            const row = { ...updated[index], [field]: value };
+            updated[index] = row;
+            return updated;
+          });
+          let totalAmount = 0;
+          let totalbillamount=0;
+          for (let i = 0; i <= poItems.length; i++) {           
+            let BillAmount = poItems[i].BillAmount != '' ? poItems[i].BillAmount : 0;
+            totalAmount += Number(BillAmount);
+            totalbillamount+=Number(BillAmount);
+          }
+          if (Number(totalbillamount) > Number(form.RemainingAmount)) {
+            alert("Total Bill Amount must be less than Remaining Amount.");
+            setPoItems((prev) => {
+            const updated = [...prev];
+            const row = { ...updated[index], [field]: ''};
+            updated[index] = row;
+            return updated;
+          });
+          }
+          else {
+            setForm(prev => ({
+              ...prev,
+              TotalAmount: Number(totalAmount)
+            }));
+          }
+        }
       }
       else {
         const checkdata = await service.getCheckBillNoExist(value);
@@ -96,14 +139,13 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         if (checkdata != null || checkbill) {
           const checkmasterdata = await service.getItemByRequestNoNotRejected(checkdata.value[0].BillIDLookupId);
           if (checkmasterdata != null) {
+             alert("Bill No is duplicate , Please enter another bill no");
             setPoItems((prev) => {
               const updated = [...prev];
               const row = { ...updated[index], [field]: '' };
               updated[index] = row;
               return updated;
-            });
-            alert("Bill No is duplicate , Please enter another bill no");
-            return;
+            });           
           }
         }
         else {
@@ -118,16 +160,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
     }
     catch (error) {
       console.log(error);
-    }
-    finally {
-      let totalAmount = 0;
-      for (let i = 0; i < poItems.length; i++) {
-        totalAmount += Number(poItems[i].CalculatedTaxes || 0) + Number(poItems[i].BillAmount || 0);
-      }
-      setForm(prev => ({
-        ...prev,
-        TotalAmount: Number(totalAmount)
-      }));
     }
   };
   // --- 1️⃣ Get ID from query string ---
@@ -180,10 +212,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
               TotalAmount: result.TotalAmount || '',
               Comments: result.ProjectDescription || '',
               vendorcode: result.Vendorcode || '',
-              BillNo: result.BillNo || '',
-              BillDate: result.BillDate,
-              BillAmount: result.BillAmount || 0,
-              CalculatedTaxes: result.CalculatedTaxes || 0,
               PORequestNo: result.PORequestNo || '',
               PORequestNoID: result.PORequestNo || '',
               AttachedSignedPO: result.AttachedSignedPO == "True" ? true : false,
@@ -335,28 +363,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       ...form,
       [name]: value
     });
-  };
-  const handleAmountCalculateChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPoItems({
-      ...poItems,
-      [name]: value
-    });
-    if (Number(value) > Number(form.RemainingAmount)) {
-      setPoItems(prev => ({
-        ...prev,
-        BillAmount: 0,
-        // TotalAmount: form.CalculatedTaxes
-      }));
-      alert("Bill Amount must be less than Remaining Amount.");
-      return;
-    }
-    else {
-      setForm(prev => ({
-        ...prev,
-        // TotalAmount: Number(value) + Number(form.CalculatedTaxes)
-      }));
-    }
   };
   const handleSaveHistory = async (id: number, Title: string, UserName: string, UserAction: string, Designation: string, ActionDate: Date, Sequence: number) => {
     let payload: {};
@@ -693,14 +699,14 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                         } onChange={(e) => handleBillProcessingChange(index, 'BillDate', e.target.value)}></input>
                       <input
                         type="number"
-                        value={item.BillAmount}
+                        value={item.BillAmount || 0}
                         placeholder="Enter Bill Amount"
-                        onChange={(e) => handleBillProcessingChange(index, 'BillAmount', e.target.value)} onBlur={handleAmountCalculateChange}
+                        onChange={(e) => handleBillProcessingChange(index, 'BillAmount', e.target.value)}
                       />
                       <input
                         type="number"
                         placeholder="Enter Calculated Taxes"
-                        value={item.CalculatedTaxes} onChange={(e) => handleBillProcessingChange(index, 'CalculatedTaxes', e.target.value)}
+                        value={item.CalculatedTaxes || 0} onChange={(e) => handleBillProcessingChange(index, 'CalculatedTaxes', e.target.value)}
                       />
                       <button type="button" className={styles.poDeleteBtn} onClick={() => removePurchaseOrderRow(index)}>
                         x
