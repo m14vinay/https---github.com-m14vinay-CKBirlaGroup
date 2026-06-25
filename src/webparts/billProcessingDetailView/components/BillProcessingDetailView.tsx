@@ -319,7 +319,9 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                     poItems.map((item, index) => (
                       <div key={`${index}`} className={styles.poRow}>
                         <input value={item.Title || ''} readOnly style={{ backgroundColor: "lightgray" }} />
-                        <input value={item.BillDate.toISOString().split('T')[0] || ''} readOnly style={{ backgroundColor: "lightgray" }} />
+                        <input value={item.BillDate
+  ? new Date(item.BillDate).toISOString().split('T')[0]
+  : ''} readOnly style={{ backgroundColor: "lightgray" }} />
                         <input value={item.BillAmount || ''} readOnly style={{ backgroundColor: "lightgray" }} />
                         <input value={item.CalculatedTaxes || ''} readOnly style={{ backgroundColor: "lightgray" }} />
                       </div>
