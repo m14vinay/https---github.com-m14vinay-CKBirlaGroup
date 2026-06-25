@@ -151,7 +151,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         const checkbill = poItems.some(item => item.Title === value);
         if (checkdata != null || checkbill) {
           if (checkdata) {
-            const checkmasterdata = await service.getItemByRequestNoNotRejected(checkdata.value[0].BillIDLookupId);
+            const checkmasterdata = await service.getItemByRequestNoNotRejected(checkdata.value[0].BillIDId);
             if (checkmasterdata != null) {
               alert("Bill No is duplicate , Please enter another bill no");
               setPoItems((prev) => {
