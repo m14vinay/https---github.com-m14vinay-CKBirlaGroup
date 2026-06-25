@@ -15,10 +15,6 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
     VendorName: '',
     projectTitle: '',
     Comments: '',
-    BillNo: '',
-    BillDate: new Date(),
-    BillAmount: 0,
-    CalculatedTaxes: 0,
     TotalAmount: 0,
     UploadDocument: '',
     files: [],
@@ -329,7 +325,7 @@ const BillProcessingDetailView: React.FC<IBillProcessingDetailViewProps> = (prop
                       </div>
                     ))
                   ) : (
-                    <div>No purchase order details found.</div>
+                    <div>No Bill details found.</div>
                   )}
                 </div>
               </div>

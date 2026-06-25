@@ -57,6 +57,19 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       console.error("Error fetching Bill Processing data:", error);
     }
   };
+  const handleBillProcessingValueChange = async (index: number, field: keyof TBillProcessingRow, value: string) => {
+    try {
+      setPoItems((prev) => {
+        const updated = [...prev];
+        const row = { ...updated[index], [field]: value };
+        updated[index] = row;
+        return updated;
+      });
+    }
+    catch (error) {
+      console.log(error);
+    }
+  };
   const handleBillProcessingChange = async (index: number, field: keyof TBillProcessingRow, value: string) => {
     try {
       if (field === 'BillDate') {
@@ -82,7 +95,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           return updated;
         });
         let totalAmount = 0;
-        for (let i = 0; i <= poItems.length; i++) {         
+        for (let i = 0; i < poItems.length; i++) {
           let BillAmount = poItems[i].BillAmount != '' ? poItems[i].BillAmount : 0;
           totalAmount += Number(BillAmount);
         }
@@ -95,7 +108,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         if (Number(value) > Number(form.RemainingAmount)) {
           setPoItems((prev) => {
             const updated = [...prev];
-            const row = { ...updated[index], [field]: ''};
+            const row = { ...updated[index], [field]: '' };
             updated[index] = row;
             return updated;
           });
@@ -110,20 +123,20 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
             return updated;
           });
           let totalAmount = 0;
-          let totalbillamount=0;
-          for (let i = 0; i <= poItems.length; i++) {           
+          let totalbillamount = 0;
+          for (let i = 0; i < poItems.length; i++) {
             let BillAmount = poItems[i].BillAmount != '' ? poItems[i].BillAmount : 0;
             totalAmount += Number(BillAmount);
-            totalbillamount+=Number(BillAmount);
+            totalbillamount += Number(BillAmount);
           }
           if (Number(totalbillamount) > Number(form.RemainingAmount)) {
             alert("Total Bill Amount must be less than Remaining Amount.");
             setPoItems((prev) => {
-            const updated = [...prev];
-            const row = { ...updated[index], [field]: ''};
-            updated[index] = row;
-            return updated;
-          });
+              const updated = [...prev];
+              const row = { ...updated[index], [field]: '' };
+              updated[index] = row;
+              return updated;
+            });
           }
           else {
             setForm(prev => ({
@@ -137,15 +150,28 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         const checkdata = await service.getCheckBillNoExist(value);
         const checkbill = poItems.some(item => item.Title === value);
         if (checkdata != null || checkbill) {
-          const checkmasterdata = await service.getItemByRequestNoNotRejected(checkdata.value[0].BillIDLookupId);
-          if (checkmasterdata != null) {
-             alert("Bill No is duplicate , Please enter another bill no");
-            setPoItems((prev) => {
-              const updated = [...prev];
-              const row = { ...updated[index], [field]: '' };
-              updated[index] = row;
-              return updated;
-            });           
+          if (checkdata) {
+            const checkmasterdata = await service.getItemByRequestNoNotRejected(checkdata.value[0].BillIDLookupId);
+            if (checkmasterdata != null) {
+              alert("Bill No is duplicate , Please enter another bill no");
+              setPoItems((prev) => {
+                const updated = [...prev];
+                const row = { ...updated[index], [field]: '' };
+                updated[index] = row;
+                return updated;
+              });
+            }
+          }
+          else {
+            if (checkbill) {
+              alert("Bill No is duplicate , Please enter another bill no");
+              setPoItems((prev) => {
+                const updated = [...prev];
+                const row = { ...updated[index], [field]: '' };
+                updated[index] = row;
+                return updated;
+              });
+            }
           }
         }
         else {
@@ -429,10 +455,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           if (!row.Title) continue;
           await service.createBillProcessingDetail({
             Title: row.Title,
-            BillAmount: Number(row.BillAmount || 0),
+            BillAmount: row.BillAmount || 0,
             BillDate: new Date(row.BillDate).toISOString(),
-            CalculatedTaxes: Number(row.CalculatedTaxes) || 0,
-            BillID: res.Id
+            CalculatedTaxes: row.CalculatedTaxes || 0,
+            BillIDId: res.Id
           });
         }
         if (res.Id > 0 && form.files.length > 0) {
@@ -454,11 +480,11 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           const row = poItems[i];
           if (!row.Title) continue;
           await service.createBillProcessingDetail({
-            Title: row.Title,
-            BillAmount: Number(row.BillAmount || 0),
+           Title: row.Title,
+            BillAmount: row.BillAmount || 0,
             BillDate: new Date(row.BillDate).toISOString(),
-            CalculatedTaxes: Number(row.CalculatedTaxes) || 0,
-            BillID: itemId
+            CalculatedTaxes: row.CalculatedTaxes || 0,
+            BillIDId: itemId
           });
         }
         if (form.files.length > 0) {
@@ -537,10 +563,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           if (!row.Title) continue;
           await service.createBillProcessingDetail({
             Title: row.Title,
-            BillAmount: Number(row.BillAmount || 0),
+            BillAmount: row.BillAmount || 0,
             BillDate: new Date(row.BillDate).toISOString(),
-            CalculatedTaxes: Number(row.CalculatedTaxes) || 0,
-            BillID: res.Id
+            CalculatedTaxes: row.CalculatedTaxes || 0,
+            BillIDId: res.Id
           });
         }
         if (res.Id > 0 && form.files.length > 0) {
@@ -568,10 +594,10 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           if (!row.Title) continue;
           await service.createBillProcessingDetail({
             Title: row.Title,
-            BillAmount: Number(row.BillAmount || 0),
+            BillAmount: row.BillAmount || 0,
             BillDate: new Date(row.BillDate).toISOString(),
-            CalculatedTaxes: Number(row.CalculatedTaxes) || 0,
-            BillID: itemId
+            CalculatedTaxes: row.CalculatedTaxes || 0,
+            BillIDId: itemId
           });
         }
 
@@ -605,12 +631,17 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
   const removePurchaseOrderRow = (index: number) => {
     setPoItems((prev) => {
       const updated = prev.filter((_, i) => i !== index);
-      return updated.length > 0 ? updated : [{ ...INITIAL_PO_ROW }];
+      const finalItems = updated.length > 0 ? updated : [{ ...INITIAL_PO_ROW }];
+      const totalAmount = finalItems.reduce(
+        (sum, item) => sum + Number(item.BillAmount || 0),
+        0
+      );
+      setForm((prevForm) => ({
+        ...prevForm,
+        TotalAmount: totalAmount,
+      }));
+      return finalItems;
     });
-    setForm(prev => ({
-      ...prev,
-      TotalAmount: Number(form.TotalAmount) - Number(poItems[index].BillAmount || 0) - Number(poItems[index].CalculatedTaxes || 0)
-    }));
   };
   return (
     <section>
@@ -680,7 +711,6 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                     <div>Bill Date</div>
                     <div>Bill Amount</div>
                     <div>Calculated Taxes</div>
-                    <div />
                   </div>
                   {poItems.map((item, index) => (
                     <div key={index} className={styles.poRow}>
@@ -696,17 +726,31 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                           item.BillDate
                             ? new Date(item.BillDate).toISOString().split('T')[0]
                             : ''
-                        } onChange={(e) => handleBillProcessingChange(index, 'BillDate', e.target.value)}></input>
+                        } onChange={(e) => handleBillProcessingChange(index, 'BillDate', e.target.value)}>
+                      </input>
                       <input
                         type="number"
                         value={item.BillAmount || 0}
                         placeholder="Enter Bill Amount"
-                        onChange={(e) => handleBillProcessingChange(index, 'BillAmount', e.target.value)}
+                        onFocus={(e) => {
+                          if (e.target.value === "0") {
+                            e.target.value = "";
+                          }
+                        }}
+                        onChange={(e) => handleBillProcessingValueChange(index, 'BillAmount', e.target.value)}
+                        onBlur={(e) => handleBillProcessingChange(index, 'BillAmount', e.target.value)}
                       />
                       <input
                         type="number"
                         placeholder="Enter Calculated Taxes"
-                        value={item.CalculatedTaxes || 0} onChange={(e) => handleBillProcessingChange(index, 'CalculatedTaxes', e.target.value)}
+                        value={item.CalculatedTaxes || 0}
+                        onFocus={(e) => {
+                          if (e.target.value === "0") {
+                            e.target.value = "";
+                          }
+                        }}
+                        onChange={(e) => handleBillProcessingValueChange(index, 'CalculatedTaxes', e.target.value)}
+                        onBlur={(e) => handleBillProcessingChange(index, 'CalculatedTaxes', e.target.value)}
                       />
                       <button type="button" className={styles.poDeleteBtn} onClick={() => removePurchaseOrderRow(index)}>
                         x

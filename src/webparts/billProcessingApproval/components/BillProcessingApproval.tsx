@@ -674,7 +674,7 @@ const BillProcessingApproval: React.FC<IBillProcessingApprovalProps> = (props) =
                       </div>
                     ))
                   ) : (
-                    <div>No purchase order details found.</div>
+                    <div>No Bill details found.</div>
                   )}
                 </div>
               </div>
