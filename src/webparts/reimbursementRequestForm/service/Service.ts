@@ -38,7 +38,7 @@ ApproverName/Id,ApproverName/Title
 ?$select=Id,Title,
 DepartmentHead/Id,DepartmentHead/Title
 &$expand=DepartmentHead
-&$filter=DepartmentName eq '${DepartmentName}'`;
+&$filter=DepartmentName eq '${encodeURIComponent(DepartmentName)}'`;
 
     const res = await this.context.spHttpClient.get(
       url,
