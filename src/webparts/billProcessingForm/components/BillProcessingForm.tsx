@@ -57,12 +57,15 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
       console.error("Error fetching Bill Processing data:", error);
     }
   };
-  const handleBillProcessingValueChange = async (index: number, field: keyof TBillProcessingRow, value: string) => {
+  const handleBillProcessingValueChange = (index: number, field: keyof TBillProcessingRow, value: string) => {
     try {
       setPoItems((prev) => {
         const updated = [...prev];
-        const row = { ...updated[index], [field]: value };
-        updated[index] = row;
+        updated[index] = {
+          ...updated[index],
+          [field]: value,
+        };
+        console.log(updated); // Latest value
         return updated;
       });
     }
@@ -97,7 +100,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
         let totalAmount = 0;
         for (let i = 0; i < poItems.length; i++) {
           let BillAmount = poItems[i].BillAmount != '' ? poItems[i].BillAmount : 0;
-          totalAmount += Number(BillAmount);
+          let CalculatedTaxes = poItems[i].CalculatedTaxes != '' ? poItems[i].CalculatedTaxes : 0;
+          totalAmount += Number(BillAmount) + Number(CalculatedTaxes);
         }
         setForm(prev => ({
           ...prev,
@@ -126,10 +130,11 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           let totalbillamount = 0;
           for (let i = 0; i < poItems.length; i++) {
             let BillAmount = poItems[i].BillAmount != '' ? poItems[i].BillAmount : 0;
-            totalAmount += Number(BillAmount);
+            let CalculatedTaxes = poItems[i].CalculatedTaxes != '' ? poItems[i].CalculatedTaxes : 0;
+            totalAmount += Number(BillAmount) + Number(CalculatedTaxes);
             totalbillamount += Number(BillAmount);
           }
-          if (Number(totalbillamount) > Number(form.RemainingAmount)) {
+          if (Number(totalAmount) > Number(form.RemainingAmount)) {
             alert("Total Bill Amount must be less than Remaining Amount.");
             setPoItems((prev) => {
               const updated = [...prev];
@@ -480,7 +485,7 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
           const row = poItems[i];
           if (!row.Title) continue;
           await service.createBillProcessingDetail({
-           Title: row.Title,
+            Title: row.Title,
             BillAmount: row.BillAmount || 0,
             BillDate: new Date(row.BillDate).toISOString(),
             CalculatedTaxes: row.CalculatedTaxes || 0,
@@ -717,7 +722,8 @@ const BillProcessingForm: React.FC<IBillProcessingFormProps> = (props) => {
                       <input
                         type='text'
                         value={item.Title}
-                        onChange={(e) => handleBillProcessingChange(index, 'Title', e.target.value)}
+                        onChange={(e) => handleBillProcessingValueChange(index, 'Title', e.target.value)}
+                        onBlur={(e) => handleBillProcessingChange(index, 'Title', e.target.value)}
                         placeholder="Enter Bill No"
                       />
                       <input

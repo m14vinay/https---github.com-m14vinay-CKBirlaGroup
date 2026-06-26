@@ -138,37 +138,29 @@ export default class Service {
     return data.value.length > 0 ? data.value[0] : null;
   }
   // PO Request NO;
-  public async getTotalAmountFromBillProcessingByPO(PORequestNo: string): Promise<number> {
+ public async getTotalAmountFromBillProcessingByPO(PORequestNo: string): Promise<number> {
   try {
+    const url =
+      `${this.context.pageContext.web.absoluteUrl}` +
+      `/_api/web/lists/getbytitle('${this.BillProcessing}')/items` +
+      `?$select=TotalAmount,CurrentStatus` +
+      `&$filter=PORequestNo eq '${PORequestNo}' and CurrentStatus ne 'Rejected'`;
 
-    const camlQuery = `
-      <View>
-        <Query>
-          <Where>
-            <Eq>
-              <FieldRef Name='PORequestNo' />
-              <Value Type='Text'>${PORequestNo}</Value>
-            </Eq>
-          </Where>
-        </Query>
-        <ViewFields>
-          <FieldRef Name='BillAmount' />
-          <FieldRef Name='CurrentStatus' />
-        </ViewFields>
-        <RowLimit>200</RowLimit>
-      </View>`;
+    const response = await this.context.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
 
-    const items = await sp.web.lists
-      .getByTitle(this.BillProcessing)
-      .getItemsByCAMLQuery({ ViewXml: camlQuery });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
 
-    // Filter + sum in code (fast + safe)
+    const data = await response.json();
+
+    const items = data.value;
+
     const total = items.reduce((sum: number, item: any) => {
-      if (item.CurrentStatus !== "Rejected") {
-        const amount = parseFloat(item.BillAmount);
-        return sum + (isNaN(amount) ? 0 : amount);
-      }
-      return sum;
+      return sum + (Number(item.TotalAmount) || 0);
     }, 0);
 
     return total;
